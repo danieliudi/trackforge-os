@@ -1,0 +1,34 @@
+@import "tailwindcss";
+
+/*
+ * A interface do app é clara por definição: todo o chrome usa a escala zinc e
+ * os temas escuros vivem dentro do canvas do slide, nunca na UI.
+ *
+ * O bloco `prefers-color-scheme: dark` que existia aqui trocava --background e
+ * --foreground, mas nenhuma superfície consumia essas variáveis: as telas são
+ * bg-zinc-100/bg-white cravados. No modo escuro do SO o resultado era só o
+ * texto solto do body virando claro sobre fundo claro. Removido junto com as
+ * variáveis mortas em vez de mantido como contradição latente.
+ */
+
+@theme inline {
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  /* Era `Arial, Helvetica, sans-serif` e vencia a fonte carregada no layout. */
+  font-family: var(--font-sans);
+  background: #f4f4f5;
+  color: #18181b;
+}
+
+/* O canvas do slide tem tipografia própria; nada da UI deve vazar para dentro. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
