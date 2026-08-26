@@ -1,6 +1,6 @@
 "use client";
 
-import { CloudOff, FileDown, Images, Redo2, Undo2 } from "lucide-react";
+import { CloudOff, FileDown, FilePlus2, Images, Redo2, Undo2 } from "lucide-react";
 
 import { Button, IconButton } from "@/components/ui/Button";
 
@@ -11,6 +11,7 @@ type AppHeaderProps = {
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
+  onReset: () => void;
   exporting: "pdf" | "zip" | null;
   onExport: (kind: "pdf" | "zip") => void;
   /** localStorage recusou o payload — o autosave silenciosamente não existe. */
@@ -24,6 +25,7 @@ export function AppHeader({
   canRedo,
   onUndo,
   onRedo,
+  onReset,
   exporting,
   onExport,
   persistFailed,
@@ -59,6 +61,12 @@ export function AppHeader({
 
       {hasCarousel ? (
         <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <Button icon={FilePlus2} onClick={onReset}>
+            <span className="hidden sm:inline">Novo carrossel</span>
+          </Button>
+
+          <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
+
           <div className="flex items-center">
             <IconButton
               icon={Undo2}

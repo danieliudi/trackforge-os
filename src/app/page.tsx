@@ -16,7 +16,7 @@ import { useHistory } from "@/hooks/useHistory";
 import { useSettings } from "@/hooks/useSettings";
 import { exportToPDF, exportToZip } from "@/lib/export";
 import { moveSlide, removeBlockedReason, renumber } from "@/lib/slides";
-import { loadSession, saveSession } from "@/lib/storage";
+import { clearSession, loadSession, saveSession } from "@/lib/storage";
 import { focusRing } from "@/lib/ui";
 import { MAX_SLIDES, type Carousel, type Slide } from "@/types/carousel";
 
@@ -224,6 +224,14 @@ export default function Home() {
     }
   }
 
+  function resetCarousel() {
+    reset(null);
+    setInput("");
+    setActiveIndex(0);
+    setError(null);
+    clearSession();
+  }
+
   function updateSlide(index: number, patch: Partial<Slide>) {
     const field = Object.keys(patch)[0];
     const coalesceKey = TEXT_FIELDS.has(field) ? `slide:${index}:${field}` : undefined;
@@ -357,6 +365,7 @@ export default function Home() {
         canRedo={canRedo}
         onUndo={undo}
         onRedo={redo}
+        onReset={resetCarousel}
         exporting={exporting}
         onExport={runExport}
         persistFailed={persistFailed}
