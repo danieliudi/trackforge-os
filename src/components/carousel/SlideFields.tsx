@@ -1,10 +1,11 @@
 "use client";
 
 import clsx from "clsx";
-import { ChevronDown, ChevronUp, Copy, Trash2, Upload, X } from "lucide-react";
-import { useId, type Ref } from "react";
+import { ChevronDown, ChevronUp, CopyPlus, Search, Trash2, Upload, X } from "lucide-react";
+import { useId, useState, type Ref } from "react";
 
 import { IconButton } from "@/components/ui/Button";
+import { ImageSearchPanel } from "@/components/carousel/ImageSearchPanel";
 import { fieldClass, focusRing, labelClass } from "@/lib/ui";
 import type { ImageLayout, Slide, SlideType } from "@/types/carousel";
 
@@ -79,6 +80,7 @@ export function SlideFields({
   const headlineOver = slide.headline.length - headlineLimit;
   const uploadId = useId();
   const isUploaded = slide.image?.url.startsWith("data:") ?? false;
+  const [searchOpen, setSearchOpen] = useState(false);
 
   function setImageUrl(url: string) {
     onChange({
@@ -136,7 +138,7 @@ export function SlideFields({
             disabled={!canMoveDown}
             onClick={onMoveDown}
           />
-          <IconButton icon={Copy} label="Duplicar slide" size="sm" onClick={onDuplicate} />
+          <IconButton icon={CopyPlus} label="Duplicar slide" size="sm" onClick={onDuplicate} />
           <IconButton
             icon={Trash2}
             label={canRemove ? "Remover slide" : (removeBlockedReason ?? "Remover slide")}
@@ -239,6 +241,12 @@ export function SlideFields({
             className="hidden"
             onChange={(event) => handleUpload(event.target.files?.[0])}
           />
+          <IconButton
+            icon={Search}
+            label="Buscar imagens"
+            variant={searchOpen ? "primary" : "secondary"}
+            onClick={() => setSearchOpen((open) => !open)}
+          />
           {slide.image ? (
             <IconButton
               icon={X}
@@ -249,6 +257,15 @@ export function SlideFields({
             />
           ) : null}
         </div>
+
+        {searchOpen ? (
+          <ImageSearchPanel
+            onSelect={(url) => {
+              setImageUrl(url);
+              setSearchOpen(false);
+            }}
+          />
+        ) : null}
 
         {slide.image ? (
           <div className="flex gap-1.5">

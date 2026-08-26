@@ -13,16 +13,16 @@ export type SlideThemeId =
   | "editorial"
   | "sanwey"
   | "resibag"
-  | "sanwey-navy"
-  | "sanwey-clean"
-  | "sanwey-benchmark"
+  | "sanwey-industrial"
+  | "sanwey-impacto"
+  | "sanwey-preto"
   | "resibag-dark"
   | "resibag-clean"
   | "resibag-impact";
 
 /** Agrupamento usado pelo dropdown do painel lateral. */
 export const THEME_GROUPS: { label: string; themes: SlideThemeId[] }[] = [
-  { label: "Sanwey", themes: ["sanwey", "sanwey-navy", "sanwey-clean", "sanwey-benchmark"] },
+  { label: "Sanwey", themes: ["sanwey", "sanwey-industrial", "sanwey-impacto", "sanwey-preto"] },
   { label: "Resibag", themes: ["resibag", "resibag-dark", "resibag-clean", "resibag-impact"] },
   { label: "Genéricos", themes: ["dark-modern", "clean-industrial", "editorial"] },
 ];
@@ -209,74 +209,68 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     },
   },
 
-  // --- Variações Sanwey (paleta definida pelo usuário, fora do MIV v2.0) ---
-  "sanwey-navy": {
-    id: "sanwey-navy",
-    label: "Sanwey Navy",
-    background: "#070F1E",
-    foreground: "#FFFFFF",
-    muted: "#94A3B8",
-    accent: "#008DDA",
-    accentContrast: "#070F1E",
-    border: "rgba(148, 163, 184, 0.24)",
+  // --- Variações Sanwey (dentro da paleta oficial do MIV v2.0) ---
+  /** Cinza industrial: a cor que o próprio manual manda usar pra destacar
+   * seção sem recorrer a blocos vermelhos grandes. */
+  "sanwey-industrial": {
+    id: "sanwey-industrial",
+    label: "Sanwey Industrial",
+    background: "#374151",
+    foreground: "#F9F5F1",
+    muted: "#D1D5DB",
+    accent: "#C7212B",
+    accentContrast: "#FFFFFF",
+    border: "rgba(249, 245, 241, 0.18)",
     displayFont: "var(--font-barlow-condensed)",
     bodyFont: INTER,
     metricFont: "var(--font-jetbrains-mono)",
     displayWeight: 900,
     displayTracking: "-0.02em",
     badgeRadius: 4,
-    overlayColor: "#070F1E",
+    overlayColor: "#374151",
     surface: "dark",
     darkSurface: {},
   },
-  "sanwey-clean": {
-    id: "sanwey-clean",
-    label: "Sanwey Clean",
-    background: "#F1F5F9",
-    foreground: "#0B192C",
-    muted: "#475569",
-    accent: "#0284C7",
+  /** Vermelho+Branco — combinação monocromática aprovada pelo manual pra
+   * material de alto impacto. */
+  "sanwey-impacto": {
+    id: "sanwey-impacto",
+    label: "Sanwey Impacto",
+    background: "#C7212B",
+    foreground: "#FFFFFF",
+    muted: "#FBE9EB",
+    accent: "#8B1419",
     accentContrast: "#FFFFFF",
-    border: "#D8E1EA",
+    border: "rgba(255, 255, 255, 0.24)",
     displayFont: "var(--font-barlow-condensed)",
     bodyFont: INTER,
     metricFont: "var(--font-jetbrains-mono)",
     displayWeight: 900,
     displayTracking: "-0.02em",
     badgeRadius: 4,
-    overlayColor: "#0B192C",
-    surface: "light",
-    coverUsesDarkSurface: true,
-    darkSurface: {
-      background: "#0B192C",
-      foreground: "#F1F5F9",
-      muted: "#94A3B8",
-      border: "rgba(241, 245, 249, 0.24)",
-      surface: "dark",
-    },
+    overlayColor: "#8B1419",
+    surface: "dark",
+    darkSurface: {},
   },
-  "sanwey-benchmark": {
-    id: "sanwey-benchmark",
-    label: "Sanwey Benchmark",
-    background: "#0F172A",
-    foreground: "#E2E8F0",
-    muted: "#94A3B8",
-    accent: "#22D3EE",
-    accentContrast: "#0F172A",
-    border: "rgba(34, 211, 238, 0.28)",
+  /** Preto+Branco — a outra combinação monocromática aprovada; mais
+   * contraste que o Carvão suave do tema institucional. */
+  "sanwey-preto": {
+    id: "sanwey-preto",
+    label: "Sanwey Preto",
+    background: "#0A0A0A",
+    foreground: "#FFFFFF",
+    muted: "#8A8680",
+    accent: "#C7212B",
+    accentContrast: "#FFFFFF",
+    border: "rgba(255, 255, 255, 0.16)",
     displayFont: "var(--font-barlow-condensed)",
     bodyFont: INTER,
     metricFont: "var(--font-jetbrains-mono)",
     displayWeight: 900,
     displayTracking: "-0.02em",
-    badgeRadius: 12,
-    overlayColor: "#0F172A",
+    badgeRadius: 4,
+    overlayColor: "#0A0A0A",
     surface: "dark",
-    // Cards escuros sobre o fundo: blocos sutis em vez de gradiente.
-    decor: {
-      backgroundImage:
-        "linear-gradient(180deg, rgba(30, 41, 59, 0.55) 0%, rgba(30, 41, 59, 0) 38%), radial-gradient(720px 480px at 92% 8%, rgba(34, 211, 238, 0.14), transparent 60%)",
-    },
     darkSurface: {},
   },
 
