@@ -16,14 +16,14 @@ export type SlideThemeId =
   | "sanwey-industrial"
   | "sanwey-impacto"
   | "sanwey-preto"
-  | "resibag-dark"
-  | "resibag-clean"
-  | "resibag-impact";
+  | "resibag-escuro"
+  | "resibag-ativo"
+  | "resibag-selo";
 
 /** Agrupamento usado pelo dropdown do painel lateral. */
 export const THEME_GROUPS: { label: string; themes: SlideThemeId[] }[] = [
   { label: "Sanwey", themes: ["sanwey", "sanwey-industrial", "sanwey-impacto", "sanwey-preto"] },
-  { label: "Resibag", themes: ["resibag", "resibag-dark", "resibag-clean", "resibag-impact"] },
+  { label: "Resibag", themes: ["resibag", "resibag-escuro", "resibag-ativo", "resibag-selo"] },
   { label: "Genéricos", themes: ["dark-modern", "clean-industrial", "editorial"] },
 ];
 
@@ -274,76 +274,88 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     darkSurface: {},
   },
 
-  // --- Variações Resibag (paleta definida pelo usuário, fora do MM v9.0) ---
-  "resibag-dark": {
-    id: "resibag-dark",
-    label: "Resibag Dark",
-    background: "#081312",
-    foreground: "#FFFFFF",
-    muted: "#9CA3AF",
-    accent: "#10B981",
-    accentContrast: "#081312",
-    border: "rgba(255, 255, 255, 0.18)",
+  // --- Variações Resibag (dentro da paleta oficial do MM v9.0) ---
+  /** Resibag Dark + Mint — os mesmos tokens já aprovados pra capa, só
+   * aplicados no carrossel inteiro em vez de só na primeira slide. */
+  "resibag-escuro": {
+    id: "resibag-escuro",
+    label: "Resibag Escuro",
+    background: "#0D3D20",
+    foreground: "#FAF8F6",
+    muted: "#EDF2EE",
+    accent: "#72FD9C",
+    accentContrast: "#0D3D20",
+    border: "rgba(250, 248, 246, 0.22)",
     displayFont: "var(--font-outfit)",
     bodyFont: INTER,
     metricFont: "var(--font-outfit)",
     displayWeight: 700,
     displayTracking: "-0.01em",
     badgeRadius: 6,
-    overlayColor: "#081312",
+    overlayColor: "#0D3D20",
     surface: "dark",
     darkSurface: {},
   },
-  "resibag-clean": {
-    id: "resibag-clean",
-    label: "Resibag Clean",
-    background: "#F8FAF9",
-    foreground: "#0F172A",
-    muted: "#52646A",
-    accent: "#047857",
-    accentContrast: "#FFFFFF",
-    border: "#DDE7E3",
+  /** Resibag Active — o tom que o manual reserva pra "botões de ação,
+   * links, ícones ativos" — como acento principal, mais vívido que o
+   * institucional. */
+  "resibag-ativo": {
+    id: "resibag-ativo",
+    label: "Resibag Ativo",
+    background: "#FAF8F6",
+    foreground: "#1E2A22",
+    muted: "#5A6B60",
+    accent: "#3AAF65",
+    accentContrast: "#FAF8F6",
+    border: "#EDF2EE",
     displayFont: "var(--font-outfit)",
     bodyFont: INTER,
     metricFont: "var(--font-outfit)",
     displayWeight: 700,
     displayTracking: "-0.01em",
     badgeRadius: 6,
-    overlayColor: "#0F172A",
+    overlayColor: "#0D3D20",
     surface: "light",
     coverUsesDarkSurface: true,
     darkSurface: {
-      background: "#0F172A",
-      foreground: "#F8FAF9",
-      muted: "#CBD5E1",
-      accent: "#10B981",
-      accentContrast: "#0F172A",
-      border: "rgba(248, 250, 249, 0.22)",
+      background: "#0D3D20",
+      foreground: "#FAF8F6",
+      muted: "#EDF2EE",
+      accent: "#72FD9C",
+      accentContrast: "#0D3D20",
+      border: "rgba(250, 248, 246, 0.22)",
       surface: "dark",
     },
   },
-  "resibag-impact": {
-    id: "resibag-impact",
-    label: "Resibag Impact",
-    background: "#0A1917",
-    foreground: "#F2FBF7",
-    muted: "#A7C4B8",
-    accent: "#00E599",
-    accentContrast: "#0A1917",
-    border: "rgba(0, 229, 153, 0.42)",
+  /** Certification Gold — reservado pelo manual pra selos INMETRO/ANTT/ANP —
+   * bom pra conteúdo de compliance e certificação. */
+  "resibag-selo": {
+    id: "resibag-selo",
+    label: "Resibag Selo",
+    background: "#FAF8F6",
+    foreground: "#1E2A22",
+    muted: "#5A6B60",
+    accent: "#B8973A",
+    accentContrast: "#1E2A22",
+    border: "#EDF2EE",
     displayFont: "var(--font-outfit)",
     bodyFont: INTER,
     metricFont: "var(--font-outfit)",
     displayWeight: 700,
     displayTracking: "-0.01em",
     badgeRadius: 6,
-    overlayColor: "#0A1917",
-    surface: "dark",
-    decor: {
-      backgroundImage:
-        "linear-gradient(160deg, rgba(0, 229, 153, 0.14) 0%, rgba(10, 25, 23, 0) 46%), radial-gradient(820px 560px at 6% 96%, rgba(0, 229, 153, 0.12), transparent 62%)",
+    overlayColor: "#0D3D20",
+    surface: "light",
+    coverUsesDarkSurface: true,
+    darkSurface: {
+      background: "#0D3D20",
+      foreground: "#FAF8F6",
+      muted: "#EDF2EE",
+      accent: "#B8973A",
+      accentContrast: "#1E2A22",
+      border: "rgba(250, 248, 246, 0.22)",
+      surface: "dark",
     },
-    darkSurface: {},
   },
 };
 

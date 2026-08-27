@@ -16,7 +16,7 @@ import { useHistory } from "@/hooks/useHistory";
 import { useSettings } from "@/hooks/useSettings";
 import { exportToPDF, exportToZip } from "@/lib/export";
 import { moveSlide, removeBlockedReason, renumber } from "@/lib/slides";
-import { clearSession, loadSession, saveSession } from "@/lib/storage";
+import { loadState, saveState, type Draft } from "@/lib/storage";
 import { focusRing } from "@/lib/ui";
 import { MAX_SLIDES, type Carousel, type Slide } from "@/types/carousel";
 
@@ -122,6 +122,9 @@ export default function Home() {
   const [mobileView, setMobileView] = useState<"editor" | "preview">("editor");
 
   const [persistFailed, setPersistFailed] = useState(false);
+  const [drafts, setDrafts] = useState<Draft[]>(() => loadState().drafts);
+  const [activeDraftId, setActiveDraftId] = useState<string | null>(() => loadState().activeId);
+  const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
 
   // Guarda a marca junto: assim um resultado de marca anterior nunca é usado,
   // sem precisar limpar o estado dentro do efeito.
@@ -137,26 +140,44 @@ export default function Home() {
   // A lista pode encolher por remoção ou desfazer; o índice não pode ficar fora.
   const safeIndex = Math.min(activeIndex, Math.max(0, slides.length - 1));
 
-  // Os dois dispatches são agrupados num render só, então quando
-  // `restored` vira true o carrossel já veio junto e o autosave abaixo
-  // nunca chega a gravar o estado vazio por cima da sessão salva.
+  // drafts/activeDraftId partem de localStorage via inicializador preguiçoso
+  // (abaixo). Aqui só falta aplicar o rascunho ativo ao carrossel e às
+  // configurações — nenhum dos dois é um setState de useState puro, então
+  // não conta como "setState síncrono dentro de efeito".
   useEffect(() => {
-    const session = loadSession();
-    if (session?.carousel) reset(session.carousel);
-    dispatchSettings({ type: "restore", settings: session ?? {} });
+    const state = loadState();
+    const active = state.drafts.find((draft) => draft.id === state.activeId);
+    if (active) reset(active.carousel);
+    dispatchSettings({ type: "restore", settings: active ?? {} });
   }, [reset, dispatchSettings]);
 
+  // Digitar atualiza o rascunho ativo com debounce — escrever a cada tecla
+  // travaria a digitação num array de rascunhos inteiro.
   useEffect(() => {
-    if (!restored) return;
+    if (!restored || !activeDraftId || !carousel) return;
 
     const timer = setTimeout(() => {
-      setPersistFailed(
-        !saveSession({ carousel, themeId, brandId, customLogo }),
+      setDrafts((current) =>
+        current.map((draft) =>
+          draft.id === activeDraftId
+            ? { ...draft, carousel, themeId, brandId, customLogo, updatedAt: Date.now() }
+            : draft,
+        ),
       );
     }, PERSIST_DELAY);
 
     return () => clearTimeout(timer);
-  }, [restored, carousel, themeId, brandId, customLogo]);
+  }, [restored, activeDraftId, carousel, themeId, brandId, customLogo]);
+
+  // Persiste sempre que a lista muda — o efeito acima já debounceu a escrita
+  // durante digitação, então aqui não precisa de um segundo delay.
+  useEffect(() => {
+    if (!restored) return;
+    const timer = setTimeout(() => {
+      setPersistFailed(!saveState({ drafts, activeId: activeDraftId }));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [restored, drafts, activeDraftId]);
 
   useEffect(() => {
     if (!brandId) return;
@@ -212,11 +233,28 @@ export default function Home() {
         );
       }
 
+      const newCarousel = data as Carousel;
+
       // Documento novo zera o histórico: desfazer para dentro do carrossel
       // anterior misturaria dois briefs diferentes.
-      reset(data as Carousel);
+      reset(newCarousel);
       setActiveIndex(0);
       setMobileView("preview");
+
+      const id = crypto.randomUUID();
+      setDrafts((current) => [
+        ...current,
+        {
+          id,
+          title: newCarousel.title,
+          updatedAt: Date.now(),
+          carousel: newCarousel,
+          themeId,
+          brandId,
+          customLogo,
+        },
+      ]);
+      setActiveDraftId(id);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "falha ao gerar o carrossel");
     } finally {
@@ -224,12 +262,30 @@ export default function Home() {
     }
   }
 
+  /** Só desativa o rascunho atual — ele já está salvo pelo autosave. */
   function resetCarousel() {
     reset(null);
     setInput("");
     setActiveIndex(0);
     setError(null);
-    clearSession();
+    setActiveDraftId(null);
+  }
+
+  function selectDraft(id: string) {
+    const draft = drafts.find((current) => current.id === id);
+    if (!draft) return;
+
+    setActiveDraftId(id);
+    reset(draft.carousel);
+    dispatchSettings({ type: "restore", settings: draft });
+    setActiveIndex(0);
+    setError(null);
+    setMobileView("preview");
+  }
+
+  function deleteDraft(id: string) {
+    setDrafts((current) => current.filter((draft) => draft.id !== id));
+    if (id === activeDraftId) resetCarousel();
   }
 
   function updateSlide(index: number, patch: Partial<Slide>) {
@@ -248,6 +304,34 @@ export default function Home() {
           : current,
       coalesceKey,
     );
+  }
+
+  async function regenerateSlide(index: number, instruction?: string) {
+    if (!carousel) return;
+
+    setRegeneratingIndex(index);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/generate/slide", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ carousel, slideIndex: index, instruction }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.issues?.join(" - ") ?? data.error ?? "falha ao regenerar o slide",
+        );
+      }
+
+      updateSlide(index, data as Slide);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "falha ao regenerar o slide");
+    } finally {
+      setRegeneratingIndex(null);
+    }
   }
 
   /** Toda mutação estrutural passa por aqui, então a paginação nunca dessincroniza. */
@@ -369,6 +453,10 @@ export default function Home() {
         exporting={exporting}
         onExport={runExport}
         persistFailed={persistFailed}
+        drafts={drafts}
+        activeDraftId={activeDraftId}
+        onSelectDraft={selectDraft}
+        onDeleteDraft={deleteDraft}
       />
 
       {/* O erro ficava colado embaixo do input da sidebar, então falha de
@@ -462,6 +550,8 @@ export default function Home() {
                       onRemove={removeSlide}
                       onMove={moveSlideAt}
                       onAdd={addSlide}
+                      onRegenerate={regenerateSlide}
+                      regeneratingIndex={regeneratingIndex}
                     />
                   </div>
                 </>

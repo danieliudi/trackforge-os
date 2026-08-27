@@ -3,6 +3,8 @@
 import { CloudOff, FileDown, FilePlus2, Images, Redo2, Undo2 } from "lucide-react";
 
 import { Button, IconButton } from "@/components/ui/Button";
+import { DraftsMenu } from "@/components/app/DraftsMenu";
+import type { Draft } from "@/lib/storage";
 
 type AppHeaderProps = {
   title?: string;
@@ -16,6 +18,10 @@ type AppHeaderProps = {
   onExport: (kind: "pdf" | "zip") => void;
   /** localStorage recusou o payload — o autosave silenciosamente não existe. */
   persistFailed: boolean;
+  drafts: Draft[];
+  activeDraftId: string | null;
+  onSelectDraft: (id: string) => void;
+  onDeleteDraft: (id: string) => void;
 };
 
 export function AppHeader({
@@ -29,6 +35,10 @@ export function AppHeader({
   exporting,
   onExport,
   persistFailed,
+  drafts,
+  activeDraftId,
+  onSelectDraft,
+  onDeleteDraft,
 }: AppHeaderProps) {
   const isExporting = exporting !== null;
 
@@ -59,49 +69,64 @@ export function AppHeader({
         ) : null}
       </div>
 
-      {hasCarousel ? (
-        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-          <Button icon={FilePlus2} onClick={onReset}>
-            <span className="hidden sm:inline">Novo carrossel</span>
-          </Button>
+      <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        {hasCarousel ? (
+          <>
+            <Button icon={FilePlus2} onClick={onReset}>
+              <span className="hidden sm:inline">Novo carrossel</span>
+            </Button>
 
-          <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
+            <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
 
-          <div className="flex items-center">
-            <IconButton
-              icon={Undo2}
-              label="Desfazer (Ctrl+Z)"
-              onClick={onUndo}
-              disabled={!canUndo}
-            />
-            <IconButton
-              icon={Redo2}
-              label="Refazer (Ctrl+Shift+Z)"
-              onClick={onRedo}
-              disabled={!canRedo}
-            />
-          </div>
+            <div className="flex items-center">
+              <IconButton
+                icon={Undo2}
+                label="Desfazer (Ctrl+Z)"
+                onClick={onUndo}
+                disabled={!canUndo}
+              />
+              <IconButton
+                icon={Redo2}
+                label="Refazer (Ctrl+Shift+Z)"
+                onClick={onRedo}
+                disabled={!canRedo}
+              />
+            </div>
 
-          <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
+            <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
+          </>
+        ) : null}
 
-          <Button
-            icon={FileDown}
-            loading={exporting === "pdf"}
-            disabled={isExporting}
-            onClick={() => onExport("pdf")}
-          >
-            <span className="hidden sm:inline">PDF</span>
-          </Button>
-          <Button
-            icon={Images}
-            loading={exporting === "zip"}
-            disabled={isExporting}
-            onClick={() => onExport("zip")}
-          >
-            <span className="hidden sm:inline">PNG</span>
-          </Button>
-        </div>
-      ) : null}
+        <DraftsMenu
+          drafts={drafts}
+          activeId={activeDraftId}
+          onSelect={onSelectDraft}
+          onDelete={onDeleteDraft}
+        />
+
+        {hasCarousel ? (
+          <>
+            <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
+
+            <Button
+              icon={FileDown}
+              loading={exporting === "pdf"}
+              disabled={isExporting}
+              onClick={() => onExport("pdf")}
+            >
+              <span className="hidden sm:inline">PDF</span>
+            </Button>
+            <Button
+              icon={Images}
+              loading={exporting === "zip"}
+              disabled={isExporting}
+              onClick={() => onExport("zip")}
+            >
+              <span className="hidden sm:inline">PNG</span>
+            </Button>
+          </>
+        ) : null}
+      </div>
     </header>
   );
 }

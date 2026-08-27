@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-const MAX_BODY_LENGTH = 30;
+export const MAX_BODY_LENGTH = 30;
 
 /** Fonte única de verdade — o schema valida e a UI trava os botões nos mesmos limites. */
 export const MIN_SLIDES = 4;

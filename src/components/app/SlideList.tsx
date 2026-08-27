@@ -17,6 +17,8 @@ type SlideListProps = {
   onRemove: (index: number) => void;
   onMove: (index: number, direction: -1 | 1) => void;
   onAdd: () => void;
+  onRegenerate: (index: number, instruction?: string) => void;
+  regeneratingIndex: number | null;
 };
 
 export function SlideList({
@@ -28,6 +30,8 @@ export function SlideList({
   onRemove,
   onMove,
   onAdd,
+  onRegenerate,
+  regeneratingIndex,
 }: SlideListProps) {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const isFull = slides.length >= MAX_SLIDES;
@@ -65,6 +69,8 @@ export function SlideList({
           onRemove={() => onRemove(index)}
           onMoveUp={() => onMove(index, -1)}
           onMoveDown={() => onMove(index, 1)}
+          onRegenerate={(instruction) => onRegenerate(index, instruction)}
+          isRegenerating={regeneratingIndex === index}
           canRemove={removeBlockedReason(index, slides.length) === undefined}
           removeBlockedReason={removeBlockedReason(index, slides.length)}
           canMoveUp={canMoveUp(index, slides.length)}

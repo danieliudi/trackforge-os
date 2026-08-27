@@ -4,76 +4,81 @@ import { slideThemes, type SlideThemeId } from "@/constants/themes";
 import { carouselSchema, type Carousel } from "@/types/carousel";
 
 /** Versionado: mudar o formato invalida o payload antigo em vez de quebrar. */
-const KEY = "carousel-builder:session:v1";
+const KEY = "carousel-builder:drafts:v1";
 
-export type Session = {
-  carousel: Carousel | null;
+export type Draft = {
+  id: string;
+  title: string;
+  updatedAt: number;
+  carousel: Carousel;
   themeId: SlideThemeId;
   brandId: BrandId | null;
   customLogo: string | null;
 };
 
+export type StoredState = {
+  drafts: Draft[];
+  activeId: string | null;
+};
+
+function isValidDraft(value: unknown): value is Draft {
+  if (typeof value !== "object" || value === null) return false;
+  const data = value as Record<string, unknown>;
+
+  return (
+    typeof data.id === "string" &&
+    typeof data.title === "string" &&
+    typeof data.updatedAt === "number" &&
+    carouselSchema.safeParse(data.carousel).success &&
+    typeof data.themeId === "string" &&
+    data.themeId in slideThemes &&
+    (data.brandId === null || (typeof data.brandId === "string" && data.brandId in brands)) &&
+    (data.customLogo === null || typeof data.customLogo === "string")
+  );
+}
+
 /**
- * Lê a sessão salva. Qualquer payload inválido é descartado em silêncio: o
- * schema é a fronteira, então um carrossel de uma versão antiga do formato
- * volta como null em vez de derrubar a tela na primeira renderização.
+ * Lê os rascunhos salvos. Qualquer payload inválido é descartado em
+ * silêncio: o schema é a fronteira, então um rascunho de uma versão antiga
+ * do formato some da lista em vez de derrubar a tela na primeira renderização.
  */
-export function loadSession(): Partial<Session> | null {
-  if (typeof window === "undefined") return null;
+export function loadState(): StoredState {
+  if (typeof window === "undefined") return { drafts: [], activeId: null };
 
   try {
     const raw = window.localStorage.getItem(KEY);
-    if (!raw) return null;
+    if (!raw) return { drafts: [], activeId: null };
 
     const parsed: unknown = JSON.parse(raw);
-    if (typeof parsed !== "object" || parsed === null) return null;
+    if (typeof parsed !== "object" || parsed === null) return { drafts: [], activeId: null };
     const data = parsed as Record<string, unknown>;
 
-    const carousel = carouselSchema.safeParse(data.carousel);
-    const themeId = data.themeId;
-    const brandId = data.brandId;
-    const customLogo = data.customLogo;
+    const drafts = Array.isArray(data.drafts) ? data.drafts.filter(isValidDraft) : [];
+    const activeId = typeof data.activeId === "string" ? data.activeId : null;
 
     return {
-      carousel: carousel.success ? carousel.data : null,
-      themeId:
-        typeof themeId === "string" && themeId in slideThemes
-          ? (themeId as SlideThemeId)
-          : undefined,
-      brandId:
-        typeof brandId === "string" && brandId in brands
-          ? (brandId as BrandId)
-          : null,
-      customLogo: typeof customLogo === "string" ? customLogo : null,
+      drafts,
+      activeId: drafts.some((draft) => draft.id === activeId) ? activeId : null,
     };
   } catch {
-    return null;
+    return { drafts: [], activeId: null };
   }
 }
 
 /**
- * Salva a sessão. Retorna false quando o navegador recusa.
+ * Salva os rascunhos. Retorna false quando o navegador recusa.
  *
- * Imagem e logo entram como data URL, então um carrossel com uploads passa
- * fácil dos ~5MB de cota. Quem chama mostra o aviso: falhar calado faria o
- * usuário confiar num autosave que não existe.
+ * Imagem e logo entram como data URL, então vários rascunhos com uploads
+ * passam fácil dos ~5MB de cota. Quem chama mostra o aviso: falhar calado
+ * faria o usuário confiar num autosave que não existe.
  */
-export function saveSession(session: Session): boolean {
+export function saveState(state: StoredState): boolean {
   if (typeof window === "undefined") return false;
 
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(session));
+    window.localStorage.setItem(KEY, JSON.stringify(state));
     return true;
   } catch {
     return false;
-  }
-}
-
-export function clearSession() {
-  if (typeof window === "undefined") return;
-  try {
-    window.localStorage.removeItem(KEY);
-  } catch {
-    // storage indisponível (modo privado); nada a limpar de qualquer forma
   }
 }

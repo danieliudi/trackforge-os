@@ -1,11 +1,13 @@
 "use client";
 
+import clsx from "clsx";
 import { Loader2, SearchX } from "lucide-react";
+import Image from "next/image";
 import { useEffect, useRef, useState } from "react";
 
 import { fieldClass, focusRing } from "@/lib/ui";
 
-type ImageResult = {
+type UnsplashResult = {
   id: string;
   thumbUrl: string;
   fullUrl: string;
@@ -15,15 +17,53 @@ type ImageResult = {
   downloadLocation: string;
 };
 
+type LibraryImage = {
+  name: string;
+  path: string;
+};
+
 const SEARCH_DELAY = 400;
+const TABS = [
+  { id: "unsplash", label: "Unsplash" },
+  { id: "biblioteca", label: "Biblioteca" },
+] as const;
+type Tab = (typeof TABS)[number]["id"];
 
 type ImageSearchPanelProps = {
   onSelect: (url: string) => void;
 };
 
 export function ImageSearchPanel({ onSelect }: ImageSearchPanelProps) {
+  const [tab, setTab] = useState<Tab>("unsplash");
+
+  return (
+    <div className="flex flex-col gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-2.5">
+      <div className="flex w-fit gap-0.5 rounded-md border border-zinc-200 bg-white p-0.5">
+        {TABS.map(({ id, label }) => (
+          <button
+            key={id}
+            type="button"
+            onClick={() => setTab(id)}
+            aria-pressed={tab === id}
+            className={clsx(
+              "rounded px-2.5 py-1 text-[11px] font-medium transition",
+              focusRing,
+              tab === id ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900",
+            )}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
+      {tab === "unsplash" ? <UnsplashTab onSelect={onSelect} /> : <LibraryTab onSelect={onSelect} />}
+    </div>
+  );
+}
+
+function UnsplashTab({ onSelect }: { onSelect: (url: string) => void }) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<ImageResult[] | null>(null);
+  const [results, setResults] = useState<UnsplashResult[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const requestId = useRef(0);
@@ -54,7 +94,7 @@ export function ImageSearchPanel({ onSelect }: ImageSearchPanelProps) {
     return () => clearTimeout(timer);
   }, [query]);
 
-  function select(photo: ImageResult) {
+  function select(photo: UnsplashResult) {
     onSelect(photo.fullUrl);
     // Fire-and-forget: exigido pelas diretrizes da API do Unsplash quando a foto é usada de fato.
     fetch("/api/images/track-download", {
@@ -65,7 +105,7 @@ export function ImageSearchPanel({ onSelect }: ImageSearchPanelProps) {
   }
 
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-2.5">
+    <div className="flex flex-col gap-2">
       <input
         autoFocus
         value={query}
@@ -118,6 +158,69 @@ export function ImageSearchPanel({ onSelect }: ImageSearchPanelProps) {
           ))}
         </div>
       ) : null}
+    </div>
+  );
+}
+
+function LibraryTab({ onSelect }: { onSelect: (url: string) => void }) {
+  const [images, setImages] = useState<LibraryImage[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [filter, setFilter] = useState("");
+
+  useEffect(() => {
+    fetch("/api/assets/library")
+      .then((response) => response.json())
+      .then((data) => setImages(data.images))
+      .catch(() => setError("falha ao carregar a biblioteca"));
+  }, []);
+
+  const filtered = images?.filter((image) =>
+    image.name.toLowerCase().includes(filter.trim().toLowerCase()),
+  );
+
+  return (
+    <div className="flex flex-col gap-2">
+      <input
+        autoFocus
+        value={filter}
+        onChange={(event) => setFilter(event.target.value)}
+        placeholder="Filtrar por nome…"
+        className={fieldClass}
+      />
+
+      {error ? (
+        <p className="py-2 text-center text-xs text-red-600">{error}</p>
+      ) : !images ? (
+        <div className="flex items-center justify-center gap-1.5 py-4 text-xs text-zinc-500">
+          <Loader2 size={13} className="animate-spin" />
+          Carregando…
+        </div>
+      ) : filtered?.length === 0 ? (
+        <div className="flex flex-col items-center gap-1 py-4 text-xs text-zinc-500">
+          <SearchX size={16} />
+          Nada encontrado
+        </div>
+      ) : (
+        <div className="grid max-h-56 grid-cols-4 gap-1.5 overflow-y-auto">
+          {filtered?.map((image) => (
+            <button
+              key={image.path}
+              type="button"
+              onClick={() => onSelect(`${window.location.origin}${image.path}`)}
+              title={image.name}
+              className={`group relative aspect-square overflow-hidden rounded bg-zinc-100 ${focusRing}`}
+            >
+              <Image
+                src={image.path}
+                alt={image.name}
+                fill
+                sizes="100px"
+                className="object-cover transition group-hover:scale-105"
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

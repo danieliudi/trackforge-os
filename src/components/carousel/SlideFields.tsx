@@ -1,10 +1,19 @@
 "use client";
 
 import clsx from "clsx";
-import { ChevronDown, ChevronUp, CopyPlus, Search, Trash2, Upload, X } from "lucide-react";
+import {
+  ChevronDown,
+  ChevronUp,
+  CopyPlus,
+  Search,
+  Sparkles,
+  Trash2,
+  Upload,
+  X,
+} from "lucide-react";
 import { useId, useState, type Ref } from "react";
 
-import { IconButton } from "@/components/ui/Button";
+import { Button, IconButton } from "@/components/ui/Button";
 import { ImageSearchPanel } from "@/components/carousel/ImageSearchPanel";
 import { fieldClass, focusRing, labelClass } from "@/lib/ui";
 import type { ImageLayout, Slide, SlideType } from "@/types/carousel";
@@ -42,6 +51,8 @@ type SlideFieldsProps = {
   onRemove: () => void;
   onMoveUp: () => void;
   onMoveDown: () => void;
+  onRegenerate: (instruction?: string) => void;
+  isRegenerating: boolean;
   /** Falso quando remover quebraria o schema (capa, CTA ou mínimo de slides). */
   canRemove: boolean;
   removeBlockedReason?: string;
@@ -69,6 +80,8 @@ export function SlideFields({
   onRemove,
   onMoveUp,
   onMoveDown,
+  onRegenerate,
+  isRegenerating,
   canRemove,
   removeBlockedReason,
   canMoveUp,
@@ -81,6 +94,14 @@ export function SlideFields({
   const uploadId = useId();
   const isUploaded = slide.image?.url.startsWith("data:") ?? false;
   const [searchOpen, setSearchOpen] = useState(false);
+  const [regenOpen, setRegenOpen] = useState(false);
+  const [instruction, setInstruction] = useState("");
+
+  function triggerRegenerate() {
+    onRegenerate(instruction.trim() || undefined);
+    setRegenOpen(false);
+    setInstruction("");
+  }
 
   function setImageUrl(url: string) {
     onChange({
@@ -138,6 +159,14 @@ export function SlideFields({
             disabled={!canMoveDown}
             onClick={onMoveDown}
           />
+          <IconButton
+            icon={Sparkles}
+            label="Regenerar com IA"
+            size="sm"
+            variant={regenOpen ? "primary" : "ghost"}
+            loading={isRegenerating}
+            onClick={() => setRegenOpen((open) => !open)}
+          />
           <IconButton icon={CopyPlus} label="Duplicar slide" size="sm" onClick={onDuplicate} />
           <IconButton
             icon={Trash2}
@@ -149,6 +178,24 @@ export function SlideFields({
           />
         </div>
       </div>
+
+      {regenOpen ? (
+        <div className="flex gap-1.5">
+          <input
+            autoFocus
+            value={instruction}
+            onChange={(event) => setInstruction(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") triggerRegenerate();
+            }}
+            placeholder='Instrução opcional (ex: "foque no ROI")…'
+            className={fieldClass}
+          />
+          <Button icon={Sparkles} onClick={triggerRegenerate}>
+            Gerar
+          </Button>
+        </div>
+      ) : null}
 
       <label className="flex flex-col gap-1">
         <span className="flex items-baseline justify-between gap-2">
