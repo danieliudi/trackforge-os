@@ -63,8 +63,7 @@ function downloadBlob(blob: Blob, name: string) {
   URL.revokeObjectURL(url);
 }
 
-/** PDF multi-página em 1080x1350, pronto para post de documento no LinkedIn. */
-export async function exportToPDF(nodes: HTMLElement[], name = "carrossel") {
+async function buildPDF(nodes: HTMLElement[]) {
   const images = await renderAll(nodes);
   const doc = new jsPDF({
     orientation: "portrait",
@@ -80,7 +79,20 @@ export async function exportToPDF(nodes: HTMLElement[], name = "carrossel") {
     doc.addImage(image, "PNG", 0, 0, SLIDE_WIDTH, SLIDE_HEIGHT);
   });
 
+  return doc;
+}
+
+/** PDF multi-página em 1080x1350, pronto para post de documento no LinkedIn. */
+export async function exportToPDF(nodes: HTMLElement[], name = "carrossel") {
+  const doc = await buildPDF(nodes);
   doc.save(`${name}.pdf`);
+}
+
+/** Mesmo PDF do export, como File — usado pelo botão de compartilhar. */
+export async function getPDFFile(nodes: HTMLElement[], name = "carrossel") {
+  const doc = await buildPDF(nodes);
+  const blob = doc.output("blob");
+  return new File([blob], `${name}.pdf`, { type: "application/pdf" });
 }
 
 /** ZIP com um PNG numerado por slide (slide-01.png, slide-02.png, ...). */

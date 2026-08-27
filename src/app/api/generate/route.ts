@@ -1,12 +1,38 @@
 import { anthropic } from "@ai-sdk/anthropic";
-import { generateObject } from "ai";
+import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
 import { carouselBaseSchema, carouselSchema } from "@/types/carousel";
 
 const requestSchema = z.object({
   input: z.string().min(3, "informe uma URL ou um tema"),
+  /** Estratégia/posicionamento da marca ativa, colado na aba Contexto. */
+  context: z.string().optional(),
+  includeNews: z.boolean().optional(),
 });
+
+const NEWS_SYSTEM = `Você pesquisa notícias recentes do setor de embalagem industrial,
+logística e gestão de resíduos para dar contexto atual a um redator de conteúdo B2B.
+
+Priorize, nessa ordem:
+- Regulação e compliance (INMETRO, ANTT, ANP)
+- Logística e big bags
+- ESG e gestão de resíduos
+
+Responda com um resumo de 3 a 5 linhas das notícias mais relevantes e recentes
+relacionadas ao tema pedido. Se não encontrar nada relevante e recente, diga isso
+em vez de inventar. Português do Brasil.`;
+
+/** Busca ao vivo — sem feed pra manter, sem banco de dados. */
+async function fetchNewsBrief(topic: string) {
+  const { text } = await generateText({
+    model: anthropic("claude-sonnet-5"),
+    system: NEWS_SYSTEM,
+    prompt: `Tema: ${topic}`,
+    tools: { web_search: anthropic.tools.webSearch_20260209({ maxUses: 3 }) },
+  });
+  return text;
+}
 
 const SYSTEM = `Você é redator de carrosséis B2B de alta conversão para LinkedIn.
 
@@ -57,12 +83,36 @@ export async function POST(request: Request) {
     );
   }
 
-  const { input } = parsed.data;
+  const { input, context, includeNews } = parsed.data;
+  const urlInput = isUrl(input);
 
   try {
-    const brief = isUrl(input)
-      ? `Baseie o carrossel neste conteúdo extraído de ${input}:\n\n${await fetchUrlText(input)}`
-      : `Tema do carrossel: ${input}`;
+    const briefParts = [
+      urlInput
+        ? `Baseie o carrossel neste conteúdo extraído de ${input}:\n\n${await fetchUrlText(input)}`
+        : `Tema do carrossel: ${input}`,
+    ];
+
+    if (context?.trim()) {
+      briefParts.push(
+        `Contexto estratégico da marca (use para alinhar tom e prioridades):\n${context.trim()}`,
+      );
+    }
+
+    // Notícia só faz sentido ancorando um tema aberto — uma URL já é a fonte concreta.
+    // Busca de notícia é um bônus: se falhar (ex.: busca web desativada na conta
+    // Anthropic), o carrossel segue sem ela em vez de derrubar a geração inteira.
+    if (includeNews && !urlInput) {
+      try {
+        briefParts.push(
+          `Notícias recentes do setor (use se forem relevantes ao tema, ignore se não forem):\n${await fetchNewsBrief(input)}`,
+        );
+      } catch {
+        // segue sem notícias
+      }
+    }
+
+    const brief = briefParts.join("\n\n");
 
     const { object } = await generateObject({
       model: anthropic("claude-sonnet-5"),

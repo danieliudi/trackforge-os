@@ -1,6 +1,6 @@
 "use client";
 
-import { CloudOff, FileDown, FilePlus2, Images, Redo2, Undo2 } from "lucide-react";
+import { CloudOff, FileDown, FilePlus2, Images, Redo2, Share2, Undo2 } from "lucide-react";
 
 import { Button, IconButton } from "@/components/ui/Button";
 import { DraftsMenu } from "@/components/app/DraftsMenu";
@@ -22,6 +22,10 @@ type AppHeaderProps = {
   activeDraftId: string | null;
   onSelectDraft: (id: string) => void;
   onDeleteDraft: (id: string) => void;
+  /** Web Share API — ausente em boa parte do desktop, então o botão some. */
+  canShare: boolean;
+  sharing: boolean;
+  onShare: () => void;
 };
 
 export function AppHeader({
@@ -39,6 +43,9 @@ export function AppHeader({
   activeDraftId,
   onSelectDraft,
   onDeleteDraft,
+  canShare,
+  sharing,
+  onShare,
 }: AppHeaderProps) {
   const isExporting = exporting !== null;
 
@@ -108,6 +115,11 @@ export function AppHeader({
           <>
             <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
 
+            {canShare ? (
+              <Button icon={Share2} loading={sharing} disabled={sharing} onClick={onShare}>
+                <span className="hidden sm:inline">Compartilhar</span>
+              </Button>
+            ) : null}
             <Button
               icon={FileDown}
               loading={exporting === "pdf"}

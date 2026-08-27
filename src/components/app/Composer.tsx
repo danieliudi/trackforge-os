@@ -1,13 +1,13 @@
 "use client";
 
 import clsx from "clsx";
-import { CornerDownLeft, Link2, RefreshCw, Sparkles } from "lucide-react";
+import { CornerDownLeft, Link2, Loader2, RefreshCw, RotateCw, Sparkles } from "lucide-react";
 import { useEffect, useState, type KeyboardEvent } from "react";
 
 import { BrandPills } from "@/components/app/BrandPills";
-import { Button } from "@/components/ui/Button";
+import { Button, IconButton } from "@/components/ui/Button";
 import type { BrandId } from "@/constants/brands";
-import { fieldClass, kbdClass, labelClass } from "@/lib/ui";
+import { fieldClass, focusRing, kbdClass, labelClass } from "@/lib/ui";
 
 /**
  * Briefs de exemplo do estado vazio.
@@ -52,6 +52,104 @@ function useElapsed(isRunning: boolean) {
   return isRunning ? seconds : 0;
 }
 
+/**
+ * Temas sugeridos pela IA a partir do contexto de marca salvo.
+ *
+ * Sem contexto, os EXAMPLES fixos continuam valendo — essa seção só existe
+ * quando há contexto pra ancorar a sugestão em algo real da marca.
+ */
+function SuggestionsSection({
+  context,
+  onPick,
+}: {
+  context: string;
+  onPick: (text: string) => void;
+}) {
+  const [topics, setTopics] = useState<string[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+
+  async function fetchSuggestions() {
+    setLoading(true);
+    setError(false);
+    try {
+      const response = await fetch("/api/generate/suggestions", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ context }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error();
+      setTopics(data.topics);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    const timer = setTimeout(fetchSuggestions, 0);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- só busca de novo no clique do refresh, não a cada tecla no contexto
+  }, []);
+
+  return (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className={labelClass}>Sugestões da IA</span>
+        <IconButton
+          icon={loading ? Loader2 : RotateCw}
+          label="Gerar novas sugestões"
+          size="sm"
+          loading={loading}
+          onClick={fetchSuggestions}
+        />
+      </div>
+      <div className="flex flex-col gap-1.5">
+        {error ? (
+          <p className="text-xs text-red-600">Falha ao sugerir temas.</p>
+        ) : !loading && topics ? (
+          topics.map((text) => (
+            <button
+              key={text}
+              type="button"
+              onClick={() => onPick(text)}
+              className={clsx(
+                "flex items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left text-sm text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-900",
+                focusRing,
+              )}
+            >
+              <Sparkles size={14} className="shrink-0 text-zinc-400" />
+              <span className="truncate">{text}</span>
+            </button>
+          ))
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function NewsToggleRow({
+  checked,
+  onChange,
+}: {
+  checked: boolean;
+  onChange: (value: boolean) => void;
+}) {
+  return (
+    <label className="flex items-center gap-2 text-xs text-zinc-600">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(event) => onChange(event.target.checked)}
+        className={clsx("h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900", focusRing)}
+      />
+      Incluir notícias recentes do setor
+    </label>
+  );
+}
+
 type ComposerProps = {
   value: string;
   onChange: (value: string) => void;
@@ -61,6 +159,10 @@ type ComposerProps = {
   variant: "hero" | "compact";
   brandId?: BrandId | null;
   onBrandChange?: (id: BrandId | null) => void;
+  /** Contexto estratégico da marca ativa — alimenta as sugestões de tema. */
+  brandContext?: string;
+  includeNews?: boolean;
+  onIncludeNewsChange?: (value: boolean) => void;
 };
 
 export function Composer({
@@ -71,6 +173,9 @@ export function Composer({
   variant,
   brandId,
   onBrandChange,
+  brandContext,
+  includeNews,
+  onIncludeNewsChange,
 }: ComposerProps) {
   const canSubmit = value.trim().length >= MIN_LENGTH && !isGenerating;
   const elapsed = useElapsed(isGenerating);
@@ -98,6 +203,12 @@ export function Composer({
           placeholder="https://... ou um tema"
           className={clsx(fieldClass, "resize-y")}
         />
+        {onIncludeNewsChange ? (
+          <NewsToggleRow
+            checked={includeNews ?? false}
+            onChange={onIncludeNewsChange}
+          />
+        ) : null}
         <Button
           variant="primary"
           icon={RefreshCw}
@@ -157,6 +268,12 @@ export function Composer({
             {isGenerating ? "Gerando carrossel..." : "Gerar carrossel"}
           </Button>
         </div>
+        {onIncludeNewsChange ? (
+          <NewsToggleRow
+            checked={includeNews ?? false}
+            onChange={onIncludeNewsChange}
+          />
+        ) : null}
       </div>
 
       {isGenerating ? (
@@ -166,8 +283,10 @@ export function Composer({
             <span className="relative inline-flex h-2 w-2 rounded-full bg-zinc-700" />
           </span>
           <p className="flex-1 text-xs leading-relaxed text-zinc-600">
-            Montando capa, slides de conteúdo e CTA. Costuma levar de 10 a 30
-            segundos.
+            Montando capa, slides de conteúdo e CTA.{" "}
+            {includeNews
+              ? "Com busca de notícias, costuma levar de 40 a 80 segundos."
+              : "Costuma levar de 10 a 30 segundos."}
           </p>
           <span className="shrink-0 text-xs tabular-nums text-zinc-500">
             {elapsed}s
@@ -175,22 +294,26 @@ export function Composer({
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-2">
-        <span className={labelClass}>Comece por um exemplo</span>
-        <div className="flex flex-col gap-1.5">
-          {EXAMPLES.map(({ icon: Icon, text }) => (
-            <button
-              key={text}
-              type="button"
-              onClick={() => onChange(text)}
-              className="flex items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left text-sm text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
-            >
-              <Icon size={14} className="shrink-0 text-zinc-400" />
-              <span className="truncate">{text}</span>
-            </button>
-          ))}
+      {brandContext?.trim() ? (
+        <SuggestionsSection context={brandContext} onPick={onChange} />
+      ) : (
+        <div className="flex flex-col gap-2">
+          <span className={labelClass}>Comece por um exemplo</span>
+          <div className="flex flex-col gap-1.5">
+            {EXAMPLES.map(({ icon: Icon, text }) => (
+              <button
+                key={text}
+                type="button"
+                onClick={() => onChange(text)}
+                className="flex items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left text-sm text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+              >
+                <Icon size={14} className="shrink-0 text-zinc-400" />
+                <span className="truncate">{text}</span>
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
 
       {onBrandChange ? (
         <div className="flex flex-col gap-2 border-t border-zinc-200 pt-6">

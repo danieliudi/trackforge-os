@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 
 import { AppHeader } from "@/components/app/AppHeader";
 import { Composer } from "@/components/app/Composer";
+import { ContextPanel } from "@/components/app/ContextPanel";
 import { SlideList } from "@/components/app/SlideList";
 import { StylePanel } from "@/components/app/StylePanel";
 import { CarouselPreview } from "@/components/carousel/CarouselPreview";
@@ -14,9 +15,16 @@ import { IconButton } from "@/components/ui/Button";
 import { brands, type BrandId } from "@/constants/brands";
 import { useHistory } from "@/hooks/useHistory";
 import { useSettings } from "@/hooks/useSettings";
-import { exportToPDF, exportToZip } from "@/lib/export";
+import { exportToPDF, exportToZip, getPDFFile } from "@/lib/export";
 import { moveSlide, removeBlockedReason, renumber } from "@/lib/slides";
-import { loadState, saveState, type Draft } from "@/lib/storage";
+import {
+  loadBrandContext,
+  loadState,
+  saveBrandContext,
+  saveState,
+  type BrandContext,
+  type Draft,
+} from "@/lib/storage";
 import { focusRing } from "@/lib/ui";
 import { MAX_SLIDES, type Carousel, type Slide } from "@/types/carousel";
 
@@ -116,15 +124,19 @@ export default function Home() {
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [includeNews, setIncludeNews] = useState(true);
   const [exporting, setExporting] = useState<"pdf" | "zip" | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
   const [error, setError] = useState<string | null>(null);
-  const [tab, setTab] = useState<"content" | "style">("content");
+  const [tab, setTab] = useState<"content" | "style" | "context">("content");
   const [mobileView, setMobileView] = useState<"editor" | "preview">("editor");
 
   const [persistFailed, setPersistFailed] = useState(false);
   const [drafts, setDrafts] = useState<Draft[]>(() => loadState().drafts);
   const [activeDraftId, setActiveDraftId] = useState<string | null>(() => loadState().activeId);
   const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
+  const [brandContext, setBrandContext] = useState<BrandContext>(() => loadBrandContext());
 
   // Guarda a marca junto: assim um resultado de marca anterior nunca é usado,
   // sem precisar limpar o estado dentro do efeito.
@@ -179,6 +191,13 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [restored, drafts, activeDraftId]);
 
+  // Digitar no contexto de marca também debounça — mesmo motivo do brief.
+  useEffect(() => {
+    if (!restored) return;
+    const timer = setTimeout(() => saveBrandContext(brandContext), PERSIST_DELAY);
+    return () => clearTimeout(timer);
+  }, [restored, brandContext]);
+
   useEffect(() => {
     if (!brandId) return;
 
@@ -223,7 +242,11 @@ export default function Home() {
       const response = await fetch("/api/generate", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ input }),
+        body: JSON.stringify({
+          input,
+          context: brandId ? brandContext[brandId] : undefined,
+          includeNews,
+        }),
       });
       const data = await response.json();
 
@@ -410,6 +433,32 @@ export default function Home() {
     [carousel],
   );
 
+  const shareCarousel = useCallback(async () => {
+    if (!carousel) return;
+
+    const nodes = exportRefs.current
+      .slice(0, carousel.slides.length)
+      .filter((node): node is HTMLDivElement => node !== null);
+    if (nodes.length === 0) return;
+
+    setSharing(true);
+    setError(null);
+
+    try {
+      const file = await getPDFFile(nodes, slugify(carousel.title));
+      if (!navigator.canShare?.({ files: [file] })) {
+        throw new Error("compartilhamento de arquivo não suportado neste navegador");
+      }
+      await navigator.share({ files: [file], title: carousel.title });
+    } catch (cause) {
+      // Usuário cancelando o menu nativo de compartilhamento não é um erro.
+      if (cause instanceof Error && cause.name === "AbortError") return;
+      setError(cause instanceof Error ? cause.message : "falha ao compartilhar");
+    } finally {
+      setSharing(false);
+    }
+  }, [carousel]);
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       const typing = isTypingTarget(event.target);
@@ -457,6 +506,9 @@ export default function Home() {
         activeDraftId={activeDraftId}
         onSelectDraft={selectDraft}
         onDeleteDraft={deleteDraft}
+        canShare={canShare}
+        sharing={sharing}
+        onShare={shareCarousel}
       />
 
       {/* O erro ficava colado embaixo do input da sidebar, então falha de
@@ -488,6 +540,9 @@ export default function Home() {
             isGenerating={isGenerating}
             brandId={brandId}
             onBrandChange={selectBrand}
+            brandContext={brandId ? brandContext[brandId] : undefined}
+            includeNews={includeNews}
+            onIncludeNewsChange={setIncludeNews}
           />
         </div>
       ) : (
@@ -526,6 +581,9 @@ export default function Home() {
                 <TabButton isActive={tab === "style"} onClick={() => setTab("style")}>
                   Estilo
                 </TabButton>
+                <TabButton isActive={tab === "context"} onClick={() => setTab("context")}>
+                  Contexto
+                </TabButton>
               </div>
 
               {tab === "content" ? (
@@ -538,6 +596,8 @@ export default function Home() {
                       onChange={setInput}
                       onSubmit={generate}
                       isGenerating={isGenerating}
+                      includeNews={includeNews}
+                      onIncludeNewsChange={setIncludeNews}
                     />
                   </div>
                   <div className="min-h-0 flex-1 overflow-y-auto p-3">
@@ -555,7 +615,7 @@ export default function Home() {
                     />
                   </div>
                 </>
-              ) : (
+              ) : tab === "style" ? (
                 <div className="min-h-0 flex-1 overflow-y-auto p-4">
                   <StylePanel
                     themeId={themeId}
@@ -565,6 +625,17 @@ export default function Home() {
                     customLogo={customLogo}
                     onCustomLogoChange={(dataUrl) =>
                       dispatchSettings({ type: "logo", customLogo: dataUrl })
+                    }
+                  />
+                </div>
+              ) : (
+                <div className="min-h-0 flex-1 overflow-y-auto p-4">
+                  <ContextPanel
+                    brandId={brandId}
+                    value={brandId ? brandContext[brandId] : ""}
+                    onChange={(value) =>
+                      brandId &&
+                      setBrandContext((current) => ({ ...current, [brandId]: value }))
                     }
                   />
                 </div>

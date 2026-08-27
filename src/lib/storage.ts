@@ -82,3 +82,41 @@ export function saveState(state: StoredState): boolean {
     return false;
   }
 }
+
+const CONTEXT_KEY = "carousel-builder:brand-context:v1";
+
+/** Estratégia/posicionamento colado pelo usuário — um texto por marca. */
+export type BrandContext = Record<BrandId, string>;
+
+const EMPTY_CONTEXT: BrandContext = { sanwey: "", resibag: "" };
+
+export function loadBrandContext(): BrandContext {
+  if (typeof window === "undefined") return EMPTY_CONTEXT;
+
+  try {
+    const raw = window.localStorage.getItem(CONTEXT_KEY);
+    if (!raw) return EMPTY_CONTEXT;
+
+    const parsed: unknown = JSON.parse(raw);
+    if (typeof parsed !== "object" || parsed === null) return EMPTY_CONTEXT;
+    const data = parsed as Record<string, unknown>;
+
+    return {
+      sanwey: typeof data.sanwey === "string" ? data.sanwey : "",
+      resibag: typeof data.resibag === "string" ? data.resibag : "",
+    };
+  } catch {
+    return EMPTY_CONTEXT;
+  }
+}
+
+export function saveBrandContext(context: BrandContext): boolean {
+  if (typeof window === "undefined") return false;
+
+  try {
+    window.localStorage.setItem(CONTEXT_KEY, JSON.stringify(context));
+    return true;
+  } catch {
+    return false;
+  }
+}
