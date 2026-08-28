@@ -246,6 +246,7 @@ export default function Home() {
           input,
           context: brandId ? brandContext[brandId] : undefined,
           includeNews,
+          brandId,
         }),
       });
       const data = await response.json();

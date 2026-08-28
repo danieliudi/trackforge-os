@@ -20,6 +20,12 @@ export type Brand = {
    * Resibag v9.0 (redes sociais): "Logo sempre presente (mínimo: ícone no canto)".
    */
   logoPolicy: "all" | "cover-and-last";
+  /**
+   * Assinatura institucional verbatim (footerNote) — fatos canônicos de cada
+   * marca, nunca parafraseada. A IA não escreve isso; o servidor sobrescreve
+   * o que ela gerar por este valor exato.
+   */
+  tagline: string;
 };
 
 export const brands: Record<BrandId, Brand> = {
@@ -30,6 +36,7 @@ export const brands: Record<BrandId, Brand> = {
     logoSrcOnDark: "/logos/sanwey-branco.svg",
     themeId: "sanwey",
     logoPolicy: "cover-and-last",
+    tagline: "A marca que valoriza o seu produto.",
   },
   resibag: {
     id: "resibag",
@@ -38,6 +45,7 @@ export const brands: Record<BrandId, Brand> = {
     logoSrcOnDark: "/logos/resibag-branco.svg",
     themeId: "resibag",
     logoPolicy: "all",
+    tagline: "Gestão inteligente de resíduos industriais.",
   },
 };
 

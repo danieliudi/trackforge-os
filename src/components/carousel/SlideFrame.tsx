@@ -15,7 +15,8 @@ type SlideFrameProps = {
   slideNumber: number;
   totalSlides: number;
   highlightTag?: string;
-  footerNote: string;
+  /** Ausente esconde o texto do rodapé — a barra de acento e o logo continuam. */
+  footerNote?: string;
   image?: SlideImage;
   logoSrc?: string;
   logoAlt?: string;
@@ -187,37 +188,41 @@ export function SlideFrame({
           ) : null}
         </main>
 
-        <footer
-          className="relative shrink-0"
-          style={{ padding: `0 ${SLIDE_PADDING}px ${SLIDE_PADDING}px` }}
-        >
-          <div
-            className="flex items-center justify-between gap-[32px] pt-[24px]"
-            style={{ borderTop: `1px solid ${theme.border}` }}
+        {footerNote || footerLogo ? (
+          <footer
+            className="relative shrink-0"
+            style={{ padding: `0 ${SLIDE_PADDING}px ${SLIDE_PADDING}px` }}
           >
-            <div className="flex min-w-0 flex-1 items-center gap-[28px]">
-              <span
-                aria-hidden
-                className="h-[6px] w-[56px] shrink-0"
-                style={{ background: theme.accent }}
-              />
-              <p
-                className="min-w-0 flex-1 truncate text-[24px] uppercase tracking-[0.16em]"
-                style={{ color: theme.muted }}
-              >
-                {footerNote}
-              </p>
+            <div
+              className={`flex items-center gap-[32px] pt-[24px] ${footerNote ? "justify-between" : "justify-end"}`}
+              style={{ borderTop: `1px solid ${theme.border}` }}
+            >
+              {footerNote ? (
+                <div className="flex min-w-0 flex-1 items-center gap-[28px]">
+                  <span
+                    aria-hidden
+                    className="h-[6px] w-[56px] shrink-0"
+                    style={{ background: theme.accent }}
+                  />
+                  <p
+                    className="min-w-0 flex-1 truncate text-[24px] uppercase tracking-[0.16em]"
+                    style={{ color: theme.muted }}
+                  >
+                    {footerNote}
+                  </p>
+                </div>
+              ) : null}
+              {footerLogo ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={footerLogo}
+                  alt={logoAlt}
+                  className={`h-auto w-auto shrink-0 object-contain ${LOGO_BOX.footer}`}
+                />
+              ) : null}
             </div>
-            {footerLogo ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={footerLogo}
-                alt={logoAlt}
-                className={`h-auto w-auto shrink-0 object-contain ${LOGO_BOX.footer}`}
-              />
-            ) : null}
-          </div>
-        </footer>
+          </footer>
+        ) : null}
       </div>
     </div>
   );

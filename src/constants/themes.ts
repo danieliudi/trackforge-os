@@ -143,16 +143,17 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
   },
 
   /**
-   * Sanwey — Manual de Identidade Visual v2.0 (Maio 2026).
-   * Paleta oficial: Creme #F9F5F1 / Carvao #2C2C2B / Vermelho #C7212B.
+   * Sanwey — Sistema Visual DOC-SW-MM-06 v7.0b.
+   * Paleta oficial: Superfície #F9F9F9 / Ink #1A1A1A / Vermelho Sanwey #C7212B.
    * O manual proibe azul, laranja e roxo fora da paleta.
-   * Regra de social: "capa em Carvao para parar scroll; leitura em Creme".
+   * Regra de social: "capa em Ink para parar scroll; leitura em Superfície".
+   * F9F5F1/2C2C2B/D1D5DB eram a paleta v5.1 — descontinuada, ver sanwey-canonical-facts §16.
    */
   sanwey: {
     id: "sanwey",
     label: "Sanwey (institucional)",
-    background: "#F9F5F1",
-    foreground: "#2C2C2B",
+    background: "#F9F9F9",
+    foreground: "#1A1A1A",
     muted: "#8A8680",
     accent: "#C7212B",
     accentContrast: "#FFFFFF",
@@ -167,10 +168,10 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     surface: "light",
     coverUsesDarkSurface: true,
     darkSurface: {
-      background: "#2C2C2B",
-      foreground: "#F9F5F1",
-      muted: "#D1D5DB",
-      border: "rgba(249, 245, 241, 0.24)",
+      background: "#1A1A1A",
+      foreground: "#F9F9F9",
+      muted: "#E2E2E2",
+      border: "rgba(249, 249, 249, 0.24)",
       surface: "dark",
     },
   },
@@ -215,19 +216,19 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
   "sanwey-industrial": {
     id: "sanwey-industrial",
     label: "Sanwey Industrial",
-    background: "#374151",
-    foreground: "#F9F5F1",
-    muted: "#D1D5DB",
+    background: "#545454",
+    foreground: "#F9F9F9",
+    muted: "#E2E2E2",
     accent: "#C7212B",
     accentContrast: "#FFFFFF",
-    border: "rgba(249, 245, 241, 0.18)",
+    border: "rgba(249, 249, 249, 0.18)",
     displayFont: "var(--font-barlow-condensed)",
     bodyFont: INTER,
     metricFont: "var(--font-jetbrains-mono)",
     displayWeight: 900,
     displayTracking: "-0.02em",
     badgeRadius: 4,
-    overlayColor: "#374151",
+    overlayColor: "#545454",
     surface: "dark",
     darkSurface: {},
   },

@@ -55,13 +55,18 @@ export function CarouselSlide({
       : logo.src
     : undefined;
 
+  // Assinatura institucional só faz sentido pontuada — repetida em todo
+  // slide de um carrossel denso vira ruído. Mesma regra de capa+última que
+  // já rege o logo.
+  const showFooterNote = slide.slideNumber === 1 || slide.slideNumber === totalSlides;
+
   return (
     <SlideFrame
       theme={theme}
       slideNumber={slide.slideNumber}
       totalSlides={totalSlides}
       highlightTag={slide.highlightTag}
-      footerNote={slide.footerNote}
+      footerNote={showFooterNote ? slide.footerNote : undefined}
       image={slide.image}
       logoSrc={logoSrc}
       logoAlt={logo?.alt}

@@ -2,6 +2,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
+import { brands } from "@/constants/brands";
 import { carouselBaseSchema, carouselSchema } from "@/types/carousel";
 
 const requestSchema = z.object({
@@ -9,6 +10,7 @@ const requestSchema = z.object({
   /** Estratégia/posicionamento da marca ativa, colado na aba Contexto. */
   context: z.string().optional(),
   includeNews: z.boolean().optional(),
+  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
 });
 
 const NEWS_SYSTEM = `Você pesquisa notícias recentes do setor de embalagem industrial,
@@ -83,7 +85,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const { input, context, includeNews } = parsed.data;
+  const { input, context, includeNews, brandId } = parsed.data;
   const urlInput = isUrl(input);
 
   try {
@@ -122,12 +124,17 @@ export async function POST(request: Request) {
       providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
     });
 
+    // footerNote é fato de marca, não criatividade — a IA nunca sabe o texto
+    // real, então o servidor sobrescreve pelo canônico em vez de confiar nela.
+    const tagline = brandId ? brands[brandId].tagline : undefined;
+
     // A ordem do array é a verdade; renumera antes de validar as regras finais.
     const normalized = {
       ...object,
       slides: object.slides.map((slide, index) => ({
         ...slide,
         slideNumber: index + 1,
+        footerNote: tagline ?? slide.footerNote,
       })),
     };
 
