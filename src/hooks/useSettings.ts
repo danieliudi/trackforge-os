@@ -3,12 +3,15 @@
 import { useReducer } from "react";
 
 import { brands, type BrandId } from "@/constants/brands";
+import type { Format, Platform } from "@/constants/format";
 import type { SlideThemeId } from "@/constants/themes";
 
 export type Settings = {
   themeId: SlideThemeId;
   brandId: BrandId | null;
   customLogo: string | null;
+  format: Format;
+  platform: Platform;
 };
 
 type State = Settings & {
@@ -20,12 +23,16 @@ type Action =
   | { type: "theme"; themeId: SlideThemeId }
   | { type: "brand"; brandId: BrandId | null }
   | { type: "logo"; customLogo: string | null }
+  | { type: "format"; format: Format }
+  | { type: "platform"; platform: Platform }
   | { type: "restore"; settings: Partial<Settings> };
 
 const INITIAL: State = {
   themeId: "dark-modern",
   brandId: null,
   customLogo: null,
+  format: "carrossel",
+  platform: "linkedin",
   restored: false,
 };
 
@@ -46,6 +53,12 @@ function reducer(state: State, action: Action): State {
     case "logo":
       return { ...state, customLogo: action.customLogo };
 
+    case "format":
+      return { ...state, format: action.format };
+
+    case "platform":
+      return { ...state, platform: action.platform };
+
     // Restaurar num dispatch só, e não em quatro setState encadeados: além do
     // render em cascata, o autosave podia rodar no meio e gravar por cima da
     // sessão que estava sendo lida.
@@ -54,13 +67,15 @@ function reducer(state: State, action: Action): State {
         themeId: action.settings.themeId ?? state.themeId,
         brandId: action.settings.brandId ?? state.brandId,
         customLogo: action.settings.customLogo ?? state.customLogo,
+        format: action.settings.format ?? state.format,
+        platform: action.settings.platform ?? state.platform,
         restored: true,
       };
   }
 }
 
 /**
- * Configuração global do carrossel: tema, marca e logo.
+ * Configuração global do carrossel: tema, marca, logo, formato e plataforma.
  *
  * Fica fora do histórico de desfazer de propósito — Ctrl+Z existe para
  * recuperar texto de slide apagado, não para reverter troca de tema.

@@ -13,9 +13,11 @@ import { CarouselPreview } from "@/components/carousel/CarouselPreview";
 import { CarouselSlide, type LogoConfig } from "@/components/carousel/CarouselSlide";
 import { IconButton } from "@/components/ui/Button";
 import { brands, type BrandId } from "@/constants/brands";
+import type { Format } from "@/constants/format";
+import { resolveCanvasSize } from "@/constants/themes";
 import { useHistory } from "@/hooks/useHistory";
 import { useSettings } from "@/hooks/useSettings";
-import { exportToPDF, exportToZip, getPDFFile } from "@/lib/export";
+import { exportToPDF, exportToPPTX, exportToZip, getPDFFile } from "@/lib/export";
 import { moveSlide, removeBlockedReason, renumber } from "@/lib/slides";
 import {
   loadBrandContext,
@@ -26,7 +28,10 @@ import {
   type Draft,
 } from "@/lib/storage";
 import { focusRing } from "@/lib/ui";
-import { MAX_SLIDES, type Carousel, type Slide } from "@/types/carousel";
+import { MAX_SLIDES, MAX_SLIDES_APRESENTACAO, type Carousel, type Slide } from "@/types/carousel";
+
+const maxSlidesFor = (format: Format) =>
+  format === "apresentacao" ? MAX_SLIDES_APRESENTACAO : MAX_SLIDES;
 
 /** Campos de texto agrupam num passo só de desfazer enquanto se digita. */
 const TEXT_FIELDS = new Set([
@@ -120,12 +125,13 @@ export default function Home() {
   } = useHistory<Carousel | null>(null);
 
   const [settings, dispatchSettings] = useSettings();
-  const { themeId, brandId, customLogo, restored } = settings;
+  const { themeId, brandId, customLogo, format, platform, restored } = settings;
+  const maxSlides = maxSlidesFor(format);
 
   const [activeIndex, setActiveIndex] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [includeNews, setIncludeNews] = useState(true);
-  const [exporting, setExporting] = useState<"pdf" | "zip" | null>(null);
+  const [exporting, setExporting] = useState<"pdf" | "zip" | "pptx" | null>(null);
   const [sharing, setSharing] = useState(false);
   const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
   const [error, setError] = useState<string | null>(null);
@@ -172,14 +178,14 @@ export default function Home() {
       setDrafts((current) =>
         current.map((draft) =>
           draft.id === activeDraftId
-            ? { ...draft, carousel, themeId, brandId, customLogo, updatedAt: Date.now() }
+            ? { ...draft, carousel, themeId, brandId, customLogo, format, platform, updatedAt: Date.now() }
             : draft,
         ),
       );
     }, PERSIST_DELAY);
 
     return () => clearTimeout(timer);
-  }, [restored, activeDraftId, carousel, themeId, brandId, customLogo]);
+  }, [restored, activeDraftId, carousel, themeId, brandId, customLogo, format, platform]);
 
   // Persiste sempre que a lista muda — o efeito acima já debounceu a escrita
   // durante digitação, então aqui não precisa de um segundo delay.
@@ -247,6 +253,8 @@ export default function Home() {
           context: brandId ? brandContext[brandId] : undefined,
           includeNews,
           brandId,
+          format,
+          platform,
         }),
       });
       const data = await response.json();
@@ -276,6 +284,8 @@ export default function Home() {
           themeId,
           brandId,
           customLogo,
+          format,
+          platform,
         },
       ]);
       setActiveDraftId(id);
@@ -366,16 +376,26 @@ export default function Home() {
   }
 
   function addSlide() {
-    if (!carousel || carousel.slides.length >= MAX_SLIDES) return;
+    if (!carousel || carousel.slides.length >= maxSlides) return;
 
     mutateSlides((current) => {
-      const blank: Slide = {
-        slideNumber: 0,
-        type: "content",
-        headline: "Nova headline",
-        bodyText: "Texto de apoio",
-        footerNote: current[0]?.footerNote ?? "",
-      };
+      const footerNote = current[0]?.footerNote ?? "";
+      const blank: Slide =
+        format === "apresentacao"
+          ? {
+              slideNumber: 0,
+              type: "bullets",
+              headline: "Novo tópico",
+              bullets: ["Novo ponto", "Novo ponto"],
+              footerNote,
+            }
+          : {
+              slideNumber: 0,
+              type: "content",
+              headline: "Nova headline",
+              bodyText: "Texto de apoio",
+              footerNote,
+            };
       // Entra antes do CTA, que o schema exige como último slide.
       return [...current.slice(0, -1), blank, current[current.length - 1]];
     });
@@ -383,7 +403,7 @@ export default function Home() {
   }
 
   function duplicateSlide(index: number) {
-    if (!carousel || carousel.slides.length >= MAX_SLIDES) return;
+    if (!carousel || carousel.slides.length >= maxSlides) return;
 
     mutateSlides((current) => [
       ...current.slice(0, index + 1),
@@ -407,7 +427,7 @@ export default function Home() {
   }
 
   const runExport = useCallback(
-    async (kind: "pdf" | "zip") => {
+    async (kind: "pdf" | "zip" | "pptx") => {
       if (!carousel) return;
 
       const nodes = exportRefs.current
@@ -420,10 +440,13 @@ export default function Home() {
 
       try {
         const name = slugify(carousel.title);
+        const { width, height } = resolveCanvasSize(format, platform);
         if (kind === "pdf") {
-          await exportToPDF(nodes, name);
+          await exportToPDF(nodes, width, height, name);
+        } else if (kind === "zip") {
+          await exportToZip(nodes, width, height, name);
         } else {
-          await exportToZip(nodes, name);
+          await exportToPPTX(nodes, width, height, name);
         }
       } catch (cause) {
         setError(cause instanceof Error ? cause.message : "falha ao exportar");
@@ -431,7 +454,7 @@ export default function Home() {
         setExporting(null);
       }
     },
-    [carousel],
+    [carousel, format, platform],
   );
 
   const shareCarousel = useCallback(async () => {
@@ -446,7 +469,8 @@ export default function Home() {
     setError(null);
 
     try {
-      const file = await getPDFFile(nodes, slugify(carousel.title));
+      const { width, height } = resolveCanvasSize(format, platform);
+      const file = await getPDFFile(nodes, width, height, slugify(carousel.title));
       if (!navigator.canShare?.({ files: [file] })) {
         throw new Error("compartilhamento de arquivo não suportado neste navegador");
       }
@@ -458,7 +482,7 @@ export default function Home() {
     } finally {
       setSharing(false);
     }
-  }, [carousel]);
+  }, [carousel, format, platform]);
 
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
@@ -495,6 +519,7 @@ export default function Home() {
       <AppHeader
         title={carousel?.title}
         hasCarousel={carousel !== null}
+        format={format}
         canUndo={canUndo}
         canRedo={canRedo}
         onUndo={undo}
@@ -544,6 +569,10 @@ export default function Home() {
             brandContext={brandId ? brandContext[brandId] : undefined}
             includeNews={includeNews}
             onIncludeNewsChange={setIncludeNews}
+            format={format}
+            onFormatChange={(next) => dispatchSettings({ type: "format", format: next })}
+            platform={platform}
+            onPlatformChange={(next) => dispatchSettings({ type: "platform", platform: next })}
           />
         </div>
       ) : (
@@ -613,6 +642,7 @@ export default function Home() {
                       onAdd={addSlide}
                       onRegenerate={regenerateSlide}
                       regeneratingIndex={regeneratingIndex}
+                      maxSlides={maxSlides}
                     />
                   </div>
                 </>
@@ -626,6 +656,12 @@ export default function Home() {
                     customLogo={customLogo}
                     onCustomLogoChange={(dataUrl) =>
                       dispatchSettings({ type: "logo", customLogo: dataUrl })
+                    }
+                    format={format}
+                    onFormatChange={(next) => dispatchSettings({ type: "format", format: next })}
+                    platform={platform}
+                    onPlatformChange={(next) =>
+                      dispatchSettings({ type: "platform", platform: next })
                     }
                   />
                 </div>
@@ -653,6 +689,8 @@ export default function Home() {
                 slides={slides}
                 themeId={themeId}
                 logo={logo}
+                format={format}
+                platform={platform}
                 activeIndex={safeIndex}
                 onActiveIndexChange={setActiveIndex}
               />
@@ -676,6 +714,8 @@ export default function Home() {
                 totalSlides={carousel.slides.length}
                 themeId={themeId}
                 logo={logo}
+                format={format}
+                platform={platform}
                 scale={1}
               />
             </div>

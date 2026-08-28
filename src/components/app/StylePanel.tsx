@@ -4,9 +4,12 @@ import clsx from "clsx";
 import { Upload, X } from "lucide-react";
 
 import { BrandPills } from "@/components/app/BrandPills";
+import { FormatSelect } from "@/components/app/FormatSelect";
+import { PlatformPills } from "@/components/app/PlatformPills";
 import { ThemeSelect } from "@/components/carousel/ThemeSelect";
 import { IconButton } from "@/components/ui/Button";
 import type { BrandId } from "@/constants/brands";
+import { getPlatformToneNote, type Format, type Platform } from "@/constants/format";
 import type { SlideThemeId } from "@/constants/themes";
 import { focusRing, labelClass } from "@/lib/ui";
 
@@ -17,6 +20,10 @@ type StylePanelProps = {
   onBrandChange: (id: BrandId | null) => void;
   customLogo: string | null;
   onCustomLogoChange: (dataUrl: string | null) => void;
+  format: Format;
+  onFormatChange: (format: Format) => void;
+  platform: Platform;
+  onPlatformChange: (platform: Platform) => void;
 };
 
 function readAsDataUrl(file: Blob) {
@@ -42,10 +49,31 @@ export function StylePanel({
   onBrandChange,
   customLogo,
   onCustomLogoChange,
+  format,
+  onFormatChange,
+  platform,
+  onPlatformChange,
 }: StylePanelProps) {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-2">
+        <span className={labelClass}>Formato</span>
+        <FormatSelect value={format} onChange={onFormatChange} />
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <span className={labelClass}>Plataforma</span>
+        <PlatformPills
+          value={platform}
+          onChange={onPlatformChange}
+          disabled={format === "apresentacao"}
+        />
+        <p className="text-[11px] leading-relaxed text-zinc-500">
+          {getPlatformToneNote(platform)}
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-2 border-t border-zinc-200 pt-6">
         <span className={labelClass}>Marca</span>
         <BrandPills value={brandId} onChange={onBrandChange} />
         <p className="text-[11px] leading-relaxed text-zinc-500">

@@ -5,8 +5,11 @@ import { CornerDownLeft, Link2, Loader2, RefreshCw, RotateCw, Sparkles } from "l
 import { useEffect, useState, type KeyboardEvent } from "react";
 
 import { BrandPills } from "@/components/app/BrandPills";
+import { FormatSelect } from "@/components/app/FormatSelect";
+import { PlatformPills } from "@/components/app/PlatformPills";
 import { Button, IconButton } from "@/components/ui/Button";
 import type { BrandId } from "@/constants/brands";
+import { getPlatformToneNote, type Format, type Platform } from "@/constants/format";
 import { fieldClass, focusRing, kbdClass, labelClass } from "@/lib/ui";
 
 /**
@@ -163,6 +166,10 @@ type ComposerProps = {
   brandContext?: string;
   includeNews?: boolean;
   onIncludeNewsChange?: (value: boolean) => void;
+  format?: Format;
+  onFormatChange?: (format: Format) => void;
+  platform?: Platform;
+  onPlatformChange?: (platform: Platform) => void;
 };
 
 export function Composer({
@@ -176,6 +183,10 @@ export function Composer({
   brandContext,
   includeNews,
   onIncludeNewsChange,
+  format,
+  onFormatChange,
+  platform,
+  onPlatformChange,
 }: ComposerProps) {
   const canSubmit = value.trim().length >= MIN_LENGTH && !isGenerating;
   const elapsed = useElapsed(isGenerating);
@@ -316,9 +327,30 @@ export function Composer({
       )}
 
       {onBrandChange ? (
-        <div className="flex flex-col gap-2 border-t border-zinc-200 pt-6">
-          <span className={labelClass}>Marca (define o tema visual)</span>
-          <BrandPills value={brandId ?? null} onChange={onBrandChange} />
+        <div className="flex flex-col gap-6 border-t border-zinc-200 pt-6">
+          {onFormatChange && format ? (
+            <div className="flex flex-col gap-2">
+              <span className={labelClass}>Formato</span>
+              <FormatSelect value={format} onChange={onFormatChange} />
+            </div>
+          ) : null}
+          {onPlatformChange && platform ? (
+            <div className="flex flex-col gap-2">
+              <span className={labelClass}>Plataforma</span>
+              <PlatformPills
+                value={platform}
+                onChange={onPlatformChange}
+                disabled={format === "apresentacao"}
+              />
+              <p className="text-[11px] leading-relaxed text-zinc-500">
+                {getPlatformToneNote(platform)}
+              </p>
+            </div>
+          ) : null}
+          <div className="flex flex-col gap-2">
+            <span className={labelClass}>Marca (define o tema visual)</span>
+            <BrandPills value={brandId ?? null} onChange={onBrandChange} />
+          </div>
         </div>
       ) : null}
     </div>

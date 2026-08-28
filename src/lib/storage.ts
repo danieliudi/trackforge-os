@@ -1,10 +1,14 @@
 import type { BrandId } from "@/constants/brands";
 import { brands } from "@/constants/brands";
+import { formatOptions, platformOptions, type Format, type Platform } from "@/constants/format";
 import { slideThemes, type SlideThemeId } from "@/constants/themes";
-import { carouselSchema, type Carousel } from "@/types/carousel";
+import { apresentacaoSchema, carouselSchema, type Carousel } from "@/types/carousel";
 
 /** Versionado: mudar o formato invalida o payload antigo em vez de quebrar. */
 const KEY = "carousel-builder:drafts:v1";
+
+const VALID_FORMATS = new Set(formatOptions.map(({ id }) => id));
+const VALID_PLATFORMS = new Set(platformOptions.map(({ id }) => id));
 
 export type Draft = {
   id: string;
@@ -14,6 +18,8 @@ export type Draft = {
   themeId: SlideThemeId;
   brandId: BrandId | null;
   customLogo: string | null;
+  format: Format;
+  platform: Platform;
 };
 
 export type StoredState = {
@@ -25,15 +31,23 @@ function isValidDraft(value: unknown): value is Draft {
   if (typeof value !== "object" || value === null) return false;
   const data = value as Record<string, unknown>;
 
+  // Formato decide qual schema valida o carrossel — Apresentação aceita até
+  // 20 slides, e validar sempre pelo teto do carrossel (12) descartaria em
+  // silêncio qualquer rascunho de apresentação mais longo que isso.
+  if (typeof data.format !== "string" || !VALID_FORMATS.has(data.format as Format)) return false;
+  const carouselValidator = data.format === "apresentacao" ? apresentacaoSchema : carouselSchema;
+
   return (
     typeof data.id === "string" &&
     typeof data.title === "string" &&
     typeof data.updatedAt === "number" &&
-    carouselSchema.safeParse(data.carousel).success &&
+    carouselValidator.safeParse(data.carousel).success &&
     typeof data.themeId === "string" &&
     data.themeId in slideThemes &&
     (data.brandId === null || (typeof data.brandId === "string" && data.brandId in brands)) &&
-    (data.customLogo === null || typeof data.customLogo === "string")
+    (data.customLogo === null || typeof data.customLogo === "string") &&
+    typeof data.platform === "string" &&
+    VALID_PLATFORMS.has(data.platform as Platform)
   );
 }
 

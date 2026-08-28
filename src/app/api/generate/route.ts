@@ -3,7 +3,13 @@ import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
 import { brands } from "@/constants/brands";
-import { carouselBaseSchema, carouselSchema } from "@/types/carousel";
+import type { Platform } from "@/constants/format";
+import {
+  apresentacaoBaseSchema,
+  apresentacaoSchema,
+  carouselBaseSchema,
+  carouselSchema,
+} from "@/types/carousel";
 
 const requestSchema = z.object({
   input: z.string().min(3, "informe uma URL ou um tema"),
@@ -11,6 +17,9 @@ const requestSchema = z.object({
   context: z.string().optional(),
   includeNews: z.boolean().optional(),
   brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
+  format: z.enum(["carrossel", "apresentacao"]).optional().default("carrossel"),
+  /** Só importa para o carrossel — Apresentação é sempre 16:9, tom único. */
+  platform: z.enum(["linkedin", "facebook", "tiktok"]).optional().default("linkedin"),
 });
 
 const NEWS_SYSTEM = `Você pesquisa notícias recentes do setor de embalagem industrial,
@@ -36,7 +45,7 @@ async function fetchNewsBrief(topic: string) {
   return text;
 }
 
-const SYSTEM = `Você é redator de carrosséis B2B de alta conversão para LinkedIn.
+const CARROSSEL_SYSTEM_BASE = `Você é redator de carrosséis B2B de alta conversão para redes sociais.
 
 Regras obrigatórias de estrutura:
 - Entre 4 e 12 slides. Você decide a quantidade pela densidade do conteúdo:
@@ -58,6 +67,48 @@ Regras obrigatórias de texto (o layout quebra quem violar):
 - "footerNote" é a assinatura institucional, no máximo 45 caracteres, igual em todos os slides.
 
 Escreva em português do Brasil. Foque em dor concreta, número e próximo passo.`;
+
+/**
+ * Tom por plataforma, além da proporção do canvas (que já é tratada na
+ * renderização). Achado de pesquisa: LinkedIn e Facebook toleram o mesmo
+ * pipeline com ajuste de tom; TikTok precisa de uma regra própria, porque o
+ * mesmo carrossel do LinkedIn redimensionado lê errado lá.
+ */
+const PLATFORM_TONE: Record<Platform, string> = {
+  linkedin: `Plataforma: LinkedIn (post de documento/carrossel). Tom autoral e orientado a dado — a audiência já está em modo "aprender", pode sustentar mais densidade de informação por slide.`,
+  facebook: `Plataforma: Facebook (carrossel de feed). Frases mais curtas e diretas que no LinkedIn, tom mais coloquial, um único CTA claro por post. Evite jargão corporativo denso — a audiência aqui é mais ampla que no LinkedIn.`,
+  tiktok: `Plataforma: TikTok (carrossel de fotos). A capa PRECISA ser um gancho que para o scroll em menos de 1 segundo — pergunta direta, número chocante ou afirmação contra-intuitiva, nunca um título de relatório. Texto mínimo por slide, frases curtas tipo lista. Isto NÃO é o carrossel do LinkedIn redimensionado: se o texto ficaria bem num documento PDF, está denso demais para o TikTok.`,
+};
+
+function buildCarrosselSystem(platform: Platform) {
+  return `${CARROSSEL_SYSTEM_BASE}\n\n${PLATFORM_TONE[platform]}`;
+}
+
+const APRESENTACAO_SYSTEM = `Você é redator de apresentações executivas internas em português do Brasil —
+não é material de venda, é material de decisão para diretoria.
+
+Regras obrigatórias de estrutura:
+- Entre 4 e 20 slides, pela densidade do conteúdo pedido. Não estique com enchimento.
+- O primeiro slide é sempre type "cover"; o último é sempre type "cta" (funciona como
+  encerramento/próximos passos).
+- Use "bullets" para agenda, listas de pontos, riscos ou prioridades — preencha o array
+  "bullets" com 2 a 6 itens curtos (uma linha cada, até 70 caracteres); "headline" é o
+  título da lista (ex.: "Agenda", "Riscos", "Próximas 3 etapas").
+- Use "section" para dividir blocos temáticos da apresentação — é tela cheia, quase sem
+  texto, só a headline (e opcionalmente "highlightTag" como categoria).
+- Use "data_metric" para um número concreto e "quote" para uma citação ou mensagem de destaque.
+- Numere slideNumber de 1 até N na ordem do array.
+
+Regras obrigatórias de texto (o layout quebra quem violar):
+- "headline" é o título do slide. Direto, sem jargão forçado.
+- Em "data_metric" a headline é APENAS o número, nada mais.
+- Em "bullets", NÃO preencha "bodyText" — o conteúdo vai todo em "bullets".
+- Em "section", NÃO preencha "bodyText".
+- Nos demais tipos, "bodyText" é um subtítulo curto de apoio (opcional, até 30 caracteres).
+- "highlightTag" é opcional, 1-2 palavras.
+- "footerNote" é a assinatura institucional, igual em todos os slides.
+
+Escreva em português do Brasil. Tom claro e objetivo, para leitura rápida de liderança.`;
 
 const isUrl = (value: string) => /^https?:\/\//i.test(value.trim());
 
@@ -85,14 +136,15 @@ export async function POST(request: Request) {
     );
   }
 
-  const { input, context, includeNews, brandId } = parsed.data;
+  const { input, context, includeNews, brandId, format, platform } = parsed.data;
   const urlInput = isUrl(input);
+  const isApresentacao = format === "apresentacao";
 
   try {
     const briefParts = [
       urlInput
-        ? `Baseie o carrossel neste conteúdo extraído de ${input}:\n\n${await fetchUrlText(input)}`
-        : `Tema do carrossel: ${input}`,
+        ? `Baseie ${isApresentacao ? "a apresentação" : "o carrossel"} neste conteúdo extraído de ${input}:\n\n${await fetchUrlText(input)}`
+        : `Tema ${isApresentacao ? "da apresentação" : "do carrossel"}: ${input}`,
     ];
 
     if (context?.trim()) {
@@ -118,8 +170,8 @@ export async function POST(request: Request) {
 
     const { object } = await generateObject({
       model: anthropic("claude-sonnet-5"),
-      schema: carouselBaseSchema,
-      system: SYSTEM,
+      schema: isApresentacao ? apresentacaoBaseSchema : carouselBaseSchema,
+      system: isApresentacao ? APRESENTACAO_SYSTEM : buildCarrosselSystem(platform),
       prompt: brief,
       providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
     });
@@ -138,7 +190,9 @@ export async function POST(request: Request) {
       })),
     };
 
-    const validated = carouselSchema.safeParse(normalized);
+    const validated = (isApresentacao ? apresentacaoSchema : carouselSchema).safeParse(
+      normalized,
+    );
     if (!validated.success) {
       return Response.json(
         {

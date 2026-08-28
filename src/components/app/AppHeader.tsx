@@ -4,18 +4,20 @@ import { CloudOff, FileDown, FilePlus2, Images, Redo2, Share2, Undo2 } from "luc
 
 import { Button, IconButton } from "@/components/ui/Button";
 import { DraftsMenu } from "@/components/app/DraftsMenu";
+import type { Format } from "@/constants/format";
 import type { Draft } from "@/lib/storage";
 
 type AppHeaderProps = {
   title?: string;
   hasCarousel: boolean;
+  format: Format;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
   onReset: () => void;
-  exporting: "pdf" | "zip" | null;
-  onExport: (kind: "pdf" | "zip") => void;
+  exporting: "pdf" | "zip" | "pptx" | null;
+  onExport: (kind: "pdf" | "zip" | "pptx") => void;
   /** localStorage recusou o payload — o autosave silenciosamente não existe. */
   persistFailed: boolean;
   drafts: Draft[];
@@ -31,6 +33,7 @@ type AppHeaderProps = {
 export function AppHeader({
   title,
   hasCarousel,
+  format,
   canUndo,
   canRedo,
   onUndo,
@@ -120,22 +123,35 @@ export function AppHeader({
                 <span className="hidden sm:inline">Compartilhar</span>
               </Button>
             ) : null}
-            <Button
-              icon={FileDown}
-              loading={exporting === "pdf"}
-              disabled={isExporting}
-              onClick={() => onExport("pdf")}
-            >
-              <span className="hidden sm:inline">PDF</span>
-            </Button>
-            <Button
-              icon={Images}
-              loading={exporting === "zip"}
-              disabled={isExporting}
-              onClick={() => onExport("zip")}
-            >
-              <span className="hidden sm:inline">PNG</span>
-            </Button>
+            {format === "apresentacao" ? (
+              <Button
+                icon={FileDown}
+                loading={exporting === "pptx"}
+                disabled={isExporting}
+                onClick={() => onExport("pptx")}
+              >
+                <span className="hidden sm:inline">Exportar .pptx</span>
+              </Button>
+            ) : (
+              <>
+                <Button
+                  icon={FileDown}
+                  loading={exporting === "pdf"}
+                  disabled={isExporting}
+                  onClick={() => onExport("pdf")}
+                >
+                  <span className="hidden sm:inline">PDF</span>
+                </Button>
+                <Button
+                  icon={Images}
+                  loading={exporting === "zip"}
+                  disabled={isExporting}
+                  onClick={() => onExport("zip")}
+                >
+                  <span className="hidden sm:inline">PNG</span>
+                </Button>
+              </>
+            )}
           </>
         ) : null}
       </div>

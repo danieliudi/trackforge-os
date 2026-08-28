@@ -22,7 +22,12 @@ type SlideFrameProps = {
   logoAlt?: string;
   /** Capa destaca o logo no topo; internas levam no rodapé. */
   logoPlacement?: LogoPlacement;
-  /** Fator de escala do canvas 1080x1350. 1 = tamanho de export. */
+  /** Canvas virtual em px. Default é o 1080x1350 do carrossel LinkedIn. */
+  width?: number;
+  height?: number;
+  /** Margem institucional do canvas, em px do canvas virtual. */
+  padding?: number;
+  /** Fator de escala do canvas. 1 = tamanho de export. */
   scale?: number;
   children: ReactNode;
 };
@@ -59,6 +64,9 @@ export function SlideFrame({
   logoSrc,
   logoAlt = "",
   logoPlacement = "footer",
+  width = SLIDE_WIDTH,
+  height = SLIDE_HEIGHT,
+  padding = SLIDE_PADDING,
   scale = 1,
   children,
 }: SlideFrameProps) {
@@ -69,14 +77,14 @@ export function SlideFrame({
   return (
     <div
       className="shrink-0"
-      style={{ width: SLIDE_WIDTH * scale, height: SLIDE_HEIGHT * scale }}
+      style={{ width: width * scale, height: height * scale }}
     >
       <div
         data-slide-theme={theme.id}
         className="relative flex flex-col overflow-hidden"
         style={{
-          width: SLIDE_WIDTH,
-          height: SLIDE_HEIGHT,
+          width,
+          height,
           transform: `scale(${scale})`,
           transformOrigin: "top left",
           background: theme.background,
@@ -110,7 +118,7 @@ export function SlideFrame({
 
         <header
           className="relative flex shrink-0 items-start justify-between gap-[32px]"
-          style={{ padding: `${SLIDE_PADDING}px ${SLIDE_PADDING}px 0` }}
+          style={{ padding: `${padding}px ${padding}px 0` }}
         >
           <div className="flex min-w-0 flex-col items-start gap-[24px]">
             {headerLogo ? (
@@ -145,7 +153,7 @@ export function SlideFrame({
 
         <main
           className="relative flex min-h-0 flex-1 flex-col overflow-hidden"
-          style={{ padding: `64px ${SLIDE_PADDING}px` }}
+          style={{ padding: `64px ${padding}px` }}
         >
           {image?.layout === "split" ? (
             <div
@@ -191,7 +199,7 @@ export function SlideFrame({
         {footerNote || footerLogo ? (
           <footer
             className="relative shrink-0"
-            style={{ padding: `0 ${SLIDE_PADDING}px ${SLIDE_PADDING}px` }}
+            style={{ padding: `0 ${padding}px ${padding}px` }}
           >
             <div
               className={`flex items-center gap-[32px] pt-[24px] ${footerNote ? "justify-between" : "justify-end"}`}
