@@ -36,7 +36,7 @@ const pad = (value: number) => String(value).padStart(2, "0");
  */
 const LOGO_BOX = {
   header: "max-h-[125px] max-w-[340px]",
-  footer: "max-h-[72px] max-w-[200px]",
+  footer: "max-h-[102px] max-w-[284px]",
 } as const;
 
 /**
@@ -205,7 +205,7 @@ export function SlideFrame({
                     style={{ background: theme.accent }}
                   />
                   <p
-                    className="min-w-0 flex-1 truncate text-[24px] uppercase tracking-[0.16em]"
+                    className="min-w-0 flex-1 text-[24px] uppercase leading-snug tracking-[0.16em]"
                     style={{ color: theme.muted }}
                   >
                     {footerNote}
