@@ -1,9 +1,10 @@
 "use client";
 
 import clsx from "clsx";
-import { Loader2, SearchX, Upload, X } from "lucide-react";
+import { ExternalLink, Loader2, SearchX } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useId, useRef, useState } from "react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 
 import { fieldClass, focusRing } from "@/lib/ui";
 
@@ -162,61 +163,21 @@ function UnsplashTab({ onSelect }: { onSelect: (url: string) => void }) {
   );
 }
 
+/**
+ * Só escolhe e insere — upload e exclusão de arquivo real moram na página
+ * /biblioteca. Assim nunca existem dois lugares editando a mesma lista.
+ */
 function LibraryTab({ onSelect }: { onSelect: (url: string) => void }) {
   const [images, setImages] = useState<LibraryImage[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
-  const [uploading, setUploading] = useState(false);
-  const uploadId = useId();
-
-  function loadImages() {
-    return fetch("/api/assets/library")
-      .then((response) => response.json())
-      .then((data) => {
-        setImages(data.images);
-        setError(null);
-      })
-      .catch(() => setError("falha ao carregar a biblioteca"));
-  }
 
   useEffect(() => {
-    loadImages();
+    fetch("/api/assets/library")
+      .then((response) => response.json())
+      .then((data) => setImages(data.images))
+      .catch(() => setError("falha ao carregar a biblioteca"));
   }, []);
-
-  async function handleUpload(file: File | undefined) {
-    if (!file) return;
-
-    setUploading(true);
-    try {
-      const form = new FormData();
-      form.append("file", file);
-      const response = await fetch("/api/assets/library", { method: "POST", body: form });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error ?? "falha ao enviar a imagem");
-      await loadImages();
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : "falha ao enviar a imagem");
-    } finally {
-      setUploading(false);
-    }
-  }
-
-  async function handleDelete(image: LibraryImage) {
-    const previous = images;
-    setImages((current) => current?.filter((item) => item.path !== image.path) ?? current);
-
-    try {
-      const response = await fetch("/api/assets/library", {
-        method: "DELETE",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ name: image.name }),
-      });
-      if (!response.ok) throw new Error();
-    } catch {
-      setImages(previous);
-      setError("falha ao excluir a imagem");
-    }
-  }
 
   const filtered = images?.filter((image) =>
     image.name.toLowerCase().includes(filter.trim().toLowerCase()),
@@ -224,37 +185,13 @@ function LibraryTab({ onSelect }: { onSelect: (url: string) => void }) {
 
   return (
     <div className="flex flex-col gap-2">
-      <div className="flex gap-1.5">
-        <input
-          autoFocus
-          value={filter}
-          onChange={(event) => setFilter(event.target.value)}
-          placeholder="Filtrar por nome…"
-          className={fieldClass}
-        />
-        <label
-          htmlFor={uploadId}
-          title="Adicionar imagem à biblioteca"
-          className={clsx(
-            "flex shrink-0 cursor-pointer items-center rounded-md border border-zinc-200 bg-white px-2.5 text-zinc-600 transition hover:border-zinc-900",
-            uploading && "pointer-events-none opacity-50",
-            focusRing,
-          )}
-        >
-          {uploading ? <Loader2 size={14} className="animate-spin" /> : <Upload size={14} />}
-        </label>
-        <input
-          id={uploadId}
-          type="file"
-          accept="image/jpeg,image/png"
-          className="hidden"
-          disabled={uploading}
-          onChange={(event) => {
-            handleUpload(event.target.files?.[0]);
-            event.target.value = "";
-          }}
-        />
-      </div>
+      <input
+        autoFocus
+        value={filter}
+        onChange={(event) => setFilter(event.target.value)}
+        placeholder="Filtrar por nome…"
+        className={fieldClass}
+      />
 
       {error ? (
         <p className="py-2 text-center text-xs text-red-600">{error}</p>
@@ -285,28 +222,19 @@ function LibraryTab({ onSelect }: { onSelect: (url: string) => void }) {
                 sizes="100px"
                 className="object-cover transition group-hover:scale-105"
               />
-              <span
-                role="button"
-                tabIndex={0}
-                title={`Excluir "${image.name}"`}
-                onClick={(event) => {
-                  event.stopPropagation();
-                  handleDelete(image);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key !== "Enter" && event.key !== " ") return;
-                  event.preventDefault();
-                  event.stopPropagation();
-                  handleDelete(image);
-                }}
-                className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/65 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100"
-              >
-                <X size={10} />
-              </span>
             </button>
           ))}
         </div>
       )}
+
+      <Link
+        href="/biblioteca"
+        target="_blank"
+        className="flex items-center justify-center gap-1.5 rounded-md border border-dashed border-zinc-300 py-1.5 text-[11px] font-medium text-zinc-600 transition hover:border-zinc-900 hover:text-zinc-900"
+      >
+        Gerenciar biblioteca
+        <ExternalLink size={11} />
+      </Link>
     </div>
   );
 }
