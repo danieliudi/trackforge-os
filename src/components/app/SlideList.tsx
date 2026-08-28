@@ -6,7 +6,7 @@ import { useEffect, useRef } from "react";
 import { SlideFields } from "@/components/carousel/SlideFields";
 import { canMoveDown, canMoveUp, removeBlockedReason } from "@/lib/slides";
 import { focusRing, labelClass } from "@/lib/ui";
-import { MAX_SLIDES, type Slide } from "@/types/carousel";
+import type { Slide } from "@/types/carousel";
 
 type SlideListProps = {
   slides: Slide[];
@@ -19,6 +19,8 @@ type SlideListProps = {
   onAdd: () => void;
   onRegenerate: (index: number, instruction?: string) => void;
   regeneratingIndex: number | null;
+  /** Carrossel trava em 12; Apresentação (documento, não scroll) aceita mais. */
+  maxSlides: number;
 };
 
 export function SlideList({
@@ -32,9 +34,10 @@ export function SlideList({
   onAdd,
   onRegenerate,
   regeneratingIndex,
+  maxSlides,
 }: SlideListProps) {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const isFull = slides.length >= MAX_SLIDES;
+  const isFull = slides.length >= maxSlides;
 
   // Selecionar um slide pelo preview não trazia o card correspondente à vista.
   // `block: "nearest"` não mexe na rolagem quando o card já está visível, então
@@ -51,7 +54,7 @@ export function SlideList({
       <div className="flex items-baseline justify-between gap-2">
         <span className={labelClass}>Slides</span>
         <span className="text-[11px] tabular-nums text-zinc-500">
-          {slides.length} / {MAX_SLIDES}
+          {slides.length} / {maxSlides}
         </span>
       </div>
 
@@ -85,7 +88,7 @@ export function SlideList({
         className={`flex items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 py-3 text-xs font-medium text-zinc-600 transition hover:border-zinc-900 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-zinc-300 disabled:hover:text-zinc-600 ${focusRing}`}
       >
         <Plus size={14} />
-        {isFull ? `Máximo de ${MAX_SLIDES} slides` : "Adicionar slide"}
+        {isFull ? `Máximo de ${maxSlides} slides` : "Adicionar slide"}
       </button>
     </div>
   );

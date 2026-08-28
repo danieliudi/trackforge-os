@@ -1,22 +1,15 @@
 import { toPng } from "html-to-image";
 import { jsPDF } from "jspdf";
 import JSZip from "jszip";
-
-import { SLIDE_HEIGHT, SLIDE_WIDTH } from "@/constants/themes";
+import pptxgen from "pptxgenjs";
 
 /**
- * A caixa CSS capturada é 1080x1350; `pixelRatio: 2` faz o bitmap sair em
- * 2160x2700. O PDF continua com página de 1080x1350, então a imagem 2x entra
- * como densidade dobrada em vez de página maior.
+ * A caixa CSS capturada é o canvas virtual (varia por formato/plataforma);
+ * `pixelRatio: 2` faz o bitmap sair no dobro. O PDF/PPTX continuam com
+ * página do mesmo tamanho do canvas, então a imagem 2x entra como densidade
+ * dobrada em vez de página maior.
  */
 const PIXEL_RATIO = 2;
-
-const pngOptions = {
-  width: SLIDE_WIDTH,
-  height: SLIDE_HEIGHT,
-  pixelRatio: PIXEL_RATIO,
-  cacheBust: true,
-};
 
 /**
  * O html-to-image costuma perder webfonts na primeira renderização, porque as
@@ -41,7 +34,9 @@ async function waitForImages(node: HTMLElement) {
   );
 }
 
-async function renderAll(nodes: HTMLElement[]) {
+async function renderAll(nodes: HTMLElement[], width: number, height: number) {
+  const pngOptions = { width, height, pixelRatio: PIXEL_RATIO, cacheBust: true };
+
   await Promise.all(nodes.map(waitForImages));
   await toPng(nodes[0], { ...pngOptions, pixelRatio: 1 });
 
@@ -63,41 +58,45 @@ function downloadBlob(blob: Blob, name: string) {
   URL.revokeObjectURL(url);
 }
 
-async function buildPDF(nodes: HTMLElement[]) {
-  const images = await renderAll(nodes);
+/** PDF já tratava o canvas virtual como pt (1pt = 1px); o PPTX segue a mesma régua em polegadas. */
+const PT_PER_INCH = 72;
+
+async function buildPDF(nodes: HTMLElement[], width: number, height: number) {
+  const images = await renderAll(nodes, width, height);
+  const orientation = width >= height ? "landscape" : "portrait";
   const doc = new jsPDF({
-    orientation: "portrait",
+    orientation,
     unit: "pt",
-    format: [SLIDE_WIDTH, SLIDE_HEIGHT],
+    format: [width, height],
     compress: true,
   });
 
   images.forEach((image, index) => {
     if (index > 0) {
-      doc.addPage([SLIDE_WIDTH, SLIDE_HEIGHT], "portrait");
+      doc.addPage([width, height], orientation);
     }
-    doc.addImage(image, "PNG", 0, 0, SLIDE_WIDTH, SLIDE_HEIGHT);
+    doc.addImage(image, "PNG", 0, 0, width, height);
   });
 
   return doc;
 }
 
-/** PDF multi-página em 1080x1350, pronto para post de documento no LinkedIn. */
-export async function exportToPDF(nodes: HTMLElement[], name = "carrossel") {
-  const doc = await buildPDF(nodes);
+/** PDF multi-página no tamanho do canvas ativo, pronto para post de documento no LinkedIn. */
+export async function exportToPDF(nodes: HTMLElement[], width: number, height: number, name = "carrossel") {
+  const doc = await buildPDF(nodes, width, height);
   doc.save(`${name}.pdf`);
 }
 
 /** Mesmo PDF do export, como File — usado pelo botão de compartilhar. */
-export async function getPDFFile(nodes: HTMLElement[], name = "carrossel") {
-  const doc = await buildPDF(nodes);
+export async function getPDFFile(nodes: HTMLElement[], width: number, height: number, name = "carrossel") {
+  const doc = await buildPDF(nodes, width, height);
   const blob = doc.output("blob");
   return new File([blob], `${name}.pdf`, { type: "application/pdf" });
 }
 
 /** ZIP com um PNG numerado por slide (slide-01.png, slide-02.png, ...). */
-export async function exportToZip(nodes: HTMLElement[], name = "carrossel") {
-  const images = await renderAll(nodes);
+export async function exportToZip(nodes: HTMLElement[], width: number, height: number, name = "carrossel") {
+  const images = await renderAll(nodes, width, height);
   const zip = new JSZip();
 
   images.forEach((image, index) => {
@@ -105,4 +104,27 @@ export async function exportToZip(nodes: HTMLElement[], name = "carrossel") {
   });
 
   downloadBlob(await zip.generateAsync({ type: "blob" }), `${name}.zip`);
+}
+
+/**
+ * .pptx de verdade — cada slide é a mesma imagem renderizada hoje, em página
+ * de foto cheia. Não é fidelidade nativa de template (texto/formas editáveis
+ * do PowerPoint): é o MVP raster, que reaproveita o pipeline de export atual
+ * em vez de reimplementar o layout em XML nativo.
+ */
+export async function exportToPPTX(nodes: HTMLElement[], width: number, height: number, name = "apresentacao") {
+  const images = await renderAll(nodes, width, height);
+  const widthIn = width / PT_PER_INCH;
+  const heightIn = height / PT_PER_INCH;
+
+  const pres = new pptxgen();
+  pres.defineLayout({ name: "CANVAS", width: widthIn, height: heightIn });
+  pres.layout = "CANVAS";
+
+  for (const image of images) {
+    const slide = pres.addSlide();
+    slide.addImage({ data: image, x: 0, y: 0, w: widthIn, h: heightIn });
+  }
+
+  await pres.writeFile({ fileName: `${name}.pptx` });
 }

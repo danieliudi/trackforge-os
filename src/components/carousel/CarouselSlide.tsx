@@ -1,7 +1,8 @@
 "use client";
 
 import { shouldShowLogo, type Brand } from "@/constants/brands";
-import { resolveTheme, type SlideThemeId } from "@/constants/themes";
+import type { Format, Platform } from "@/constants/format";
+import { resolveCanvasSize, resolvePadding, resolveTheme, type SlideThemeId } from "@/constants/themes";
 import type { ImageLayout, Slide } from "@/types/carousel";
 
 import { SlideFrame } from "./SlideFrame";
@@ -31,7 +32,10 @@ type CarouselSlideProps = {
   totalSlides: number;
   themeId: SlideThemeId;
   logo?: LogoConfig | null;
-  /** Fator de escala do canvas 1080x1350. 1 = tamanho de export. */
+  /** Formato/plataforma determinam a proporção do canvas. Default: carrossel LinkedIn (4:5). */
+  format?: Format;
+  platform?: Platform;
+  /** Fator de escala do canvas virtual. 1 = tamanho de export. */
   scale?: number;
 };
 
@@ -40,12 +44,16 @@ export function CarouselSlide({
   totalSlides,
   themeId,
   logo,
+  format = "carrossel",
+  platform = "linkedin",
   scale = 1,
 }: CarouselSlideProps) {
   // Só o layout 'background' escurece o slide inteiro; split e card não.
   const hasBackgroundImage = slide.image?.layout === "background";
   const theme = resolveTheme(themeId, slide.type, hasBackgroundImage);
   const Layout = slideLayouts[slide.type];
+  const { width, height } = resolveCanvasSize(format, platform);
+  const padding = resolvePadding(width);
 
   const showLogo =
     logo != null && shouldShowLogo(logo.policy, slide.slideNumber, totalSlides);
@@ -70,7 +78,10 @@ export function CarouselSlide({
       image={slide.image}
       logoSrc={logoSrc}
       logoAlt={logo?.alt}
-      logoPlacement={slide.type === "cover" ? "header" : "footer"}
+      logoPlacement={slide.type === "cover" || slide.type === "section" ? "header" : "footer"}
+      width={width}
+      height={height}
+      padding={padding}
       scale={scale}
     >
       <Layout

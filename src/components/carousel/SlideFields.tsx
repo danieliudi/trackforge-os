@@ -5,6 +5,7 @@ import {
   ChevronDown,
   ChevronUp,
   CopyPlus,
+  Plus,
   Search,
   Sparkles,
   Trash2,
@@ -16,9 +17,18 @@ import { useId, useState, type Ref } from "react";
 import { Button, IconButton } from "@/components/ui/Button";
 import { ImageSearchPanel } from "@/components/carousel/ImageSearchPanel";
 import { fieldClass, focusRing, labelClass } from "@/lib/ui";
-import type { ImageLayout, Slide, SlideType } from "@/types/carousel";
+import {
+  MAX_BULLET_LENGTH,
+  MAX_BULLETS,
+  MIN_BULLETS,
+  type ImageLayout,
+  type Slide,
+  type SlideType,
+} from "@/types/carousel";
 
 const BODY_MAX = 30;
+/** Tipos que não usam bodyText — o layout deles não renderiza esse campo. */
+const NO_BODY_TYPES = new Set<SlideType>(["bullets", "section"]);
 
 /**
  * A partir daqui a headline para de encolher e o line-clamp do layout corta.
@@ -34,6 +44,8 @@ const HEADLINE_SOFT_LIMIT: Record<SlideType, number> = {
   quote: 104,
   data_metric: 28,
   cta: 68,
+  bullets: 100,
+  section: 70,
 };
 
 const IMAGE_LAYOUTS: { id: ImageLayout; label: string }[] = [
@@ -88,7 +100,8 @@ export function SlideFields({
   canMoveDown,
   cardRef,
 }: SlideFieldsProps) {
-  const bodyRemaining = BODY_MAX - slide.bodyText.length;
+  const bodyRemaining = BODY_MAX - (slide.bodyText?.length ?? 0);
+  const bullets = slide.bullets ?? [];
   const headlineLimit = HEADLINE_SOFT_LIMIT[slide.type];
   const headlineOver = slide.headline.length - headlineLimit;
   const uploadId = useId();
@@ -221,25 +234,74 @@ export function SlideFields({
         />
       </label>
 
-      <label className="flex flex-col gap-1">
-        <span className="flex items-baseline justify-between gap-2">
-          <span className={labelClass}>Body text</span>
-          <span
+      {NO_BODY_TYPES.has(slide.type) ? null : (
+        <label className="flex flex-col gap-1">
+          <span className="flex items-baseline justify-between gap-2">
+            <span className={labelClass}>Body text</span>
+            <span
+              className={clsx(
+                "text-[10px] tabular-nums",
+                bodyRemaining <= 5 ? "font-medium text-amber-600" : "text-zinc-400",
+              )}
+            >
+              {bodyRemaining}
+            </span>
+          </span>
+          <input
+            value={slide.bodyText ?? ""}
+            maxLength={BODY_MAX}
+            onChange={(event) => onChange({ bodyText: event.target.value })}
+            className={fieldClass}
+          />
+        </label>
+      )}
+
+      {slide.type === "bullets" ? (
+        <div className="flex flex-col gap-2">
+          <span className="flex items-baseline justify-between gap-2">
+            <span className={labelClass}>Itens</span>
+            <span className="text-[10px] tabular-nums text-zinc-400">
+              {bullets.length} / {MAX_BULLETS}
+            </span>
+          </span>
+          <div className="flex flex-col gap-1.5">
+            {bullets.map((item, bulletIndex) => (
+              <div key={bulletIndex} className="flex gap-1.5">
+                <input
+                  value={item}
+                  maxLength={MAX_BULLET_LENGTH}
+                  onChange={(event) => {
+                    const next = [...bullets];
+                    next[bulletIndex] = event.target.value;
+                    onChange({ bullets: next });
+                  }}
+                  className={fieldClass}
+                />
+                <IconButton
+                  icon={X}
+                  label="Remover item"
+                  variant="secondary"
+                  disabled={bullets.length <= MIN_BULLETS}
+                  onClick={() => onChange({ bullets: bullets.filter((_, i) => i !== bulletIndex) })}
+                  className="hover:border-red-500 hover:text-red-600"
+                />
+              </div>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={() => onChange({ bullets: [...bullets, "Novo ponto"] })}
+            disabled={bullets.length >= MAX_BULLETS}
             className={clsx(
-              "text-[10px] tabular-nums",
-              bodyRemaining <= 5 ? "font-medium text-amber-600" : "text-zinc-400",
+              "flex items-center justify-center gap-1.5 rounded-md border border-dashed border-zinc-300 py-2 text-xs font-medium text-zinc-600 transition hover:border-zinc-900 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-40",
+              focusRing,
             )}
           >
-            {bodyRemaining}
-          </span>
-        </span>
-        <input
-          value={slide.bodyText}
-          maxLength={BODY_MAX}
-          onChange={(event) => onChange({ bodyText: event.target.value })}
-          className={fieldClass}
-        />
-      </label>
+            <Plus size={13} />
+            Adicionar item
+          </button>
+        </div>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-2">
         <label className="flex flex-col gap-1">

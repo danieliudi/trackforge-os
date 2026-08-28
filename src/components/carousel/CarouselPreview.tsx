@@ -5,7 +5,8 @@ import { ChevronLeft, ChevronRight, LayoutGrid, Square } from "lucide-react";
 import { useState } from "react";
 
 import { IconButton } from "@/components/ui/Button";
-import { SLIDE_HEIGHT, SLIDE_WIDTH, type SlideThemeId } from "@/constants/themes";
+import type { Format, Platform } from "@/constants/format";
+import { resolveCanvasSize, type SlideThemeId } from "@/constants/themes";
 import { useElementSize } from "@/hooks/useElementSize";
 import { focusRing } from "@/lib/ui";
 import type { Slide } from "@/types/carousel";
@@ -22,40 +23,45 @@ type CarouselPreviewProps = {
   slides: Slide[];
   themeId: SlideThemeId;
   logo?: LogoConfig | null;
+  format: Format;
+  platform: Platform;
   activeIndex: number;
   onActiveIndexChange: (index: number) => void;
 };
 
 /**
- * Escala do canvas 1080x1350 para caber inteiro no espaço medido.
+ * Escala do canvas virtual (varia por formato/plataforma) para caber inteiro
+ * no espaço medido.
  *
  * As escalas eram cravadas em 0.42 (único) e 0.17 (grade): num monitor largo
  * sobrava área morta e abaixo de ~900px de altura o slide era cortado pelo
  * container. Agora quem manda é a medida real do elemento.
  */
-function fitScale(width: number, height: number) {
-  if (width === 0 || height === 0) return 0;
+function fitScale(stageWidth: number, stageHeight: number, slideWidth: number, slideHeight: number) {
+  if (stageWidth === 0 || stageHeight === 0) return 0;
   const scale = Math.min(
-    (width - SINGLE_INSET) / SLIDE_WIDTH,
-    (height - SINGLE_INSET) / SLIDE_HEIGHT,
+    (stageWidth - SINGLE_INSET) / slideWidth,
+    (stageHeight - SINGLE_INSET) / slideHeight,
   );
   return Math.max(0.05, Math.min(scale, 1));
 }
 
-function gridScale(width: number) {
-  if (width === 0) return 0;
+function gridScale(stageWidth: number, slideWidth: number) {
+  if (stageWidth === 0) return 0;
   const columns = Math.max(
     2,
-    Math.min(GRID_MAX_COLUMNS, Math.floor(width / GRID_MIN_CELL)),
+    Math.min(GRID_MAX_COLUMNS, Math.floor(stageWidth / GRID_MIN_CELL)),
   );
-  const cell = (width - GRID_GAP * (columns - 1)) / columns;
-  return Math.max(0.05, cell / SLIDE_WIDTH);
+  const cell = (stageWidth - GRID_GAP * (columns - 1)) / columns;
+  return Math.max(0.05, cell / slideWidth);
 }
 
 export function CarouselPreview({
   slides,
   themeId,
   logo,
+  format,
+  platform,
   activeIndex,
   onActiveIndexChange,
 }: CarouselPreviewProps) {
@@ -63,7 +69,10 @@ export function CarouselPreview({
   const [stageRef, stage] = useElementSize<HTMLDivElement>();
 
   const activeSlide = slides[activeIndex] ?? slides[0];
-  const scale = isGrid ? gridScale(stage.width) : fitScale(stage.width, stage.height);
+  const { width: slideWidth, height: slideHeight } = resolveCanvasSize(format, platform);
+  const scale = isGrid
+    ? gridScale(stage.width, slideWidth)
+    : fitScale(stage.width, stage.height, slideWidth, slideHeight);
   // Renderizar o canvas antes da primeira medida faria o slide piscar em 1:1.
   const measured = scale > 0;
 
@@ -140,6 +149,8 @@ export function CarouselPreview({
                   totalSlides={slides.length}
                   themeId={themeId}
                   logo={logo}
+                  format={format}
+                  platform={platform}
                   scale={scale}
                 />
               </button>
@@ -151,6 +162,8 @@ export function CarouselPreview({
             totalSlides={slides.length}
             themeId={themeId}
             logo={logo}
+            format={format}
+            platform={platform}
             scale={scale}
           />
         )}

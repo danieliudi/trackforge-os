@@ -1,11 +1,30 @@
 import type { CSSProperties } from "react";
 
-/** Proporção 4:5 — canvas virtual em px, escalado via CSS na exibição. */
+import type { Format, Platform } from "./format";
+
+/** Proporção 4:5 (LinkedIn) — canvas virtual em px, escalado via CSS na exibição. */
 export const SLIDE_WIDTH = 1080;
 export const SLIDE_HEIGHT = 1350;
 
 /** Margem institucional do canvas (px do canvas virtual). */
 export const SLIDE_PADDING = 88;
+
+/** Proporção de cada combinação formato×plataforma. Apresentação é sempre 16:9. */
+const CARROSSEL_SIZE: Record<Platform, { width: number; height: number }> = {
+  linkedin: { width: 1080, height: 1350 },
+  facebook: { width: 1080, height: 1080 },
+  tiktok: { width: 1080, height: 1920 },
+};
+const APRESENTACAO_SIZE = { width: 1920, height: 1080 };
+
+export function resolveCanvasSize(format: Format, platform: Platform) {
+  return format === "apresentacao" ? APRESENTACAO_SIZE : CARROSSEL_SIZE[platform];
+}
+
+/** Mesma proporção de margem do canvas original (88/1080), pra manter a densidade visual em qualquer formato. */
+export function resolvePadding(width: number) {
+  return Math.round(width * (SLIDE_PADDING / SLIDE_WIDTH));
+}
 
 export type SlideThemeId =
   | "dark-modern"
@@ -370,8 +389,9 @@ export function resolveTheme(
   hasImage: boolean,
 ): SlideTheme {
   const theme = slideThemes[themeId];
-  const needsDark =
-    hasImage || (slideType === "cover" && theme.coverUsesDarkSurface === true);
+  // "section" é o divisor de bloco da Apresentação — mesma regra de impacto que a capa.
+  const isDarkByType = slideType === "cover" || slideType === "section";
+  const needsDark = hasImage || (isDarkByType && theme.coverUsesDarkSurface === true);
 
   if (!needsDark) return theme;
   return { ...theme, ...theme.darkSurface };

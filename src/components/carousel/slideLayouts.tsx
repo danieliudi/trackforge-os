@@ -65,7 +65,7 @@ function CoverLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         className="mt-[36px] line-clamp-2 max-w-[820px] break-words leading-[1.45]"
         style={{ color: theme.muted, fontSize: Math.round(34 * density) }}
       >
-        {slide.bodyText}
+        {slide.bodyText ?? ""}
       </p>
     </div>
   );
@@ -99,7 +99,7 @@ function ContentLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         className="mt-[40px] line-clamp-3 max-w-[860px] break-words leading-[1.5]"
         style={{ color: theme.muted, fontSize: Math.round(34 * density) }}
       >
-        {slide.bodyText}
+        {slide.bodyText ?? ""}
       </p>
     </div>
   );
@@ -139,7 +139,7 @@ function QuoteLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         className="relative mt-[44px] line-clamp-2 break-words font-semibold uppercase leading-[1.4] tracking-[0.14em]"
         style={{ color: theme.accent, fontSize: Math.round(28 * density) }}
       >
-        &mdash; {slide.bodyText}
+        &mdash; {slide.bodyText ?? ""}
       </p>
     </div>
   );
@@ -175,7 +175,7 @@ function DataMetricLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         className="mt-[40px] line-clamp-3 max-w-[860px] break-words leading-[1.5]"
         style={{ color: theme.muted, fontSize: Math.round(34 * density) }}
       >
-        {slide.bodyText}
+        {slide.bodyText ?? ""}
       </p>
     </div>
   );
@@ -212,7 +212,7 @@ function CtaLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
             fontSize: Math.round(32 * density),
           }}
         >
-          {slide.bodyText}
+          {slide.bodyText ?? ""}
         </span>
 
         {slide.qrCodeUrl ? (
@@ -239,6 +239,90 @@ function CtaLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
   );
 }
 
+/**
+ * Lista de pontos — agenda, riscos, prioridades. Exclusivo de Apresentação,
+ * então calibrado para o canvas 16:9 (1920 de largura), não para os 1080 do
+ * carrossel: densidade de deck é mais baixa que a de um poster social.
+ */
+function BulletsLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
+  const scale: SizeScale = [
+    [30, 64],
+    [60, 54],
+    [100, 46],
+    [Number.POSITIVE_INFINITY, 40],
+  ];
+  const items = slide.bullets ?? [];
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden">
+      <h2
+        className="line-clamp-2 break-words"
+        style={{
+          ...display(theme, fitSize(slide.headline, scale), density),
+          lineHeight: 1.15,
+        }}
+      >
+        {slide.headline}
+      </h2>
+      <span
+        aria-hidden
+        className="mt-[32px] h-px w-[180px] shrink-0"
+        style={{ background: theme.border }}
+      />
+      <div className="mt-[32px] flex flex-col gap-[24px] overflow-hidden">
+        {items.map((item, index) => (
+          <div key={index} className="flex items-start gap-[20px]">
+            <span
+              aria-hidden
+              className="mt-[10px] h-[12px] w-[12px] shrink-0"
+              style={{ background: theme.accent }}
+            />
+            <p
+              className="break-words leading-[1.4]"
+              style={{ fontSize: Math.round(32 * density) }}
+            >
+              {item}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Divisor de bloco temático — tela cheia, quase sem texto. Exclusivo de
+ * Apresentação; mesma superfície escura de impacto que a capa (ver
+ * resolveTheme em constants/themes.ts).
+ */
+function SectionLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
+  const scale: SizeScale = [
+    [20, 88],
+    [40, 72],
+    [70, 58],
+    [Number.POSITIVE_INFINITY, 48],
+  ];
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden">
+      <span
+        aria-hidden
+        className="mb-[36px] h-[10px] w-[132px] shrink-0"
+        style={{ background: theme.accent }}
+      />
+      <h1
+        className="line-clamp-3 break-words"
+        style={{
+          ...display(theme, fitSize(slide.headline, scale), density),
+          lineHeight: 1.08,
+        }}
+      >
+        {slide.headline}
+      </h1>
+    </div>
+  );
+}
+
 export const slideLayouts: Record<
   SlideType,
   (props: SlideLayoutProps) => React.JSX.Element
@@ -248,4 +332,6 @@ export const slideLayouts: Record<
   quote: QuoteLayout,
   data_metric: DataMetricLayout,
   cta: CtaLayout,
+  bullets: BulletsLayout,
+  section: SectionLayout,
 };
