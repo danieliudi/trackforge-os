@@ -35,7 +35,7 @@ const pad = (value: number) => String(value).padStart(2, "0");
  * (Sanwey 140px, Resibag 120px). object-contain preserva o aspecto.
  */
 const LOGO_BOX = {
-  header: "max-h-[88px] max-w-[240px]",
+  header: "max-h-[125px] max-w-[340px]",
   footer: "max-h-[72px] max-w-[200px]",
 } as const;
 
