@@ -35,37 +35,13 @@ Registro 2 — só ISO 9001:2015, SEM INMETRO/ANTT/ANP:
 
 Filtrante e Resíduo Verde nunca podem ser oferecidos para resíduo perigoso Classe I transportado externamente.
 
-## Certificações (com código — use o código, não uma paráfrase)
-| Certificação | Código | Escopo | Linhas |
-|---|---|---|---|
-| INMETRO | IBC-0136/22 SAN T025 | Embalagem para resíduo perigoso | Standard, Estruturado |
-| INMETRO | IBC-0143/25 SAN T015 | Embalagem para resíduo perigoso | Standard, Estruturado |
-| OCP acreditador | ABRACE OCP-0041 | Organismo de certificação | — |
-| ANTT 5998/2022 | — | Transporte rodoviário de perigosos | Standard, Estruturado |
-| ANP | — | Oil & Gas offshore | Standard, Estruturado |
-| ISO 9001:2015 | SGS BR08/4255.00 | Gestão da qualidade | Todas |
+## Certificações
+Os códigos, escopos e datas estão no bloco FATOS NORMATIVOS, cada um com sua fonte.
+Aqui fica só a regra de atribuição, que é política de compliance da marca:
+INMETRO, ANTT 5998 e ANP valem **exclusivamente** para Standard e Estruturado.
+Filtrante e Resíduo Verde têm apenas ISO 9001:2015.
 
 São **duas** homologações para resíduo perigoso: INMETRO + ANTT 5998. Chame de "dupla homologação".
-
-## Normas — o que cada uma realmente é
-- **NBR 10.004:2024 (ABNT)** — norma de *classificação* de resíduo sólido quanto à periculosidade. Não é obrigação sobre transportador. Classe I = perigoso (solvente, óleo contaminado, tinta, bateria, medicamento vencido) e exige big bag homologado INMETRO. Classe II A = não inerte. Classe II B = inerte. A revisão de 2024 mexeu em limites de metais pesados, ensaios de lixiviação e solubilização (anexos F e G) e critérios de amostragem.
-- **ANTT 5998/2022** — vigente desde junho/2023, revogou a ANTT 420/2004. Exige embalagem certificada INMETRO, Ficha de Emergência + Envelope para Transporte, MOPP do motorista e declaração de responsabilidade do expedidor (o gerador).
-- **Portaria INMETRO 320/2021** — requisitos de conformidade da embalagem. Ensaios de queda livre, empilhamento, estanqueidade e pressão interna; certificação por OCP acreditado; marcação ONU obrigatória (símbolo + código + massa bruta máxima); auditoria anual e recertificação a cada 3 anos. Marcação no formato \`1H2/Y/[ano]/BR/[fabricante]/[OCP]\` — 1H2 é big bag flexível, Y cobre grupos de embalagem II e III.
-- **IBAMA RAPP** — relatório anual obrigatório para gerador de resíduo perigoso; prazo maio/2026 para o ano-base 2025.
-- **Decreto 12.688/2025** — detalha a PNRS em responsabilidade compartilhada, amplia logística reversa obrigatória, cria critérios de certificação de destinadoras.
-- **IN IBAMA 06/2026** — novos critérios de declaração no RAPP, integração com MTR-e, rastreabilidade documental da embalagem.
-- **IFRS S1 / S2 (ISSB)** — relato de sustentabilidade; no Brasil via CVM Res. 193/2023, voluntária desde 2024. Resíduo perigoso entra como Escopo 3; embalagem certificada e rastreável vira evidência auditável.
-
-## Multas documentadas (só estes valores — nenhum outro)
-| Infração | Base legal | Valor |
-|---|---|---|
-| Destinação irregular de resíduo perigoso | Lei 9.605/98, art. 54 | R$ 5.000 a R$ 50.000.000 |
-| Transporte sem embalagem certificada | ANTT 5998/2022 | R$ 5.000 a R$ 10.000 por ocorrência |
-| Ausência de documentação no transporte | ANTT 5998/2022 | R$ 2.500 a R$ 5.000 |
-| Não entrega do RAPP | IBAMA | R$ 5.000 a R$ 10.000.000 |
-| Crime ambiental com dolo | Lei 9.605/98 | Detenção 1 a 5 anos + multa |
-
-Reincidência ANTT: dobro do valor + apreensão da carga. Enquadre sempre como proteção de patrimônio, nunca como ameaça.
 
 ## Argumentos fixos (verbatim)
 - "1 Resibag substitui 5 tambores" — cinco, nunca outro número.

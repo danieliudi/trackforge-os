@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "eslint",
     "knowledge:check": "node scripts/check-knowledge.mjs",
-    "knowledge:sync": "node scripts/check-knowledge.mjs --sync"
+    "knowledge:sync": "node scripts/check-knowledge.mjs --sync",
+    "knowledge:audit": "node scripts/audit-knowledge.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.42",

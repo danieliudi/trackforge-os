@@ -1,5 +1,6 @@
 import type { BrandId } from "@/constants/brands";
 
+import { buildNormativeBlock } from "./provenance";
 import { resibagKnowledge } from "./resibag";
 import { sanweyKnowledge } from "./sanwey";
 import type { BrandKnowledge } from "./types";
@@ -104,7 +105,16 @@ const SOURCING_RULES = `Regras de procedência (acima de qualquer regra de estil
  * pedir.
  */
 export function buildGroundedSystem(base: string, brandId: BrandId | null | undefined) {
-  return [base, SOURCING_RULES, todayLine(), buildKnowledgeBlock(brandId)]
+  return [
+    base,
+    SOURCING_RULES,
+    todayLine(),
+    buildKnowledgeBlock(brandId),
+    // Depois da base de marca de propósito: a regra de procedência é a última
+    // coisa que o modelo lê antes de escrever, e é a que decide se um número
+    // pode aparecer.
+    buildNormativeBlock(brandId),
+  ]
     .filter(Boolean)
     .join("\n\n");
 }

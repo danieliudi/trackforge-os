@@ -25,16 +25,8 @@ export const sanweyKnowledge: BrandKnowledge = {
 Uma peça carrega uma tagline só — nunca empilhar a oficial com a sub-tagline. A tagline é afirmação, não dado: em peça com espaço, acompanhe de uma linha de prova (certificação, marco datado, especificação).
 
 ## Certificações
-| Certificação | Referência | Escopo | Desde |
-|---|---|---|---|
-| ISO 9001:2015 | DNV | Gestão da qualidade, todas as linhas | 1999 |
-| INMETRO | Res. ANTT 420 | Contentor flexível para carga perigosa | 2008 |
-| ANP | — | Oil & Gas, petroquímica condutiva | — |
-| ABNT NBR 16029 | — | FIBC para carga não perigosa | — |
-| Ministério da Marinha | — | Transporte marítimo de carga perigosa | 1996 |
-| British Standard + JIS z 1961 | — | Padrões do protótipo original | 1983 |
-
-Certificação aqui é barreira de entrada, não compliance passivo. INMETRO em 2008 veio antes de qualquer concorrente do setor.
+Escopo, código e data estão no bloco FATOS NORMATIVOS, cada um com sua fonte.
+Certificação aqui é barreira de entrada, não compliance passivo.
 
 ## Marcos documentados (use com o ano)
 - 1983 — registro da Sanwey, primeiro protótipo Sanbag, capacidade de 500 bags/mês.
