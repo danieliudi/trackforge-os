@@ -7,16 +7,29 @@ import { useCallback, useEffect, useRef, useState, type ReactNode } from "react"
 import { AppHeader } from "@/components/app/AppHeader";
 import { Composer } from "@/components/app/Composer";
 import { ContextPanel } from "@/components/app/ContextPanel";
+import { CostReceipt } from "@/components/app/CostReceipt";
 import { SlideList } from "@/components/app/SlideList";
 import { StylePanel } from "@/components/app/StylePanel";
 import { CarouselPreview } from "@/components/carousel/CarouselPreview";
 import { CarouselSlide, type LogoConfig } from "@/components/carousel/CarouselSlide";
 import { IconButton } from "@/components/ui/Button";
 import { brands, type BrandId } from "@/constants/brands";
-import type { Format } from "@/constants/format";
+import {
+  formatOptions,
+  platformOptions,
+  type Format,
+  type Platform,
+} from "@/constants/format";
+import type { GenerationCost } from "@/constants/pricing";
 import { resolveCanvasSize } from "@/constants/themes";
 import { useHistory } from "@/hooks/useHistory";
 import { useSettings } from "@/hooks/useSettings";
+import {
+  appendCostEntry,
+  entryFromCost,
+  loadCostLog,
+  type CostEntry,
+} from "@/lib/costLog";
 import { exportToPDF, exportToPPTX, exportToZip, getPDFFile } from "@/lib/export";
 import { moveSlide, removeBlockedReason, renumber } from "@/lib/slides";
 import {
@@ -32,6 +45,18 @@ import { MAX_SLIDES, MAX_SLIDES_APRESENTACAO, type Carousel, type Slide } from "
 
 const maxSlidesFor = (format: Format) =>
   format === "apresentacao" ? MAX_SLIDES_APRESENTACAO : MAX_SLIDES;
+
+/** Linha de contexto do recibo: "Carrossel LinkedIn · 8 slides". */
+function costSummary(format: Format, platform: Platform, slideCount: number) {
+  const formatLabel = formatOptions.find(({ id }) => id === format)?.label ?? format;
+  // Apresentação é sempre 16:9 e não tem plataforma — citar uma seria ruído.
+  const platformLabel =
+    format === "apresentacao"
+      ? ""
+      : ` ${platformOptions.find(({ id }) => id === platform)?.label ?? platform}`;
+
+  return `${formatLabel}${platformLabel} · ${slideCount} slides`;
+}
 
 /** Campos de texto agrupam num passo só de desfazer enquanto se digita. */
 const TEXT_FIELDS = new Set([
@@ -143,6 +168,27 @@ export default function Home() {
   const [activeDraftId, setActiveDraftId] = useState<string | null>(() => loadState().activeId);
   const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
   const [brandContext, setBrandContext] = useState<BrandContext>(() => loadBrandContext());
+
+  // Lido depois de montar, e não no inicializador do useState: o chip some
+  // quando o log está vazio, então ler direto faria o servidor renderizar sem
+  // ele e o cliente com ele — mismatch de hidratação que derruba a árvore.
+  const [costEntries, setCostEntries] = useState<CostEntry[]>([]);
+  useEffect(() => setCostEntries(loadCostLog()), []);
+  // Recibo da última geração de documento. Regerar um slide não substitui: o
+  // recibo responde "quanto custou este post", e o slide avulso entra na soma
+  // do rascunho, não numa tela nova a cada clique.
+  const [lastCost, setLastCost] = useState<GenerationCost | null>(null);
+
+  /** Registra a cobrança e devolve o custo, pra quem chama somar no rascunho. */
+  const logCost = useCallback(
+    (cost: GenerationCost, kind: CostEntry["kind"], title: string, failed = false) => {
+      setCostEntries((current) =>
+        appendCostEntry(current, entryFromCost(cost, kind, title, failed)),
+      );
+      return cost.usd;
+    },
+    [],
+  );
 
   // Guarda a marca junto: assim um resultado de marca anterior nunca é usado,
   // sem precisar limpar o estado dentro do efeito.
@@ -258,14 +304,22 @@ export default function Home() {
         }),
       });
       const data = await response.json();
+      const kind = format === "apresentacao" ? "apresentacao" : "carrossel";
 
       if (!response.ok) {
+        // Resposta fora das regras ainda queimou tokens. Registrar antes de
+        // lançar evita que a geração mais frustrante seja também a invisível
+        // no extrato.
+        if (data.cost) logCost(data.cost as GenerationCost, kind, input.slice(0, 60), true);
         throw new Error(
           data.issues?.join(" - ") ?? data.error ?? "falha ao gerar o carrossel",
         );
       }
 
-      const newCarousel = data as Carousel;
+      const newCarousel = data.carousel as Carousel;
+      const cost = data.cost as GenerationCost;
+      setLastCost(cost);
+      const costUsd = logCost(cost, kind, newCarousel.title);
 
       // Documento novo zera o histórico: desfazer para dentro do carrossel
       // anterior misturaria dois briefs diferentes.
@@ -286,6 +340,7 @@ export default function Home() {
           customLogo,
           format,
           platform,
+          costUsd,
         },
       ]);
       setActiveDraftId(id);
@@ -303,6 +358,7 @@ export default function Home() {
     setActiveIndex(0);
     setError(null);
     setActiveDraftId(null);
+    setLastCost(null);
   }
 
   function selectDraft(id: string) {
@@ -315,6 +371,9 @@ export default function Home() {
     setActiveIndex(0);
     setError(null);
     setMobileView("preview");
+    // O recibo é da geração, não do documento: abrir um rascunho antigo não
+    // cobrou nada agora, e manter o recibo anterior sugeriria que sim.
+    setLastCost(null);
   }
 
   function deleteDraft(id: string) {
@@ -355,12 +414,28 @@ export default function Home() {
       const data = await response.json();
 
       if (!response.ok) {
+        if (data.cost) {
+          logCost(data.cost as GenerationCost, "slide", `Slide ${index + 1}`, true);
+        }
         throw new Error(
           data.issues?.join(" - ") ?? data.error ?? "falha ao regenerar o slide",
         );
       }
 
-      updateSlide(index, data as Slide);
+      const cost = data.cost as GenerationCost;
+      logCost(cost, "slide", `Slide ${index + 1} · ${carousel.title}`);
+
+      // Soma no rascunho: o custo de um post inclui o retrabalho depois da
+      // primeira geração, senão o número do rascunho só desce com o tempo.
+      setDrafts((current) =>
+        current.map((draft) =>
+          draft.id === activeDraftId
+            ? { ...draft, costUsd: (draft.costUsd ?? 0) + cost.usd }
+            : draft,
+        ),
+      );
+
+      updateSlide(index, data.slide as Slide);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "falha ao regenerar o slide");
     } finally {
@@ -535,6 +610,7 @@ export default function Home() {
         canShare={canShare}
         sharing={sharing}
         onShare={shareCarousel}
+        costEntries={costEntries}
       />
 
       {/* O erro ficava colado embaixo do input da sidebar, então falha de
@@ -573,6 +649,7 @@ export default function Home() {
             onFormatChange={(next) => dispatchSettings({ type: "format", format: next })}
             platform={platform}
             onPlatformChange={(next) => dispatchSettings({ type: "platform", platform: next })}
+            onSuggestionsCost={(cost) => logCost(cost, "sugestoes", "Sugestões de tema")}
           />
         </div>
       ) : (
@@ -619,7 +696,7 @@ export default function Home() {
               {tab === "content" ? (
                 <>
                   {/* Fixo acima da rolagem: com 12 slides o brief sumia da vista. */}
-                  <div className="shrink-0 border-b border-zinc-200 p-3">
+                  <div className="flex shrink-0 flex-col gap-3 border-b border-zinc-200 p-3">
                     <Composer
                       variant="compact"
                       value={input}
@@ -629,6 +706,12 @@ export default function Home() {
                       includeNews={includeNews}
                       onIncludeNewsChange={setIncludeNews}
                     />
+                    {lastCost ? (
+                      <CostReceipt
+                        cost={lastCost}
+                        summary={costSummary(format, platform, slides.length)}
+                      />
+                    ) : null}
                   </div>
                   <div className="min-h-0 flex-1 overflow-y-auto p-3">
                     <SlideList

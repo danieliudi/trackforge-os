@@ -10,6 +10,7 @@ import { PlatformPills } from "@/components/app/PlatformPills";
 import { Button, IconButton } from "@/components/ui/Button";
 import type { BrandId } from "@/constants/brands";
 import { getPlatformToneNote, type Format, type Platform } from "@/constants/format";
+import type { GenerationCost } from "@/constants/pricing";
 import { fieldClass, focusRing, kbdClass, labelClass } from "@/lib/ui";
 
 /**
@@ -64,9 +65,11 @@ function useElapsed(isRunning: boolean) {
 function SuggestionsSection({
   context,
   onPick,
+  onCost,
 }: {
   context: string;
   onPick: (text: string) => void;
+  onCost?: (cost: GenerationCost) => void;
 }) {
   const [topics, setTopics] = useState<string[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -83,6 +86,7 @@ function SuggestionsSection({
       });
       const data = await response.json();
       if (!response.ok) throw new Error();
+      if (data.cost) onCost?.(data.cost as GenerationCost);
       setTopics(data.topics);
     } catch {
       setError(true);
@@ -170,6 +174,8 @@ type ComposerProps = {
   onFormatChange?: (format: Format) => void;
   platform?: Platform;
   onPlatformChange?: (platform: Platform) => void;
+  /** Sugestão de tema também é chamada paga — entra no extrato como as outras. */
+  onSuggestionsCost?: (cost: GenerationCost) => void;
 };
 
 export function Composer({
@@ -187,6 +193,7 @@ export function Composer({
   onFormatChange,
   platform,
   onPlatformChange,
+  onSuggestionsCost,
 }: ComposerProps) {
   const canSubmit = value.trim().length >= MIN_LENGTH && !isGenerating;
   const elapsed = useElapsed(isGenerating);
@@ -306,7 +313,11 @@ export function Composer({
       ) : null}
 
       {brandContext?.trim() ? (
-        <SuggestionsSection context={brandContext} onPick={onChange} />
+        <SuggestionsSection
+          context={brandContext}
+          onPick={onChange}
+          onCost={onSuggestionsCost}
+        />
       ) : (
         <div className="flex flex-col gap-2">
           <span className={labelClass}>Comece por um exemplo</span>

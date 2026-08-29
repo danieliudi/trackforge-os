@@ -5,6 +5,14 @@ import { z } from "zod";
 import { brands } from "@/constants/brands";
 import type { Platform } from "@/constants/format";
 import {
+  EMPTY_USAGE,
+  priceUsage,
+  WEB_SEARCH_PRICE,
+  type CostStep,
+  type GenerationCost,
+} from "@/constants/pricing";
+import { countWebSearchesAcrossSteps, toTokenUsage } from "@/lib/usage";
+import {
   apresentacaoBaseSchema,
   apresentacaoSchema,
   carouselBaseSchema,
@@ -36,13 +44,33 @@ em vez de inventar. Português do Brasil.`;
 
 /** Busca ao vivo — sem feed pra manter, sem banco de dados. */
 async function fetchNewsBrief(topic: string) {
-  const { text } = await generateText({
+  const { text, totalUsage, steps } = await generateText({
     model: anthropic("claude-sonnet-5"),
     system: NEWS_SYSTEM,
     prompt: `Tema: ${topic}`,
     tools: { web_search: anthropic.tools.webSearch_20260209({ maxUses: 3 }) },
   });
-  return text;
+
+  // `totalUsage` e não `usage`: com ferramenta a Anthropic devolve uma etapa por
+  // rodada de busca, e `usage` descreve só a última delas.
+  const usage = toTokenUsage(totalUsage);
+  const searches = countWebSearchesAcrossSteps(steps);
+
+  // A busca vira linha própria no recibo. Diluída no total ela some, e é
+  // justamente o item mais caro: US$ 0,01 por busca contra centavos de token.
+  const costSteps: CostStep[] = [
+    { label: "Leitura das notícias", usage, webSearches: 0, usd: priceUsage(usage) },
+  ];
+  if (searches > 0) {
+    costSteps.push({
+      label: `${searches} ${searches === 1 ? "busca" : "buscas"} na web`,
+      usage: EMPTY_USAGE,
+      webSearches: searches,
+      usd: searches * WEB_SEARCH_PRICE,
+    });
+  }
+
+  return { text, costSteps };
 }
 
 const CARROSSEL_SYSTEM_BASE = `Você é redator de carrosséis B2B de alta conversão para redes sociais.
@@ -141,6 +169,7 @@ export async function POST(request: Request) {
   const isApresentacao = format === "apresentacao";
 
   try {
+    const costSteps: CostStep[] = [];
     const briefParts = [
       urlInput
         ? `Baseie ${isApresentacao ? "a apresentação" : "o carrossel"} neste conteúdo extraído de ${input}:\n\n${await fetchUrlText(input)}`
@@ -158,8 +187,10 @@ export async function POST(request: Request) {
     // Anthropic), o carrossel segue sem ela em vez de derrubar a geração inteira.
     if (includeNews && !urlInput) {
       try {
+        const news = await fetchNewsBrief(input);
+        costSteps.push(...news.costSteps);
         briefParts.push(
-          `Notícias recentes do setor (use se forem relevantes ao tema, ignore se não forem):\n${await fetchNewsBrief(input)}`,
+          `Notícias recentes do setor (use se forem relevantes ao tema, ignore se não forem):\n${news.text}`,
         );
       } catch {
         // segue sem notícias
@@ -168,13 +199,26 @@ export async function POST(request: Request) {
 
     const brief = briefParts.join("\n\n");
 
-    const { object } = await generateObject({
+    const { object, usage } = await generateObject({
       model: anthropic("claude-sonnet-5"),
       schema: isApresentacao ? apresentacaoBaseSchema : carouselBaseSchema,
       system: isApresentacao ? APRESENTACAO_SYSTEM : buildCarrosselSystem(platform),
       prompt: brief,
       providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
     });
+
+    const writeUsage = toTokenUsage(usage);
+    costSteps.push({
+      label: isApresentacao ? "Redação da apresentação" : "Redação do carrossel",
+      usage: writeUsage,
+      webSearches: 0,
+      usd: priceUsage(writeUsage),
+    });
+
+    const cost: GenerationCost = {
+      usd: costSteps.reduce((total, step) => total + step.usd, 0),
+      steps: costSteps,
+    };
 
     // footerNote é fato de marca, não criatividade — a IA nunca sabe o texto
     // real, então o servidor sobrescreve pelo canônico em vez de confiar nela.
@@ -194,16 +238,20 @@ export async function POST(request: Request) {
       normalized,
     );
     if (!validated.success) {
+      // O custo vai junto no erro: os tokens foram cobrados mesmo com a
+      // resposta inválida, e uma geração que falhou é exatamente a que o
+      // usuário não deveria pagar sem saber.
       return Response.json(
         {
           error: "a IA devolveu um carrossel fora das regras",
           issues: validated.error.issues.map((issue) => issue.message),
+          cost,
         },
         { status: 422 },
       );
     }
 
-    return Response.json(validated.data);
+    return Response.json({ carousel: validated.data, cost });
   } catch (error) {
     const message = error instanceof Error ? error.message : "erro desconhecido";
     return Response.json({ error: message }, { status: 500 });

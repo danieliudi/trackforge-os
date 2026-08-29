@@ -5,6 +5,7 @@ import { History, Trash2 } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import { IconButton } from "@/components/ui/Button";
+import { formatCost } from "@/lib/costLog";
 import type { Draft } from "@/lib/storage";
 import { focusRing, panelClass } from "@/lib/ui";
 
@@ -93,8 +94,19 @@ export function DraftsMenu({ drafts, activeId, onSelect, onDelete }: DraftsMenuP
                     <span className="w-full truncate text-xs font-medium text-zinc-900">
                       {draft.title}
                     </span>
-                    <span className="text-[10.5px] text-zinc-400">
-                      {isActive ? "editando agora" : relativeTime(draft.updatedAt)}
+                    <span className="flex w-full items-baseline gap-1.5 text-[10.5px] text-zinc-400">
+                      <span>{isActive ? "editando agora" : relativeTime(draft.updatedAt)}</span>
+                      {draft.costUsd !== undefined ? (
+                        <>
+                          <span aria-hidden>·</span>
+                          <span
+                            className="font-mono tabular-nums text-emerald-700"
+                            title="Custo de API deste rascunho, incluindo regerações de slide"
+                          >
+                            {formatCost(draft.costUsd).primary}
+                          </span>
+                        </>
+                      ) : null}
                     </span>
                   </button>
                   <IconButton

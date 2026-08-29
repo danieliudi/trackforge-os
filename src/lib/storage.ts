@@ -20,6 +20,12 @@ export type Draft = {
   customLogo: string | null;
   format: Format;
   platform: Platform;
+  /**
+   * Dólares gastos neste rascunho, somando a geração e as regerações de slide
+   * feitas depois. Opcional porque rascunhos salvos antes do medidor não têm o
+   * dado — e descartá-los por isso apagaria trabalho do usuário.
+   */
+  costUsd?: number;
 };
 
 export type StoredState = {
@@ -47,7 +53,8 @@ function isValidDraft(value: unknown): value is Draft {
     (data.brandId === null || (typeof data.brandId === "string" && data.brandId in brands)) &&
     (data.customLogo === null || typeof data.customLogo === "string") &&
     typeof data.platform === "string" &&
-    VALID_PLATFORMS.has(data.platform as Platform)
+    VALID_PLATFORMS.has(data.platform as Platform) &&
+    (data.costUsd === undefined || typeof data.costUsd === "number")
   );
 }
 

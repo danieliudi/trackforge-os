@@ -2,6 +2,9 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
+import { priceUsage, type GenerationCost } from "@/constants/pricing";
+import { toTokenUsage } from "@/lib/usage";
+
 const requestSchema = z.object({
   context: z.string().min(1, "informe o contexto da marca"),
 });
@@ -24,7 +27,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { object } = await generateObject({
+    const { object, usage } = await generateObject({
       model: anthropic("claude-sonnet-5"),
       schema: suggestionsSchema,
       system: SYSTEM,
@@ -32,7 +35,20 @@ export async function POST(request: Request) {
       providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
     });
 
-    return Response.json(object);
+    const suggestionsUsage = toTokenUsage(usage);
+    const cost: GenerationCost = {
+      usd: priceUsage(suggestionsUsage),
+      steps: [
+        {
+          label: "Sugestões de tema",
+          usage: suggestionsUsage,
+          webSearches: 0,
+          usd: priceUsage(suggestionsUsage),
+        },
+      ],
+    };
+
+    return Response.json({ ...object, cost });
   } catch (error) {
     const message = error instanceof Error ? error.message : "erro desconhecido";
     return Response.json({ error: message }, { status: 500 });

@@ -2,6 +2,8 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
+import { priceUsage, type GenerationCost } from "@/constants/pricing";
+import { toTokenUsage } from "@/lib/usage";
 import {
   carouselSchema,
   MAX_BODY_LENGTH,
@@ -69,13 +71,26 @@ export async function POST(request: Request) {
   const brief = `Documento completo (contexto, não reescreva os outros slides):\n${JSON.stringify(context, null, 2)}\n\nReescreva o slide ${slideIndex + 1}, tipo "${target.type}". Headline atual: "${target.headline}".${instruction ? `\n\nInstrução do usuário: ${instruction}` : ""}`;
 
   try {
-    const { object } = await generateObject({
+    const { object, usage } = await generateObject({
       model: anthropic("claude-sonnet-5"),
       schema: slideContentSchema,
       system: SYSTEM,
       prompt: brief,
       providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
     });
+
+    const slideUsage = toTokenUsage(usage);
+    const cost: GenerationCost = {
+      usd: priceUsage(slideUsage),
+      steps: [
+        {
+          label: `Slide ${slideIndex + 1} regerado`,
+          usage: slideUsage,
+          webSearches: 0,
+          usd: priceUsage(slideUsage),
+        },
+      ],
+    };
 
     // Só o texto é da IA — imagem, QR code e o resto da estrutura do slide não mudam.
     const updated = slideSchema.safeParse({
@@ -91,12 +106,13 @@ export async function POST(request: Request) {
         {
           error: "a IA devolveu um slide fora das regras",
           issues: updated.error.issues.map((issue) => issue.message),
+          cost,
         },
         { status: 422 },
       );
     }
 
-    return Response.json(updated.data);
+    return Response.json({ slide: updated.data, cost });
   } catch (error) {
     const message = error instanceof Error ? error.message : "erro desconhecido";
     return Response.json({ error: message }, { status: 500 });
