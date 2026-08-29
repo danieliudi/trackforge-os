@@ -2,7 +2,14 @@
 
 import clsx from "clsx";
 import { AlertCircle, X } from "lucide-react";
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+} from "react";
 
 import { AppHeader } from "@/components/app/AppHeader";
 import { Composer } from "@/components/app/Composer";
@@ -25,9 +32,11 @@ import { resolveCanvasSize } from "@/constants/themes";
 import { useHistory } from "@/hooks/useHistory";
 import { useSettings } from "@/hooks/useSettings";
 import {
-  appendCostEntry,
   entryFromCost,
-  loadCostLog,
+  getCostLogServerSnapshot,
+  getCostLogSnapshot,
+  pushCostEntry,
+  subscribeCostLog,
   type CostEntry,
 } from "@/lib/costLog";
 import { exportToPDF, exportToPPTX, exportToZip, getPDFFile } from "@/lib/export";
@@ -169,11 +178,14 @@ export default function Home() {
   const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
   const [brandContext, setBrandContext] = useState<BrandContext>(() => loadBrandContext());
 
-  // Lido depois de montar, e não no inicializador do useState: o chip some
-  // quando o log está vazio, então ler direto faria o servidor renderizar sem
-  // ele e o cliente com ele — mismatch de hidratação que derruba a árvore.
-  const [costEntries, setCostEntries] = useState<CostEntry[]>([]);
-  useEffect(() => setCostEntries(loadCostLog()), []);
+  // Store externo em vez de useState: o log vive no localStorage e o chip some
+  // quando está vazio, então ler no inicializador causaria mismatch de
+  // hidratação (ver comentário em lib/costLog.ts).
+  const costEntries = useSyncExternalStore(
+    subscribeCostLog,
+    getCostLogSnapshot,
+    getCostLogServerSnapshot,
+  );
   // Recibo da última geração de documento. Regerar um slide não substitui: o
   // recibo responde "quanto custou este post", e o slide avulso entra na soma
   // do rascunho, não numa tela nova a cada clique.
@@ -182,9 +194,7 @@ export default function Home() {
   /** Registra a cobrança e devolve o custo, pra quem chama somar no rascunho. */
   const logCost = useCallback(
     (cost: GenerationCost, kind: CostEntry["kind"], title: string, failed = false) => {
-      setCostEntries((current) =>
-        appendCostEntry(current, entryFromCost(cost, kind, title, failed)),
-      );
+      pushCostEntry(entryFromCost(cost, kind, title, failed));
       return cost.usd;
     },
     [],
@@ -409,7 +419,7 @@ export default function Home() {
       const response = await fetch("/api/generate/slide", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ carousel, slideIndex: index, instruction }),
+        body: JSON.stringify({ carousel, slideIndex: index, instruction, brandId }),
       });
       const data = await response.json();
 

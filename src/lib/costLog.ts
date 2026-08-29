@@ -72,29 +72,56 @@ export function loadCostLog(): CostEntry[] {
 }
 
 /**
- * Grava uma geração e devolve o log atualizado.
+ * Store externo do log, consumido por `useSyncExternalStore`.
+ *
+ * O chip de custo some quando o log está vazio, então ler o localStorage no
+ * inicializador de um `useState` fazia o servidor renderizar sem o chip e o
+ * cliente com ele — mismatch de hidratação que derruba a árvore. O store resolve
+ * porque tem snapshot de servidor próprio: hidrata vazio como o HTML, e troca
+ * pelo valor real logo depois, sem `setState` dentro de efeito.
+ */
+const EMPTY: CostEntry[] = [];
+let cache: CostEntry[] | null = null;
+const listeners = new Set<() => void>();
+
+export function subscribeCostLog(listener: () => void) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+/** Precisa ser referencialmente estável entre chamadas, ou o React entra em loop. */
+export function getCostLogSnapshot(): CostEntry[] {
+  cache ??= loadCostLog();
+  return cache;
+}
+
+export function getCostLogServerSnapshot(): CostEntry[] {
+  return EMPTY;
+}
+
+/**
+ * Grava uma geração no log e avisa quem observa.
  *
  * Falha de escrita não interrompe nada: perder uma linha do extrato é menos
  * grave que travar a geração que o usuário acabou de pagar.
  */
-export function appendCostEntry(
-  entries: CostEntry[],
-  entry: Omit<CostEntry, "id" | "at">,
-): CostEntry[] {
-  const next = [
+export function pushCostEntry(entry: Omit<CostEntry, "id" | "at">): void {
+  cache = [
     { ...entry, id: crypto.randomUUID(), at: Date.now() },
-    ...entries,
+    ...getCostLogSnapshot(),
   ].slice(0, MAX_ENTRIES);
 
   if (typeof window !== "undefined") {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify(next));
+      window.localStorage.setItem(KEY, JSON.stringify(cache));
     } catch {
       // segue com o valor em memória
     }
   }
 
-  return next;
+  listeners.forEach((listener) => listener());
 }
 
 /** Converte um `GenerationCost` da API no que o log guarda. */

@@ -2,8 +2,9 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject, generateText } from "ai";
 import { z } from "zod";
 
-import { brands } from "@/constants/brands";
+import { brands, type BrandId } from "@/constants/brands";
 import type { Platform } from "@/constants/format";
+import { buildGroundedSystem } from "@/knowledge";
 import {
   EMPTY_USAGE,
   priceUsage,
@@ -82,7 +83,11 @@ Regras obrigatórias de estrutura:
   - Só passe de 10 se o conteúdo sustentar; nunca estique com enchimento.
 - O primeiro slide é sempre type "cover"; o último é sempre type "cta".
 - Numere slideNumber de 1 até N na ordem do array, onde N é o total que você escolheu.
-- Use "data_metric" para um número concreto e "quote" para uma tese forte.
+- "quote" carrega uma tese forte.
+- "data_metric" é OPCIONAL e condicionado: só use quando existir, na base de fatos
+  ou na origem, um número real que sustente o slide — e a headline é esse número
+  copiado. Sem número verificável, não crie o slide. Inventar estatística
+  ("100%", "38%", "3 em cada 4") é o pior erro possível nesta ferramenta.
 
 Regras obrigatórias de texto (o layout quebra quem violar):
 - "headline" é o texto principal do slide. Máximo 90 caracteres, sem jargão, sem emoji.
@@ -108,8 +113,11 @@ const PLATFORM_TONE: Record<Platform, string> = {
   tiktok: `Plataforma: TikTok (carrossel de fotos). A capa PRECISA ser um gancho que para o scroll em menos de 1 segundo — pergunta direta, número chocante ou afirmação contra-intuitiva, nunca um título de relatório. Texto mínimo por slide, frases curtas tipo lista. Isto NÃO é o carrossel do LinkedIn redimensionado: se o texto ficaria bem num documento PDF, está denso demais para o TikTok.`,
 };
 
-function buildCarrosselSystem(platform: Platform) {
-  return `${CARROSSEL_SYSTEM_BASE}\n\n${PLATFORM_TONE[platform]}`;
+function buildCarrosselSystem(platform: Platform, brandId: BrandId | null | undefined) {
+  return buildGroundedSystem(
+    `${CARROSSEL_SYSTEM_BASE}\n\n${PLATFORM_TONE[platform]}`,
+    brandId,
+  );
 }
 
 const APRESENTACAO_SYSTEM = `Você é redator de apresentações executivas internas em português do Brasil —
@@ -124,7 +132,11 @@ Regras obrigatórias de estrutura:
   título da lista (ex.: "Agenda", "Riscos", "Próximas 3 etapas").
 - Use "section" para dividir blocos temáticos da apresentação — é tela cheia, quase sem
   texto, só a headline (e opcionalmente "highlightTag" como categoria).
-- Use "data_metric" para um número concreto e "quote" para uma citação ou mensagem de destaque.
+- "quote" carrega uma citação ou mensagem de destaque.
+- "data_metric" é OPCIONAL e condicionado: só use quando existir, na base de fatos ou
+  na origem, um número real que sustente o slide — e a headline é esse número copiado.
+  Sem número verificável, não crie o slide. Inventar estatística é o pior erro
+  possível nesta ferramenta.
 - Numere slideNumber de 1 até N na ordem do array.
 
 Regras obrigatórias de texto (o layout quebra quem violar):
@@ -202,7 +214,9 @@ export async function POST(request: Request) {
     const { object, usage } = await generateObject({
       model: anthropic("claude-sonnet-5"),
       schema: isApresentacao ? apresentacaoBaseSchema : carouselBaseSchema,
-      system: isApresentacao ? APRESENTACAO_SYSTEM : buildCarrosselSystem(platform),
+      system: isApresentacao
+        ? buildGroundedSystem(APRESENTACAO_SYSTEM, brandId)
+        : buildCarrosselSystem(platform, brandId),
       prompt: brief,
       providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
     });

@@ -3,10 +3,12 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import { priceUsage, type GenerationCost } from "@/constants/pricing";
+import { buildProhibitionsBlock } from "@/knowledge";
 import { toTokenUsage } from "@/lib/usage";
 
 const requestSchema = z.object({
   context: z.string().min(1, "informe o contexto da marca"),
+  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
 });
 
 const suggestionsSchema = z.object({
@@ -30,7 +32,12 @@ export async function POST(request: Request) {
     const { object, usage } = await generateObject({
       model: anthropic("claude-sonnet-5"),
       schema: suggestionsSchema,
-      system: SYSTEM,
+      // Só as proibições, não a base inteira: um tema sugerido não é publicado,
+      // mas semeia o brief — e não faz sentido sugerir algo que a geração final
+      // teria de recusar.
+      system: [SYSTEM, buildProhibitionsBlock(parsed.data.brandId)]
+        .filter(Boolean)
+        .join("\n\n"),
       prompt: `Contexto estratégico da marca:\n${parsed.data.context}\n\nSugira 4 temas de carrossel alinhados a esse contexto.`,
       providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
     });

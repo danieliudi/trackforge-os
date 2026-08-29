@@ -64,10 +64,12 @@ function useElapsed(isRunning: boolean) {
  */
 function SuggestionsSection({
   context,
+  brandId,
   onPick,
   onCost,
 }: {
   context: string;
+  brandId?: BrandId | null;
   onPick: (text: string) => void;
   onCost?: (cost: GenerationCost) => void;
 }) {
@@ -82,7 +84,7 @@ function SuggestionsSection({
       const response = await fetch("/api/generate/suggestions", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ context }),
+        body: JSON.stringify({ context, brandId }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error();
@@ -315,6 +317,7 @@ export function Composer({
       {brandContext?.trim() ? (
         <SuggestionsSection
           context={brandContext}
+          brandId={brandId}
           onPick={onChange}
           onCost={onSuggestionsCost}
         />

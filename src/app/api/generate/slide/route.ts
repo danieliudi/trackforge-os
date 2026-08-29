@@ -3,9 +3,10 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import { priceUsage, type GenerationCost } from "@/constants/pricing";
+import { buildGroundedSystem } from "@/knowledge";
 import { toTokenUsage } from "@/lib/usage";
 import {
-  carouselSchema,
+  apresentacaoSchema,
   MAX_BODY_LENGTH,
   MAX_BULLET_LENGTH,
   MAX_BULLETS,
@@ -14,9 +15,13 @@ import {
 } from "@/types/carousel";
 
 const requestSchema = z.object({
-  carousel: carouselSchema,
+  // Teto de 20 (apresentação), não o de 12 do carrossel: aqui o documento é só
+  // contexto e vale para os dois formatos. Com `carouselSchema` regerar um slide
+  // de uma apresentação com mais de 12 slides era rejeitado como payload inválido.
+  carousel: apresentacaoSchema,
   slideIndex: z.number().int().nonnegative(),
   instruction: z.string().optional(),
+  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
 });
 
 const slideContentSchema = z.object({
@@ -51,7 +56,7 @@ export async function POST(request: Request) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
 
-  const { carousel, slideIndex, instruction } = parsed.data;
+  const { carousel, slideIndex, instruction, brandId } = parsed.data;
   const target = carousel.slides[slideIndex];
   if (!target) {
     return Response.json({ error: "slide não encontrado" }, { status: 400 });
@@ -74,7 +79,10 @@ export async function POST(request: Request) {
     const { object, usage } = await generateObject({
       model: anthropic("claude-sonnet-5"),
       schema: slideContentSchema,
-      system: SYSTEM,
+      // Mesma base de fatos da geração completa: regerar um slide sozinho é
+      // exatamente onde o modelo tem menos contexto e mais chance de preencher
+      // a lacuna com memória.
+      system: buildGroundedSystem(SYSTEM, brandId),
       prompt: brief,
       providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
     });
