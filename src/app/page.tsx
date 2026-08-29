@@ -29,6 +29,7 @@ import {
 } from "@/constants/format";
 import type { GenerationCost } from "@/constants/pricing";
 import { resolveCanvasSize } from "@/constants/themes";
+import type { ForbiddenHit } from "@/knowledge/check";
 import { useHistory } from "@/hooks/useHistory";
 import { useSettings } from "@/hooks/useSettings";
 import {
@@ -65,6 +66,29 @@ function costSummary(format: Format, platform: Platform, slideCount: number) {
       : ` ${platformOptions.find(({ id }) => id === platform)?.label ?? platform}`;
 
   return `${formatLabel}${platformLabel} · ${slideCount} slides`;
+}
+
+/**
+ * Aviso de termo proibido, no mesmo banner de erro que já existe.
+ *
+ * Reaproveita o banner de propósito: uma peça pronta com termo que a marca
+ * proíbe é erro, não sugestão — e criar uma superfície nova pra dizer isso
+ * seria inventar design pra uma mensagem que já tem onde caber. Não bloqueia
+ * nada: quem edita e publica é o usuário.
+ */
+function forbiddenMessage(hits: ForbiddenHit[], brandId: BrandId | null) {
+  const brandLabel = brandId ? brands[brandId].label : "a marca";
+  const items = hits
+    .map((hit) => {
+      // Só a primeira frase do motivo: o texto completo foi escrito para o
+      // prompt, e inteiro não cabe numa linha de aviso.
+      const reason = hit.reason.split(". ")[0];
+      return `"${hit.matched}" (slide ${hit.slideNumber}) — ${reason}`;
+    })
+    .join(" · ");
+
+  const count = hits.length === 1 ? "1 termo proibido" : `${hits.length} termos proibidos`;
+  return `Revisar antes de publicar — ${count} para ${brandLabel}: ${items}`;
 }
 
 /** Campos de texto agrupam num passo só de desfazer enquanto se digita. */
@@ -354,6 +378,9 @@ export default function Home() {
         },
       ]);
       setActiveDraftId(id);
+
+      const warnings = (data.warnings ?? []) as ForbiddenHit[];
+      if (warnings.length > 0) setError(forbiddenMessage(warnings, brandId));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "falha ao gerar o carrossel");
     } finally {
@@ -446,6 +473,9 @@ export default function Home() {
       );
 
       updateSlide(index, data.slide as Slide);
+
+      const warnings = (data.warnings ?? []) as ForbiddenHit[];
+      if (warnings.length > 0) setError(forbiddenMessage(warnings, brandId));
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "falha ao regenerar o slide");
     } finally {

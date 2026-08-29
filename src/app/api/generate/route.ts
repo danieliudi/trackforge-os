@@ -5,6 +5,7 @@ import { z } from "zod";
 import { brands, type BrandId } from "@/constants/brands";
 import type { Platform } from "@/constants/format";
 import { buildGroundedSystem } from "@/knowledge";
+import { findForbiddenInSlides } from "@/knowledge/check";
 import {
   EMPTY_USAGE,
   priceUsage,
@@ -265,7 +266,12 @@ export async function POST(request: Request) {
       );
     }
 
-    return Response.json({ carousel: validated.data, cost });
+    // Checagem determinística: o prompt manda não usar termo proibido, isto
+    // confere se ele obedeceu. Não bloqueia — quem edita é o usuário; só não
+    // deixa a violação passar despercebida até a publicação.
+    const warnings = findForbiddenInSlides(validated.data.slides, brandId);
+
+    return Response.json({ carousel: validated.data, cost, warnings });
   } catch (error) {
     const message = error instanceof Error ? error.message : "erro desconhecido";
     return Response.json({ error: message }, { status: 500 });

@@ -84,31 +84,38 @@ Evite: big bag sozinho como categoria · fornecedor de embalagem · sustentável
       term: "NORMAM, Marinha do Brasil, homologação marítima ou aquaviária",
       reason:
         "a Resibag NÃO possui essa homologação. Foi removida da base canônica em agosto/2026 depois de constar por engano. Citar isso é alegar certificação inexistente.",
+      match: [/normam/, /marinha/, /aquaviari/, /homologacao maritima/],
     },
     {
       term: '"tripla homologação"',
       reason: "a contagem é dois: INMETRO + ANTT 5998. Escreva dupla homologação.",
+      match: [/tripla homologacao/, /tres homologacoes/],
     },
     {
       term: '"1 big bag substitui 4 tambores", "4 a 5 tambores" ou qualquer variação',
       reason: "o argumento auditável é 5 tambores, valor fixo.",
+      match: [/\b4\s*a\s*5\s*tambores/, /\b4\s+tambores/, /quatro tambores/],
     },
     {
       term: '"Seu resíduo, nosso compromisso"',
       reason: "tagline descontinuada 100%, sem retenção em nenhum canal.",
+      match: [/seu residuo,?\s*nosso compromisso/],
     },
     {
       term: '"entrega em 48h", "48 horas" ou "entregamos em sua porta"',
       reason:
         'o claim correto é "envio em até 2 dias ou retirada em fábrica" — e vale só para a linha Standard.',
+      match: [/\b48\s*h\b/, /\b48\s*horas/, /entregamos em sua porta/],
     },
     {
       term: '"Uma empresa Sanwey"',
       reason: 'o endosso correto é "Uma marca Sanwey".',
+      match: [/uma empresa sanwey/],
     },
     {
       term: '"maior fabricante", "melhor do mercado" ou líder de mercado',
       reason: "não é verificável.",
+      match: [/maior fabricante/, /melhor do mercado/, /lider de mercado/],
     },
     {
       term: "INMETRO, ANTT ou ANP associados a Filtrante ou Resíduo Verde",
@@ -118,10 +125,12 @@ Evite: big bag sozinho como categoria · fornecedor de embalagem · sustentável
     {
       term: "qualquer telefone ou e-mail fora de (11) 99465-9377 e vendas@resibag.com.br",
       reason: "contatos errados já circularam em material antigo.",
+      match: [/\(?81\)?\s*923.?721.?7839/, /94055.?1389/],
     },
     {
       term: "nome, preço ou cobertura de concorrente (EmbTec, Ágilbag, Engebag)",
       reason: "é inteligência interna, não entra em peça pública.",
+      match: [/embtec/, /agilbag/, /engebag/],
     },
   ],
 };

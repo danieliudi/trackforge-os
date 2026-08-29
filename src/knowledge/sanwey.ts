@@ -1,7 +1,8 @@
 import type { BrandKnowledge } from "./types";
 
 /**
- * Fatos Sanwey — cópia curada de `sanwey-canonical-facts` v7.x (agosto/2026).
+ * Fatos Sanwey — cópia curada de `sanwey-canonical-facts` v1.5, alinhada ao
+ * Manual de Identidade Visual v7.0b (agosto/2026).
  *
  * Fora daqui de propósito: design system (é outra disciplina), protocolo de
  * versionamento (é processo interno) e contato pessoal do Daniel (não tem por
@@ -86,26 +87,32 @@ Evite: saco genérico · granel (o termo é semi-granel) · empresa inovadora ·
       term: "FSSC 22000",
       reason:
         "obtida em 2018, não é mais certificação ativa. Não pode aparecer nem como vigente, nem como \"seguimos as práticas de\". O argumento correto para alimentício é BPF e assepsia documentadas.",
+      match: [/fssc/],
     },
     {
       term: '"soluções personalizadas"',
       reason: "genérico e sem substância técnica; use engenharia aplicada por carga.",
+      match: [/solucoes personalizadas/],
     },
     {
       term: '"embalagens para todo tipo de carga"',
       reason: "sem qualificação, contradiz o posicionamento de projeto por briefing.",
+      match: [/todo tipo de carga/],
     },
     {
       term: '"maior fabricante", "melhor do mercado" ou líder de mercado',
       reason: "não é verificável.",
+      match: [/maior fabricante/, /melhor do mercado/, /lider de mercado/],
     },
     {
       term: '"décadas de experiência"',
       reason: 'o número é preciso e é o argumento: 42 anos documentados.',
+      match: [/decadas de experiencia/],
     },
     {
       term: '"Uma empresa Sanwey"',
       reason: 'o endosso correto é "Uma marca Sanwey".',
+      match: [/uma empresa sanwey/],
     },
     {
       term: "Sanbag posicionado para resíduo perigoso",
@@ -114,6 +121,7 @@ Evite: saco genérico · granel (o termo é semi-granel) · empresa inovadora ·
     {
       term: "preço por quilo",
       reason: "a precificação é por valor: engenharia e conformidade.",
+      match: [/preco por quilo/, /precificacao por quilo/, /preco por kg/],
     },
   ],
 };

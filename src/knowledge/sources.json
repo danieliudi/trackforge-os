@@ -1,0 +1,23 @@
+{
+  "comment": "Skills de origem de src/knowledge/*.ts, com o hash do arquivo no momento da curadoria. `npm run knowledge:check` compara com o que está em ~/.claude/skills e avisa quando a fonte mudou. O script NÃO reescreve a curadoria: o que entra e o que fica de fora foi decisão editorial (fato verificável entra; design system, protocolo de versionamento e dado interno não). Depois de atualizar o arquivo curado à mão, rode `npm run knowledge:sync` para gravar o hash novo.",
+  "sources": [
+    {
+      "skill": "resibag-canonical-facts",
+      "version": "v2.3",
+      "sha256": "782dba9c100ce7d7d5392d300588d72228669fa9204a3cf992c4992805cf38a5",
+      "curatedInto": "src/knowledge/resibag.ts"
+    },
+    {
+      "skill": "resibag-compliance-kb",
+      "version": "v3.3",
+      "sha256": "d25c74185dbc0f11e9020558aa0341d8aa60b5aced13015369094006fb868f73",
+      "curatedInto": "src/knowledge/resibag.ts"
+    },
+    {
+      "skill": "sanwey-canonical-facts",
+      "version": "v1.5",
+      "sha256": "7114cfabd0f7ac1c3a199ea8f6bf4ec606b974927ba8571a824f22f67b572366",
+      "curatedInto": "src/knowledge/sanwey.ts"
+    }
+  ]
+}

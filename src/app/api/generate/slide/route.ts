@@ -4,6 +4,7 @@ import { z } from "zod";
 
 import { priceUsage, type GenerationCost } from "@/constants/pricing";
 import { buildGroundedSystem } from "@/knowledge";
+import { findForbiddenInSlides } from "@/knowledge/check";
 import { toTokenUsage } from "@/lib/usage";
 import {
   apresentacaoSchema,
@@ -120,7 +121,9 @@ export async function POST(request: Request) {
       );
     }
 
-    return Response.json({ slide: updated.data, cost });
+    const warnings = findForbiddenInSlides([updated.data], brandId);
+
+    return Response.json({ slide: updated.data, cost, warnings });
   } catch (error) {
     const message = error instanceof Error ? error.message : "erro desconhecido";
     return Response.json({ error: message }, { status: 500 });

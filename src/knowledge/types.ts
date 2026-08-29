@@ -22,5 +22,17 @@ export type BrandKnowledge = {
    * contorna com um sinônimo; "não escreva X porque a marca não tem essa
    * homologação" fecha a categoria inteira.
    */
-  forbidden: { term: string; reason: string }[];
+  forbidden: {
+    term: string;
+    reason: string;
+    /**
+     * Padrões que detectam a violação no texto já gerado.
+     *
+     * Comparados contra o texto normalizado (sem acento, minúsculo) — escreva o
+     * padrão assim também. Ausente de propósito quando a proibição depende de
+     * semântica e não de string: "INMETRO atribuído ao Filtrante" não vira
+     * regex sem falso positivo, e continua valendo só como regra de prompt.
+     */
+    match?: RegExp[];
+  }[];
 };
