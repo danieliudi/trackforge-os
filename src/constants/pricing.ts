@@ -19,12 +19,27 @@ export const MODEL_PRICING = {
     cacheRead: perMillion(0.2),
     cacheWrite: perMillion(2.5),
   },
+  "claude-haiku-4-5": {
+    input: perMillion(1),
+    output: perMillion(5),
+    cacheRead: perMillion(0.1),
+    cacheWrite: perMillion(1.25),
+  },
 } satisfies Record<string, Record<"input" | "output" | "cacheRead" | "cacheWrite", number>>;
 
 export type PricedModel = keyof typeof MODEL_PRICING;
 
-/** O modelo que as três rotas de geração usam hoje. */
+/** O modelo que redige. */
 export const GENERATION_MODEL: PricedModel = "claude-sonnet-5";
+
+/**
+ * O modelo que confere.
+ *
+ * Conferir é tarefa mais fácil que escrever — a afirmação e a fonte chegam
+ * prontas, e a resposta é um veredito curto. Sonnet aqui custaria o dobro da
+ * geração inteira sem ganho proporcional.
+ */
+export const VERIFICATION_MODEL: PricedModel = "claude-haiku-4-5";
 
 /**
  * US$ 10 por 1.000 buscas, cobrados por busca além dos tokens do resultado.

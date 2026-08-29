@@ -7,6 +7,7 @@ import { useEffect, useState, type KeyboardEvent } from "react";
 import { BrandPills } from "@/components/app/BrandPills";
 import { FormatSelect } from "@/components/app/FormatSelect";
 import { PlatformPills } from "@/components/app/PlatformPills";
+import { SignalPicker } from "@/components/app/SignalPicker";
 import { Button, IconButton } from "@/components/ui/Button";
 import type { BrandId } from "@/constants/brands";
 import { getPlatformToneNote, type Format, type Platform } from "@/constants/format";
@@ -178,6 +179,9 @@ type ComposerProps = {
   onPlatformChange?: (platform: Platform) => void;
   /** Sugestão de tema também é chamada paga — entra no extrato como as outras. */
   onSuggestionsCost?: (cost: GenerationCost) => void;
+  /** null = ainda não escolheu; o picker marca tudo no primeiro carregamento. */
+  signalIds?: string[] | null;
+  onSignalIdsChange?: (ids: string[]) => void;
 };
 
 export function Composer({
@@ -196,6 +200,8 @@ export function Composer({
   platform,
   onPlatformChange,
   onSuggestionsCost,
+  signalIds,
+  onSignalIdsChange,
 }: ComposerProps) {
   const canSubmit = value.trim().length >= MIN_LENGTH && !isGenerating;
   const elapsed = useElapsed(isGenerating);
@@ -295,6 +301,16 @@ export function Composer({
           />
         ) : null}
       </div>
+
+      {/* Antes da busca paga de propósito: quando o sinal curado já resolve o
+          contexto, a busca na web vira gasto sem ganho. */}
+      {onSignalIdsChange ? (
+        <SignalPicker
+          brandId={brandId ?? null}
+          selected={signalIds ?? null}
+          onChange={onSignalIdsChange}
+        />
+      ) : null}
 
       {isGenerating ? (
         <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-3">

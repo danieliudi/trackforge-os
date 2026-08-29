@@ -15,6 +15,7 @@ import { AppHeader } from "@/components/app/AppHeader";
 import { Composer } from "@/components/app/Composer";
 import { ContextPanel } from "@/components/app/ContextPanel";
 import { CostReceipt } from "@/components/app/CostReceipt";
+import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { SlideList } from "@/components/app/SlideList";
 import { StylePanel } from "@/components/app/StylePanel";
 import { CarouselPreview } from "@/components/carousel/CarouselPreview";
@@ -30,6 +31,7 @@ import {
 import type { GenerationCost } from "@/constants/pricing";
 import { resolveCanvasSize } from "@/constants/themes";
 import type { ForbiddenHit } from "@/knowledge/check";
+import type { Verification } from "@/lib/verify";
 import { useHistory } from "@/hooks/useHistory";
 import { useSettings } from "@/hooks/useSettings";
 import {
@@ -214,6 +216,9 @@ export default function Home() {
   // recibo responde "quanto custou este post", e o slide avulso entra na soma
   // do rascunho, não numa tela nova a cada clique.
   const [lastCost, setLastCost] = useState<GenerationCost | null>(null);
+  const [verification, setVerification] = useState<Verification | null>(null);
+  // null = o picker ainda não carregou; ele marca todos no primeiro load.
+  const [signalIds, setSignalIds] = useState<string[] | null>(null);
 
   /** Registra a cobrança e devolve o custo, pra quem chama somar no rascunho. */
   const logCost = useCallback(
@@ -332,6 +337,7 @@ export default function Home() {
           input,
           context: brandId ? brandContext[brandId] : undefined,
           includeNews,
+          signalIds: signalIds ?? undefined,
           brandId,
           format,
           platform,
@@ -353,6 +359,7 @@ export default function Home() {
       const newCarousel = data.carousel as Carousel;
       const cost = data.cost as GenerationCost;
       setLastCost(cost);
+      setVerification((data.verification ?? null) as Verification | null);
       const costUsd = logCost(cost, kind, newCarousel.title);
 
       // Documento novo zera o histórico: desfazer para dentro do carrossel
@@ -396,6 +403,7 @@ export default function Home() {
     setError(null);
     setActiveDraftId(null);
     setLastCost(null);
+    setVerification(null);
   }
 
   function selectDraft(id: string) {
@@ -411,6 +419,7 @@ export default function Home() {
     // O recibo é da geração, não do documento: abrir um rascunho antigo não
     // cobrou nada agora, e manter o recibo anterior sugeriria que sim.
     setLastCost(null);
+    setVerification(null);
   }
 
   function deleteDraft(id: string) {
@@ -690,6 +699,8 @@ export default function Home() {
             platform={platform}
             onPlatformChange={(next) => dispatchSettings({ type: "platform", platform: next })}
             onSuggestionsCost={(cost) => logCost(cost, "sugestoes", "Sugestões de tema")}
+            signalIds={signalIds}
+            onSignalIdsChange={setSignalIds}
           />
         </div>
       ) : (
@@ -752,6 +763,7 @@ export default function Home() {
                         summary={costSummary(format, platform, slides.length)}
                       />
                     ) : null}
+                    {verification ? <VerificationPanel verification={verification} /> : null}
                   </div>
                   <div className="min-h-0 flex-1 overflow-y-auto p-3">
                     <SlideList

@@ -39,3 +39,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# o exemplo entra no repo; o .env.local continua fora
+!.env.example

@@ -6,6 +6,8 @@ import { brands, type BrandId } from "@/constants/brands";
 import type { Platform } from "@/constants/format";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbiddenInSlides } from "@/knowledge/check";
+import { buildSignalsBlock, fetchMarketSignals } from "@/lib/marketSignals";
+import { verifySlides } from "@/lib/verify";
 import {
   EMPTY_USAGE,
   priceUsage,
@@ -26,6 +28,12 @@ const requestSchema = z.object({
   /** Estratégia/posicionamento da marca ativa, colado na aba Contexto. */
   context: z.string().optional(),
   includeNews: z.boolean().optional(),
+  /** Sinais curados do CRM. Grátis e verificados — o default ligado. */
+  useSignals: z.boolean().optional().default(true),
+  /** Ids dos sinais escolhidos. Vazio = todos os recentes da marca. */
+  signalIds: z.array(z.string()).optional(),
+  /** Conferir a peça depois de gerar. */
+  verify: z.boolean().optional().default(true),
   brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
   format: z.enum(["carrossel", "apresentacao"]).optional().default("carrossel"),
   /** Só importa para o carrossel — Apresentação é sempre 16:9, tom único. */
@@ -177,7 +185,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const { input, context, includeNews, brandId, format, platform } = parsed.data;
+  const { input, context, includeNews, useSignals, signalIds, verify, brandId, format, platform } =
+    parsed.data;
   const urlInput = isUrl(input);
   const isApresentacao = format === "apresentacao";
 
@@ -193,6 +202,25 @@ export async function POST(request: Request) {
       briefParts.push(
         `Contexto estratégico da marca (use para alinhar tom e prioridades):\n${context.trim()}`,
       );
+    }
+
+    // Sinal do CRM vem antes da busca web de propósito: é curado, tem fonte e é
+    // de graça. Quando ele resolve o contexto, a busca paga vira supérflua.
+    if (useSignals) {
+      const all = await fetchMarketSignals(brandId);
+      const chosen = signalIds?.length
+        ? all.filter((signal) => signalIds.includes(signal.id))
+        : all;
+
+      if (chosen.length > 0) {
+        briefParts.push(buildSignalsBlock(chosen));
+        costSteps.push({
+          label: `${chosen.length} ${chosen.length === 1 ? "sinal" : "sinais"} de mercado`,
+          usage: EMPTY_USAGE,
+          webSearches: 0,
+          usd: 0,
+        });
+      }
     }
 
     // Notícia só faz sentido ancorando um tema aberto — uma URL já é a fonte concreta.
@@ -271,7 +299,23 @@ export async function POST(request: Request) {
     // deixa a violação passar despercebida até a publicação.
     const warnings = findForbiddenInSlides(validated.data.slides, brandId);
 
-    return Response.json({ carousel: validated.data, cost, warnings });
+    // Verificação semântica: pega o que a varredura de string não alcança —
+    // número sem lastro, data que a fonte não declara. Falha aqui não invalida a
+    // peça: o usuário já pagou pela geração, e ficar sem o parecer é melhor que
+    // perder o carrossel.
+    let verification = null;
+    if (verify) {
+      try {
+        const result = await verifySlides(validated.data.slides, brandId);
+        verification = result.verification;
+        cost.steps.push(result.costStep);
+        cost.usd += result.costStep.usd;
+      } catch {
+        // segue sem parecer
+      }
+    }
+
+    return Response.json({ carousel: validated.data, cost, warnings, verification });
   } catch (error) {
     const message = error instanceof Error ? error.message : "erro desconhecido";
     return Response.json({ error: message }, { status: 500 });

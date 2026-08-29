@@ -45,38 +45,39 @@ export function CostReceipt({ cost, summary }: CostReceiptProps) {
       </div>
 
       <dl className="border-t border-zinc-100 bg-zinc-50 px-3.5 py-1.5">
-        {cost.steps.map((step) => (
-          <div
-            key={step.label}
-            className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-1.5 last:border-b-0"
-          >
-            <dt
-              className={
-                step.webSearches > 0
-                  ? "text-[11.5px] text-amber-700"
-                  : "text-[11.5px] text-zinc-600"
-              }
+        {cost.steps.map((step) => {
+          // Etapa sem custo é o sinal curado do CRM. "US$ 0,0000" tecnicamente
+          // certo esconde justamente o que interessa: essa parte não custou nada.
+          const free = step.usd === 0;
+          const tone = free
+            ? "text-emerald-700"
+            : step.webSearches > 0
+              ? "text-amber-700"
+              : "text-zinc-600";
+
+          return (
+            <div
+              key={step.label}
+              className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-1.5 last:border-b-0"
             >
-              {step.label}
-            </dt>
-            <div className="flex shrink-0 items-baseline gap-3">
-              <span className="font-mono text-[10.5px] tabular-nums text-zinc-400">
-                {step.webSearches > 0
-                  ? `${formatUsd(WEB_SEARCH_PRICE)} cada`
-                  : `${tokens(step.usage.inputTokens)} ent · ${tokens(step.usage.outputTokens)} saí`}
-              </span>
-              <span
-                className={
-                  step.webSearches > 0
-                    ? "w-[74px] text-right font-mono text-[10.5px] tabular-nums text-amber-700"
-                    : "w-[74px] text-right font-mono text-[10.5px] tabular-nums text-zinc-600"
-                }
-              >
-                {formatUsd(step.usd)}
-              </span>
+              <dt className={`text-[11.5px] ${tone}`}>{step.label}</dt>
+              <div className="flex shrink-0 items-baseline gap-3">
+                <span className="font-mono text-[10.5px] tabular-nums text-zinc-400">
+                  {step.webSearches > 0
+                    ? `${formatUsd(WEB_SEARCH_PRICE)} cada`
+                    : free
+                      ? "consulta ao CRM"
+                      : `${tokens(step.usage.inputTokens)} ent · ${tokens(step.usage.outputTokens)} saí`}
+                </span>
+                <span
+                  className={`w-[74px] text-right font-mono text-[10.5px] tabular-nums ${tone}`}
+                >
+                  {free ? "grátis" : formatUsd(step.usd)}
+                </span>
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </dl>
 
       {searchShare >= 40 ? (
