@@ -3,8 +3,10 @@
 import { CloudOff, FileDown, FilePlus2, Images, Redo2, Share2, Undo2 } from "lucide-react";
 
 import { Button, IconButton } from "@/components/ui/Button";
+import { CostMenu } from "@/components/app/CostMenu";
 import { DraftsMenu } from "@/components/app/DraftsMenu";
 import type { Format } from "@/constants/format";
+import type { CostEntry } from "@/lib/costLog";
 import type { Draft } from "@/lib/storage";
 
 type AppHeaderProps = {
@@ -28,6 +30,8 @@ type AppHeaderProps = {
   canShare: boolean;
   sharing: boolean;
   onShare: () => void;
+  /** Histórico de custo da API — o chip some enquanto estiver vazio. */
+  costEntries: CostEntry[];
 };
 
 export function AppHeader({
@@ -49,6 +53,7 @@ export function AppHeader({
   canShare,
   sharing,
   onShare,
+  costEntries,
 }: AppHeaderProps) {
   const isExporting = exporting !== null;
 
@@ -80,8 +85,12 @@ export function AppHeader({
       </div>
 
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        <CostMenu entries={costEntries} />
+
         {hasCarousel ? (
           <>
+            <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
+
             <Button icon={FilePlus2} onClick={onReset}>
               <span className="hidden sm:inline">Novo carrossel</span>
             </Button>

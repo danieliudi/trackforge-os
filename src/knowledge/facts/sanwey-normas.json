@@ -1,0 +1,54 @@
+{
+  "comment": "Afirmações verificáveis da Sanwey — certificação e marco datado. Menos exposta que a Resibag, porque quase tudo aqui é documento próprio da empresa (certificado, registro) e não norma de terceiro em movimento. Ainda assim precisa de procedência: 'INMETRO desde 2008' numa peça é um fato datado, e fato datado precisa de papel.",
+  "facts": [
+    {
+      "id": "iso-9001-sanwey",
+      "claim": "A Sanwey tem ISO 9001:2015 pela DNV desde 1999, aplicável a todas as linhas.",
+      "tier": "nao-verificado",
+      "source": "sanwey-canonical-facts v1.5, seção 07",
+      "notes": "Fonte primária é o certificado DNV. Tem validade — preencher revalidateBy com o vencimento ao anexar."
+    },
+    {
+      "id": "inmetro-sanwey-2008",
+      "claim": "A Sanwey homologou contentor flexível para carga perigosa no INMETRO em 2008, referência Res. ANTT 420 — primeira do setor.",
+      "tier": "nao-verificado",
+      "source": "sanwey-canonical-facts v1.5, seções 07 e 10",
+      "notes": "O '1º do setor' é a parte difícil: certificado prova a homologação, não a precedência. Sem documento que sustente o pioneirismo, use só a data."
+    },
+    {
+      "id": "marinha-sanwey-1996",
+      "claim": "A Sanwey é homologada pelo Ministério da Marinha para transporte marítimo de carga perigosa desde 1996 — primeira brasileira.",
+      "tier": "nao-verificado",
+      "source": "sanwey-canonical-facts v1.5, seções 07 e 10",
+      "notes": "Homologação da Sanwey, não da Resibag — a Resibag não tem essa e citá-la lá é proibido."
+    },
+    {
+      "id": "anp-sanwey",
+      "claim": "A Sanwey tem certificação ANP para Oil & Gas e petroquímica condutiva, ligada ao Type C Condutivo.",
+      "tier": "nao-verificado",
+      "source": "sanwey-canonical-facts v1.5, seção 07",
+      "notes": "Sem ano na base. Conferir data e escopo no certificado."
+    },
+    {
+      "id": "nbr-16029-sanwey",
+      "claim": "A Sanwey atende a ABNT NBR 16029 para FIBC de carga não perigosa.",
+      "tier": "nao-verificado",
+      "source": "sanwey-canonical-facts v1.5, seção 07"
+    },
+    {
+      "id": "sanwey-42-anos",
+      "claim": "42 anos de mercado: registro em dezembro/1983, operação desde 1984. Só passa a 43 depois de dezembro/2026.",
+      "tier": "interna",
+      "source": "sanwey-canonical-facts v1.5, seção 01",
+      "revalidateBy": "2026-12-31",
+      "notes": "Aritmética de data, não fato de terceiro. Vence sozinho: revalidar na virada do ano."
+    },
+    {
+      "id": "sanwey-fator-seguranca",
+      "claim": "Fator de segurança 8:1 para granulado pesado, na linha de mineração.",
+      "tier": "nao-verificado",
+      "source": "sanwey-canonical-facts v1.5, seção 09",
+      "notes": "Número técnico usado como argumento de venda. Fonte primária é o laudo de ensaio."
+    }
+  ]
+}

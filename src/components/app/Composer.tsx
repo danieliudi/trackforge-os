@@ -7,9 +7,11 @@ import { useEffect, useState, type KeyboardEvent } from "react";
 import { BrandPills } from "@/components/app/BrandPills";
 import { FormatSelect } from "@/components/app/FormatSelect";
 import { PlatformPills } from "@/components/app/PlatformPills";
+import { SignalPicker } from "@/components/app/SignalPicker";
 import { Button, IconButton } from "@/components/ui/Button";
 import type { BrandId } from "@/constants/brands";
 import { getPlatformToneNote, type Format, type Platform } from "@/constants/format";
+import type { GenerationCost } from "@/constants/pricing";
 import { fieldClass, focusRing, kbdClass, labelClass } from "@/lib/ui";
 
 /**
@@ -63,10 +65,14 @@ function useElapsed(isRunning: boolean) {
  */
 function SuggestionsSection({
   context,
+  brandId,
   onPick,
+  onCost,
 }: {
   context: string;
+  brandId?: BrandId | null;
   onPick: (text: string) => void;
+  onCost?: (cost: GenerationCost) => void;
 }) {
   const [topics, setTopics] = useState<string[] | null>(null);
   const [loading, setLoading] = useState(false);
@@ -79,10 +85,11 @@ function SuggestionsSection({
       const response = await fetch("/api/generate/suggestions", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ context }),
+        body: JSON.stringify({ context, brandId }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error();
+      if (data.cost) onCost?.(data.cost as GenerationCost);
       setTopics(data.topics);
     } catch {
       setError(true);
@@ -170,6 +177,11 @@ type ComposerProps = {
   onFormatChange?: (format: Format) => void;
   platform?: Platform;
   onPlatformChange?: (platform: Platform) => void;
+  /** Sugestão de tema também é chamada paga — entra no extrato como as outras. */
+  onSuggestionsCost?: (cost: GenerationCost) => void;
+  /** null = ainda não escolheu; o picker marca tudo no primeiro carregamento. */
+  signalIds?: string[] | null;
+  onSignalIdsChange?: (ids: string[]) => void;
 };
 
 export function Composer({
@@ -187,6 +199,9 @@ export function Composer({
   onFormatChange,
   platform,
   onPlatformChange,
+  onSuggestionsCost,
+  signalIds,
+  onSignalIdsChange,
 }: ComposerProps) {
   const canSubmit = value.trim().length >= MIN_LENGTH && !isGenerating;
   const elapsed = useElapsed(isGenerating);
@@ -287,6 +302,16 @@ export function Composer({
         ) : null}
       </div>
 
+      {/* Antes da busca paga de propósito: quando o sinal curado já resolve o
+          contexto, a busca na web vira gasto sem ganho. */}
+      {onSignalIdsChange ? (
+        <SignalPicker
+          brandId={brandId ?? null}
+          selected={signalIds ?? null}
+          onChange={onSignalIdsChange}
+        />
+      ) : null}
+
       {isGenerating ? (
         <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-3">
           <span className="relative flex h-2 w-2 shrink-0">
@@ -306,7 +331,12 @@ export function Composer({
       ) : null}
 
       {brandContext?.trim() ? (
-        <SuggestionsSection context={brandContext} onPick={onChange} />
+        <SuggestionsSection
+          context={brandContext}
+          brandId={brandId}
+          onPick={onChange}
+          onCost={onSuggestionsCost}
+        />
       ) : (
         <div className="flex flex-col gap-2">
           <span className={labelClass}>Comece por um exemplo</span>

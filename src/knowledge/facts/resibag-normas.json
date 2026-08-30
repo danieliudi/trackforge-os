@@ -1,0 +1,134 @@
+{
+  "comment": "Afirmações normativas e numéricas da Resibag, uma a uma, com a procedência de cada. Separadas da prosa de marca porque são a classe de fato que já saiu errada: a ANTT 6.078/2026 foi publicada como 'atualização da 5.998' por meses sem ninguém ter conferido na ANTT. O campo `tier` decide o que pode virar alegação pública — ver src/knowledge/provenance.ts. `npm run knowledge:audit` lista o que falta verificar.",
+  "facts": [
+    {
+      "id": "nbr-10004-classificacao",
+      "claim": "A NBR 10.004:2024 (ABNT) classifica resíduo sólido quanto à periculosidade. Classe I é perigoso, Classe II A não inerte, Classe II B inerte. Não é obrigação sobre transportador.",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 1",
+      "notes": "Conferir contra o texto da ABNT. A KB nunca cita a norma diretamente."
+    },
+    {
+      "id": "nbr-10004-transicao",
+      "claim": "O prazo de transição da NBR 10.004:2024 termina em 31/12/2026, e a CETESB passa a exigir a nova versão em 01/01/2027.",
+      "tier": "secundaria",
+      "source": "market_signals do CRM (ABNT / CETESB), 13/08/2026",
+      "url": "https://www.novaambiental.com.br/fim-do-prazo-para-a-antiga-nbr-10004-saiba-como-a-nova-decisao-da-cetesb-impacta-a-classificacao-de-residuos-da-sua-industria/",
+      "notes": "A fonte é um portal setorial, não a CETESB. Confirmar na CETESB antes de usar a data numa peça."
+    },
+    {
+      "id": "nbr-10004-revisao-2024",
+      "claim": "A revisão de 2024 da NBR 10.004 mexeu em limites de contaminação por metais pesados, ensaios de lixiviação e solubilização (anexos F e G) e critérios de amostragem.",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 1"
+    },
+    {
+      "id": "antt-5998-vigencia",
+      "claim": "A Resolução ANTT 5998/2022 está vigente desde junho/2023 e revogou a ANTT 420/2004.",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 2",
+      "notes": "Data de vigência e revogação precisam sair do texto da resolução, não da KB."
+    },
+    {
+      "id": "antt-5998-exigencias",
+      "claim": "A ANTT 5998/2022 exige embalagem certificada INMETRO, Ficha de Emergência e Envelope para Transporte, MOPP do motorista e declaração de responsabilidade do expedidor (o gerador do resíduo).",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 2"
+    },
+    {
+      "id": "antt-5998-revisao",
+      "claim": "A ANTT abriu a Audiência Pública nº 007/2026, com contribuições entre 15/mai e 28/jun/2026, para revisar a Resolução 5.998/2022.",
+      "tier": "primaria",
+      "source": "ANTT — notícia oficial",
+      "url": "https://www.gov.br/antt/pt-br/assuntos/ultimas-noticias/antt-abre-audiencia-publica-para-revisar-regulamento-do-transporte-rodoviario-de-produtos-perigosos",
+      "checkedAt": "2026-08-13",
+      "checkedBy": "time Resibag (market_signals)",
+      "revalidateBy": "2026-12-31",
+      "notes": "Norma em revisão: revalidar antes de usar em peça, o resultado da audiência pode mudar o argumento."
+    },
+    {
+      "id": "inmetro-320-exigencias",
+      "claim": "A Portaria INMETRO 320/2021 exige ensaios de queda livre, empilhamento, estanqueidade e pressão interna; certificação por OCP acreditado; marcação ONU com símbolo, código e massa bruta máxima; auditoria anual e recertificação a cada 3 anos.",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 3"
+    },
+    {
+      "id": "inmetro-320-marcacao",
+      "claim": "A marcação ONU do big bag segue o formato 1H2/Y/[ano]/BR/[fabricante]/[OCP], onde 1H2 é big bag flexível e Y cobre grupos de embalagem II e III.",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 3"
+    },
+    {
+      "id": "codigos-ibc-resibag",
+      "claim": "Os códigos INMETRO da Resibag são IBC-0136/22 SAN T025 e IBC-0143/25 SAN T015, pelo OCP ABRACE OCP-0041, aplicáveis às linhas Standard e Estruturado.",
+      "tier": "nao-verificado",
+      "source": "resibag-canonical-facts v2.3, seção 05",
+      "notes": "Fonte primária aqui é o próprio certificado INMETRO. Anexar o PDF e marcar como primária resolve — é o fato mais citado em peça e o mais fácil de comprovar."
+    },
+    {
+      "id": "iso-9001-resibag",
+      "claim": "A Resibag tem ISO 9001:2015 sob o certificado SGS BR08/4255.00, aplicável a todas as linhas.",
+      "tier": "nao-verificado",
+      "source": "resibag-canonical-facts v2.3, seção 05",
+      "notes": "Certificado ISO tem data de validade — quando anexar, preencher revalidateBy com o vencimento real."
+    },
+    {
+      "id": "ibama-rapp",
+      "claim": "O RAPP é declaração anual obrigatória ao IBAMA para gerador de resíduo perigoso, com prazo em maio/2026 para o ano-base 2025.",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 5",
+      "revalidateBy": "2026-12-31",
+      "notes": "Prazo muda todo ano. Não usar em peça sem conferir o ano corrente."
+    },
+    {
+      "id": "decreto-12688-2025",
+      "claim": "O Decreto 12.688/2025 detalha a PNRS em responsabilidade compartilhada, amplia a logística reversa obrigatória e cria critérios de certificação de destinadoras.",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 5"
+    },
+    {
+      "id": "in-ibama-06-2026",
+      "claim": "A IN IBAMA 06/2026 traz novos critérios de declaração no RAPP, integração com o MTR-e e rastreabilidade documental da embalagem.",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 5"
+    },
+    {
+      "id": "ifrs-s1-s2",
+      "claim": "IFRS S1 e S2 (ISSB) chegam ao Brasil pela CVM Res. 193/2023, voluntária desde 2024. Resíduo perigoso entra como Escopo 3, e embalagem certificada e rastreável vira evidência auditável.",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 6"
+    },
+    {
+      "id": "multa-destinacao-irregular",
+      "claim": "Destinação irregular de resíduo perigoso: multa de R$ 5.000 a R$ 50.000.000 (Lei 9.605/98, art. 54).",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 7",
+      "notes": "Valor de multa em peça pública é dos itens de maior risco. Conferir na lei."
+    },
+    {
+      "id": "multa-transporte-sem-certificado",
+      "claim": "Transporte sem embalagem certificada: multa de R$ 5.000 a R$ 10.000 por ocorrência (ANTT 5998/2022). Reincidência dobra o valor e a carga é apreendida.",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seções 2 e 7",
+      "notes": "Conferir na tabela de infrações da ANTT."
+    },
+    {
+      "id": "multa-documentacao",
+      "claim": "Ausência de documentação no transporte: multa de R$ 2.500 a R$ 5.000 (ANTT 5998/2022).",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 7"
+    },
+    {
+      "id": "multa-rapp",
+      "claim": "Não entrega do RAPP: multa de R$ 5.000 a R$ 10.000.000 (IBAMA).",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 7"
+    },
+    {
+      "id": "crime-ambiental-dolo",
+      "claim": "Crime ambiental com dolo: detenção de 1 a 5 anos mais multa (Lei 9.605/98).",
+      "tier": "nao-verificado",
+      "source": "resibag-compliance-kb v3.3, seção 7"
+    }
+  ]
+}
