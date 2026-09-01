@@ -16,7 +16,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ArticleReader } from "@/components/app/ArticleReader";
 import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
 import { CostReceipt } from "@/components/app/CostReceipt";
-import { DerivedPieces, type DerivedPiece } from "@/components/app/DerivedPieces";
+import { OutputPieces, type Piece } from "@/components/app/OutputPieces";
 import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { Button } from "@/components/ui/Button";
 import { brandOptions } from "@/constants/brands";
@@ -34,6 +34,7 @@ import type { MarketSignal } from "@/lib/marketSignals";
 import { fieldClass, focusRing, labelClass, panelClass } from "@/lib/ui";
 import type { Verification } from "@/lib/verify";
 import { articleBlocks, articleToMarkdown, type Article } from "@/types/article";
+import { OUTPUT_META, type OutputKind } from "@/types/outputs";
 import { useSyncExternalStore } from "react";
 
 /**
@@ -62,8 +63,8 @@ type PendingPiece = {
 const STEPS = [
   { n: 1 as const, label: "Sinal" },
   { n: 2 as const, label: "Ângulo" },
-  { n: 3 as const, label: "Escrita" },
-  { n: 4 as const, label: "Conferir" },
+  { n: 3 as const, label: "Formatos" },
+  { n: 4 as const, label: "Peças" },
 ];
 
 function Steps({ current }: { current: 1 | 2 | 3 | 4 }) {
@@ -153,7 +154,8 @@ export default function EsteiraPage() {
   const [cost, setCost] = useState<GenerationCost | null>(null);
   const [warnings, setWarnings] = useState<ForbiddenHit[]>([]);
   const [verification, setVerification] = useState<Verification | null>(null);
-  const [pieces, setPieces] = useState<DerivedPiece[] | null>(null);
+  const [pieces, setPieces] = useState<Piece[] | null>(null);
+  const [kinds, setKinds] = useState<OutputKind[]>([]);
   const [sent, setSent] = useState(false);
   const [copied, setCopied] = useState(false);
 
@@ -198,6 +200,7 @@ export default function EsteiraPage() {
     setWarnings([]);
     setVerification(null);
     setPieces(null);
+    setKinds([]);
     setSent(false);
     setError(null);
   };
@@ -228,20 +231,9 @@ export default function EsteiraPage() {
       setArticle(data.article);
       setWarnings(data.warnings ?? []);
       setVerification(data.verification ?? null);
-
-      // Deriva na sequência: a corrente é o produto, não o artigo sozinho.
-      const derived = await fetch("/api/derive", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ article: data.article, brandId }),
-      });
-      const derivedData = await derived.json();
-      if (derivedData.cost) {
-        pushCostEntry(
-          entryFromCost(derivedData.cost, "derivacao", data.article.title, !derived.ok),
-        );
-      }
-      if (derived.ok) setPieces(derivedData.pieces ?? []);
+      // O redator já disse o que o conteúdo sustenta; começa marcado no que ele
+      // sugeriu, e a tela existe pra você discordar.
+      setKinds((data.article.suggestedOutputs ?? []).map((s: { kind: OutputKind }) => s.kind));
 
       setView(3);
     } catch (caught) {
@@ -249,7 +241,31 @@ export default function EsteiraPage() {
     } finally {
       setBusy(false);
     }
-  }, [angle, source, brandId, signalId]);
+  }, [angle, source, brandId, signalId, setKinds]);
+
+  const derive = useCallback(async () => {
+    if (!article || kinds.length === 0) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/derive", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ article, brandId, kinds }),
+      });
+      const data = await response.json();
+      if (data.cost) {
+        pushCostEntry(entryFromCost(data.cost, "derivacao", article.title, !response.ok));
+      }
+      if (!response.ok) throw new Error(data.error ?? "não foi possível gerar as peças");
+      setPieces(data.pieces ?? []);
+      setView(4);
+    } catch (caught) {
+      setError(caught instanceof Error ? caught.message : "erro desconhecido");
+    } finally {
+      setBusy(false);
+    }
+  }, [article, brandId, kinds]);
 
   const send = useCallback(async () => {
     if (!article || !pieces) return;
@@ -264,8 +280,8 @@ export default function EsteiraPage() {
           brandId,
           sourceLabel: chosen?.source ?? null,
           pieces: pieces.map((piece) => ({
-            platform: piece.platform,
-            carousel: piece.carousel,
+            platform: piece.kind,
+            carousel: piece.data,
             flagged: piece.verification?.flagged ?? 0,
           })),
         }),
@@ -490,14 +506,17 @@ export default function EsteiraPage() {
           {/* ══ PASSO 3 — ESCRITA ══ */}
           {view === 3 && article ? (
             <div className="flex flex-col gap-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <h1 className="text-lg font-semibold tracking-tight text-zinc-900">Pronto</h1>
-                <span className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">
-                  artigo → linkedin → instagram
-                </span>
+              <div className="flex flex-col gap-0.5">
+                <h1 className="text-lg font-semibold tracking-tight text-zinc-900">
+                  Que peças sair daqui?
+                </h1>
+                <p className="text-[13px] text-zinc-500">
+                  Marcados são os que o artigo sustenta. Desmarque o que não quiser,
+                  marque o que faltou.
+                </p>
               </div>
 
-              {cost ? <CostReceipt cost={cost} summary="Artigo e derivação" /> : null}
+              {cost ? <CostReceipt cost={cost} summary="Artigo" /> : null}
               {verification ? (
                 <VerificationPanel verification={verification} labels={blockLabels} />
               ) : null}
@@ -512,19 +531,72 @@ export default function EsteiraPage() {
                 </div>
               ) : null}
 
-              {pieces ? <DerivedPieces pieces={pieces} brandId={brandId} /> : null}
+              <div className="flex flex-col gap-2">
+                {(Object.keys(OUTPUT_META) as OutputKind[]).map((kind) => {
+                  const meta = OUTPUT_META[kind];
+                  const on = kinds.includes(kind);
+                  const suggested = article.suggestedOutputs.find((s) => s.kind === kind);
+
+                  return (
+                    <label
+                      key={kind}
+                      className={clsx(
+                        "flex cursor-pointer items-start gap-2.5 rounded-lg border px-3.5 py-3 transition",
+                        on ? "border-zinc-900 bg-white" : "border-zinc-200 bg-white hover:border-zinc-400",
+                      )}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={on}
+                        onChange={() =>
+                          setKinds((current) =>
+                            current.includes(kind)
+                              ? current.filter((k) => k !== kind)
+                              : [...current, kind],
+                          )
+                        }
+                        className={clsx("mt-0.5 h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900", focusRing)}
+                      />
+                      <span className="flex min-w-0 flex-1 flex-col gap-0.5">
+                        <span className="flex flex-wrap items-baseline gap-2">
+                          <span className="text-[13px] font-medium text-zinc-900">{meta.label}</span>
+                          <span className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">
+                            {meta.platform}
+                          </span>
+                          {suggested ? (
+                            <span className="rounded border border-emerald-300 bg-emerald-50 px-1.5 py-0.5 font-mono text-[9.5px] uppercase tracking-wide text-emerald-800">
+                              sugerido
+                            </span>
+                          ) : null}
+                        </span>
+                        {/* A razão da sugestão fala deste conteúdo; a nota do
+                            formato fala do formato. Quando há sugestão, ela ganha. */}
+                        <span className="text-[11.5px] leading-snug text-zinc-500">
+                          {suggested ? suggested.reason : meta.note}
+                        </span>
+                      </span>
+                    </label>
+                  );
+                })}
+              </div>
 
               <div className="flex items-center gap-2">
-                <Button onClick={() => setView(2)}>Refazer o ângulo</Button>
+                <Button onClick={() => setView(2)}>Voltar</Button>
                 <div className="flex-1" />
-                <Button variant="primary" onClick={() => setView(4)}>
-                  Conferir o texto
+                <Button
+                  variant="primary"
+                  loading={busy}
+                  disabled={kinds.length === 0}
+                  onClick={() => void derive()}
+                >
+                  {busy
+                    ? "Gerando…"
+                    : `Gerar ${kinds.length} ${kinds.length === 1 ? "peça" : "peças"}`}
                 </Button>
               </div>
             </div>
           ) : null}
 
-          {/* ══ PASSO 4 — CONFERIR E ENVIAR ══ */}
           {view === 4 && article ? (
             <div className="flex flex-col gap-4">
               {sent ? (
@@ -559,6 +631,8 @@ export default function EsteiraPage() {
                         : `${flagged} ${flagged === 1 ? "afirmação" : "afirmações"} sem fonte nas peças — dá pra enviar assim, mas você vai decidir sobre isso na aprovação.`}
                     </p>
                   </div>
+
+                  {pieces ? <OutputPieces pieces={pieces} brandId={brandId} /> : null}
 
                   <div className={clsx(panelClass, "flex flex-col gap-4 p-5")}>
                     <div className="flex flex-wrap items-center gap-2 border-b border-zinc-100 pb-3">
@@ -598,7 +672,7 @@ export default function EsteiraPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Button onClick={() => setView(3)}>Voltar</Button>
+                        <Button onClick={() => setView(3)}>Voltar</Button>
                     <div className="flex-1" />
                     {crmReady ? (
                       <Button

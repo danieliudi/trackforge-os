@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { outputSuggestionSchema } from "./outputs";
+
 /**
  * Artigo longo — o ativo permanente do ciclo editorial.
  *
@@ -61,6 +63,15 @@ export const articleSchema = z.object({
   /** O que o leitor faz depois de ler. É daqui que sai o CTA das peças derivadas. */
   takeaways: z.array(z.string().min(1)).min(MIN_TAKEAWAYS).max(MAX_TAKEAWAYS),
   sources: z.array(articleSourceSchema).max(12).default([]),
+  /**
+   * Que formatos curtos este conteúdo sustenta, e por quê.
+   *
+   * Vem do redator do artigo em vez de uma chamada própria: ele acabou de ler o
+   * material e decidir a estrutura, então já sabe se o assunto é passo a passo
+   * (carrossel), prazo (post de texto) ou lembrete (stories). Perguntar de novo
+   * seria pagar duas vezes pela mesma leitura.
+   */
+  suggestedOutputs: z.array(outputSuggestionSchema).min(1).max(5),
 });
 
 export type ArticleSection = z.infer<typeof articleSectionSchema>;
