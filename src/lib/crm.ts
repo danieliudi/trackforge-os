@@ -117,3 +117,58 @@ export async function publishForApproval(
 
   return { id: data?.data?.id ?? "", status: data?.data?.status ?? "pending" };
 }
+
+export type PendingPiece = {
+  id: string;
+  title: string;
+  summary: string | null;
+  companyId: string | null;
+  priority: string;
+  createdAt: string;
+};
+
+/**
+ * Peças da esteira esperando decisão sua na fila do CRM.
+ *
+ * Alimenta o painel: sem isto, "1 pacote esperando aprovação" seria um número
+ * inventado, e número inventado num painel é pior que campo vazio — ele parece
+ * informação. Só conta o que esta ferramenta propôs; sugestão de sinal e de
+ * prospect são outra fila, de outro agente.
+ */
+export async function listPendingPieces(
+  brandId?: BrandId | null,
+): Promise<PendingPiece[]> {
+  const config = readConfig();
+  if (!config) return [];
+
+  const params = new URLSearchParams({ action: "list", status: "pending", limit: "20" });
+  if (brandId) params.set("company_id", COMPANY_ID[brandId]);
+
+  const response = await fetch(`${config.url}?${params}`, {
+    headers: { "x-agent-key": config.key },
+  });
+  if (!response.ok) return [];
+
+  const body = await response.json().catch(() => ({}));
+  const rows: unknown = body?.data;
+  if (!Array.isArray(rows)) return [];
+
+  return rows.flatMap((row) => {
+    if (typeof row !== "object" || row === null) return [];
+    const data = row as Record<string, unknown>;
+    // A fila é compartilhada com os outros agentes; filtra pelo tipo desta
+    // ferramenta em vez de mostrar sugestão de prospect no painel do conteúdo.
+    if (data.action_type !== ACTION_TYPE) return [];
+
+    return [
+      {
+        id: String(data.id ?? ""),
+        title: String(data.title ?? ""),
+        summary: typeof data.summary === "string" ? data.summary : null,
+        companyId: typeof data.company_id === "string" ? data.company_id : null,
+        priority: String(data.priority ?? "normal"),
+        createdAt: String(data.created_at ?? ""),
+      },
+    ];
+  });
+}

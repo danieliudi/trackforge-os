@@ -66,12 +66,12 @@ export function AppHeader({
           Carousel Builder
         </span>
         <Link
-          href="/artigo"
+          href="/esteira"
           className={`flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-xs text-zinc-500 transition hover:text-zinc-900 ${focusRing}`}
-          title="Escrever o artigo que origina as peças"
+          title="Do sinal à peça enviada"
         >
           <FileText size={13} />
-          <span className="hidden sm:inline">Artigo</span>
+          <span className="hidden sm:inline">Esteira</span>
         </Link>
         {title ? (
           <>
