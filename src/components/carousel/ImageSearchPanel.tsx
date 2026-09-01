@@ -39,6 +39,8 @@ type ImageSearchPanelProps = {
   initialQuery?: string;
   /** Aba inicial. A biblioteca da marca vem antes quando ela tem foto. */
   initialTab?: Tab;
+  /** Nome da frente na aba: "Biblioteca Resibag" diz de quem é a pasta aberta. */
+  brandLabel?: string;
 };
 
 /**
@@ -61,6 +63,7 @@ export function ImageSearchPanel({
   brandId,
   initialQuery,
   initialTab = "unsplash",
+  brandLabel,
 }: ImageSearchPanelProps) {
   const [tab, setTab] = useState<Tab>(initialTab);
 
@@ -79,7 +82,7 @@ export function ImageSearchPanel({
               tab === id ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900",
             )}
           >
-            {label}
+            {id === "biblioteca" && brandLabel ? `${label} ${brandLabel}` : label}
           </button>
         ))}
       </div>

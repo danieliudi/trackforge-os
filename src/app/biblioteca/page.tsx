@@ -3,9 +3,16 @@
 import { ArrowLeft, Loader2, SearchX, Upload, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useId, useState } from "react";
+import { useCallback, useEffect, useId, useState, useSyncExternalStore } from "react";
 
-import { fieldClass, focusRing } from "@/lib/ui";
+import { brandOptions, type BrandId } from "@/constants/brands";
+import {
+  getFrontServerSnapshot,
+  getFrontSnapshot,
+  setFront,
+  subscribeFront,
+} from "@/lib/front";
+import { fieldClass, focusRing, labelClass } from "@/lib/ui";
 
 type LibraryImage = {
   name: string;
@@ -19,25 +26,36 @@ type LibraryImage = {
  * moram só aqui, então nunca existem dois lugares editando a mesma lista.
  */
 export default function BibliotecaPage() {
+  // A mesma frente do resto do app, e não uma escolha local: trocar de frente
+  // aqui e voltar para a esteira noutra frente é como a foto de uma marca
+  // termina numa peça da outra.
+  const front = useSyncExternalStore(subscribeFront, getFrontSnapshot, getFrontServerSnapshot);
   const [images, setImages] = useState<LibraryImage[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
   const [uploading, setUploading] = useState(false);
   const uploadId = useId();
 
-  function loadImages() {
-    return fetch("/api/assets/library")
+  const loadImages = useCallback(() => {
+    return fetch(`/api/assets/library?brandId=${front}`)
       .then((response) => response.json())
       .then((data) => {
         setImages(data.images);
         setError(null);
       })
       .catch(() => setError("falha ao carregar a biblioteca"));
-  }
+  }, [front]);
 
+  // Agendado como no resto do app: setState síncrono dentro do efeito encadeia
+  // render antes da pintura. Trocar de frente esvazia a grade antes de recarregar,
+  // senão as fotos da frente anterior ficam na tela como se fossem desta.
   useEffect(() => {
-    loadImages();
-  }, []);
+    const timer = setTimeout(() => {
+      setImages(null);
+      loadImages();
+    }, 0);
+    return () => clearTimeout(timer);
+  }, [loadImages]);
 
   async function handleUpload(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -48,7 +66,10 @@ export default function BibliotecaPage() {
       for (const file of Array.from(files)) {
         const form = new FormData();
         form.append("file", file);
-        const response = await fetch("/api/assets/library", { method: "POST", body: form });
+        const response = await fetch(`/api/assets/library?brandId=${front}`, {
+          method: "POST",
+          body: form,
+        });
         if (!response.ok) {
           const data = await response.json();
           throw new Error(data.error ?? `falha ao enviar "${file.name}"`);
@@ -67,7 +88,7 @@ export default function BibliotecaPage() {
     setImages((current) => current?.filter((item) => item.path !== image.path) ?? current);
 
     try {
-      const response = await fetch("/api/assets/library", {
+      const response = await fetch(`/api/assets/library?brandId=${front}`, {
         method: "DELETE",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ name: image.name }),
@@ -87,11 +108,11 @@ export default function BibliotecaPage() {
     <div className="flex flex-1 flex-col overflow-y-auto bg-zinc-100 font-sans">
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-zinc-200 bg-white px-4 py-2.5 sm:px-6">
         <Link
-          href="/editor"
+          href="/esteira"
           className={`flex items-center gap-1.5 text-sm text-zinc-600 transition hover:text-zinc-900 ${focusRing}`}
         >
           <ArrowLeft size={15} />
-          Carousel Builder
+          Esteira
         </Link>
         <span className="text-sm font-semibold tracking-tight text-zinc-900">
           Biblioteca de imagens
@@ -102,6 +123,28 @@ export default function BibliotecaPage() {
       </header>
 
       <div className="mx-auto flex w-full max-w-5xl flex-1 flex-col gap-4 p-4 sm:p-6">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className={labelClass}>Frente</span>
+          {brandOptions.map(({ id, label }) => (
+            <button
+              key={id}
+              type="button"
+              aria-pressed={id === front}
+              onClick={() => setFront(id as BrandId)}
+              className={`rounded-md border px-3 py-1 text-[13px] transition ${focusRing} ${
+                id === front
+                  ? "border-zinc-900 bg-white font-semibold text-zinc-900"
+                  : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400"
+              }`}
+            >
+              {label}
+            </button>
+          ))}
+          <span className="text-[11.5px] text-zinc-500">
+            Cada frente tem a sua pasta. O que está aqui aparece primeiro na busca de imagem.
+          </span>
+        </div>
+
         <div className="flex gap-2">
           <input
             value={filter}

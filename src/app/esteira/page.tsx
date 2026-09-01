@@ -13,6 +13,7 @@ import {
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
+import { ArticleImages } from "@/components/app/ArticleImages";
 import { ArticleReader } from "@/components/app/ArticleReader";
 import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
 import { CostReceipt } from "@/components/app/CostReceipt";
@@ -34,7 +35,12 @@ import {
 import type { MarketSignal } from "@/lib/marketSignals";
 import { fieldClass, focusRing, labelClass, panelClass } from "@/lib/ui";
 import type { Verification } from "@/lib/verify";
-import { articleBlocks, articleToMarkdown, type Article } from "@/types/article";
+import {
+  articleBlocks,
+  articleToMarkdown,
+  type Article,
+  type ChosenImage,
+} from "@/types/article";
 import { OUTPUT_META, type OutputKind } from "@/types/outputs";
 import { useSyncExternalStore } from "react";
 
@@ -123,6 +129,8 @@ export default function EsteiraPage() {
   const [warnings, setWarnings] = useState<ForbiddenHit[]>([]);
   const [verification, setVerification] = useState<Verification | null>(null);
   const [pieces, setPieces] = useState<Piece[] | null>(null);
+  /** Imagem escolhida por slot do artigo — entra no markdown e no envio. */
+  const [images, setImages] = useState<Record<string, ChosenImage>>({});
   const [kinds, setKinds] = useState<OutputKind[]>([]);
   const [sent, setSent] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -168,6 +176,7 @@ export default function EsteiraPage() {
     setWarnings([]);
     setVerification(null);
     setPieces(null);
+    setImages({});
     setKinds([]);
     setSent(false);
     setError(null);
@@ -247,6 +256,7 @@ export default function EsteiraPage() {
           article,
           brandId,
           sourceLabel: chosen?.source ?? null,
+          images: Object.values(images),
           pieces: pieces.map((piece) => ({
             kind: piece.kind,
             data: piece.data,
@@ -263,9 +273,9 @@ export default function EsteiraPage() {
     } finally {
       setBusy(false);
     }
-  }, [article, pieces, brandId, chosen, load]);
+  }, [article, pieces, brandId, chosen, images, load]);
 
-  const markdown = article ? articleToMarkdown(article) : "";
+  const markdown = article ? articleToMarkdown(article, Object.values(images)) : "";
   const blockLabels = article
     ? Object.fromEntries(articleBlocks(article).map((block) => [block.number, block.label]))
     : undefined;
@@ -601,6 +611,13 @@ export default function EsteiraPage() {
                   </div>
 
                   {pieces ? <OutputPieces pieces={pieces} brandId={brandId} /> : null}
+
+                  <ArticleImages
+                    ideas={article.imageIdeas}
+                    chosen={images}
+                    onChange={setImages}
+                    brandId={brandId}
+                  />
 
                   <div className={clsx(panelClass, "flex flex-col gap-4 p-5")}>
                     <div className="flex flex-wrap items-center gap-2 border-b border-zinc-100 pb-3">
