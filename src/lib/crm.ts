@@ -1,6 +1,7 @@
 import type { BrandId } from "@/constants/brands";
 import { COMPANY_ID } from "@/lib/marketSignals";
-import { articleToMarkdown, type Article } from "@/types/article";
+import { articleToMarkdown, type Article, type ChosenImage } from "@/types/article";
+import { isCarousel, outputBlocks, OUTPUT_META, type OutputKind } from "@/types/outputs";
 import type { Carousel } from "@/types/carousel";
 
 /**
@@ -38,25 +39,38 @@ export function crmPublishConfigured(): boolean {
 }
 
 export type PieceForPublish = {
-  platform: string;
-  carousel: Carousel;
+  kind: OutputKind;
+  /** O objeto do formato — carrossel, roteiro, sequência de telas. */
+  data: unknown;
   flagged: number;
 };
 
 export type PublishInput = {
   article: Article;
   pieces: PieceForPublish[];
+  /** Imagens escolhidas para o artigo — entram no markdown entregue. */
+  images?: ChosenImage[];
   brandId?: BrandId | null;
   /** Sinal que originou a pauta, quando houve um. */
   sourceLabel?: string;
 };
+
+/** Título da peça, que só o carrossel carrega dentro de si. */
+function pieceTitle(piece: PieceForPublish): string {
+  const meta = OUTPUT_META[piece.kind];
+  if (isCarousel(piece.kind)) {
+    const carousel = piece.data as Carousel;
+    return carousel.title;
+  }
+  return `${meta.label} · ${meta.platform}`;
+}
 
 export type PublishResult = { id: string; status: string };
 
 /** Uma linha por peça, curta o bastante para o pacote caber numa tela. */
 function summarize({ article, pieces }: PublishInput): string {
   const list = pieces
-    .map((piece) => `${piece.platform}: ${piece.carousel.slides.length} slides`)
+    .map((piece) => `${OUTPUT_META[piece.kind].platform}: ${OUTPUT_META[piece.kind].label}`)
     .join(" · ");
   const flagged = pieces.reduce((total, piece) => total + piece.flagged, 0);
 
@@ -77,7 +91,7 @@ export async function publishForApproval(
     throw new Error("o CRM não está configurado nesta instalação");
   }
 
-  const { article, pieces, brandId, sourceLabel } = input;
+  const { article, pieces, images, brandId, sourceLabel } = input;
   const flagged = pieces.reduce((total, piece) => total + piece.flagged, 0);
 
   const response = await fetch(`${config.url}?action=create`, {
@@ -96,14 +110,28 @@ export async function publishForApproval(
       payload: {
         origem: "carousel-builder",
         sinal: sourceLabel ?? null,
-        artigo_markdown: articleToMarkdown(article),
+        artigo_markdown: articleToMarkdown(article, images ?? []),
         artigo: article,
-        pecas: pieces.map((piece) => ({
-          plataforma: piece.platform,
-          titulo: piece.carousel.title,
-          slides: piece.carousel.slides,
-          sem_fonte: piece.flagged,
-        })),
+        imagens: images ?? [],
+        pecas: pieces.map((piece) => {
+          const blocos = outputBlocks(piece.kind, piece.data);
+          return {
+            plataforma: OUTPUT_META[piece.kind].platform,
+            formato: OUTPUT_META[piece.kind].label,
+            titulo: pieceTitle(piece),
+            blocos,
+            // `slides` é a forma que o gateway em produção lê hoje. É o mesmo
+            // conteúdo dos blocos, com o nome que aquele código espera — sem
+            // isto, Reels e Stories chegariam ao entregável como um título sem
+            // corpo. Some quando o gateway passar a ler `blocos`.
+            slides: blocos.map((bloco) => ({
+              slideNumber: bloco.number,
+              headline: bloco.text,
+            })),
+            conteudo: piece.data,
+            sem_fonte: piece.flagged,
+          };
+        }),
       },
     }),
   });

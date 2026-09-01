@@ -62,6 +62,19 @@ Regras de "suggestedOutputs" — o que o conteúdo sustenta:
   cabe em post de texto e em stories; passo a passo é carrossel.
 - Não liste um formato só para completar a lista.
 
+Regras de "imageIdeas" — que imagem o artigo pede:
+- De 1 a 4 ideias. "slot" é "capa" ou o título EXATO de uma das seções que você
+  escreveu — nunca um título que não existe no artigo.
+- "describes" é o que a foto deve mostrar, em português, concreto: "operador
+  movimentando big bag com empilhadeira em pátio industrial", não "logística".
+- "query" é o termo de busca EM INGLÊS, de 2 a 5 palavras, do jeito que se
+  procura foto de banco de imagem: "industrial warehouse forklift", não uma
+  frase. O acervo é indexado em inglês; termo em português não acha nada.
+- Norma, prazo e número não têm foto literal. Quando a seção for sobre isso,
+  procure o CONTEXTO físico — o pátio, o documento sobre a mesa, o equipamento,
+  a inspeção. Nunca sugira infográfico, ilustração de conceito ou gráfico.
+- Não sugira foto de pessoa identificável em situação que o artigo não sustenta.
+
 Regras de texto:
 - Português do Brasil, parágrafos curtos, voz ativa.
 - Sem "no mundo de hoje", "cada vez mais", "não é segredo que". Comece pelo assunto.

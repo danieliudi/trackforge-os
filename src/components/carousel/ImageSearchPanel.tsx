@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
+import type { BrandId } from "@/constants/brands";
 import { fieldClass, focusRing } from "@/lib/ui";
 
 type UnsplashResult = {
@@ -31,11 +32,37 @@ const TABS = [
 type Tab = (typeof TABS)[number]["id"];
 
 type ImageSearchPanelProps = {
-  onSelect: (url: string) => void;
+  onSelect: (image: PickedImage) => void;
+  /** Frente cuja biblioteca abrir. Sem isto, cai na pasta padrão. */
+  brandId?: BrandId | null;
+  /** Termo já preenchido — usado quando a busca vem de uma sugestão do artigo. */
+  initialQuery?: string;
+  /** Aba inicial. A biblioteca da marca vem antes quando ela tem foto. */
+  initialTab?: Tab;
 };
 
-export function ImageSearchPanel({ onSelect }: ImageSearchPanelProps) {
-  const [tab, setTab] = useState<Tab>("unsplash");
+/**
+ * O que a escolha devolve.
+ *
+ * Antes era só a URL, porque o slide só precisava dela. O artigo precisa do
+ * crédito junto: foto de acervo tem exigência de atribuição, e um crédito que
+ * depende de alguém lembrar de copiar é um crédito que não vai sair.
+ */
+export type PickedImage = {
+  url: string;
+  alt: string;
+  credit: string | null;
+  creditUrl: string | null;
+  fileName: string | null;
+};
+
+export function ImageSearchPanel({
+  onSelect,
+  brandId,
+  initialQuery,
+  initialTab = "unsplash",
+}: ImageSearchPanelProps) {
+  const [tab, setTab] = useState<Tab>(initialTab);
 
   return (
     <div className="flex flex-col gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-2.5">
@@ -57,13 +84,23 @@ export function ImageSearchPanel({ onSelect }: ImageSearchPanelProps) {
         ))}
       </div>
 
-      {tab === "unsplash" ? <UnsplashTab onSelect={onSelect} /> : <LibraryTab onSelect={onSelect} />}
+      {tab === "unsplash" ? (
+        <UnsplashTab onSelect={onSelect} initialQuery={initialQuery} />
+      ) : (
+        <LibraryTab onSelect={onSelect} brandId={brandId} />
+      )}
     </div>
   );
 }
 
-function UnsplashTab({ onSelect }: { onSelect: (url: string) => void }) {
-  const [query, setQuery] = useState("");
+function UnsplashTab({
+  onSelect,
+  initialQuery,
+}: {
+  onSelect: (image: PickedImage) => void;
+  initialQuery?: string;
+}) {
+  const [query, setQuery] = useState(initialQuery ?? "");
   const [results, setResults] = useState<UnsplashResult[] | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -96,7 +133,13 @@ function UnsplashTab({ onSelect }: { onSelect: (url: string) => void }) {
   }, [query]);
 
   function select(photo: UnsplashResult) {
-    onSelect(photo.fullUrl);
+    onSelect({
+      url: photo.fullUrl,
+      alt: photo.alt,
+      credit: photo.credit,
+      creditUrl: photo.creditUrl,
+      fileName: null,
+    });
     // Fire-and-forget: exigido pelas diretrizes da API do Unsplash quando a foto é usada de fato.
     fetch("/api/images/track-download", {
       method: "POST",
@@ -167,17 +210,23 @@ function UnsplashTab({ onSelect }: { onSelect: (url: string) => void }) {
  * Só escolhe e insere — upload e exclusão de arquivo real moram na página
  * /biblioteca. Assim nunca existem dois lugares editando a mesma lista.
  */
-function LibraryTab({ onSelect }: { onSelect: (url: string) => void }) {
+function LibraryTab({
+  onSelect,
+  brandId,
+}: {
+  onSelect: (image: PickedImage) => void;
+  brandId?: BrandId | null;
+}) {
   const [images, setImages] = useState<LibraryImage[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    fetch("/api/assets/library")
+    fetch(brandId ? `/api/assets/library?brandId=${brandId}` : "/api/assets/library")
       .then((response) => response.json())
       .then((data) => setImages(data.images))
       .catch(() => setError("falha ao carregar a biblioteca"));
-  }, []);
+  }, [brandId]);
 
   const filtered = images?.filter((image) =>
     image.name.toLowerCase().includes(filter.trim().toLowerCase()),
@@ -211,7 +260,15 @@ function LibraryTab({ onSelect }: { onSelect: (url: string) => void }) {
             <button
               key={image.path}
               type="button"
-              onClick={() => onSelect(`${window.location.origin}${image.path}`)}
+              onClick={() =>
+                onSelect({
+                  url: `${window.location.origin}${image.path}`,
+                  alt: image.name,
+                  credit: null,
+                  creditUrl: null,
+                  fileName: image.name,
+                })
+              }
               title={image.name}
               className={`group relative aspect-square overflow-hidden rounded bg-zinc-100 ${focusRing}`}
             >

@@ -777,6 +777,7 @@ export default function Home() {
                       onAdd={addSlide}
                       onRegenerate={regenerateSlide}
                       regeneratingIndex={regeneratingIndex}
+                      brandId={brandId}
                       maxSlides={maxSlides}
                     />
                   </div>

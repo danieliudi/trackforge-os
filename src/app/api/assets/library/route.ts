@@ -1,9 +1,27 @@
-import { access, readdir, unlink, writeFile } from "node:fs/promises";
+import { access, mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const LIBRARY_DIR = path.join(process.cwd(), "public", "assets", "resibag");
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png"]);
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
+
+/**
+ * Uma pasta por frente.
+ *
+ * A biblioteca era só `assets/resibag`, de quando a ferramenta atendia uma
+ * marca. Com duas frentes a pasta única deixa a foto de uma aparecer na peça da
+ * outra — o erro caro, porque sai publicado com a marca errada e ninguém
+ * percebe até estar no ar. O padrão continua sendo resibag para não quebrar
+ * quem já chama sem a frente.
+ */
+const BRANDS = new Set(["sanwey", "resibag"]);
+const DEFAULT_BRAND = "resibag";
+
+function brandFrom(request: Request): string {
+  const asked = new URL(request.url).searchParams.get("brandId");
+  return asked && BRANDS.has(asked) ? asked : DEFAULT_BRAND;
+}
+
+const dirOf = (brand: string) => path.join(process.cwd(), "public", "assets", brand);
 
 /** Só nome de arquivo simples, com extensão de imagem — barra travessão de diretório. */
 function sanitizeName(name: string): string | null {
@@ -22,21 +40,32 @@ async function exists(filePath: string) {
 }
 
 /** "foto.jpg" já existe? tenta "foto-1.jpg", "foto-2.jpg"... em vez de sobrescrever. */
-async function uniqueName(name: string) {
+async function uniqueName(dir: string, name: string) {
   const ext = path.extname(name);
   const base = name.slice(0, -ext.length);
 
   let candidate = name;
   let suffix = 1;
-  while (await exists(path.join(LIBRARY_DIR, candidate))) {
+  while (await exists(path.join(dir, candidate))) {
     candidate = `${base}-${suffix}${ext}`;
     suffix += 1;
   }
   return candidate;
 }
 
-export async function GET() {
-  const files = await readdir(LIBRARY_DIR);
+export async function GET(request: Request) {
+  const brand = brandFrom(request);
+
+  // Frente sem pasta é biblioteca vazia, não erro: a pasta nasce no primeiro
+  // upload, e derrubar o painel por isso seria transformar "ainda não subi
+  // nada" em falha.
+  let files: string[];
+  try {
+    files = await readdir(dirOf(brand));
+  } catch (error) {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return Response.json({ images: [] });
+    throw error;
+  }
 
   const images = files
     .filter((name) => IMAGE_EXTENSIONS.has(path.extname(name).toLowerCase()))
@@ -45,13 +74,14 @@ export async function GET() {
       name,
       // Caminho relativo ao /public; o cliente monta a URL absoluta com o
       // próprio origin, porque o schema do slide só aceita http(s) ou data:.
-      path: `/assets/resibag/${encodeURIComponent(name)}`,
+      path: `/assets/${brand}/${encodeURIComponent(name)}`,
     }));
 
   return Response.json({ images });
 }
 
 export async function POST(request: Request) {
+  const brand = brandFrom(request);
   const form = await request.formData();
   const file = form.get("file");
 
@@ -68,25 +98,28 @@ export async function POST(request: Request) {
     return Response.json({ error: "arquivo maior que 25MB" }, { status: 400 });
   }
 
-  const name = await uniqueName(file.name);
-  await writeFile(path.join(LIBRARY_DIR, name), Buffer.from(await file.arrayBuffer()));
+  const dir = dirOf(brand);
+  await mkdir(dir, { recursive: true });
+  const name = await uniqueName(dir, file.name);
+  await writeFile(path.join(dir, name), Buffer.from(await file.arrayBuffer()));
 
   return Response.json({
     name,
-    path: `/assets/resibag/${encodeURIComponent(name)}`,
+    path: `/assets/${brand}/${encodeURIComponent(name)}`,
   });
 }
 
 export async function DELETE(request: Request) {
+  const dir = dirOf(brandFrom(request));
   const { name } = (await request.json()) as { name?: string };
   const safeName = name ? sanitizeName(name) : null;
   if (!safeName) {
     return Response.json({ error: "nome de arquivo inválido" }, { status: 400 });
   }
 
-  const filePath = path.join(LIBRARY_DIR, safeName);
+  const filePath = path.join(dir, safeName);
   // Defesa extra além do sanitizeName: o caminho final precisa continuar dentro da pasta.
-  if (path.resolve(filePath) !== path.join(LIBRARY_DIR, safeName)) {
+  if (path.resolve(filePath) !== path.join(dir, safeName)) {
     return Response.json({ error: "nome de arquivo inválido" }, { status: 400 });
   }
 

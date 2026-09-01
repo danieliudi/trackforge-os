@@ -248,8 +248,8 @@ export default function EsteiraPage() {
           brandId,
           sourceLabel: chosen?.source ?? null,
           pieces: pieces.map((piece) => ({
-            platform: piece.kind,
-            carousel: piece.data,
+            kind: piece.kind,
+            data: piece.data,
             flagged: piece.verification?.flagged ?? 0,
           })),
         }),
