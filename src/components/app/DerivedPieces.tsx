@@ -59,7 +59,7 @@ export function DerivedPieces({ pieces, brandId }: DerivedPiecesProps) {
         setFailed(true);
         return;
       }
-      router.push("/");
+      router.push("/editor");
     },
     [brandId, router],
   );

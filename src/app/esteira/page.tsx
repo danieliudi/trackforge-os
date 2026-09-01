@@ -3,7 +3,6 @@
 import clsx from "clsx";
 import {
   AlertCircle,
-  ArrowLeft,
   Check,
   Copy,
   Download,
@@ -15,11 +14,12 @@ import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
 import { ArticleReader } from "@/components/app/ArticleReader";
+import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
 import { CostReceipt } from "@/components/app/CostReceipt";
 import { DerivedPieces, type DerivedPiece } from "@/components/app/DerivedPieces";
 import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { Button } from "@/components/ui/Button";
-import { brandOptions, type BrandId } from "@/constants/brands";
+import { brandOptions } from "@/constants/brands";
 import type { GenerationCost } from "@/constants/pricing";
 import type { ForbiddenHit } from "@/knowledge/check";
 import {
@@ -64,15 +64,6 @@ const STEPS = [
   { n: 2 as const, label: "Ângulo" },
   { n: 3 as const, label: "Escrita" },
   { n: 4 as const, label: "Conferir" },
-];
-
-const FRONTS: { id: BrandId | null; label: string; ready: boolean }[] = [
-  ...brandOptions.map(({ id, label }) => ({ id: id as BrandId | null, label, ready: true })),
-  // A frente pessoal aparece porque ela é parte do desenho, e some da lista de
-  // escolhas porque ainda não tem base de fatos nem auditor de fronteira.
-  // Escondê-la faria parecer que não existe; habilitá-la deixaria sair peça sem
-  // a guarda que ela, das três, é a que mais precisa.
-  { id: null, label: "Meu · pessoal", ready: false },
 ];
 
 function Steps({ current }: { current: 1 | 2 | 3 | 4 }) {
@@ -133,7 +124,7 @@ function Tile({
 }
 
 export default function EsteiraPage() {
-  const [brandId, setBrandId] = useState<BrandId>("resibag");
+  const [brandId] = useFront();
   const [view, setView] = useState<View>("painel");
 
   // ── painel ──────────────────────────────────────────────
@@ -297,63 +288,7 @@ export default function EsteiraPage() {
   const flagged = pieces?.reduce((total, p) => total + (p.verification?.flagged ?? 0), 0) ?? 0;
 
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3">
-          <Link
-            href="/"
-            className={clsx(
-              "flex items-center gap-1.5 rounded-md px-1.5 py-1 text-xs text-zinc-500 transition hover:text-zinc-900",
-              focusRing,
-            )}
-          >
-            <ArrowLeft size={14} />
-            Carrossel
-          </Link>
-          <span className="text-sm font-semibold tracking-tight text-zinc-900">Esteira</span>
-          <div className="flex-1" />
-          {view !== "painel" ? <Steps current={view} /> : null}
-        </div>
-      </header>
-
-      <div className="mx-auto grid max-w-6xl gap-6 px-5 py-6 md:grid-cols-[11.5rem_1fr]">
-        <nav className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
-            <span className={labelClass}>Frente</span>
-            <div className="flex flex-col gap-0.5">
-              {FRONTS.map(({ id, label, ready }) => (
-                <button
-                  key={label}
-                  type="button"
-                  disabled={!ready}
-                  aria-pressed={ready && id === brandId}
-                  onClick={() => {
-                    if (!id) return;
-                    setBrandId(id);
-                    reset();
-                    setView("painel");
-                  }}
-                  className={clsx(
-                    "flex items-center justify-between gap-2 rounded-md border px-2.5 py-1.5 text-left text-[13px] transition",
-                    focusRing,
-                    !ready
-                      ? "cursor-not-allowed border-transparent text-zinc-300"
-                      : id === brandId
-                        ? "border-zinc-900 bg-white font-semibold text-zinc-900"
-                        : "border-transparent text-zinc-600 hover:bg-white",
-                  )}
-                >
-                  {label}
-                  {!ready ? (
-                    <span className="font-mono text-[9px] uppercase text-zinc-300">em breve</span>
-                  ) : null}
-                </button>
-              ))}
-            </div>
-          </div>
-        </nav>
-
-        <main className="flex flex-col gap-4">
+    <EsteiraShell aside={view !== "painel" ? <Steps current={view} /> : null}>
           {error ? (
             <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-[12.5px] text-red-800">
               <AlertCircle size={14} className="mt-px shrink-0" />
@@ -401,7 +336,10 @@ export default function EsteiraPage() {
                 </div>
               ) : null}
 
-              <div>
+              {/* Uma porta, duas saídas. O carrossel avulso existe porque nem
+                  todo post precisa de artigo — e é ele que antes vivia numa
+                  segunda tela de entrada, competindo com esta. */}
+              <div className="flex flex-wrap items-center gap-2">
                 <Button
                   variant="primary"
                   size="lg"
@@ -410,9 +348,22 @@ export default function EsteiraPage() {
                     setView(1);
                   }}
                 >
-                  Criar peça
+                  Criar peça completa
                 </Button>
+                <Link
+                  href="/editor"
+                  className={clsx(
+                    "inline-flex h-11 items-center rounded-lg border border-zinc-300 bg-white px-5 text-sm font-medium text-zinc-800 transition hover:border-zinc-900",
+                    focusRing,
+                  )}
+                >
+                  Carrossel avulso
+                </Link>
               </div>
+              <p className="text-[11.5px] text-zinc-400">
+                Peça completa é artigo + LinkedIn + Instagram, na ordem. Avulso é um
+                post só, sem artigo por trás.
+              </p>
             </div>
           ) : null}
 
@@ -669,8 +620,6 @@ export default function EsteiraPage() {
               )}
             </div>
           ) : null}
-        </main>
-      </div>
-    </div>
+    </EsteiraShell>
   );
 }

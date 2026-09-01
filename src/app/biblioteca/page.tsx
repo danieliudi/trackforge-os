@@ -87,7 +87,7 @@ export default function BibliotecaPage() {
     <div className="flex flex-1 flex-col overflow-y-auto bg-zinc-100 font-sans">
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-zinc-200 bg-white px-4 py-2.5 sm:px-6">
         <Link
-          href="/"
+          href="/editor"
           className={`flex items-center gap-1.5 text-sm text-zinc-600 transition hover:text-zinc-900 ${focusRing}`}
         >
           <ArrowLeft size={15} />

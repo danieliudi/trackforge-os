@@ -95,7 +95,7 @@ entrou numa peça como se fosse a norma-base de transporte de perigosos.`;
  * fala em `[primária]` e o fato vem marcado `[primaria]`, o modelo tem que
  * adivinhar que são a mesma coisa, e a regra deixa de prender.
  */
-const TIER_LABEL: Record<SourceTier, string> = {
+export const TIER_LABEL: Record<SourceTier, string> = {
   primaria: "primária",
   secundaria: "secundária",
   interna: "interna",
