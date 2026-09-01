@@ -25,7 +25,7 @@ export type MarketSignal = {
  * A tabela separa por empresa e o CRM chama a Sanwey de "industria" — a marca
  * ali é a unidade de negócio, não o nome comercial.
  */
-const COMPANY_ID: Record<BrandId, string> = {
+export const COMPANY_ID: Record<BrandId, string> = {
   resibag: "resibag",
   sanwey: "industria",
 };

@@ -1,9 +1,18 @@
 "use client";
 
 import clsx from "clsx";
-import { AlertCircle, ArrowLeft, Check, Copy, Download, FileText, GitBranch } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Check,
+  Copy,
+  Download,
+  FileText,
+  GitBranch,
+  Send,
+} from "lucide-react";
 import Link from "next/link";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { BrandPills } from "@/components/app/BrandPills";
 import { CostReceipt } from "@/components/app/CostReceipt";
@@ -165,6 +174,23 @@ export default function ArtigoPage() {
   const [deriveCost, setDeriveCost] = useState<GenerationCost | null>(null);
   const [deriveError, setDeriveError] = useState<string | null>(null);
 
+  const [crmReady, setCrmReady] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState(false);
+  const [sendError, setSendError] = useState<string | null>(null);
+
+  // Sem credencial do CRM o botão nem aparece — quem roda o gerador nem sempre
+  // é quem tem acesso à fila de aprovação.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void fetch("/api/publish")
+        .then((response) => response.json())
+        .then((data) => setCrmReady(data.configured === true))
+        .catch(() => setCrmReady(false));
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   const generate = useCallback(async () => {
     if (input.trim().length < 3) return;
     setLoading(true);
@@ -203,6 +229,8 @@ export default function ArtigoPage() {
       setPieces(null);
       setDeriveCost(null);
       setDeriveError(null);
+      setSent(false);
+      setSendError(null);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "erro desconhecido");
     } finally {
@@ -238,6 +266,35 @@ export default function ArtigoPage() {
       setDeriving(false);
     }
   }, [article, brandId]);
+
+  const send = useCallback(async () => {
+    if (!article || !pieces) return;
+    setSending(true);
+    setSendError(null);
+
+    try {
+      const response = await fetch("/api/publish", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          article,
+          brandId,
+          pieces: pieces.map((piece) => ({
+            platform: piece.platform,
+            carousel: piece.carousel,
+            flagged: piece.verification?.flagged ?? 0,
+          })),
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "não foi possível enviar");
+      setSent(true);
+    } catch (caught) {
+      setSendError(caught instanceof Error ? caught.message : "erro desconhecido");
+    } finally {
+      setSending(false);
+    }
+  }, [article, pieces, brandId]);
 
   const markdown = article ? articleToMarkdown(article) : "";
 
@@ -430,7 +487,43 @@ export default function ArtigoPage() {
               ) : null}
 
               {pieces ? (
-                <DerivedPieces pieces={pieces} brandId={brandId} />
+                <>
+                  <DerivedPieces pieces={pieces} brandId={brandId} />
+
+                  {crmReady ? (
+                    <div className={clsx(panelClass, "flex flex-col gap-2.5 p-4")}>
+                      {sent ? (
+                        <p className="flex items-center gap-2 text-[12.5px] text-emerald-700">
+                          <Check size={14} className="shrink-0" />
+                          Na sua fila de aprovação no CRM. O artigo, as fontes e o
+                          parecer foram junto — a agência não vê nada disso.
+                        </p>
+                      ) : (
+                        <>
+                          <p className="text-[12.5px] leading-relaxed text-zinc-600">
+                            Entra na mesma fila que você já usa para aprovar sugestão de
+                            sinal e de prospect. Aprovar ou reprovar acontece lá.
+                          </p>
+                          {sendError ? (
+                            <p className="flex items-start gap-2 text-[12px] text-red-700">
+                              <AlertCircle size={13} className="mt-px shrink-0" />
+                              {sendError}
+                            </p>
+                          ) : null}
+                          <Button
+                            icon={Send}
+                            variant="primary"
+                            loading={sending}
+                            onClick={() => void send()}
+                            className="self-start"
+                          >
+                            {sending ? "Enviando…" : "Enviar para aprovação"}
+                          </Button>
+                        </>
+                      )}
+                    </div>
+                  ) : null}
+                </>
               ) : (
                 <div className={clsx(panelClass, "flex flex-col gap-3 p-4")}>
                   <p className="text-[12.5px] leading-relaxed text-zinc-600">
