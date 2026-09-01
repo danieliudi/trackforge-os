@@ -32,7 +32,6 @@ const MAX_DEPTH = 6;
 
 const bold = (s) => `[1m${s}[0m`;
 const dim = (s) => `[2m${s}[0m`;
-const red = (s) => `[31m${s}[0m`;
 const yellow = (s) => `[33m${s}[0m`;
 const green = (s) => `[32m${s}[0m`;
 
