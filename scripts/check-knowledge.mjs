@@ -32,7 +32,6 @@ const MAX_DEPTH = 6;
 
 const bold = (s) => `[1m${s}[0m`;
 const dim = (s) => `[2m${s}[0m`;
-const red = (s) => `[31m${s}[0m`;
 const yellow = (s) => `[33m${s}[0m`;
 const green = (s) => `[32m${s}[0m`;
 
@@ -64,6 +63,23 @@ function findSkill(name, dir = SKILLS_ROOT, depth = 0) {
 }
 
 const sha256 = (path) => createHash("sha256").update(readFileSync(path)).digest("hex");
+
+/**
+ * -1, 0 ou 1 comparando "v2.3" com "v2.10" numericamente.
+ *
+ * Existe porque a direção da deriva muda o conselho: skill que ANDOU PRA FRENTE
+ * pede revisão da curadoria; cópia local ATRASADA não pede nada — a base curada
+ * é que está certa. Tratar os dois como "desatualizado" mandava o usuário
+ * sincronizar para trás, que é o oposto do que ele quer.
+ */
+function compareVersions(a, b) {
+  const parse = (v) => (v ?? "").replace(/^v/, "").split(".").map(Number);
+  const [aMajor = 0, aMinor = 0] = parse(a);
+  const [bMajor = 0, bMinor = 0] = parse(b);
+  if (aMajor !== bMajor) return aMajor < bMajor ? -1 : 1;
+  if (aMinor !== bMinor) return aMinor < bMinor ? -1 : 1;
+  return 0;
+}
 
 /** A versão declarada no cabeçalho, para o aviso citar de/para. */
 function readVersion(path) {
@@ -112,8 +128,10 @@ function main() {
     return;
   }
 
+  // Skill de conta fica no servidor, não em disco: some daqui sem que nada
+  // esteja errado. Por isso o tom é informativo, não de alerta.
   for (const source of missing) {
-    console.log(yellow(`· skill "${source.skill}" não encontrada em ${SKILLS_ROOT} — não dá pra conferir`));
+    console.log(dim(`· "${source.skill}" não está em disco sob ${SKILLS_ROOT} — sem cópia local, não dá pra comparar`));
   }
 
   if (!changed.length) {
@@ -121,23 +139,53 @@ function main() {
     return;
   }
 
-  console.log("");
-  console.log(red(bold("  A base de conhecimento do gerador está desatualizada.")));
-  console.log("");
-  for (const source of changed) {
-    const version =
-      source.current === source.version
-        ? `${source.version} (conteúdo mudou sem bump de versão)`
-        : `${source.version} → ${source.current}`;
-    console.log(`  ${bold(source.skill)}  ${version}`);
+  // A skill andou pra frente: a curadoria pode ter ficado para trás e vale
+  // revisar. É o único caso que pede ação.
+  const ahead = changed.filter((s) => compareVersions(s.version, s.current) < 0);
+  // Cópia local mais velha que a curadoria, ou mesma versão com conteúdo
+  // diferente. Nada a fazer no gerador — a base curada é a boa.
+  const behind = changed.filter((s) => compareVersions(s.version, s.current) > 0);
+  const sameVersion = changed.filter((s) => compareVersions(s.version, s.current) === 0);
+
+  const describe = (source) => {
+    console.log(`  ${bold(source.skill)}  ${source.version} → ${source.current}`);
     console.log(dim(`    curada em ${source.curatedInto}`));
     console.log(dim(`    fonte:     ${source.path}`));
+  };
+
+  if (ahead.length) {
+    console.log("");
+    console.log(yellow(bold("  A skill de origem avançou desde a curadoria.")));
+    console.log("");
+    ahead.forEach(describe);
+    console.log("");
+    console.log("  Revise o arquivo curado à mão e depois rode:");
+    console.log(bold("    npm run knowledge:sync"));
+    console.log("");
+    console.log(dim("  Até lá o gerador usa a curadoria atual, que continua válida."));
   }
-  console.log("");
-  console.log("  Revise o arquivo curado à mão e depois rode:");
-  console.log(bold("    npm run knowledge:sync"));
-  console.log("");
-  console.log(dim("  O gerador continua rodando com a versão antiga até você atualizar."));
+
+  if (sameVersion.length) {
+    console.log("");
+    console.log(yellow("  Mesma versão, conteúdo diferente — alguém editou a skill sem subir a versão."));
+    console.log("");
+    sameVersion.forEach((source) => {
+      console.log(`  ${bold(source.skill)}  ${source.version} (conteúdo mudou sem bump)`);
+      console.log(dim(`    curada em ${source.curatedInto}`));
+      console.log(dim(`    fonte:     ${source.path}`));
+    });
+  }
+
+  if (behind.length) {
+    console.log("");
+    console.log(dim("  Cópia local mais antiga que a usada na curadoria — nada a fazer:"));
+    behind.forEach((source) => {
+      console.log(dim(`  · ${source.skill}: curada de ${source.version}, em disco ${source.current}`));
+    });
+    console.log(dim("  A base do gerador veio da versão mais nova. Não rode knowledge:sync,"));
+    console.log(dim("  ou você grava o hash da cópia velha por cima."));
+  }
+
   console.log("");
 }
 

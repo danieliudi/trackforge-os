@@ -85,7 +85,7 @@ function forbiddenMessage(hits: ForbiddenHit[], brandId: BrandId | null) {
       // Só a primeira frase do motivo: o texto completo foi escrito para o
       // prompt, e inteiro não cabe numa linha de aviso.
       const reason = hit.reason.split(". ")[0];
-      return `"${hit.matched}" (slide ${hit.slideNumber}) — ${reason}`;
+      return `"${hit.matched}" (slide ${hit.blockNumber}) — ${reason}`;
     })
     .join(" · ");
 

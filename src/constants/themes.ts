@@ -12,6 +12,7 @@ export const SLIDE_PADDING = 88;
 /** Proporção de cada combinação formato×plataforma. Apresentação é sempre 16:9. */
 const CARROSSEL_SIZE: Record<Platform, { width: number; height: number }> = {
   linkedin: { width: 1080, height: 1350 },
+  instagram: { width: 1080, height: 1350 },
   facebook: { width: 1080, height: 1080 },
   tiktok: { width: 1080, height: 1920 },
 };

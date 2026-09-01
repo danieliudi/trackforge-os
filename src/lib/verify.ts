@@ -27,7 +27,8 @@ import type { Slide } from "@/types/carousel";
 export const verdictSchema = z.enum(["rastreado", "sem-fonte", "contradiz"]);
 
 const claimSchema = z.object({
-  slideNumber: z.number().int().positive(),
+  /** Bloco onde a afirmação aparece: o slide no carrossel, a seção no artigo. */
+  blockNumber: z.number().int().min(0),
   /** A afirmação como ela aparece na peça, curta o bastante pra caber num aviso. */
   claim: z.string().min(1).max(160),
   verdict: verdictSchema,
@@ -83,13 +84,22 @@ Regras que decidem o veredito:
 Responda em português do Brasil. Seja literal: audite o que está escrito, não o
 que a peça provavelmente quis dizer.`;
 
-export async function verifySlides(
-  slides: Slide[],
+/** Um pedaço numerado da peça: slide do carrossel, seção do artigo. */
+export type VerifiableBlock = { number: number; label: string; text: string };
+
+/**
+ * Audita qualquer peça, desde que ela chegue como blocos numerados.
+ *
+ * O prompt e a base são os mesmos do carrossel de propósito: a regra de
+ * procedência que barra um número sem lastro não muda porque o formato mudou.
+ */
+export async function verifyBlocks(
+  blocks: VerifiableBlock[],
   brandId: BrandId | null | undefined,
   extraContext = "",
 ): Promise<{ verification: Verification; costStep: CostStep }> {
-  const piece = slides
-    .map((slide) => `Slide ${slide.slideNumber} (${slide.type}): ${slideText(slide)}`)
+  const piece = blocks
+    .map((block) => `Bloco ${block.number} (${block.label}): ${block.text}`)
     .join("\n");
 
   const { object, usage } = await generateObject({
@@ -115,4 +125,20 @@ export async function verifySlides(
       usd: priceUsage(verifyUsage, 0, VERIFICATION_MODEL),
     },
   };
+}
+
+export function verifySlides(
+  slides: Slide[],
+  brandId: BrandId | null | undefined,
+  extraContext = "",
+) {
+  return verifyBlocks(
+    slides.map((slide) => ({
+      number: slide.slideNumber,
+      label: slide.type,
+      text: slideText(slide),
+    })),
+    brandId,
+    extraContext,
+  );
 }

@@ -15,8 +15,8 @@ import { getBrandKnowledge } from "./index";
  * entenda a afirmação, não de regex.
  */
 export type ForbiddenHit = {
-  /** 0 quando a violação está fora de um slide específico. */
-  slideNumber: number;
+  /** Slide no carrossel, seção no artigo. 0 quando é fora de um bloco. */
+  blockNumber: number;
   /** O trecho que casou, para o aviso citar o que procurar. */
   matched: string;
   term: string;
@@ -49,7 +49,7 @@ export function slideText(slide: Slide): string {
 }
 
 export function findForbidden(
-  parts: { slideNumber: number; text: string }[],
+  parts: { blockNumber: number; text: string }[],
   brandId: BrandId | null | undefined,
 ): ForbiddenHit[] {
   const knowledge = getBrandKnowledge(brandId);
@@ -66,7 +66,7 @@ export function findForbidden(
         if (!found) continue;
 
         hits.push({
-          slideNumber: part.slideNumber,
+          blockNumber: part.blockNumber,
           matched: found[0].trim(),
           term: rule.term,
           reason: rule.reason,
@@ -84,7 +84,7 @@ export function findForbiddenInSlides(
   brandId: BrandId | null | undefined,
 ): ForbiddenHit[] {
   return findForbidden(
-    slides.map((slide) => ({ slideNumber: slide.slideNumber, text: slideText(slide) })),
+    slides.map((slide) => ({ blockNumber: slide.slideNumber, text: slideText(slide) })),
     brandId,
   );
 }

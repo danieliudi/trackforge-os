@@ -104,6 +104,22 @@ export function saveState(state: StoredState): boolean {
   }
 }
 
+/**
+ * Guarda um rascunho novo e deixa ele ativo.
+ *
+ * Existe para a derivação: a peça nasce na tela do artigo e é editada na tela
+ * do carrossel, e o rascunho é a única ponte entre as duas — não há servidor de
+ * sessão aqui. Retorna false quando o navegador recusa o payload, e quem chama
+ * avisa em vez de fingir que salvou.
+ */
+export function addDraft(draft: Draft): boolean {
+  const state = loadState();
+  return saveState({
+    drafts: [draft, ...state.drafts.filter((existing) => existing.id !== draft.id)],
+    activeId: draft.id,
+  });
+}
+
 const CONTEXT_KEY = "carousel-builder:brand-context:v1";
 
 /** Estratégia/posicionamento colado pelo usuário — um texto por marca. */
