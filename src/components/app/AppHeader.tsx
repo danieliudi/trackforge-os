@@ -1,8 +1,10 @@
 "use client";
 
-import { CloudOff, FileDown, FilePlus2, Images, Redo2, Share2, Undo2 } from "lucide-react";
+import { CloudOff, FileDown, FilePlus2, FileText, Images, Redo2, Share2, Undo2 } from "lucide-react";
+import Link from "next/link";
 
 import { Button, IconButton } from "@/components/ui/Button";
+import { focusRing } from "@/lib/ui";
 import { CostMenu } from "@/components/app/CostMenu";
 import { DraftsMenu } from "@/components/app/DraftsMenu";
 import type { Format } from "@/constants/format";
@@ -63,6 +65,14 @@ export function AppHeader({
         <span className="shrink-0 text-sm font-semibold tracking-tight text-zinc-900">
           Carousel Builder
         </span>
+        <Link
+          href="/artigo"
+          className={`flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-xs text-zinc-500 transition hover:text-zinc-900 ${focusRing}`}
+          title="Escrever o artigo que origina as peças"
+        >
+          <FileText size={13} />
+          <span className="hidden sm:inline">Artigo</span>
+        </Link>
         {title ? (
           <>
             <span aria-hidden className="shrink-0 text-zinc-300">

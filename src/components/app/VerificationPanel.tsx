@@ -9,6 +9,12 @@ import { focusRing } from "@/lib/ui";
 
 type VerificationPanelProps = {
   verification: Verification;
+  /**
+   * Como nomear o bloco de cada afirmação. Sem isto vira "slide N", que é o
+   * caso do carrossel; o artigo passa o título da seção, que é o que o leitor
+   * consegue achar no texto.
+   */
+  labels?: Record<number, string>;
 };
 
 const VERDICT_LABEL: Record<string, string> = {
@@ -24,7 +30,7 @@ const VERDICT_LABEL: Record<string, string> = {
  * usuário, e a peça já foi paga. O papel aqui é impedir que uma afirmação sem
  * lastro passe despercebida até depois de publicada — não substituir a leitura.
  */
-export function VerificationPanel({ verification }: VerificationPanelProps) {
+export function VerificationPanel({ verification, labels }: VerificationPanelProps) {
   const [open, setOpen] = useState(false);
   const { claims, flagged } = verification;
 
@@ -92,11 +98,11 @@ export function VerificationPanel({ verification }: VerificationPanelProps) {
         <dl className="border-t border-zinc-100 bg-white px-3.5 py-1">
           {ordered.map((claim, index) => (
             <div
-              key={`${claim.slideNumber}-${index}`}
+              key={`${claim.blockNumber}-${index}`}
               className="grid grid-cols-[auto_1fr] gap-x-2.5 border-b border-zinc-100 py-2 last:border-b-0"
             >
-              <dt className="pt-0.5 font-mono text-[10px] tabular-nums text-zinc-400">
-                slide {claim.slideNumber}
+              <dt className="max-w-[7.5rem] truncate pt-0.5 font-mono text-[10px] tabular-nums text-zinc-400">
+                {labels?.[claim.blockNumber] ?? `slide ${claim.blockNumber}`}
               </dt>
               <dd className="flex min-w-0 flex-col gap-0.5">
                 <span className="text-[11.5px] leading-snug text-zinc-900">{claim.claim}</span>

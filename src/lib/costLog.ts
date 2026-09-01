@@ -13,11 +13,12 @@ const KEY = "carousel-builder:cost-log:v1";
  */
 const MAX_ENTRIES = 500;
 
-export type CostKind = "carrossel" | "apresentacao" | "slide" | "sugestoes";
+export type CostKind = "carrossel" | "apresentacao" | "artigo" | "slide" | "sugestoes";
 
 export const costKindLabels: Record<CostKind, string> = {
   carrossel: "Carrossel",
   apresentacao: "Apresentação",
+  artigo: "Artigo",
   slide: "Slide avulso",
   sugestoes: "Sugestões de tema",
 };
