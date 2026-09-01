@@ -73,8 +73,10 @@ export function VerificationPanel({ verification, labels }: VerificationPanelPro
           )}
           {clean ? (
             <span>
-              <strong className="font-semibold">{claims.length} afirmações verificadas</strong>,
-              todas rastreadas até uma fonte
+              <strong className="font-semibold">
+                {claims.length} {claims.length === 1 ? "afirmação verificada" : "afirmações verificadas"}
+              </strong>
+              {claims.length === 1 ? ", rastreada até uma fonte" : ", todas rastreadas até uma fonte"}
             </span>
           ) : (
             <span>

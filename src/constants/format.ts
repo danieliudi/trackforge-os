@@ -1,5 +1,5 @@
 export type Format = "carrossel" | "apresentacao";
-export type Platform = "linkedin" | "facebook" | "tiktok";
+export type Platform = "linkedin" | "instagram" | "facebook" | "tiktok";
 
 export const formatOptions: { id: Format; label: string }[] = [
   { id: "carrossel", label: "Carrossel" },
@@ -17,6 +17,12 @@ export const platformOptions: { id: Platform; label: string; toneNote: string }[
     id: "linkedin",
     label: "LinkedIn",
     toneNote: "Dado concreto, autoridade B2B, copy mais longa.",
+  },
+  {
+    id: "instagram",
+    label: "Instagram",
+    toneNote:
+      "Capa que segura o polegar, texto curto por slide, peça que a pessoa salva para consultar depois.",
   },
   {
     id: "facebook",

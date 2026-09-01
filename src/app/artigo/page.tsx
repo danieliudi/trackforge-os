@@ -1,12 +1,17 @@
 "use client";
 
 import clsx from "clsx";
-import { AlertCircle, ArrowLeft, Check, Copy, Download, FileText } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, Copy, Download, FileText, GitBranch } from "lucide-react";
 import Link from "next/link";
 import { useCallback, useState } from "react";
 
 import { BrandPills } from "@/components/app/BrandPills";
 import { CostReceipt } from "@/components/app/CostReceipt";
+import {
+  DerivationChain,
+  DerivedPieces,
+  type DerivedPiece,
+} from "@/components/app/DerivedPieces";
 import { SignalPicker } from "@/components/app/SignalPicker";
 import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { Button } from "@/components/ui/Button";
@@ -24,7 +29,7 @@ import {
   type Article,
 } from "@/types/article";
 
-type Step = 1 | 2;
+type Step = 1 | 2 | 3;
 
 const EXAMPLES = [
   "O que muda com a revisão da Resolução ANTT 5.998/2022",
@@ -32,11 +37,12 @@ const EXAMPLES = [
   "Como escolher big bag certificado para resíduo perigoso",
 ];
 
-/** Passo atual da esteira. Só dois por enquanto — a aprovação vem com o gate. */
+/** Passo atual da esteira. A aprovação ainda não é passo — ela vem com o gate. */
 function Steps({ current }: { current: Step }) {
   const steps = [
     { n: 1 as const, label: "Brief" },
     { n: 2 as const, label: "Artigo" },
+    { n: 3 as const, label: "Peças" },
   ];
 
   return (
@@ -154,6 +160,11 @@ export default function ArtigoPage() {
   const [verification, setVerification] = useState<Verification | null>(null);
   const [copied, setCopied] = useState(false);
 
+  const [deriving, setDeriving] = useState(false);
+  const [pieces, setPieces] = useState<DerivedPiece[] | null>(null);
+  const [deriveCost, setDeriveCost] = useState<GenerationCost | null>(null);
+  const [deriveError, setDeriveError] = useState<string | null>(null);
+
   const generate = useCallback(async () => {
     if (input.trim().length < 3) return;
     setLoading(true);
@@ -187,12 +198,46 @@ export default function ArtigoPage() {
       setArticle(data.article);
       setWarnings(data.warnings ?? []);
       setVerification(data.verification ?? null);
+      // Peça derivada de um artigo que não está mais na tela é pior que peça
+      // nenhuma: ela parece conferida e não é.
+      setPieces(null);
+      setDeriveCost(null);
+      setDeriveError(null);
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "erro desconhecido");
     } finally {
       setLoading(false);
     }
   }, [input, includeNews, verify, brandId, signalIds]);
+
+  const derive = useCallback(async () => {
+    if (!article) return;
+    setDeriving(true);
+    setDeriveError(null);
+
+    try {
+      const response = await fetch("/api/derive", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ article, brandId }),
+      });
+      const data = await response.json();
+
+      if (data.cost) {
+        setDeriveCost(data.cost);
+        pushCostEntry(
+          entryFromCost(data.cost, "derivacao", article.title, !response.ok),
+        );
+      }
+      if (!response.ok) throw new Error(data.error ?? "não foi possível derivar as peças");
+
+      setPieces(data.pieces ?? []);
+    } catch (caught) {
+      setDeriveError(caught instanceof Error ? caught.message : "erro desconhecido");
+    } finally {
+      setDeriving(false);
+    }
+  }, [article, brandId]);
 
   const markdown = article ? articleToMarkdown(article) : "";
 
@@ -236,7 +281,7 @@ export default function ArtigoPage() {
             Artigo
           </span>
           <div className="flex-1" />
-          <Steps current={article ? 2 : 1} />
+          <Steps current={pieces ? 3 : article ? 2 : 1} />
         </div>
       </header>
 
@@ -312,6 +357,9 @@ export default function ArtigoPage() {
             </Button>
           </div>
 
+          {deriveCost ? (
+            <CostReceipt cost={deriveCost} summary="Derivação · LinkedIn e Instagram" />
+          ) : null}
           {cost ? (
             <CostReceipt
               cost={cost}
@@ -369,6 +417,40 @@ export default function ArtigoPage() {
               </p>
             </div>
           )}
+
+          {article ? (
+            <section className="flex flex-col gap-3">
+              <DerivationChain done={Boolean(pieces)} />
+
+              {deriveError ? (
+                <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-[12.5px] text-red-800">
+                  <AlertCircle size={14} className="mt-px shrink-0" />
+                  <span>{deriveError}</span>
+                </div>
+              ) : null}
+
+              {pieces ? (
+                <DerivedPieces pieces={pieces} brandId={brandId} />
+              ) : (
+                <div className={clsx(panelClass, "flex flex-col gap-3 p-4")}>
+                  <p className="text-[12.5px] leading-relaxed text-zinc-600">
+                    O LinkedIn sai do artigo e o Instagram sai do LinkedIn — nessa
+                    ordem, nunca os dois do zero. É o que impede uma afirmação de
+                    aparecer na peça curta sem existir no artigo.
+                  </p>
+                  <Button
+                    icon={GitBranch}
+                    variant="primary"
+                    loading={deriving}
+                    onClick={() => void derive()}
+                    className="self-start"
+                  >
+                    {deriving ? "Derivando…" : "Derivar LinkedIn e Instagram"}
+                  </Button>
+                </div>
+              )}
+            </section>
+          ) : null}
         </div>
       </main>
     </div>
