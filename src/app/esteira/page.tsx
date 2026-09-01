@@ -17,6 +17,7 @@ import { ArticleReader } from "@/components/app/ArticleReader";
 import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
 import { CostReceipt } from "@/components/app/CostReceipt";
 import { OutputPieces, type Piece } from "@/components/app/OutputPieces";
+import { Steps } from "@/components/app/Steps";
 import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { Button } from "@/components/ui/Button";
 import { brandOptions } from "@/constants/brands";
@@ -53,52 +54,19 @@ import { useSyncExternalStore } from "react";
 
 type View = "painel" | 1 | 2 | 3 | 4;
 
+const STEPS = [
+  { n: 1, label: "Sinal" },
+  { n: 2, label: "\u00c2ngulo" },
+  { n: 3, label: "Formatos" },
+  { n: 4, label: "Pe\u00e7as" },
+];
+
 type PendingPiece = {
   id: string;
   title: string;
   summary: string | null;
   priority: string;
 };
-
-const STEPS = [
-  { n: 1 as const, label: "Sinal" },
-  { n: 2 as const, label: "Ângulo" },
-  { n: 3 as const, label: "Formatos" },
-  { n: 4 as const, label: "Peças" },
-];
-
-function Steps({ current }: { current: 1 | 2 | 3 | 4 }) {
-  return (
-    <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
-      {STEPS.map(({ n, label }, index) => (
-        <li key={n} className="flex items-center gap-2">
-          {index > 0 ? <span className="h-px w-4 bg-zinc-200" aria-hidden /> : null}
-          <span
-            className={clsx(
-              "flex items-center gap-1.5 text-[11.5px]",
-              n === current ? "font-semibold text-zinc-900" : "text-zinc-400",
-            )}
-            aria-current={n === current ? "step" : undefined}
-          >
-            <span
-              className={clsx(
-                "grid h-[19px] w-[19px] place-items-center rounded-full border font-mono text-[10px]",
-                n < current
-                  ? "border-emerald-600 bg-emerald-50 text-emerald-700"
-                  : n === current
-                    ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-zinc-200 text-zinc-400",
-              )}
-            >
-              {n < current ? "✓" : n}
-            </span>
-            {label}
-          </span>
-        </li>
-      ))}
-    </ol>
-  );
-}
 
 function Tile({
   value,
@@ -304,7 +272,7 @@ export default function EsteiraPage() {
   const flagged = pieces?.reduce((total, p) => total + (p.verification?.flagged ?? 0), 0) ?? 0;
 
   return (
-    <EsteiraShell aside={view !== "painel" ? <Steps current={view} /> : null}>
+    <EsteiraShell aside={view !== "painel" ? <Steps steps={STEPS} current={view} /> : null}>
           {error ? (
             <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 px-3.5 py-3 text-[12.5px] text-red-800">
               <AlertCircle size={14} className="mt-px shrink-0" />
@@ -352,9 +320,9 @@ export default function EsteiraPage() {
                 </div>
               ) : null}
 
-              {/* Uma porta, duas saídas. O carrossel avulso existe porque nem
-                  todo post precisa de artigo — e é ele que antes vivia numa
-                  segunda tela de entrada, competindo com esta. */}
+              {/* Uma porta, duas saídas. A peça avulsa existe porque nem todo
+                  post precisa de artigo — e é ela que antes vivia numa segunda
+                  tela de entrada, competindo com esta. */}
               <div className="flex flex-wrap items-center gap-2">
                 <Button
                   variant="primary"
@@ -367,18 +335,18 @@ export default function EsteiraPage() {
                   Criar peça completa
                 </Button>
                 <Link
-                  href="/editor"
+                  href="/esteira/avulso"
                   className={clsx(
                     "inline-flex h-11 items-center rounded-lg border border-zinc-300 bg-white px-5 text-sm font-medium text-zinc-800 transition hover:border-zinc-900",
                     focusRing,
                   )}
                 >
-                  Carrossel avulso
+                  Peça avulsa
                 </Link>
               </div>
               <p className="text-[11.5px] text-zinc-400">
-                Peça completa é artigo + LinkedIn + Instagram, na ordem. Avulso é um
-                post só, sem artigo por trás.
+                Peça completa nasce de um artigo e tudo deriva dele. Avulsa sai
+                direto de um tema, de um texto colado ou de um arquivo seu.
               </p>
             </div>
           ) : null}

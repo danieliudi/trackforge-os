@@ -26,7 +26,7 @@ import {
 export type Piece = {
   kind: OutputKind;
   data: unknown;
-  /** "do artigo" ou "do carrossel do LinkedIn" — a origem fica visível. */
+  /** "derivado do artigo", "do material colado" — a origem fica visível. */
   from: string;
   warnings: ForbiddenHit[];
   verification: Verification | null;
@@ -261,7 +261,7 @@ export function OutputPieces({
                   {meta.label}
                 </span>
                 <span className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">
-                  {meta.platform} · derivado {piece.from}
+                  {meta.platform} · {piece.from}
                 </span>
               </span>
             </div>
@@ -306,7 +306,7 @@ export function OutputPieces({
               {flagged === 0 && piece.verification ? (
                 <span className="flex items-center gap-1 text-[11px] text-emerald-700">
                   <Check size={12} />
-                  tudo rastreado até o artigo
+                  tudo rastreado até a origem
                 </span>
               ) : null}
             </div>

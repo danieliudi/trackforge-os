@@ -108,7 +108,7 @@ export async function POST(request: Request) {
     for (const kind of ordered) {
       const meta = OUTPUT_META[kind];
       const derivesFromLinkedin = kind === "carrossel-instagram" && linkedinCarousel !== null;
-      const from = derivesFromLinkedin ? "do carrossel do LinkedIn" : "do artigo";
+      const from = derivesFromLinkedin ? "derivado do carrossel do LinkedIn" : "derivado do artigo";
 
       const sourceText = derivesFromLinkedin
         ? `Peça de origem (carrossel do LinkedIn):\n\n${linkedinCarousel}\n\nArtigo completo, para conferir fato — não para copiar estrutura:\n\n${articleText}`

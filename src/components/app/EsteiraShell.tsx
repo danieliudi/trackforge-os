@@ -104,7 +104,11 @@ export function EsteiraShell({
             <span className={labelClass}>Seções</span>
             <div className="flex flex-col gap-0.5">
               {SECTIONS.map(({ href, label }) => {
-                const active = pathname === href;
+                // A peça avulsa se abre pelo painel e não tem entrada própria
+                // na barra: sem isto a lateral fica sem nada aceso, o que lê
+                // como bug em vez de "você está numa tela do painel".
+                const active =
+                  pathname === href || (href === "/esteira" && pathname === "/esteira/avulso");
                 return (
                   <Link
                     key={href}
