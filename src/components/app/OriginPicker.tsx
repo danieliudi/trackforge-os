@@ -117,7 +117,7 @@ export function OriginPicker({
       <span className={labelClass}>Origem</span>
 
       <div
-        className="flex gap-0.5 rounded-lg border border-line bg-canvas p-0.5"
+        className="flex gap-0.5 rounded-lg border border-line bg-surface2 p-0.5"
         role="group"
         aria-label="Origem do material"
       >

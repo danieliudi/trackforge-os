@@ -22,7 +22,8 @@ parecido**.
 
 | Item | Arquivo | Uso real |
 |---|---|---|
-| Tokens de classe da UI (`focusRing`, `labelClass`, `fieldClass`, `panelClass`, `kbdClass`) | `src/lib/ui.ts` | 29 arquivos — nunca escreva `border-zinc-200 bg-white rounded-lg` na mão para um painel |
+| Cor: tokens semânticos (`canvas`, `surface`, `line`, `ink`, `mut`, `acc`, `ok`, `warn`, `danger`) | `src/app/globals.css` (bloco `@theme`) | toda a UI — nunca escreva hex nem escala do Tailwind (`zinc-200`, `white`) num arquivo de tela. A paleta Clockwork inteira mora nesse bloco, e trocá-la é trocar só ele |
+| Tokens de classe da UI (`focusRing`, `labelClass`, `fieldClass`, `panelClass`, `metaClass`) | `src/lib/ui.ts` | 29 arquivos — nunca monte painel ou campo na mão |
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 arquivos — `IconButton` exige `label` (nome acessível) |
 | Casca do app: barra lateral, frente ativa, seções | `src/components/app/EsteiraShell.tsx` | 5 telas — toda tela nova dentro da esteira nasce aqui, não com layout próprio |
 | Frente ativa como store global | `src/lib/front.ts` | via `useFront()` do shell. É global de propósito: estar no painel da Resibag lendo fato da Sanwey é a classe de bug que isto previne |
@@ -107,6 +108,13 @@ funciona, ou um asset quebrado voltando ao original. Mudança de aparência, sem
 Formato que funciona com ele: HTML clicável com 3-4 estados, mais screenshots
 na largura real do monitor dele (1900px). Página única longa com scroll foi
 rejeitada explicitamente.
+
+**Contraste é gate, não gosto.** Texto de corpo ≥ 4,5:1 sobre o fundo; rótulo
+pequeno e ornamento ≥ 3:1. O medidor está em `scratchpad/contraste.mjs` e roda
+sobre o app de verdade, em todas as telas. Quando uma cor da paleta não passa
+como letra, ela vira preenchimento ou borda — nunca se escurece a cor da marca
+para caber texto branco: troca-se a letra. Foi a decisão do laranja `#E56515`
+(branco em cima dá 3,4:1; quase-preto dá 5,0:1).
 
 ## 5. Custo é visível ou não existe
 

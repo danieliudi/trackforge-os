@@ -80,7 +80,7 @@ export function EsteiraShell({
 
         <span className="flex items-center gap-2">
           <span className={clsx(labelClass, "hidden sm:inline")}>Frente</span>
-          <span className="flex gap-0.5 rounded-lg border border-line bg-canvas p-0.5">
+          <span className="flex gap-0.5 rounded-lg border border-line bg-surface2 p-0.5">
             {brandOptions.map(({ id, label }) => (
               <button
                 key={id}
@@ -90,7 +90,9 @@ export function EsteiraShell({
                 className={clsx(
                   "rounded-md px-3 py-1 text-[12.5px] transition",
                   focusRing,
-                  id === front ? "bg-surface2 font-semibold text-ink" : "text-mut hover:text-ink",
+                  id === front
+                    ? "border border-line bg-surface font-semibold text-ink shadow-sm"
+                    : "border border-transparent text-mut hover:text-ink",
                 )}
               >
                 {label}
@@ -126,7 +128,7 @@ export function EsteiraShell({
                 className={clsx(
                   "rounded-md px-2.5 py-1.5 text-[12.5px] transition",
                   focusRing,
-                  active ? "bg-surface2 font-medium text-ink" : "text-mut hover:text-ink",
+                  active ? "bg-surface2 font-medium text-ink" : "text-mut hover:bg-surface2 hover:text-ink",
                 )}
               >
                 {label}

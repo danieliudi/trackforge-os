@@ -1,55 +1,70 @@
 @import "tailwindcss";
 
 /*
- * A identidade da ferramenta: grafite com um acento âmbar.
+ * A identidade da ferramenta: Clockwork — cinza quente com acento laranja.
  *
- * POR QUE ESCURA: isto é ferramenta interna, e o que ela produz é conteúdo de
- * marca — Resibag verde, Sanwey azul. Um chrome claro e colorido competiria
- * com a peça que aparece dentro dele. Grafite recua, o conteúdo avança.
+ * A PALETA VEIO DO DANIEL, com seis tons. Os derivados existem só onde ela não
+ * cobria: os dois cinzas de texto (o #919599 dela é cor de borda — como letra
+ * sobre o fundo claro dá 2,8:1 e reprova) e as cores semânticas, que ela não
+ * traz. Nada de laranja foi escurecido: o que mudou para caber contraste foi a
+ * letra em cima dele.
  *
  * POR QUE TOKEN E NÃO ZINC CRAVADO: a versão anterior tinha 447 cores
  * escritas à mão em 31 arquivos, e trocar a identidade significava tocar em
  * todas. Aqui a cor tem nome semântico — `surface` é superfície, `line` é
  * borda, `acc` é ação — e a próxima troca é só este bloco.
  *
- * O ACENTO É UM SÓ. Âmbar preenchido = ação. Âmbar contornado = atenção
+ * O ACENTO É UM SÓ. Laranja preenchido = ação. Laranja tintado = atenção
  * (afirmação sem fonte, termo proibido). Verde = conferido. Vermelho = erro.
  * Informação neutra usa `surface2`, nunca acento — acento em tudo é acento em
  * nada.
  *
  * O canvas do slide tem tema próprio (src/constants/themes.ts) e não consome
- * nada daqui: peça escura em UI escura continua sendo decisão da peça.
+ * nada daqui: o tema escuro de uma peça continua sendo decisão da peça.
  */
 
 @theme {
-  --color-canvas: #0f172a;
-  --color-surface: #1a2438;
-  --color-surface2: #212d45;
-  --color-line: #2b3b57;
-  --color-line2: #1e2a40;
-  --color-line3: #3c5075;
+  /* Clockwork — a paleta que o Daniel mandou. Os seis tons dela estão marcados;
+   * o resto é derivado deles para fechar contraste, não cor inventada. */
+  --color-canvas: #f8f8f8;   /* Clockwork */
+  --color-surface: #ffffff;
+  --color-surface2: #f1f1ef;
+  --color-line: #cdcdcb;     /* Clockwork */
+  --color-line2: #e4e4e2;
+  --color-line3: #919599;    /* Clockwork */
 
-  --color-ink: #f1f5f9;
-  --color-ink2: #cbd5e1;
-  --color-mut: #94a3b8;
-  --color-faint: #64748b;
+  /* Texto: #919599 é cor de borda, não de letra — sobre o fundo claro dá 2,8:1
+   * e reprova. Os dois tons de leitura abaixo saem da mesma família, escuros o
+   * bastante para passar. */
+  --color-ink: #1c1c1b;
+  --color-ink2: #3f4143;
+  --color-mut: #5f6367;
+  --color-faint: #7a7e82;
 
-  --color-acc: #c2841b;
-  --color-acc-hi: #d89a2c;
-  --color-acc-tx: #e3a93f;
-  --color-acc-ink: #12182a;
+  /* O laranja fica exato. O que muda é a letra em cima dele: branco sobre
+   * #E56515 dá 3,4:1 e reprova; quase-preto dá 5,0:1. Escurecer o laranja para
+   * caber texto branco mudaria a marca — trocar a letra, não. */
+  --color-acc: #e56515;      /* Clockwork */
+  --color-acc-hi: #c2540f;
+  --color-acc-soft: #fba45c; /* Clockwork */
+  --color-acc-tint: #fdf0e4;
+  --color-acc-tx: #b8490b;
+  --color-acc-ink: #1c1c1b;
 
-  --color-ok: #34d399;
-  --color-ok-bg: #0a2a20;
-  --color-ok-line: #14503c;
+  --color-ok: #15803d;
+  --color-ok-bg: #eff8f2;
+  --color-ok-line: #a7d8b9;
 
-  --color-warn: #e3a93f;
-  --color-warn-bg: #2a1f08;
-  --color-warn-line: #6b4e14;
+  /* Atenção usa o laranja claro da própria paleta, mas TINTADO com letra
+   * escura — nunca preenchido. Preenchido é ação; tintado é aviso. É o que
+   * impede um "termo proibido" de parecer um botão. */
+  --color-warn: #8a4a10;
+  --color-warn-bg: #fdf0e4;
+  --color-warn-line: #fba45c;
 
-  --color-danger: #f87171;
-  --color-danger-bg: #2a1414;
-  --color-danger-line: #7f2828;
+  --color-danger: #b91c1c;
+  --color-danger-bg: #fef2f2;
+  --color-danger-line: #f0b4b4;
 }
 
 @theme inline {
@@ -62,7 +77,7 @@ html {
    * deslocava o header horizontalmente a cada troca de tela. Reservar o espaço
    * sempre corrige isso em toda página, não só nas que rolam. */
   scrollbar-gutter: stable;
-  color-scheme: dark;
+  color-scheme: light;
 }
 
 body {

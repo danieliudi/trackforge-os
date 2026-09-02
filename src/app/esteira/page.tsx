@@ -258,7 +258,7 @@ export default function BancadaPage() {
     >
       <div className="grid h-full grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)_430px]">
         {/* ══ ORIGEM ══ */}
-        <div className={clsx(column, "border-r border-line2")}>
+        <div className={clsx(column, "border-r border-line")}>
           <OriginPicker
             origin={origin}
             onChange={(next) => {
@@ -345,7 +345,7 @@ export default function BancadaPage() {
         </div>
 
         {/* ══ ARTIGO ══ */}
-        <div className={clsx(column, "px-6")}>
+        <div className={clsx(column, "bg-surface px-6")}>
           {error ? (
             <div className="flex items-start gap-2 rounded-lg border border-danger-line bg-danger-bg px-3.5 py-3 text-[12.5px] text-danger">
               <AlertCircle size={14} className="mt-px shrink-0" />
@@ -404,7 +404,7 @@ export default function BancadaPage() {
                 </div>
               ) : null}
 
-              <div className={clsx(panelClass, "p-6")}>
+              <div className="pb-6 pt-1">
                 <ArticleReader article={article} />
               </div>
             </>
@@ -428,7 +428,7 @@ export default function BancadaPage() {
         </div>
 
         {/* ══ SAÍDAS ══ */}
-        <div className={clsx(column, "border-l border-line2")}>
+        <div className={clsx(column, "border-l border-line")}>
           <div className="flex items-baseline gap-2">
             <span className={labelClass}>Peças</span>
             <span className={metaClass}>
