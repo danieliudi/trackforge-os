@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/Button";
 import type { GenerationCost } from "@/constants/pricing";
 import type { ForbiddenHit } from "@/knowledge/check";
 import { entryFromCost, pushCostEntry } from "@/lib/costLog";
+import { getProduction, saveProduction, type Production } from "@/lib/produced";
 import type { MarketSignal } from "@/lib/marketSignals";
 import { fieldClass, focusRing, labelClass, metaClass, panelClass } from "@/lib/ui";
 import type { Verification } from "@/lib/verify";
@@ -75,6 +76,8 @@ export default function BancadaPage() {
   const [images, setImages] = useState<Record<string, ChosenImage>>({});
   const [sent, setSent] = useState(false);
   const [copied, setCopied] = useState(false);
+  /** Id da produção em curso — a linha que vai sendo regravada a cada etapa. */
+  const [runId, setRunId] = useState<string | null>(null);
 
   const load = useCallback(() => {
     void fetch("/api/signals", {
@@ -104,11 +107,46 @@ export default function BancadaPage() {
     return () => clearTimeout(timer);
   }, [load]);
 
+  // Reabrir uma produção salva. Lê da URL em vez de `useSearchParams` para não
+  // exigir uma fronteira de Suspense só por causa disto.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const id = new URLSearchParams(window.location.search).get("abrir");
+      if (!id) return;
+      const run = getProduction(id);
+      if (!run) return;
+
+      setRunId(run.id);
+      setArticle(run.article);
+      setImages(Object.fromEntries(run.images.map((image) => [image.slot, image])));
+      setKinds(run.pieces.map((piece) => piece.kind));
+      setPieces(
+        run.pieces.map((piece) => ({
+          kind: piece.kind,
+          data: piece.data,
+          from: piece.from,
+          warnings: [],
+          // O parecer completo não é guardado — só quantas afirmações ficaram
+          // sem fonte, que é o que muda a decisão de enviar. Reconstruir o
+          // parecer inteiro exigiria pagar a auditoria de novo.
+          verification: piece.flagged
+            ? { flagged: piece.flagged, claims: [] }
+            : null,
+        })),
+      );
+      setSent(run.sent);
+      setOrigin({ mode: "tema", input: run.source, signalId: null, fileName: null });
+    }, 0);
+    return () => clearTimeout(timer);
+  }, []);
+
   const source = originLabel(origin, signals);
   const material = originIsMaterial(origin.mode);
   const ready = originReady(origin);
 
   const reset = () => {
+    // A produção anterior fica salva; o que se zera é a bancada.
+    setRunId(null);
     setOrigin(emptyOrigin);
     setAngle("");
     setArticle(null);
@@ -126,6 +164,35 @@ export default function BancadaPage() {
   const inputFor = useCallback(
     () => (material ? origin.input : angle.trim() || source),
     [material, origin.input, angle, source],
+  );
+
+  /**
+   * Grava o que já existe da produção. Chamado depois de cada etapa paga.
+   *
+   * `crypto.randomUUID()` mora aqui dentro e não no corpo do render: id novo a
+   * cada render viola `react-hooks/purity` e criaria uma linha por repintura.
+   */
+  const keep = useCallback(
+    (patch: Partial<Production>) => {
+      const id = runId ?? crypto.randomUUID();
+      if (!runId) setRunId(id);
+
+      const previous = getProduction(id);
+      saveProduction({
+        id,
+        at: Date.now(),
+        brandId,
+        source,
+        title: previous?.title ?? source,
+        article: previous?.article ?? null,
+        images: previous?.images ?? [],
+        pieces: previous?.pieces ?? [],
+        sent: previous?.sent ?? false,
+        ...patch,
+      });
+      return id;
+    },
+    [runId, brandId, source],
   );
 
   const write = useCallback(async () => {
@@ -157,12 +224,13 @@ export default function BancadaPage() {
       setWarnings(data.warnings ?? []);
       setVerification(data.verification ?? null);
       setKinds((data.article.suggestedOutputs ?? []).map((s: { kind: OutputKind }) => s.kind));
+      keep({ article: data.article, title: data.article.title });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "erro desconhecido");
     } finally {
       setBusy(null);
     }
-  }, [inputFor, material, angle, brandId, origin.signalId, source, setKinds]);
+  }, [inputFor, material, angle, brandId, origin.signalId, source, setKinds, keep]);
 
   const generate = useCallback(async () => {
     if (kinds.length === 0) return;
@@ -201,13 +269,22 @@ export default function BancadaPage() {
         );
       }
       if (!response.ok) throw new Error(data.error ?? "não foi possível gerar as peças");
-      setPieces(data.pieces ?? []);
+      const produced: Piece[] = data.pieces ?? [];
+      setPieces(produced);
+      keep({
+        pieces: produced.map((piece) => ({
+          kind: piece.kind,
+          data: piece.data,
+          from: piece.from,
+          flagged: piece.verification?.flagged ?? 0,
+        })),
+      });
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "erro desconhecido");
     } finally {
       setBusy(null);
     }
-  }, [kinds, article, brandId, material, inputFor, origin.signalId, source]);
+  }, [kinds, article, brandId, material, inputFor, origin.signalId, source, keep]);
 
   const send = useCallback(async () => {
     if (!article || !pieces) return;
@@ -232,13 +309,14 @@ export default function BancadaPage() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "não foi possível enviar");
       setSent(true);
+      keep({ sent: true, images: Object.values(images) });
       load();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "erro desconhecido");
     } finally {
       setBusy(null);
     }
-  }, [article, pieces, brandId, source, images, load]);
+  }, [article, pieces, brandId, source, images, load, keep]);
 
   const markdown = article ? articleToMarkdown(article, Object.values(images)) : "";
   const blockLabels = article
@@ -503,7 +581,10 @@ export default function BancadaPage() {
               <ArticleImages
                 ideas={article.imageIdeas}
                 chosen={images}
-                onChange={setImages}
+                onChange={(next) => {
+                  setImages(next);
+                  keep({ images: Object.values(next) });
+                }}
                 brandId={brandId}
               />
             </>
