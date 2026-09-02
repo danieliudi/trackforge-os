@@ -57,7 +57,7 @@ export function SlideList({
     <div className="flex flex-col gap-3">
       <div className="flex items-baseline justify-between gap-2">
         <span className={labelClass}>Slides</span>
-        <span className="text-[11px] tabular-nums text-zinc-500">
+        <span className="text-[11px] tabular-nums text-mut">
           {slides.length} / {maxSlides}
         </span>
       </div>
@@ -90,7 +90,7 @@ export function SlideList({
         type="button"
         onClick={onAdd}
         disabled={isFull}
-        className={`flex items-center justify-center gap-2 rounded-lg border border-dashed border-zinc-300 py-3 text-xs font-medium text-zinc-600 transition hover:border-zinc-900 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-zinc-300 disabled:hover:text-zinc-600 ${focusRing}`}
+        className={`flex items-center justify-center gap-2 rounded-lg border border-dashed border-line py-3 text-xs font-medium text-mut transition hover:border-acc hover:text-ink disabled:cursor-not-allowed disabled:opacity-40 disabled:hover:border-line disabled:hover:text-mut ${focusRing}`}
       >
         <Plus size={14} />
         {isFull ? `Máximo de ${maxSlides} slides` : "Adicionar slide"}

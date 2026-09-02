@@ -63,10 +63,10 @@ const sample: Carousel = carouselSchema.parse({
 
 export default function SlidesPreviewPage() {
   return (
-    <main className="flex flex-col gap-16 bg-zinc-100 p-12">
+    <main className="flex flex-col gap-16 bg-surface2 p-12">
       {slideThemeOptions.map(({ id, label }) => (
         <section key={id} className="flex flex-col gap-6">
-          <h2 className="text-xl font-semibold text-zinc-900">{label}</h2>
+          <h2 className="text-xl font-semibold text-ink">{label}</h2>
           <div className="flex gap-6 overflow-x-auto pb-4">
             {sample.slides.map((slide) => (
               <CarouselSlide

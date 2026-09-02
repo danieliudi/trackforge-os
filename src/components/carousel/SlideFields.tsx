@@ -142,8 +142,8 @@ export function SlideFields({
       className={clsx(
         "flex scroll-mt-3 flex-col gap-3 rounded-lg border p-3 transition",
         isActive
-          ? "border-zinc-900 bg-zinc-50 shadow-sm"
-          : "border-zinc-200 bg-white hover:border-zinc-300",
+          ? "border-acc bg-canvas shadow-sm"
+          : "border-line bg-surface hover:border-line",
       )}
     >
       <div className="flex items-center justify-between gap-2">
@@ -151,12 +151,12 @@ export function SlideFields({
           <span
             className={clsx(
               "flex h-5 w-5 shrink-0 items-center justify-center rounded text-[10px] font-semibold tabular-nums",
-              isActive ? "bg-zinc-900 text-white" : "bg-zinc-100 text-zinc-600",
+              isActive ? "bg-acc text-acc-ink" : "bg-surface2 text-mut",
             )}
           >
             {slide.slideNumber}
           </span>
-          <span className="truncate rounded bg-zinc-100 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-zinc-600">
+          <span className="truncate rounded bg-surface2 px-1.5 py-0.5 text-[10px] font-medium uppercase tracking-wide text-mut">
             {slide.type}
           </span>
         </div>
@@ -219,7 +219,7 @@ export function SlideFields({
           <span className={labelClass}>Headline</span>
           {headlineOver > 0 ? (
             <span
-              className="text-[10px] font-medium text-amber-600"
+              className="text-[10px] font-medium text-warn"
               title={`Acima de ${headlineLimit} caracteres a fonte para de encolher e o texto pode ser cortado no slide.`}
             >
               {headlineOver} além do limite
@@ -233,7 +233,7 @@ export function SlideFields({
           className={clsx(
             fieldClass,
             "resize-y",
-            headlineOver > 0 && "border-amber-400 focus:border-amber-500",
+            headlineOver > 0 && "border-warn-line focus:border-warn-line",
           )}
         />
       </label>
@@ -245,7 +245,7 @@ export function SlideFields({
             <span
               className={clsx(
                 "text-[10px] tabular-nums",
-                bodyRemaining <= 5 ? "font-medium text-amber-600" : "text-zinc-400",
+                bodyRemaining <= 5 ? "font-medium text-warn" : "text-faint",
               )}
             >
               {bodyRemaining}
@@ -264,7 +264,7 @@ export function SlideFields({
         <div className="flex flex-col gap-2">
           <span className="flex items-baseline justify-between gap-2">
             <span className={labelClass}>Itens</span>
-            <span className="text-[10px] tabular-nums text-zinc-400">
+            <span className="text-[10px] tabular-nums text-faint">
               {bullets.length} / {MAX_BULLETS}
             </span>
           </span>
@@ -287,7 +287,7 @@ export function SlideFields({
                   variant="secondary"
                   disabled={bullets.length <= MIN_BULLETS}
                   onClick={() => onChange({ bullets: bullets.filter((_, i) => i !== bulletIndex) })}
-                  className="hover:border-red-500 hover:text-red-600"
+                  className="hover:border-danger-line hover:text-danger"
                 />
               </div>
             ))}
@@ -297,7 +297,7 @@ export function SlideFields({
             onClick={() => onChange({ bullets: [...bullets, "Novo ponto"] })}
             disabled={bullets.length >= MAX_BULLETS}
             className={clsx(
-              "flex items-center justify-center gap-1.5 rounded-md border border-dashed border-zinc-300 py-2 text-xs font-medium text-zinc-600 transition hover:border-zinc-900 hover:text-zinc-900 disabled:cursor-not-allowed disabled:opacity-40",
+              "flex items-center justify-center gap-1.5 rounded-md border border-dashed border-line py-2 text-xs font-medium text-mut transition hover:border-acc hover:text-ink disabled:cursor-not-allowed disabled:opacity-40",
               focusRing,
             )}
           >
@@ -341,7 +341,7 @@ export function SlideFields({
             htmlFor={uploadId}
             title="Enviar arquivo local"
             className={clsx(
-              "flex shrink-0 cursor-pointer items-center rounded-md border border-zinc-200 bg-white px-2.5 text-zinc-600 transition hover:border-zinc-900",
+              "flex shrink-0 cursor-pointer items-center rounded-md border border-line bg-surface px-2.5 text-mut transition hover:border-acc",
               focusRing,
             )}
           >
@@ -366,7 +366,7 @@ export function SlideFields({
               label="Remover imagem"
               variant="secondary"
               onClick={() => onChange({ image: undefined })}
-              className="hover:border-red-500 hover:text-red-600"
+              className="hover:border-danger-line hover:text-danger"
             />
           ) : null}
         </div>
@@ -395,8 +395,8 @@ export function SlideFields({
                   "flex-1 rounded-md border px-2 py-1.5 text-[11px] font-medium transition",
                   focusRing,
                   slide.image?.layout === id
-                    ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-zinc-200 text-zinc-600 hover:border-zinc-400",
+                    ? "border-acc bg-acc text-acc-ink"
+                    : "border-line text-mut hover:border-line3",
                 )}
               >
                 {label}

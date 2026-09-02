@@ -17,9 +17,9 @@ type SignalPickerProps = {
 };
 
 const URGENCY_STYLE: Record<string, string> = {
-  alto: "border-amber-200 bg-amber-50 text-amber-700",
-  medio: "border-zinc-200 bg-zinc-50 text-zinc-600",
-  info: "border-zinc-100 bg-zinc-50 text-zinc-400",
+  alto: "border-warn-line bg-warn-bg text-warn",
+  medio: "border-line bg-canvas text-mut",
+  info: "border-line2 bg-canvas text-faint",
 };
 
 const formatDate = (iso: string) =>
@@ -85,7 +85,7 @@ export function SignalPicker({ brandId, selected, onChange }: SignalPickerProps)
       <div className="flex items-baseline justify-between gap-2">
         <span className={labelClass}>
           Sinais de mercado{" "}
-          <span className="font-mono text-[10px] normal-case tracking-normal text-emerald-700">
+          <span className="font-mono text-[10px] normal-case tracking-normal text-ok">
             grátis
           </span>
         </span>
@@ -107,19 +107,19 @@ export function SignalPicker({ brandId, selected, onChange }: SignalPickerProps)
               className={clsx(
                 "flex cursor-pointer items-start gap-2.5 rounded-lg border px-3 py-2.5 transition",
                 on
-                  ? "border-zinc-900 bg-zinc-50"
-                  : "border-zinc-200 bg-white hover:border-zinc-300",
+                  ? "border-acc bg-canvas"
+                  : "border-line bg-surface hover:border-line",
               )}
             >
               <input
                 type="checkbox"
                 checked={on}
                 onChange={() => toggle(signal.id)}
-                className={clsx("mt-0.5 h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900", focusRing)}
+                className={clsx("mt-0.5 h-3.5 w-3.5 rounded border-line text-ink", focusRing)}
               />
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="text-xs leading-snug text-zinc-900">{signal.title}</span>
-                <span className="flex flex-wrap items-baseline gap-1.5 text-[10px] text-zinc-400">
+                <span className="text-xs leading-snug text-ink">{signal.title}</span>
+                <span className="flex flex-wrap items-baseline gap-1.5 text-[10px] text-faint">
                   <span className="font-mono">{signal.source}</span>
                   <span aria-hidden>·</span>
                   <span>{formatDate(signal.detectedAt)}</span>

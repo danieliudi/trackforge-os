@@ -28,41 +28,41 @@ export function CostReceipt({ cost, summary }: CostReceiptProps) {
   const searchShare = cost.usd > 0 ? Math.round((searchUsd / cost.usd) * 100) : 0;
 
   return (
-    <div className="overflow-hidden rounded-lg border border-zinc-200 bg-white">
+    <div className="overflow-hidden rounded-lg border border-line bg-surface">
       <div className="flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 px-3.5 py-3">
         <div className="flex items-baseline gap-2.5">
           <span className={labelClass}>Custo</span>
-          <span className="text-lg font-semibold tabular-nums tracking-tight text-emerald-700">
+          <span className="text-lg font-semibold tabular-nums tracking-tight text-ok">
             {primary}
           </span>
           {secondary ? (
-            <span className="font-mono text-[11px] tabular-nums text-zinc-500">
+            <span className="font-mono text-[11px] tabular-nums text-mut">
               {secondary}
             </span>
           ) : null}
         </div>
-        <span className="text-[11px] text-zinc-500">{summary}</span>
+        <span className="text-[11px] text-mut">{summary}</span>
       </div>
 
-      <dl className="border-t border-zinc-100 bg-zinc-50 px-3.5 py-1.5">
+      <dl className="border-t border-line2 bg-canvas px-3.5 py-1.5">
         {cost.steps.map((step) => {
           // Etapa sem custo é o sinal curado do CRM. "US$ 0,0000" tecnicamente
           // certo esconde justamente o que interessa: essa parte não custou nada.
           const free = step.usd === 0;
           const tone = free
-            ? "text-emerald-700"
+            ? "text-ok"
             : step.webSearches > 0
-              ? "text-amber-700"
-              : "text-zinc-600";
+              ? "text-warn"
+              : "text-mut";
 
           return (
             <div
               key={step.label}
-              className="flex items-baseline justify-between gap-3 border-b border-zinc-100 py-1.5 last:border-b-0"
+              className="flex items-baseline justify-between gap-3 border-b border-line2 py-1.5 last:border-b-0"
             >
               <dt className={`text-[11.5px] ${tone}`}>{step.label}</dt>
               <div className="flex shrink-0 items-baseline gap-3">
-                <span className="font-mono text-[10.5px] tabular-nums text-zinc-400">
+                <span className="font-mono text-[10.5px] tabular-nums text-faint">
                   {step.webSearches > 0
                     ? `${formatUsd(WEB_SEARCH_PRICE)} cada`
                     : free
@@ -81,7 +81,7 @@ export function CostReceipt({ cost, summary }: CostReceiptProps) {
       </dl>
 
       {searchShare >= 40 ? (
-        <div className="flex items-start gap-2 border-t border-amber-100 bg-amber-50 px-3.5 py-2.5 text-[11.5px] leading-relaxed text-amber-900">
+        <div className="flex items-start gap-2 border-t border-warn-line bg-warn-bg px-3.5 py-2.5 text-[11.5px] leading-relaxed text-warn">
           <AlertTriangle size={13} className="mt-px shrink-0" />
           <span>
             As buscas de notícia responderam por {searchShare}% deste custo. Sem

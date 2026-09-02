@@ -66,19 +66,19 @@ export function ThemeSelect({ value, onChange }: ThemeSelectProps) {
                     "group flex flex-col gap-1.5 rounded-lg border p-1.5 text-left transition",
                     focusRing,
                     isActive
-                      ? "border-zinc-900 bg-zinc-50"
-                      : "border-zinc-200 hover:border-zinc-400",
+                      ? "border-acc bg-canvas"
+                      : "border-line hover:border-line3",
                   )}
                 >
                   <ThemeSwatch themeId={themeId} />
                   <span className="flex items-center gap-1 px-0.5 pb-0.5">
                     {isActive ? (
-                      <Check size={11} className="shrink-0 text-zinc-900" />
+                      <Check size={11} className="shrink-0 text-ink" />
                     ) : null}
                     <span
                       className={clsx(
                         "truncate text-[11px] leading-tight",
-                        isActive ? "font-medium text-zinc-900" : "text-zinc-600",
+                        isActive ? "font-medium text-ink" : "text-mut",
                       )}
                     >
                       {slideThemes[themeId].label}

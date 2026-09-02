@@ -68,15 +68,15 @@ export function StylePanel({
           onChange={onPlatformChange}
           disabled={format === "apresentacao"}
         />
-        <p className="text-[11px] leading-relaxed text-zinc-500">
+        <p className="text-[11px] leading-relaxed text-mut">
           {getPlatformToneNote(platform)}
         </p>
       </div>
 
-      <div className="flex flex-col gap-2 border-t border-zinc-200 pt-6">
+      <div className="flex flex-col gap-2 border-t border-line pt-6">
         <span className={labelClass}>Marca</span>
         <BrandPills value={brandId} onChange={onBrandChange} />
-        <p className="text-[11px] leading-relaxed text-zinc-500">
+        <p className="text-[11px] leading-relaxed text-mut">
           Selecionar uma marca aplica o tema e a política de logo do manual dela.
         </p>
       </div>
@@ -86,7 +86,7 @@ export function StylePanel({
         <div className="flex items-center gap-2">
           <label
             className={clsx(
-              "flex cursor-pointer items-center gap-2 rounded-md border border-zinc-300 bg-white px-3 py-2 text-xs font-medium text-zinc-700 transition hover:border-zinc-900",
+              "flex cursor-pointer items-center gap-2 rounded-md border border-line bg-surface px-3 py-2 text-xs font-medium text-ink2 transition hover:border-acc",
               focusRing,
             )}
           >
@@ -108,18 +108,18 @@ export function StylePanel({
               label="Remover logo customizado"
               variant="secondary"
               onClick={() => onCustomLogoChange(null)}
-              className="hover:border-red-500 hover:text-red-600"
+              className="hover:border-danger-line hover:text-danger"
             />
           ) : null}
         </div>
         {customLogo ? (
-          <p className="text-[11px] text-zinc-500">
+          <p className="text-[11px] text-mut">
             O logo customizado tem prioridade sobre o da marca em todos os slides.
           </p>
         ) : null}
       </div>
 
-      <div className="flex flex-col gap-3 border-t border-zinc-200 pt-6">
+      <div className="flex flex-col gap-3 border-t border-line pt-6">
         <span className={labelClass}>Tema visual</span>
         <ThemeSelect value={themeId} onChange={onThemeChange} />
       </div>

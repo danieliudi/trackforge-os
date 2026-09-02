@@ -80,15 +80,15 @@ export function CarouselPreview({
     <div className="flex h-full min-h-0 flex-col gap-3">
       <div className="flex shrink-0 items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+          <span className="text-xs font-medium uppercase tracking-wide text-mut">
             Preview
           </span>
-          <span className="rounded bg-white px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-zinc-500 ring-1 ring-zinc-200">
+          <span className="rounded bg-surface px-1.5 py-0.5 text-[10px] font-medium tabular-nums text-mut ring-1 ring-line">
             {Math.round(scale * 100)}%
           </span>
         </div>
 
-        <div className="flex items-center gap-1 rounded-md border border-zinc-300 bg-white p-0.5">
+        <div className="flex items-center gap-1 rounded-md border border-line bg-surface p-0.5">
           <button
             type="button"
             onClick={() => setIsGrid(false)}
@@ -97,7 +97,7 @@ export function CarouselPreview({
             className={clsx(
               "flex h-7 w-7 items-center justify-center rounded transition",
               focusRing,
-              isGrid ? "text-zinc-500 hover:text-zinc-900" : "bg-zinc-900 text-white",
+              isGrid ? "text-mut hover:text-ink" : "bg-acc text-acc-ink",
             )}
           >
             <Square size={14} />
@@ -110,7 +110,7 @@ export function CarouselPreview({
             className={clsx(
               "flex h-7 w-7 items-center justify-center rounded transition",
               focusRing,
-              isGrid ? "bg-zinc-900 text-white" : "text-zinc-500 hover:text-zinc-900",
+              isGrid ? "bg-acc text-acc-ink" : "text-mut hover:text-ink",
             )}
           >
             <LayoutGrid size={14} />
@@ -140,8 +140,8 @@ export function CarouselPreview({
                   "rounded ring-offset-2 ring-offset-zinc-100 transition",
                   focusRing,
                   index === activeIndex
-                    ? "ring-2 ring-zinc-900"
-                    : "hover:ring-2 hover:ring-zinc-300",
+                    ? "ring-2 ring-acc"
+                    : "hover:ring-2 hover:ring-line3",
                 )}
               >
                 <CarouselSlide
@@ -178,7 +178,7 @@ export function CarouselPreview({
             onClick={() => onActiveIndexChange(activeIndex - 1)}
             disabled={activeIndex === 0}
           />
-          <span className="text-sm tabular-nums text-zinc-600">
+          <span className="text-sm tabular-nums text-mut">
             {activeIndex + 1} / {slides.length}
           </span>
           <IconButton

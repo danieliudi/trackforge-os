@@ -42,7 +42,7 @@ export type Piece = {
  * do outro.
  */
 
-const line = "text-[13px] leading-relaxed text-zinc-700";
+const line = "text-[13px] leading-relaxed text-ink2";
 
 function CarouselBody({ carousel }: { carousel: Carousel }) {
   return (
@@ -52,10 +52,10 @@ function CarouselBody({ carousel }: { carousel: Carousel }) {
           key={slide.slideNumber}
           className="grid grid-cols-[1.4rem_1fr] gap-2 text-[12px] leading-snug"
         >
-          <span className="font-mono tabular-nums text-zinc-300">
+          <span className="font-mono tabular-nums text-faint">
             {String(slide.slideNumber).padStart(2, "0")}
           </span>
-          <span className="text-zinc-700">{slide.headline}</span>
+          <span className="text-ink2">{slide.headline}</span>
         </li>
       ))}
     </ol>
@@ -64,14 +64,14 @@ function CarouselBody({ carousel }: { carousel: Carousel }) {
 
 function Hook({ text }: { text: string }) {
   return (
-    <p className="border-l-2 border-zinc-900 pl-2.5 text-[13.5px] font-medium leading-snug text-zinc-900">
+    <p className="border-l-2 border-acc pl-2.5 text-[13.5px] font-medium leading-snug text-ink">
       {text}
     </p>
   );
 }
 
 function Cta({ text }: { text: string }) {
-  return <p className="text-[12.5px] italic leading-snug text-zinc-500">{text}</p>;
+  return <p className="text-[12.5px] italic leading-snug text-mut">{text}</p>;
 }
 
 function PieceBody({ kind, data }: { kind: OutputKind; data: unknown }) {
@@ -104,7 +104,7 @@ function PieceBody({ kind, data }: { kind: OutputKind; data: unknown }) {
         ))}
         <Cta text={legenda.cta} />
         {legenda.hashtags.length > 0 ? (
-          <p className="font-mono text-[11px] text-zinc-400">
+          <p className="font-mono text-[11px] text-faint">
             {legenda.hashtags.map((tag) => `#${tag.replace(/^#/, "")}`).join(" ")}
           </p>
         ) : null}
@@ -121,12 +121,12 @@ function PieceBody({ kind, data }: { kind: OutputKind; data: unknown }) {
         <div className="flex flex-col gap-2">
           {reels.beats.map((beat, index) => (
             <div key={index} className="grid grid-cols-[2.6rem_1fr] gap-2.5">
-              <span className="pt-0.5 font-mono text-[10.5px] tabular-nums text-zinc-400">
+              <span className="pt-0.5 font-mono text-[10.5px] tabular-nums text-faint">
                 {beat.seconds}s
               </span>
               <span className="flex flex-col gap-0.5">
                 <span className={line}>{beat.fala}</span>
-                <span className="font-mono text-[10.5px] uppercase tracking-wide text-zinc-400">
+                <span className="font-mono text-[10.5px] uppercase tracking-wide text-faint">
                   na tela: {beat.naTela}
                 </span>
               </span>
@@ -134,7 +134,7 @@ function PieceBody({ kind, data }: { kind: OutputKind; data: unknown }) {
           ))}
         </div>
         <Cta text={reels.cta} />
-        <span className="font-mono text-[10px] text-zinc-400">{total}s no total</span>
+        <span className="font-mono text-[10px] text-faint">{total}s no total</span>
       </div>
     );
   }
@@ -146,14 +146,14 @@ function PieceBody({ kind, data }: { kind: OutputKind; data: unknown }) {
         {stories.screens.map((screen, index) => (
           <div
             key={index}
-            className="flex min-h-[6.5rem] w-[9.5rem] flex-col gap-1.5 rounded-md border border-zinc-200 bg-zinc-50 px-2.5 py-2"
+            className="flex min-h-[6.5rem] w-[9.5rem] flex-col gap-1.5 rounded-md border border-line bg-canvas px-2.5 py-2"
           >
-            <span className="font-mono text-[9.5px] uppercase tracking-wide text-zinc-400">
+            <span className="font-mono text-[9.5px] uppercase tracking-wide text-faint">
               {index + 1} de {stories.screens.length}
             </span>
-            <span className="text-[11.5px] leading-snug text-zinc-700">{screen.texto}</span>
+            <span className="text-[11.5px] leading-snug text-ink2">{screen.texto}</span>
             {screen.interacao ? (
-              <span className="mt-auto rounded border border-zinc-300 bg-white px-1.5 py-0.5 text-[10px] text-zinc-500">
+              <span className="mt-auto rounded border border-line bg-surface px-1.5 py-0.5 text-[10px] text-mut">
                 {screen.interacao}
               </span>
             ) : null}
@@ -240,7 +240,7 @@ export function OutputPieces({
   return (
     <div className="flex flex-col gap-4">
       {failed ? (
-        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3.5 py-2.5 text-[12px] text-amber-900">
+        <p className="rounded-lg border border-warn-line bg-warn-bg px-3.5 py-2.5 text-[12px] text-warn">
           O navegador recusou salvar a peça — provavelmente falta espaço. Apague um
           rascunho antigo e tente de novo.
         </p>
@@ -257,10 +257,10 @@ export function OutputPieces({
           >
             <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
               <span className="flex flex-wrap items-baseline gap-2">
-                <span className="text-sm font-semibold tracking-tight text-zinc-900">
+                <span className="text-sm font-semibold tracking-tight text-ink">
                   {meta.label}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">
+                <span className="font-mono text-[10px] uppercase tracking-wide text-faint">
                   {meta.platform} · {piece.from}
                 </span>
               </span>
@@ -269,7 +269,7 @@ export function OutputPieces({
             <PieceBody kind={piece.kind} data={piece.data} />
 
             {piece.warnings.length > 0 ? (
-              <div className="flex flex-col gap-0.5 rounded-md border border-amber-200 bg-amber-50 px-2.5 py-2 text-[11.5px] text-amber-900">
+              <div className="flex flex-col gap-0.5 rounded-md border border-warn-line bg-warn-bg px-2.5 py-2 text-[11.5px] text-warn">
                 <span className="flex items-center gap-1.5 font-semibold">
                   <AlertTriangle size={12} />
                   Termo proibido pela marca
@@ -286,7 +286,7 @@ export function OutputPieces({
               <VerificationPanel verification={piece.verification} />
             ) : null}
 
-            <div className="flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-3">
+            <div className="flex flex-wrap items-center gap-2 border-t border-line2 pt-3">
               <Button
                 icon={copied === piece.kind ? Check : Copy}
                 size="sm"
@@ -304,7 +304,7 @@ export function OutputPieces({
                 </Button>
               ) : null}
               {flagged === 0 && piece.verification ? (
-                <span className="flex items-center gap-1 text-[11px] text-emerald-700">
+                <span className="flex items-center gap-1 text-[11px] text-ok">
                   <Check size={12} />
                   tudo rastreado até a origem
                 </span>

@@ -13,7 +13,7 @@ type FormatSelectProps = {
 /** Segmentado igual às abas Conteúdo/Estilo/Contexto — Formato é modo, não filtro. */
 export function FormatSelect({ value, onChange }: FormatSelectProps) {
   return (
-    <div className="flex gap-0.5 rounded-lg bg-zinc-100 p-1">
+    <div className="flex gap-0.5 rounded-lg bg-surface2 p-1">
       {formatOptions.map(({ id, label }) => {
         const isActive = id === value;
         return (
@@ -25,7 +25,7 @@ export function FormatSelect({ value, onChange }: FormatSelectProps) {
             className={clsx(
               "rounded-md px-3 py-1.5 text-xs font-medium transition",
               focusRing,
-              isActive ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900",
+              isActive ? "bg-acc text-acc-ink" : "text-mut hover:text-ink",
             )}
           >
             {label}

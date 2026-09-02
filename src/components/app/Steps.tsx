@@ -18,11 +18,11 @@ export function Steps({ steps, current }: { steps: Step[]; current: number }) {
     <ol className="flex flex-wrap items-center gap-x-2 gap-y-1">
       {steps.map(({ n, label }, index) => (
         <li key={n} className="flex items-center gap-2">
-          {index > 0 ? <span className="h-px w-4 bg-zinc-200" aria-hidden /> : null}
+          {index > 0 ? <span className="h-px w-4 bg-line" aria-hidden /> : null}
           <span
             className={clsx(
               "flex items-center gap-1.5 text-[11.5px]",
-              n === current ? "font-semibold text-zinc-900" : "text-zinc-400",
+              n === current ? "font-semibold text-ink" : "text-faint",
             )}
             aria-current={n === current ? "step" : undefined}
           >
@@ -30,10 +30,10 @@ export function Steps({ steps, current }: { steps: Step[]; current: number }) {
               className={clsx(
                 "grid h-[19px] w-[19px] place-items-center rounded-full border font-mono text-[10px]",
                 n < current
-                  ? "border-emerald-600 bg-emerald-50 text-emerald-700"
+                  ? "border-ok-line bg-ok-bg text-ok"
                   : n === current
-                    ? "border-zinc-900 bg-zinc-900 text-white"
-                    : "border-zinc-200 text-zinc-400",
+                    ? "border-acc bg-acc text-acc-ink"
+                    : "border-line text-faint",
               )}
             >
               {n < current ? "✓" : n}

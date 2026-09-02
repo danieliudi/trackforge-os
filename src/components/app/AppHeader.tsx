@@ -60,14 +60,14 @@ export function AppHeader({
   const isExporting = exporting !== null;
 
   return (
-    <header className="flex shrink-0 items-center justify-between gap-4 border-b border-zinc-200 bg-white px-4 py-2.5 sm:px-6">
+    <header className="flex shrink-0 items-center justify-between gap-4 border-b border-line bg-surface px-4 py-2.5 sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="shrink-0 text-sm font-semibold tracking-tight text-zinc-900">
+        <span className="shrink-0 text-sm font-semibold tracking-tight text-ink">
           Carousel Builder
         </span>
         <Link
           href="/esteira"
-          className={`flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-xs text-zinc-500 transition hover:text-zinc-900 ${focusRing}`}
+          className={`flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-xs text-mut transition hover:text-ink ${focusRing}`}
           title="Voltar para a esteira"
         >
           <ArrowLeft size={13} />
@@ -75,17 +75,17 @@ export function AppHeader({
         </Link>
         {title ? (
           <>
-            <span aria-hidden className="shrink-0 text-zinc-300">
+            <span aria-hidden className="shrink-0 text-faint">
               /
             </span>
-            <span className="truncate text-sm text-zinc-600" title={title}>
+            <span className="truncate text-sm text-mut" title={title}>
               {title}
             </span>
           </>
         ) : null}
         {persistFailed ? (
           <span
-            className="flex shrink-0 items-center gap-1 rounded bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-700"
+            className="flex shrink-0 items-center gap-1 rounded bg-warn-bg px-2 py-0.5 text-[11px] font-medium text-warn"
             title="O navegador recusou salvar a sessão, provavelmente por excesso de imagens em data URL. Recarregar a página vai perder as edições."
           >
             <CloudOff size={12} />
@@ -99,13 +99,13 @@ export function AppHeader({
 
         {hasCarousel ? (
           <>
-            <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
+            <span aria-hidden className="mx-1 h-5 w-px bg-line" />
 
             <Button icon={FilePlus2} onClick={onReset}>
               <span className="hidden sm:inline">Novo carrossel</span>
             </Button>
 
-            <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
+            <span aria-hidden className="mx-1 h-5 w-px bg-line" />
 
             <div className="flex items-center">
               <IconButton
@@ -122,7 +122,7 @@ export function AppHeader({
               />
             </div>
 
-            <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
+            <span aria-hidden className="mx-1 h-5 w-px bg-line" />
           </>
         ) : null}
 
@@ -135,7 +135,7 @@ export function AppHeader({
 
         {hasCarousel ? (
           <>
-            <span aria-hidden className="mx-1 h-5 w-px bg-zinc-200" />
+            <span aria-hidden className="mx-1 h-5 w-px bg-line" />
 
             {canShare ? (
               <Button icon={Share2} loading={sharing} disabled={sharing} onClick={onShare}>

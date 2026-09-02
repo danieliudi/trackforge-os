@@ -118,7 +118,7 @@ function SuggestionsSection({
       </div>
       <div className="flex flex-col gap-1.5">
         {error ? (
-          <p className="text-xs text-red-600">Falha ao sugerir temas.</p>
+          <p className="text-xs text-danger">Falha ao sugerir temas.</p>
         ) : !loading && topics ? (
           topics.map((text) => (
             <button
@@ -126,11 +126,11 @@ function SuggestionsSection({
               type="button"
               onClick={() => onPick(text)}
               className={clsx(
-                "flex items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left text-sm text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-900",
+                "flex items-center gap-2.5 rounded-lg border border-line bg-surface px-3 py-2.5 text-left text-sm text-ink2 transition hover:border-line3 hover:text-ink",
                 focusRing,
               )}
             >
-              <Sparkles size={14} className="shrink-0 text-zinc-400" />
+              <Sparkles size={14} className="shrink-0 text-faint" />
               <span className="truncate">{text}</span>
             </button>
           ))
@@ -148,12 +148,12 @@ function NewsToggleRow({
   onChange: (value: boolean) => void;
 }) {
   return (
-    <label className="flex items-center gap-2 text-xs text-zinc-600">
+    <label className="flex items-center gap-2 text-xs text-mut">
       <input
         type="checkbox"
         checked={checked}
         onChange={(event) => onChange(event.target.checked)}
-        className={clsx("h-3.5 w-3.5 rounded border-zinc-300 text-zinc-900", focusRing)}
+        className={clsx("h-3.5 w-3.5 rounded border-line text-ink", focusRing)}
       />
       Incluir notícias recentes do setor
     </label>
@@ -245,7 +245,7 @@ export function Composer({
         >
           {isGenerating ? "Gerando..." : "Gerar novamente"}
         </Button>
-        <p className="text-[11px] text-zinc-500">
+        <p className="text-[11px] text-mut">
           Substitui todos os slides. Dá para desfazer com{" "}
           <kbd className={kbdClass}>Ctrl</kbd> <kbd className={kbdClass}>Z</kbd>.
         </p>
@@ -256,10 +256,10 @@ export function Composer({
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-7 px-6 py-12">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-2xl font-semibold tracking-tight text-ink">
           Gere um carrossel B2B
         </h1>
-        <p className="text-sm leading-relaxed text-zinc-600">
+        <p className="text-sm leading-relaxed text-mut">
           Cole a URL de um artigo ou descreva o tema. A IA monta a sequência
           completa — capa, slides de conteúdo e CTA — e você edita cada texto
           antes de exportar em PDF ou PNG.
@@ -278,7 +278,7 @@ export function Composer({
           className={clsx(fieldClass, "resize-y px-4 py-3 text-base")}
         />
         <div className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-1 text-[11px] text-zinc-500">
+          <span className="flex items-center gap-1 text-[11px] text-mut">
             <kbd className={kbdClass}>Ctrl</kbd>
             <CornerDownLeft size={11} />
             para gerar
@@ -313,18 +313,18 @@ export function Composer({
       ) : null}
 
       {isGenerating ? (
-        <div className="flex items-center gap-3 rounded-lg border border-zinc-200 bg-white px-4 py-3">
+        <div className="flex items-center gap-3 rounded-lg border border-line bg-surface px-4 py-3">
           <span className="relative flex h-2 w-2 shrink-0">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-zinc-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-zinc-700" />
+            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-faint opacity-75" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-surface2" />
           </span>
-          <p className="flex-1 text-xs leading-relaxed text-zinc-600">
+          <p className="flex-1 text-xs leading-relaxed text-mut">
             Montando capa, slides de conteúdo e CTA.{" "}
             {includeNews
               ? "Com busca de notícias, costuma levar de 40 a 80 segundos."
               : "Costuma levar de 10 a 30 segundos."}
           </p>
-          <span className="shrink-0 text-xs tabular-nums text-zinc-500">
+          <span className="shrink-0 text-xs tabular-nums text-mut">
             {elapsed}s
           </span>
         </div>
@@ -346,9 +346,9 @@ export function Composer({
                 key={text}
                 type="button"
                 onClick={() => onChange(text)}
-                className="flex items-center gap-2.5 rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-left text-sm text-zinc-700 transition hover:border-zinc-400 hover:text-zinc-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900"
+                className="flex items-center gap-2.5 rounded-lg border border-line bg-surface px-3 py-2.5 text-left text-sm text-ink2 transition hover:border-line3 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acc"
               >
-                <Icon size={14} className="shrink-0 text-zinc-400" />
+                <Icon size={14} className="shrink-0 text-faint" />
                 <span className="truncate">{text}</span>
               </button>
             ))}
@@ -357,7 +357,7 @@ export function Composer({
       )}
 
       {onBrandChange ? (
-        <div className="flex flex-col gap-6 border-t border-zinc-200 pt-6">
+        <div className="flex flex-col gap-6 border-t border-line pt-6">
           {onFormatChange && format ? (
             <div className="flex flex-col gap-2">
               <span className={labelClass}>Formato</span>
@@ -372,7 +372,7 @@ export function Composer({
                 onChange={onPlatformChange}
                 disabled={format === "apresentacao"}
               />
-              <p className="text-[11px] leading-relaxed text-zinc-500">
+              <p className="text-[11px] leading-relaxed text-mut">
                 {getPlatformToneNote(platform)}
               </p>
             </div>

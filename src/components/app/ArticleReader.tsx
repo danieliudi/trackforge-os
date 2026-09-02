@@ -19,38 +19,38 @@ import { countWords, type Article } from "@/types/article";
 export function ArticleReader({ article }: { article: Article }) {
   return (
     <article className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2 border-b border-zinc-200 pb-5">
-        <h2 className="text-balance text-2xl font-semibold leading-tight tracking-tight text-zinc-900">
+      <header className="flex flex-col gap-2 border-b border-line pb-5">
+        <h2 className="text-balance text-2xl font-semibold leading-tight tracking-tight text-ink">
           {article.title}
         </h2>
-        <p className="text-[15px] leading-relaxed text-zinc-600">{article.dek}</p>
-        <p className="font-mono text-[10.5px] uppercase tracking-wide text-zinc-400">
+        <p className="text-[15px] leading-relaxed text-mut">{article.dek}</p>
+        <p className="font-mono text-[10.5px] uppercase tracking-wide text-faint">
           {article.targetAudience} · {countWords(article)} palavras
         </p>
       </header>
 
       {article.sections.map((section, index) => (
         <section key={`${section.heading}-${index}`} className="flex flex-col gap-2.5">
-          <h3 className="text-[15px] font-semibold tracking-tight text-zinc-900">
+          <h3 className="text-[15px] font-semibold tracking-tight text-ink">
             {section.heading}
           </h3>
           {section.paragraphs.map((paragraph, position) => (
-            <p key={position} className="text-[14.5px] leading-[1.72] text-zinc-700">
+            <p key={position} className="text-[14.5px] leading-[1.72] text-ink2">
               {paragraph}
             </p>
           ))}
         </section>
       ))}
 
-      <section className="flex flex-col gap-2.5 rounded-lg border border-zinc-200 bg-zinc-50 px-4 py-4">
-        <h3 className="text-[13px] font-semibold tracking-tight text-zinc-900">O que fazer</h3>
+      <section className="flex flex-col gap-2.5 rounded-lg border border-line bg-canvas px-4 py-4">
+        <h3 className="text-[13px] font-semibold tracking-tight text-ink">O que fazer</h3>
         <ul className="flex flex-col gap-1.5">
           {article.takeaways.map((takeaway, index) => (
             <li
               key={index}
-              className="grid grid-cols-[auto_1fr] gap-2 text-[14px] leading-relaxed text-zinc-700"
+              className="grid grid-cols-[auto_1fr] gap-2 text-[14px] leading-relaxed text-ink2"
             >
-              <Check size={13} className="mt-[5px] shrink-0 text-emerald-600" />
+              <Check size={13} className="mt-[5px] shrink-0 text-ok" />
               <span>{takeaway}</span>
             </li>
           ))}
@@ -58,17 +58,17 @@ export function ArticleReader({ article }: { article: Article }) {
       </section>
 
       {article.sources.length > 0 ? (
-        <section className="flex flex-col gap-1.5 border-t border-zinc-200 pt-4">
+        <section className="flex flex-col gap-1.5 border-t border-line pt-4">
           <span className={labelClass}>Fontes</span>
           <ul className="flex flex-col gap-1">
             {article.sources.map((source, index) => (
-              <li key={index} className="text-[12.5px] leading-snug text-zinc-600">
+              <li key={index} className="text-[12.5px] leading-snug text-mut">
                 {source.url ? (
                   <a
                     href={source.url}
                     target="_blank"
                     rel="noreferrer"
-                    className={clsx("underline underline-offset-2 hover:text-zinc-900", focusRing)}
+                    className={clsx("underline underline-offset-2 hover:text-ink", focusRing)}
                   >
                     {source.label}
                   </a>
