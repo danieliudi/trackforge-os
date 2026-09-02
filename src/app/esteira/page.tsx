@@ -135,7 +135,16 @@ export default function BancadaPage() {
         })),
       );
       setSent(run.sent);
-      setOrigin({ mode: "tema", input: run.source, signalId: null, fileName: null });
+      // A origem volta inteira quando foi guardada. Produção antiga, gravada
+      // antes de o campo existir, cai no rótulo — que é o que havia.
+      setOrigin(
+        (run.origin as Origin | undefined) ?? {
+          mode: "tema",
+          input: run.source,
+          signalId: null,
+          fileName: null,
+        },
+      );
     }, 0);
     return () => clearTimeout(timer);
   }, []);
@@ -183,6 +192,7 @@ export default function BancadaPage() {
         at: Date.now(),
         brandId,
         source,
+        origin,
         title: previous?.title ?? source,
         article: previous?.article ?? null,
         images: previous?.images ?? [],
@@ -192,7 +202,7 @@ export default function BancadaPage() {
       });
       return id;
     },
-    [runId, brandId, source],
+    [runId, brandId, source, origin],
   );
 
   const write = useCallback(async () => {

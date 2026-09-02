@@ -33,6 +33,14 @@ export type Production = {
   brandId: BrandId | null;
   /** Rótulo da origem: o sinal, o tema, o nome do arquivo. */
   source: string;
+  /**
+   * A origem inteira, não só o rótulo.
+   *
+   * Guardar só o rótulo fazia a produção reabrir sempre como "Tema" com o NOME
+   * do arquivo no campo — e um clique em "Reescrever o artigo" gastava dinheiro
+   * gerando a partir de "relatorio.md" em vez do conteúdo dele.
+   */
+  origin?: { mode: string; input: string; signalId: string | null; fileName: string | null };
   title: string;
   article: Article | null;
   images: ChosenImage[];

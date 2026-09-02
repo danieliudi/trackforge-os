@@ -1,9 +1,11 @@
 "use client";
 
-import { ArrowLeft, Loader2, SearchX, Upload, X } from "lucide-react";
+import { ArrowLeft, Loader2, Monitor, Moon, SearchX, Sun, Upload, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useId, useState, useSyncExternalStore } from "react";
+
+import { IconButton } from "@/components/ui/Button";
 
 import { brandOptions, type BrandId } from "@/constants/brands";
 import {
@@ -12,6 +14,14 @@ import {
   setFront,
   subscribeFront,
 } from "@/lib/front";
+import {
+  getThemeServerSnapshot,
+  getThemeSnapshot,
+  nextTheme,
+  setTheme,
+  subscribeTheme,
+  themeLabel,
+} from "@/lib/theme";
 import { fieldClass, focusRing, labelClass } from "@/lib/ui";
 
 type LibraryImage = {
@@ -30,6 +40,8 @@ export default function BibliotecaPage() {
   // aqui e voltar para a esteira noutra frente é como a foto de uma marca
   // termina numa peça da outra.
   const front = useSyncExternalStore(subscribeFront, getFrontSnapshot, getFrontServerSnapshot);
+  const tema = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
+  const themeIcon = tema === "claro" ? Sun : tema === "escuro" ? Moon : Monitor;
   const [images, setImages] = useState<LibraryImage[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState("");
@@ -117,8 +129,16 @@ export default function BibliotecaPage() {
         <span className="text-sm font-semibold tracking-tight text-ink">
           Biblioteca de imagens
         </span>
-        <span className="text-xs tabular-nums text-mut">
-          {images ? `${images.length} imagens` : ""}
+        <span className="flex items-center gap-3">
+          <span className="text-xs tabular-nums text-mut">
+            {images ? `${images.length} imagens` : ""}
+          </span>
+          <IconButton
+            icon={themeIcon}
+            size="sm"
+            label={`Tema: ${themeLabel[tema]} — clique para ${themeLabel[nextTheme[tema]]}`}
+            onClick={() => setTheme(nextTheme[tema])}
+          />
         </span>
       </header>
 
