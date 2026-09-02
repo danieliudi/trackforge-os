@@ -90,6 +90,11 @@ Isto não é preferência de estilo. É o requisito do produto.
   cruza para o entregável.
 - **Não aplicar migration nem fazer deploy de edge function sem confirmação
   explícita do Daniel.** Vale também para qualquer escrita em produção no CRM.
+- **Publicar exige `APP_PASSWORD`.** As rotas de API gastam a chave da
+  Anthropic, leem sinais do CRM, escrevem na fila de aprovação e apagam arquivo
+  da biblioteca. Sem essa variável o `src/proxy.ts` não pede nada — o que
+  é certo em `localhost` e inaceitável numa URL pública. Ao subir a ferramenta
+  para qualquer lugar, definir a variável faz parte de "no ar".
 
 ## 4. Mockup antes de código — mudança visual ou estrutural
 

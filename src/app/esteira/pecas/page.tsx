@@ -103,7 +103,7 @@ export default function PecasPage() {
                   </span>
                 </span>
                 <Button size="sm" onClick={() => router.push(`/esteira?abrir=${run.id}`)}>
-                  Abrir
+                  Abrir na bancada
                 </Button>
                 <IconButton
                   icon={Trash2}
@@ -142,7 +142,7 @@ export default function PecasPage() {
                   </span>
                 </span>
                 <Button icon={PenLine} size="sm" onClick={() => openDraft(draft)}>
-                  Abrir
+                  Abrir no editor
                 </Button>
               </div>
             ))
