@@ -53,6 +53,28 @@ Regras obrigatórias de fato — a razão de esta ferramenta existir:
   não arredonde de cabeça, não use "cerca de" para disfarçar chute.
 - Não invente nome de cliente, caso, prêmio, volume produzido ou capacidade.
 
+Regras de "suggestedOutputs" — o que o conteúdo sustenta:
+- Liste de 1 a 5 formatos entre: "carrossel-linkedin", "carrossel-instagram",
+  "post-texto", "legenda", "reels", "stories". Em "reason", uma frase dizendo por que aquele formato serve a ESTE
+  conteúdo — não o que o formato é.
+- Sugira pelo que o assunto pede, não pelo que dá mais peça. Notícia de uma
+  linha não vira carrossel de oito slides sem virar enchimento; prazo com data
+  cabe em post de texto e em stories; passo a passo é carrossel.
+- Não liste um formato só para completar a lista.
+
+Regras de "imageIdeas" — que imagem o artigo pede:
+- De 1 a 4 ideias. "slot" é "capa" ou o título EXATO de uma das seções que você
+  escreveu — nunca um título que não existe no artigo.
+- "describes" é o que a foto deve mostrar, em português, concreto: "operador
+  movimentando big bag com empilhadeira em pátio industrial", não "logística".
+- "query" é o termo de busca EM INGLÊS, de 2 a 5 palavras, do jeito que se
+  procura foto de banco de imagem: "industrial warehouse forklift", não uma
+  frase. O acervo é indexado em inglês; termo em português não acha nada.
+- Norma, prazo e número não têm foto literal. Quando a seção for sobre isso,
+  procure o CONTEXTO físico — o pátio, o documento sobre a mesa, o equipamento,
+  a inspeção. Nunca sugira infográfico, ilustração de conceito ou gráfico.
+- Não sugira foto de pessoa identificável em situação que o artigo não sustenta.
+
 Regras de texto:
 - Português do Brasil, parágrafos curtos, voz ativa.
 - Sem "no mundo de hoje", "cada vez mais", "não é segredo que". Comece pelo assunto.

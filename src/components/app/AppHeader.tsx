@@ -1,6 +1,6 @@
 "use client";
 
-import { CloudOff, FileDown, FilePlus2, FileText, Images, Redo2, Share2, Undo2 } from "lucide-react";
+import { ArrowLeft, CloudOff, FileDown, FilePlus2, Images, Redo2, Share2, Undo2 } from "lucide-react";
 import Link from "next/link";
 
 import { Button, IconButton } from "@/components/ui/Button";
@@ -68,9 +68,9 @@ export function AppHeader({
         <Link
           href="/esteira"
           className={`flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-xs text-zinc-500 transition hover:text-zinc-900 ${focusRing}`}
-          title="Do sinal à peça enviada"
+          title="Voltar para a esteira"
         >
-          <FileText size={13} />
+          <ArrowLeft size={13} />
           <span className="hidden sm:inline">Esteira</span>
         </Link>
         {title ? (

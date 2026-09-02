@@ -42,6 +42,15 @@ export const GENERATION_MODEL: PricedModel = "claude-sonnet-5";
 export const VERIFICATION_MODEL: PricedModel = "claude-haiku-4-5";
 
 /**
+ * O modelo que sugere formato.
+ *
+ * Ler um material e dizer que peça ele sustenta é classificação, não redação, e
+ * roda ANTES de o usuário decidir gastar — se custasse como uma geração, a
+ * sugestão viraria um pedágio na entrada em vez de ajuda.
+ */
+export const SUGGESTION_MODEL: PricedModel = "claude-haiku-4-5";
+
+/**
  * US$ 10 por 1.000 buscas, cobrados por busca além dos tokens do resultado.
  * É o item mais caro de uma geração com notícias — daí ele aparecer como linha
  * separada no recibo em vez de diluído no total.

@@ -56,3 +56,59 @@ export function buildCarrosselSystem(platform: Platform, brandId: BrandId | null
     brandId,
   );
 }
+
+import { OUTPUT_META, type TextKind } from "@/types/outputs";
+
+/**
+ * Como cada formato quer ser escrito.
+ *
+ * O que separa um do outro não é tamanho, é onde a atenção quebra: no LinkedIn
+ * o corte vem depois de três linhas, no Instagram depois de uma, no Reels o
+ * primeiro segundo decide, e no Stories cada tela é um toque de distância do
+ * abandono. Um prompt só, com "adapte ao formato", produziria o mesmo texto
+ * picotado quatro vezes.
+ */
+const KIND_RULES: Record<TextKind, string> = {
+  "post-texto": `Você escreve o post de texto do LinkedIn.
+
+- "hook": a primeira linha. É a única garantida antes do corte — precisa dizer a
+  consequência ou o prazo, não anunciar o assunto. Nada de "você sabia que".
+- "paragraphs": de 3 a 9 parágrafos curtos, um por ideia, com linha em branco
+  entre eles. Sem subtítulo, sem marcador, sem emoji.
+- "cta": uma frase. Convite a uma ação concreta, não "comente aqui o que achou".
+- Sem hashtag no corpo. No LinkedIn ela não entrega alcance e polui o texto.`,
+
+  legenda: `Você escreve a legenda de um post único do Instagram.
+
+- "hook": a primeira linha, e só ela aparece antes do "ver mais". Uma frase.
+- "body": de 1 a 4 blocos curtos. Frase curta, sem parágrafo longo.
+- "cta": uma frase.
+- "hashtags": até 8, e só termo que descreve de fato o assunto ou o setor.
+  Nunca invente hashtag de campanha, de slogan ou de marca que não exista.`,
+
+  reels: `Você escreve o roteiro de um Reels do Instagram.
+
+- "hook": o que é dito no primeiro segundo. Se não segurar aqui, o resto não é visto.
+- "beats": de 3 a 7 blocos. Cada um tem "seconds" (quanto dura), "fala" (o que a
+  pessoa diz) e "naTela" (o texto que aparece escrito, curto, até 70 caracteres).
+  A soma dos tempos deve ficar entre 20 e 60 segundos.
+- "cta": a frase final.
+- Escreva "fala" como fala mesmo: frase que alguém diz em voz alta, não texto lido.`,
+
+  stories: `Você escreve uma sequência de Stories do Instagram.
+
+- "screens": de 3 a 5 telas. Cada uma tem "texto" curto — cabe pouco na tela e
+  a pessoa passa rápido.
+- "interacao" é opcional e só quando a tela pedir: enquete de duas opções, caixa
+  de pergunta, ou contagem. Não force nas cinco.
+- "cta": a frase final.
+- Story some em 24h: serve pra lembrete de prazo e pergunta, não pra tese longa.`,
+};
+
+export function buildOutputSystem(kind: TextKind, brandId: BrandId | null | undefined) {
+  const meta = OUTPUT_META[kind];
+  return buildGroundedSystem(
+    `${KIND_RULES[kind]}\n\nPlataforma: ${meta.platform}. Português do Brasil.`,
+    brandId,
+  );
+}

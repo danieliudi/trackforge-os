@@ -2,19 +2,38 @@ import { z } from "zod";
 
 import { crmPublishConfigured, listPendingPieces, publishForApproval } from "@/lib/crm";
 import { articleSchema } from "@/types/article";
-import { carouselSchema } from "@/types/carousel";
+import { outputKindSchema } from "@/types/outputs";
 
+/**
+ * `data` é `unknown` de propósito: o formato de cada peça já foi validado pelo
+ * schema dele na rota que a gerou, e repetir a validação aqui obrigaria esta
+ * rota a conhecer os seis — que é exatamente o acoplamento que fez o envio
+ * quebrar quando a esteira passou a produzir Stories e Reels, e não só slides.
+ */
 const requestSchema = z.object({
   article: articleSchema,
   pieces: z
     .array(
       z.object({
-        platform: z.string().min(1),
-        carousel: carouselSchema,
+        kind: outputKindSchema,
+        data: z.unknown(),
         flagged: z.number().int().min(0).default(0),
       }),
     )
     .min(1, "não há peça para enviar"),
+  images: z
+    .array(
+      z.object({
+        slot: z.string().min(1),
+        url: z.string().min(1),
+        alt: z.string().default(""),
+        credit: z.string().nullable().default(null),
+        creditUrl: z.string().nullable().default(null),
+        fileName: z.string().nullable().default(null),
+      }),
+    )
+    .max(4)
+    .optional(),
   brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
   sourceLabel: z.string().optional(),
 });

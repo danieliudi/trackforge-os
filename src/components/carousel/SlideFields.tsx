@@ -15,6 +15,7 @@ import {
 import { useId, useState, type Ref } from "react";
 
 import { Button, IconButton } from "@/components/ui/Button";
+import type { BrandId } from "@/constants/brands";
 import { ImageSearchPanel } from "@/components/carousel/ImageSearchPanel";
 import { fieldClass, focusRing, labelClass } from "@/lib/ui";
 import {
@@ -71,6 +72,8 @@ type SlideFieldsProps = {
   /** Capa é sempre o primeiro e CTA sempre o último: nenhum dos dois se move. */
   canMoveUp: boolean;
   canMoveDown: boolean;
+  /** Frente da peça: decide de qual biblioteca a busca de imagem parte. */
+  brandId?: BrandId | null;
   cardRef?: Ref<HTMLDivElement>;
 };
 
@@ -98,6 +101,7 @@ export function SlideFields({
   removeBlockedReason,
   canMoveUp,
   canMoveDown,
+  brandId,
   cardRef,
 }: SlideFieldsProps) {
   const bodyRemaining = BODY_MAX - (slide.bodyText?.length ?? 0);
@@ -369,8 +373,9 @@ export function SlideFields({
 
         {searchOpen ? (
           <ImageSearchPanel
-            onSelect={(url) => {
-              setImageUrl(url);
+            brandId={brandId}
+            onSelect={(image) => {
+              setImageUrl(image.url);
               setSearchOpen(false);
             }}
           />

@@ -6,6 +6,7 @@ import { useEffect, useRef } from "react";
 import { SlideFields } from "@/components/carousel/SlideFields";
 import { canMoveDown, canMoveUp, removeBlockedReason } from "@/lib/slides";
 import { focusRing, labelClass } from "@/lib/ui";
+import type { BrandId } from "@/constants/brands";
 import type { Slide } from "@/types/carousel";
 
 type SlideListProps = {
@@ -19,6 +20,8 @@ type SlideListProps = {
   onAdd: () => void;
   onRegenerate: (index: number, instruction?: string) => void;
   regeneratingIndex: number | null;
+  /** Frente da peça, repassada à busca de imagem. */
+  brandId?: BrandId | null;
   /** Carrossel trava em 12; Apresentação (documento, não scroll) aceita mais. */
   maxSlides: number;
 };
@@ -34,6 +37,7 @@ export function SlideList({
   onAdd,
   onRegenerate,
   regeneratingIndex,
+  brandId,
   maxSlides,
 }: SlideListProps) {
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -78,6 +82,7 @@ export function SlideList({
           removeBlockedReason={removeBlockedReason(index, slides.length)}
           canMoveUp={canMoveUp(index, slides.length)}
           canMoveDown={canMoveDown(index, slides.length)}
+          brandId={brandId}
         />
       ))}
 
