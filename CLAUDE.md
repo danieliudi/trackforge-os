@@ -22,7 +22,8 @@ parecido**.
 
 | Item | Arquivo | Uso real |
 |---|---|---|
-| Cor: tokens semânticos (`canvas`, `surface`, `line`, `ink`, `mut`, `acc`, `ok`, `warn`, `danger`) | `src/app/globals.css` (bloco `@theme`) | toda a UI — nunca escreva hex nem escala do Tailwind (`zinc-200`, `white`) num arquivo de tela. A paleta Clockwork inteira mora nesse bloco, e trocá-la é trocar só ele |
+| Cor: tokens semânticos (`canvas`, `surface`, `line`, `ink`, `mut`, `acc`, `ok`, `warn`, `danger`) | `src/app/globals.css` (bloco `@theme` + os dois blocos escuros) | toda a UI — nunca escreva hex nem escala do Tailwind (`zinc-200`, `white`) num arquivo de tela. Claro e escuro são o MESMO conjunto de nomes com valores diferentes; escrever cor à mão numa tela quebra o modo escuro sem ninguém perceber |
+| Tema claro/escuro (`sistema` / `claro` / `escuro`) | `src/lib/theme.ts` + o script inline em `src/app/layout.tsx` | o atributo `data-tema` no `<html>` é a fonte da verdade. O script roda ANTES da primeira pintura: sem ele a tela nasce clara e pisca para escura em toda navegação |
 | Tokens de classe da UI (`focusRing`, `labelClass`, `fieldClass`, `panelClass`, `metaClass`) | `src/lib/ui.ts` | 29 arquivos — nunca monte painel ou campo na mão |
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 arquivos — `IconButton` exige `label` (nome acessível) |
 | Casca do app: barra lateral, frente ativa, seções | `src/components/app/EsteiraShell.tsx` | 5 telas — toda tela nova dentro da esteira nasce aqui, não com layout próprio |
@@ -109,9 +110,11 @@ Formato que funciona com ele: HTML clicável com 3-4 estados, mais screenshots
 na largura real do monitor dele (1900px). Página única longa com scroll foi
 rejeitada explicitamente.
 
-**Contraste é gate, não gosto.** Texto de corpo ≥ 4,5:1 sobre o fundo; rótulo
-pequeno e ornamento ≥ 3:1. O medidor está em `scratchpad/contraste.mjs` e roda
-sobre o app de verdade, em todas as telas. Quando uma cor da paleta não passa
+**Contraste é gate, não gosto, e vale nos dois temas.** Texto de corpo ≥ 4,5:1
+sobre o fundo; rótulo pequeno e ornamento ≥ 3:1. O medidor está em
+`scratchpad/contraste.mjs` e roda sobre o app de verdade, em todas as telas —
+rode com `colorScheme: "dark"` também, porque um token que passa no claro pode
+reprovar no escuro. Quando uma cor da paleta não passa
 como letra, ela vira preenchimento ou borda — nunca se escurece a cor da marca
 para caber texto branco: troca-se a letra. Foi a decisão do laranja `#E56515`
 (branco em cima dá 3,4:1; quase-preto dá 5,0:1).

@@ -67,6 +67,85 @@
   --color-danger-line: #f0b4b4;
 }
 
+/*
+ * O mesmo Clockwork, à noite.
+ *
+ * Não é outra paleta: os cinzas viram quase-pretos quentes da mesma família, o
+ * quase-branco #F8F8F8 dela vira a cor da letra, e o laranja #E56515 não muda
+ * — no escuro ele passa a funcionar até como texto (5,5:1), o que no claro não
+ * acontecia.
+ *
+ * Dois blocos e não um: a mídia atende quem não escolheu nada (`data-tema`
+ * ausente), e o atributo atende quem escolheu escuro de propósito, inclusive
+ * com o sistema no claro. A negação `:not([data-tema="claro"])` é o que faz
+ * "quero claro mesmo com o sistema escuro" funcionar.
+ */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema="claro"]) {
+    color-scheme: dark;
+
+    --color-canvas: #171715;
+    --color-surface: #201f1d;
+    --color-surface2: #2a2926;
+    --color-line: #3a3835;
+    --color-line2: #2a2926;
+    --color-line3: #55524e;
+
+    --color-ink: #f8f8f8;
+    --color-ink2: #dcdbd8;
+    --color-mut: #a9a7a2;
+    --color-faint: #8a8782;
+
+    --color-acc-hi: #fba45c;
+    --color-acc-tint: #2e1f0f;
+    --color-acc-tx: #fba45c;
+
+    --color-ok: #34d399;
+    --color-ok-bg: #0e2a20;
+    --color-ok-line: #1e5a44;
+
+    --color-warn: #fba45c;
+    --color-warn-bg: #2e1f0f;
+    --color-warn-line: #6b4a1e;
+
+    --color-danger: #f87171;
+    --color-danger-bg: #2e1616;
+    --color-danger-line: #7a2c2c;
+  }
+}
+
+:root[data-tema="escuro"] {
+  color-scheme: dark;
+
+  --color-canvas: #171715;
+  --color-surface: #201f1d;
+  --color-surface2: #2a2926;
+  --color-line: #3a3835;
+  --color-line2: #2a2926;
+  --color-line3: #55524e;
+
+  --color-ink: #f8f8f8;
+  --color-ink2: #dcdbd8;
+  --color-mut: #a9a7a2;
+  --color-faint: #8a8782;
+
+  --color-acc-hi: #fba45c;
+  --color-acc-tint: #2e1f0f;
+  --color-acc-tx: #fba45c;
+
+  --color-ok: #34d399;
+  --color-ok-bg: #0e2a20;
+  --color-ok-line: #1e5a44;
+
+  --color-warn: #fba45c;
+  --color-warn-bg: #2e1f0f;
+  --color-warn-line: #6b4a1e;
+
+  --color-danger: #f87171;
+  --color-danger-bg: #2e1616;
+  --color-danger-line: #7a2c2c;
+}
+
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);

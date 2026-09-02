@@ -1,10 +1,12 @@
 "use client";
 
 import clsx from "clsx";
+import { Monitor, Moon, Sun } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSyncExternalStore, type ReactNode } from "react";
 
+import { IconButton } from "@/components/ui/Button";
 import { brandOptions, type BrandId } from "@/constants/brands";
 import {
   formatCost,
@@ -18,6 +20,14 @@ import {
   setFront,
   subscribeFront,
 } from "@/lib/front";
+import {
+  getThemeServerSnapshot,
+  getThemeSnapshot,
+  nextTheme,
+  setTheme,
+  subscribeTheme,
+  themeLabel,
+} from "@/lib/theme";
 import { focusRing, labelClass } from "@/lib/ui";
 
 /**
@@ -64,6 +74,9 @@ export function EsteiraShell({
   const month = entries
     .filter((entry) => new Date(entry.at).getMonth() === new Date().getMonth())
     .reduce((total, entry) => total + entry.usd, 0);
+
+  const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
+  const ThemeIcon = theme === "claro" ? Sun : theme === "escuro" ? Moon : Monitor;
 
   return (
     <div className="flex h-screen flex-col bg-canvas">
@@ -116,6 +129,15 @@ export function EsteiraShell({
         {aside}
 
         <span className="font-mono text-[11px] text-faint">mês · {formatCost(month).primary}</span>
+
+        {/* Um botão, três estados. Três botões no topo custariam espaço
+            permanente por uma decisão que se toma uma vez. */}
+        <IconButton
+          icon={ThemeIcon}
+          size="sm"
+          label={`Tema: ${themeLabel[theme]} — clique para ${themeLabel[nextTheme[theme]]}`}
+          onClick={() => setTheme(nextTheme[theme])}
+        />
 
         <nav className="flex items-center gap-0.5">
           {SECTIONS.map(({ href, label }) => {
