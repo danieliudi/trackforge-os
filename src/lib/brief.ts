@@ -33,12 +33,73 @@ em vez de inventar. Português do Brasil.`;
 
 export const isUrl = (value: string) => /^https?:\/\//i.test(value.trim());
 
+/**
+ * Hosts que o servidor nunca vai buscar a pedido do usuário.
+ *
+ * QUEM COLA A URL É O USUÁRIO, MAS QUEM BUSCA É O SERVIDOR — e o servidor
+ * alcança coisas que o navegador de quem colou não alcança: o próprio
+ * localhost, a rede interna, e o endereço de metadados da instância
+ * (169.254.169.254), que em nuvem devolve credencial. Sem esta guarda, colar
+ * esse endereço no campo de tema faz o conteúdo dele virar texto dentro do
+ * artigo. Hoje a ferramenta roda na máquina do Daniel, onde o alcance é o
+ * mesmo; a guarda existe para o dia em que ela subir para algum lugar.
+ */
+const BLOQUEADOS = [
+  /^localhost$/i,
+  /^127\./,
+  /^0\./,
+  /^10\./,
+  /^192\.168\./,
+  /^172\.(1[6-9]|2\d|3[01])\./,
+  /^169\.254\./,
+  /^\[?::1\]?$/,
+  /^\[?f[cd][0-9a-f]{2}:/i,
+  /\.local$/i,
+  /\.internal$/i,
+];
+
+/** Teto do que se lê de uma página. O corte final é 8.000 caracteres; ler 200MB
+ * para jogar fora 99,9% é só uma forma cara de travar o servidor. */
+const MAX_BYTES = 2_000_000;
+const TIMEOUT_MS = 10_000;
+
+function assertUrlPermitida(raw: string): URL {
+  let url: URL;
+  try {
+    url = new URL(raw);
+  } catch {
+    throw new Error("URL inválida");
+  }
+  if (url.protocol !== "http:" && url.protocol !== "https:") {
+    throw new Error("só http e https");
+  }
+  if (BLOQUEADOS.some((padrao) => padrao.test(url.hostname))) {
+    throw new Error("essa URL aponta para a rede interna, não para uma página pública");
+  }
+  return url;
+}
+
 export async function fetchUrlText(url: string) {
-  const response = await fetch(url, { headers: { "user-agent": "carousel-builder" } });
+  const alvo = assertUrlPermitida(url);
+
+  const response = await fetch(alvo, {
+    headers: { "user-agent": "carousel-builder" },
+    // `manual` porque um redirecionamento levaria de volta para um host que a
+    // checagem acima já recusou — a validação precisa valer para o destino
+    // final, e a forma barata de garantir isso é não seguir redirecionamento.
+    redirect: "manual",
+    signal: AbortSignal.timeout(TIMEOUT_MS),
+  });
+
+  if (response.status >= 300 && response.status < 400) {
+    throw new Error("a URL redireciona; use o endereço final da página");
+  }
   if (!response.ok) {
     throw new Error(`não foi possível ler a URL (HTTP ${response.status})`);
   }
-  const html = await response.text();
+
+  const buffer = await response.arrayBuffer();
+  const html = new TextDecoder().decode(buffer.slice(0, MAX_BYTES));
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
     .replace(/<style[\s\S]*?<\/style>/gi, " ")

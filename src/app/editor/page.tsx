@@ -33,6 +33,7 @@ import { resolveCanvasSize } from "@/constants/themes";
 import type { ForbiddenHit } from "@/knowledge/check";
 import type { Verification } from "@/lib/verify";
 import { useHistory } from "@/hooks/useHistory";
+import { useFront } from "@/components/app/EsteiraShell";
 import { useSettings } from "@/hooks/useSettings";
 import {
   entryFromCost,
@@ -184,6 +185,7 @@ export default function Home() {
     canRedo,
   } = useHistory<Carousel | null>(null);
 
+  const [front] = useFront();
   const [settings, dispatchSettings] = useSettings();
   const { themeId, brandId, customLogo, format, platform, restored } = settings;
   const maxSlides = maxSlidesFor(format);
@@ -251,8 +253,14 @@ export default function Home() {
     const state = loadState();
     const active = state.drafts.find((draft) => draft.id === state.activeId);
     if (active) reset(active.carousel);
-    dispatchSettings({ type: "restore", settings: active ?? {} });
-  }, [reset, dispatchSettings]);
+
+    // Sem rascunho ativo, o editor nasce na frente do app. Antes nascia em
+    // "Nenhuma" mesmo com a esteira em Sanwey — e carrossel sem marca sai sem
+    // a assinatura canônica e sem o tema visual dela, que é a classe de erro
+    // que o estado global de frente existe para evitar.
+    // Com rascunho, quem manda é o rascunho: ele foi salvo com uma marca.
+    dispatchSettings({ type: "restore", settings: active ?? { brandId: front } });
+  }, [reset, dispatchSettings, front]);
 
   // Digitar atualiza o rascunho ativo com debounce — escrever a cada tecla
   // travaria a digitação num array de rascunhos inteiro.

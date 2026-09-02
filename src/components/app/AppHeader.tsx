@@ -1,7 +1,20 @@
 "use client";
 
-import { ArrowLeft, CloudOff, FileDown, FilePlus2, Images, Redo2, Share2, Undo2 } from "lucide-react";
+import {
+  ArrowLeft,
+  CloudOff,
+  FileDown,
+  FilePlus2,
+  Images,
+  Monitor,
+  Moon,
+  Redo2,
+  Share2,
+  Sun,
+  Undo2,
+} from "lucide-react";
 import Link from "next/link";
+import { useSyncExternalStore } from "react";
 
 import { Button, IconButton } from "@/components/ui/Button";
 import { focusRing } from "@/lib/ui";
@@ -10,6 +23,14 @@ import { DraftsMenu } from "@/components/app/DraftsMenu";
 import type { Format } from "@/constants/format";
 import type { CostEntry } from "@/lib/costLog";
 import type { Draft } from "@/lib/storage";
+import {
+  getThemeServerSnapshot,
+  getThemeSnapshot,
+  nextTheme,
+  setTheme,
+  subscribeTheme,
+  themeLabel,
+} from "@/lib/theme";
 
 type AppHeaderProps = {
   title?: string;
@@ -58,21 +79,24 @@ export function AppHeader({
   costEntries,
 }: AppHeaderProps) {
   const isExporting = exporting !== null;
+  const tema = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
+  const themeIcon = tema === "claro" ? Sun : tema === "escuro" ? Moon : Monitor;
 
   return (
     <header className="flex shrink-0 items-center justify-between gap-4 border-b border-line bg-surface px-4 py-2.5 sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="shrink-0 text-sm font-semibold tracking-tight text-ink">
-          Carousel Builder
-        </span>
         <Link
           href="/esteira"
-          className={`flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-xs text-mut transition hover:text-ink ${focusRing}`}
+          className={`flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm font-semibold tracking-tight text-ink transition hover:text-acc-tx ${focusRing}`}
           title="Voltar para a esteira"
         >
-          <ArrowLeft size={13} />
-          <span className="hidden sm:inline">Esteira</span>
+          <ArrowLeft size={14} />
+          Esteira
         </Link>
+        <span aria-hidden className="shrink-0 text-faint">
+          /
+        </span>
+        <span className="shrink-0 text-sm text-mut">Editor</span>
         {title ? (
           <>
             <span aria-hidden className="shrink-0 text-faint">
@@ -95,6 +119,14 @@ export function AppHeader({
       </div>
 
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+        {/* O tema é do app inteiro, não de uma tela: faltar aqui obrigava a
+            voltar para a esteira só para trocar. */}
+        <IconButton
+          icon={themeIcon}
+          size="sm"
+          label={`Tema: ${themeLabel[tema]} — clique para ${themeLabel[nextTheme[tema]]}`}
+          onClick={() => setTheme(nextTheme[tema])}
+        />
         <CostMenu entries={costEntries} />
 
         {hasCarousel ? (

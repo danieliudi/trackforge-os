@@ -28,7 +28,6 @@ parecido**.
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 arquivos — `IconButton` exige `label` (nome acessível) |
 | Casca do app: barra lateral, frente ativa, seções | `src/components/app/EsteiraShell.tsx` | 5 telas — toda tela nova dentro da esteira nasce aqui, não com layout próprio |
 | Frente ativa como store global | `src/lib/front.ts` | via `useFront()` do shell. É global de propósito: estar no painel da Resibag lendo fato da Sanwey é a classe de bug que isto previne |
-| Trilha de passos | `src/components/app/Steps.tsx` | 2 fluxos — recebe `steps` e `current`, não duplique o desenho |
 | Renderização de peça por formato + `toPlainText` | `src/components/app/OutputPieces.tsx` | 2 telas — Reels mostra tempo, Stories mostra telas; não renderize formato novo como parágrafo genérico |
 | Recibo de custo | `src/components/app/CostReceipt.tsx` | 3 telas |
 | Parecer da auditoria | `src/components/app/VerificationPanel.tsx` | 3 telas |
@@ -91,6 +90,11 @@ Isto não é preferência de estilo. É o requisito do produto.
   cruza para o entregável.
 - **Não aplicar migration nem fazer deploy de edge function sem confirmação
   explícita do Daniel.** Vale também para qualquer escrita em produção no CRM.
+- **Publicar exige `APP_PASSWORD`.** As rotas de API gastam a chave da
+  Anthropic, leem sinais do CRM, escrevem na fila de aprovação e apagam arquivo
+  da biblioteca. Sem essa variável o `src/proxy.ts` não pede nada — o que
+  é certo em `localhost` e inaceitável numa URL pública. Ao subir a ferramenta
+  para qualquer lugar, definir a variável faz parte de "no ar".
 
 ## 4. Mockup antes de código — mudança visual ou estrutural
 

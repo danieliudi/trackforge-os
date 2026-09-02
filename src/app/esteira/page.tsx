@@ -78,6 +78,8 @@ export default function BancadaPage() {
   const [copied, setCopied] = useState(false);
   /** Id da produção em curso — a linha que vai sendo regravada a cada etapa. */
   const [runId, setRunId] = useState<string | null>(null);
+  /** Reescrever descarta um artigo pago e paga outro: pede confirmação. */
+  const [confirmarReescrita, setConfirmarReescrita] = useState(false);
 
   const load = useCallback(() => {
     void fetch("/api/signals", {
@@ -135,7 +137,16 @@ export default function BancadaPage() {
         })),
       );
       setSent(run.sent);
-      setOrigin({ mode: "tema", input: run.source, signalId: null, fileName: null });
+      // A origem volta inteira quando foi guardada. Produção antiga, gravada
+      // antes de o campo existir, cai no rótulo — que é o que havia.
+      setOrigin(
+        (run.origin as Origin | undefined) ?? {
+          mode: "tema",
+          input: run.source,
+          signalId: null,
+          fileName: null,
+        },
+      );
     }, 0);
     return () => clearTimeout(timer);
   }, []);
@@ -147,6 +158,8 @@ export default function BancadaPage() {
   const reset = () => {
     // A produção anterior fica salva; o que se zera é a bancada.
     setRunId(null);
+    setConfirmarReescrita(false);
+    setWithArticle(true);
     setOrigin(emptyOrigin);
     setAngle("");
     setArticle(null);
@@ -183,6 +196,7 @@ export default function BancadaPage() {
         at: Date.now(),
         brandId,
         source,
+        origin,
         title: previous?.title ?? source,
         article: previous?.article ?? null,
         images: previous?.images ?? [],
@@ -192,7 +206,7 @@ export default function BancadaPage() {
       });
       return id;
     },
-    [runId, brandId, source],
+    [runId, brandId, source, origin],
   );
 
   const write = useCallback(async () => {
@@ -379,19 +393,47 @@ export default function BancadaPage() {
           </label>
 
           {withArticle ? (
-            <Button
-              variant="primary"
-              className="w-full"
-              loading={busy === "artigo"}
-              disabled={!ready || origin.input.length > MAX_CHARS}
-              onClick={() => void write()}
-            >
-              {busy === "artigo"
-                ? "Escrevendo…"
-                : article
-                  ? "Reescrever o artigo"
-                  : "Escrever o artigo"}
-            </Button>
+            article && confirmarReescrita ? (
+              /* O primeiro clique não gasta: ele explica o que o segundo faz.
+                 O botão dizia "Reescrever o artigo" com o mesmo peso do
+                 primeiro clique, e o artigo que se perde já foi pago. */
+              <div className="flex flex-col gap-2 rounded-lg border border-warn-line bg-warn-bg p-3">
+                <span className="text-[12px] leading-snug text-warn">
+                  Isto descarta o artigo atual e paga uma nova geração. As peças
+                  já geradas continuam salvas.
+                </span>
+                <div className="flex gap-2">
+                  <Button
+                    variant="primary"
+                    className="flex-1"
+                    loading={busy === "artigo"}
+                    onClick={() => {
+                      setConfirmarReescrita(false);
+                      void write();
+                    }}
+                  >
+                    Reescrever
+                  </Button>
+                  <Button variant="ghost" onClick={() => setConfirmarReescrita(false)}>
+                    Cancelar
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button
+                variant="primary"
+                className="w-full"
+                loading={busy === "artigo"}
+                disabled={!ready || origin.input.length > MAX_CHARS}
+                onClick={() => (article ? setConfirmarReescrita(true) : void write())}
+              >
+                {busy === "artigo"
+                  ? "Escrevendo…"
+                  : article
+                    ? "Reescrever o artigo"
+                    : "Escrever o artigo"}
+              </Button>
+            )
           ) : (
             <p className="rounded-lg border border-line2 bg-surface px-3 py-2.5 text-[11.5px] leading-snug text-mut">
               {ready
