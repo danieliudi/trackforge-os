@@ -15,8 +15,8 @@ const pill = (isActive: boolean) =>
     "rounded-full border px-3 py-1.5 text-xs font-medium transition",
     focusRing,
     isActive
-      ? "border-zinc-900 bg-zinc-900 text-white"
-      : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-500",
+      ? "border-acc bg-acc text-acc-ink"
+      : "border-line bg-surface text-ink2 hover:border-line3",
   );
 
 /** Escolher a marca também troca o tema, então o controle vale já na entrada. */

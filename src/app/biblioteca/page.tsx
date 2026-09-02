@@ -105,19 +105,19 @@ export default function BibliotecaPage() {
   );
 
   return (
-    <div className="flex flex-1 flex-col overflow-y-auto bg-zinc-100 font-sans">
-      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-zinc-200 bg-white px-4 py-2.5 sm:px-6">
+    <div className="flex flex-1 flex-col overflow-y-auto bg-surface2 font-sans">
+      <header className="flex shrink-0 items-center justify-between gap-4 border-b border-line bg-surface px-4 py-2.5 sm:px-6">
         <Link
           href="/esteira"
-          className={`flex items-center gap-1.5 text-sm text-zinc-600 transition hover:text-zinc-900 ${focusRing}`}
+          className={`flex items-center gap-1.5 text-sm text-mut transition hover:text-ink ${focusRing}`}
         >
           <ArrowLeft size={15} />
           Esteira
         </Link>
-        <span className="text-sm font-semibold tracking-tight text-zinc-900">
+        <span className="text-sm font-semibold tracking-tight text-ink">
           Biblioteca de imagens
         </span>
-        <span className="text-xs tabular-nums text-zinc-500">
+        <span className="text-xs tabular-nums text-mut">
           {images ? `${images.length} imagens` : ""}
         </span>
       </header>
@@ -133,14 +133,14 @@ export default function BibliotecaPage() {
               onClick={() => setFront(id as BrandId)}
               className={`rounded-md border px-3 py-1 text-[13px] transition ${focusRing} ${
                 id === front
-                  ? "border-zinc-900 bg-white font-semibold text-zinc-900"
-                  : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-400"
+                  ? "border-acc bg-surface font-semibold text-ink"
+                  : "border-line bg-surface text-mut hover:border-line3"
               }`}
             >
               {label}
             </button>
           ))}
-          <span className="text-[11.5px] text-zinc-500">
+          <span className="text-[11.5px] text-mut">
             Cada frente tem a sua pasta. O que está aqui aparece primeiro na busca de imagem.
           </span>
         </div>
@@ -154,7 +154,7 @@ export default function BibliotecaPage() {
           />
           <label
             htmlFor={uploadId}
-            className={`inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-md bg-zinc-900 px-3.5 text-sm font-medium text-white transition hover:bg-zinc-700 ${uploading ? "pointer-events-none opacity-50" : ""} ${focusRing}`}
+            className={`inline-flex shrink-0 cursor-pointer items-center gap-2 rounded-md bg-acc px-3.5 text-sm font-medium text-acc-ink transition hover:bg-surface2 ${uploading ? "pointer-events-none opacity-50" : ""} ${focusRing}`}
           >
             {uploading ? (
               <Loader2 size={15} className="animate-spin" />
@@ -178,16 +178,16 @@ export default function BibliotecaPage() {
         </div>
 
         {error ? (
-          <p className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">{error}</p>
+          <p className="rounded-md bg-danger-bg px-3 py-2 text-xs text-danger">{error}</p>
         ) : null}
 
         {!images ? (
-          <div className="flex flex-1 items-center justify-center gap-2 text-sm text-zinc-500">
+          <div className="flex flex-1 items-center justify-center gap-2 text-sm text-mut">
             <Loader2 size={16} className="animate-spin" />
             Carregando…
           </div>
         ) : filtered?.length === 0 ? (
-          <div className="flex flex-1 flex-col items-center justify-center gap-2 text-sm text-zinc-500">
+          <div className="flex flex-1 flex-col items-center justify-center gap-2 text-sm text-mut">
             <SearchX size={22} />
             Nada encontrado
           </div>
@@ -196,7 +196,7 @@ export default function BibliotecaPage() {
             {filtered?.map((image) => (
               <div
                 key={image.path}
-                className="group relative aspect-square overflow-hidden rounded-lg bg-zinc-200"
+                className="group relative aspect-square overflow-hidden rounded-lg bg-line"
               >
                 <Image
                   src={image.path}
@@ -212,7 +212,7 @@ export default function BibliotecaPage() {
                   type="button"
                   onClick={() => handleDelete(image)}
                   title={`Excluir "${image.name}"`}
-                  className={`absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-white opacity-0 transition hover:bg-red-600 group-hover:opacity-100 ${focusRing}`}
+                  className={`absolute right-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-full bg-black/65 text-white opacity-0 transition hover:bg-danger group-hover:opacity-100 ${focusRing}`}
                 >
                   <X size={13} />
                 </button>

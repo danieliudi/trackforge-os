@@ -7,6 +7,12 @@ import { useSyncExternalStore, type ReactNode } from "react";
 
 import { brandOptions, type BrandId } from "@/constants/brands";
 import {
+  formatCost,
+  getCostLogServerSnapshot,
+  getCostLogSnapshot,
+  subscribeCostLog,
+} from "@/lib/costLog";
+import {
   getFrontServerSnapshot,
   getFrontSnapshot,
   setFront,
@@ -15,27 +21,27 @@ import {
 import { focusRing, labelClass } from "@/lib/ui";
 
 /**
- * A casca do app: uma barra lateral, uma porta.
+ * A casca do app: uma barra no topo, a janela inteira embaixo.
  *
- * Antes havia duas entradas — o editor de carrossel em "/" e a esteira — as
- * duas pedindo "descreva o tema" e produzindo coisas diferentes. Isto é a
- * correção: a esteira é a casa, a frente é a primeira decisão, e as seções são
- * a espinha de navegação. O editor virou destino, não porta.
+ * A BARRA LATERAL SAIU e virou esta faixa. Ela custava 184px fixos em toda tela
+ * para mostrar quatro links que se usam duas vezes por semana, e empurrava o
+ * trabalho para uma coluna estreita no meio de um monitor largo — a reclamação
+ * que originou o redesenho. Navegação de baixa frequência mora no topo; a
+ * largura toda fica para o que se faz todo dia.
+ *
+ * A FRENTE CONTINUA SENDO A PRIMEIRA DECISÃO, e por isso fica colada na marca:
+ * peça sai com o nome de uma empresa, e trocar de frente sem perceber é como
+ * fato de uma marca vai parar no material da outra.
  */
 
 const SECTIONS = [
-  { href: "/esteira", label: "Painel" },
   { href: "/esteira/pecas", label: "Peças" },
   { href: "/esteira/fatos", label: "Base de fatos" },
   { href: "/esteira/custos", label: "Custos" },
 ];
 
 export function useFront(): [BrandId, (id: BrandId) => void] {
-  const front = useSyncExternalStore(
-    subscribeFront,
-    getFrontSnapshot,
-    getFrontServerSnapshot,
-  );
+  const front = useSyncExternalStore(subscribeFront, getFrontSnapshot, getFrontServerSnapshot);
   return [front, setFront];
 }
 
@@ -44,94 +50,102 @@ export function EsteiraShell({
   aside,
 }: {
   children: ReactNode;
-  /** Conteúdo do topo à direita — os passos, quando há um fluxo em curso. */
+  /** Conteúdo extra no topo à direita, antes das seções. */
   aside?: ReactNode;
 }) {
   const pathname = usePathname();
   const [front, choose] = useFront();
 
+  const entries = useSyncExternalStore(
+    subscribeCostLog,
+    getCostLogSnapshot,
+    getCostLogServerSnapshot,
+  );
+  const month = entries
+    .filter((entry) => new Date(entry.at).getMonth() === new Date().getMonth())
+    .reduce((total, entry) => total + entry.usd, 0);
+
   return (
-    <div className="min-h-screen bg-zinc-50">
-      <header className="border-b border-zinc-200 bg-white">
-        <div className="mx-auto flex max-w-6xl items-center gap-4 px-5 py-3">
-          <Link
-            href="/esteira"
-            className={clsx(
-              "rounded-md px-1 py-0.5 text-sm font-semibold tracking-tight text-zinc-900",
-              focusRing,
-            )}
-          >
-            Esteira
-          </Link>
-          <div className="flex-1" />
-          {aside}
-        </div>
+    <div className="flex h-screen flex-col bg-canvas">
+      <header className="flex shrink-0 items-center gap-4 border-b border-line2 bg-surface px-5 py-2.5">
+        <Link
+          href="/esteira"
+          className={clsx(
+            "rounded-md px-1 py-0.5 text-sm font-semibold tracking-tight text-ink",
+            focusRing,
+          )}
+        >
+          Esteira
+        </Link>
+
+        <span className="flex items-center gap-2">
+          <span className={clsx(labelClass, "hidden sm:inline")}>Frente</span>
+          <span className="flex gap-0.5 rounded-lg border border-line bg-canvas p-0.5">
+            {brandOptions.map(({ id, label }) => (
+              <button
+                key={id}
+                type="button"
+                aria-pressed={id === front}
+                onClick={() => choose(id)}
+                className={clsx(
+                  "rounded-md px-3 py-1 text-[12.5px] transition",
+                  focusRing,
+                  id === front ? "bg-surface2 font-semibold text-ink" : "text-mut hover:text-ink",
+                )}
+              >
+                {label}
+              </button>
+            ))}
+            {/* Listada e desligada: esconder sugeriria que não é parte do
+                desenho; habilitar deixaria sair peça sem o auditor de fronteira. */}
+            {/* Recuada, mas legível: a 2,2:1 ela sumia, e item invisível não
+                comunica "em breve" — comunica que não existe. */}
+            <span
+              className="flex items-center gap-1.5 px-3 py-1 text-[12.5px] text-faint"
+              title="Em breve — falta o auditor de fronteira para esta frente"
+            >
+              Meu
+              <span className="font-mono text-[9px] uppercase tracking-wide">em breve</span>
+            </span>
+          </span>
+        </span>
+
+        <span className="flex-1" />
+        {aside}
+
+        <span className="font-mono text-[11px] text-faint">mês · {formatCost(month).primary}</span>
+
+        <nav className="flex items-center gap-0.5">
+          {SECTIONS.map(({ href, label }) => {
+            const active = pathname === href;
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={active ? "page" : undefined}
+                className={clsx(
+                  "rounded-md px-2.5 py-1.5 text-[12.5px] transition",
+                  focusRing,
+                  active ? "bg-surface2 font-medium text-ink" : "text-mut hover:text-ink",
+                )}
+              >
+                {label}
+              </Link>
+            );
+          })}
+        </nav>
       </header>
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-5 py-6 md:grid-cols-[11.5rem_1fr]">
-        <nav className="flex flex-col gap-5">
-          <div className="flex flex-col gap-1.5">
-            <span className={labelClass}>Frente</span>
-            <div className="flex flex-col gap-0.5">
-              {brandOptions.map(({ id, label }) => (
-                <button
-                  key={id}
-                  type="button"
-                  aria-pressed={id === front}
-                  onClick={() => choose(id)}
-                  className={clsx(
-                    "rounded-md border px-2.5 py-1.5 text-left text-[13px] transition",
-                    focusRing,
-                    id === front
-                      ? "border-zinc-900 bg-white font-semibold text-zinc-900"
-                      : "border-transparent text-zinc-600 hover:bg-white",
-                  )}
-                >
-                  {label}
-                </button>
-              ))}
-              {/* Listada e desligada: esconder sugeriria que não é parte do
-                  desenho, habilitar deixaria sair peça sem o auditor de
-                  fronteira — que é a guarda que esta frente mais precisa. */}
-              <span className="flex items-center justify-between gap-2 px-2.5 py-1.5 text-[13px] text-zinc-300">
-                Meu · pessoal
-                <span className="font-mono text-[9px] uppercase">em breve</span>
-              </span>
-            </div>
-          </div>
+      <main className="min-h-0 flex-1">{children}</main>
+    </div>
+  );
+}
 
-          <div className="flex flex-col gap-1.5">
-            <span className={labelClass}>Seções</span>
-            <div className="flex flex-col gap-0.5">
-              {SECTIONS.map(({ href, label }) => {
-                // A peça avulsa se abre pelo painel e não tem entrada própria
-                // na barra: sem isto a lateral fica sem nada aceso, o que lê
-                // como bug em vez de "você está numa tela do painel".
-                const active =
-                  pathname === href || (href === "/esteira" && pathname === "/esteira/avulso");
-                return (
-                  <Link
-                    key={href}
-                    href={href}
-                    aria-current={active ? "page" : undefined}
-                    className={clsx(
-                      "rounded-md px-2.5 py-1.5 text-[13px] transition",
-                      focusRing,
-                      active
-                        ? "bg-white font-medium text-zinc-900"
-                        : "text-zinc-600 hover:bg-white",
-                    )}
-                  >
-                    {label}
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </nav>
-
-        <main className="flex flex-col gap-4">{children}</main>
-      </div>
+/** Container das telas de leitura — as que não são a bancada de três colunas. */
+export function ShellPage({ children }: { children: ReactNode }) {
+  return (
+    <div className="h-full overflow-y-auto">
+      <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6 py-6">{children}</div>
     </div>
   );
 }

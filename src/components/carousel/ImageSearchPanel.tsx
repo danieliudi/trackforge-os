@@ -68,8 +68,8 @@ export function ImageSearchPanel({
   const [tab, setTab] = useState<Tab>(initialTab);
 
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-zinc-200 bg-zinc-50 p-2.5">
-      <div className="flex w-fit gap-0.5 rounded-md border border-zinc-200 bg-white p-0.5">
+    <div className="flex flex-col gap-2 rounded-md border border-line bg-canvas p-2.5">
+      <div className="flex w-fit gap-0.5 rounded-md border border-line bg-surface p-0.5">
         {TABS.map(({ id, label }) => (
           <button
             key={id}
@@ -79,7 +79,7 @@ export function ImageSearchPanel({
             className={clsx(
               "rounded px-2.5 py-1 text-[11px] font-medium transition",
               focusRing,
-              tab === id ? "bg-zinc-900 text-white" : "text-zinc-600 hover:text-zinc-900",
+              tab === id ? "bg-acc text-acc-ink" : "text-mut hover:text-ink",
             )}
           >
             {id === "biblioteca" && brandLabel ? `${label} ${brandLabel}` : label}
@@ -171,14 +171,14 @@ function UnsplashTab({
       />
 
       {loading ? (
-        <div className="flex items-center justify-center gap-1.5 py-4 text-xs text-zinc-500">
+        <div className="flex items-center justify-center gap-1.5 py-4 text-xs text-mut">
           <Loader2 size={13} className="animate-spin" />
           Buscando…
         </div>
       ) : error ? (
-        <p className="py-2 text-center text-xs text-red-600">{error}</p>
+        <p className="py-2 text-center text-xs text-danger">{error}</p>
       ) : results?.length === 0 ? (
-        <div className="flex flex-col items-center gap-1 py-4 text-xs text-zinc-500">
+        <div className="flex flex-col items-center gap-1 py-4 text-xs text-mut">
           <SearchX size={16} />
           Nada encontrado
         </div>
@@ -246,14 +246,14 @@ function LibraryTab({
       />
 
       {error ? (
-        <p className="py-2 text-center text-xs text-red-600">{error}</p>
+        <p className="py-2 text-center text-xs text-danger">{error}</p>
       ) : !images ? (
-        <div className="flex items-center justify-center gap-1.5 py-4 text-xs text-zinc-500">
+        <div className="flex items-center justify-center gap-1.5 py-4 text-xs text-mut">
           <Loader2 size={13} className="animate-spin" />
           Carregando…
         </div>
       ) : filtered?.length === 0 ? (
-        <div className="flex flex-col items-center gap-1 py-4 text-xs text-zinc-500">
+        <div className="flex flex-col items-center gap-1 py-4 text-xs text-mut">
           <SearchX size={16} />
           Nada encontrado
         </div>
@@ -273,7 +273,7 @@ function LibraryTab({
                 })
               }
               title={image.name}
-              className={`group relative aspect-square overflow-hidden rounded bg-zinc-100 ${focusRing}`}
+              className={`group relative aspect-square overflow-hidden rounded bg-surface2 ${focusRing}`}
             >
               <Image
                 src={image.path}
@@ -290,7 +290,7 @@ function LibraryTab({
       <Link
         href="/biblioteca"
         target="_blank"
-        className="flex items-center justify-center gap-1.5 rounded-md border border-dashed border-zinc-300 py-1.5 text-[11px] font-medium text-zinc-600 transition hover:border-zinc-900 hover:text-zinc-900"
+        className="flex items-center justify-center gap-1.5 rounded-md border border-dashed border-line py-1.5 text-[11px] font-medium text-mut transition hover:border-acc hover:text-ink"
       >
         Gerenciar biblioteca
         <ExternalLink size={11} />

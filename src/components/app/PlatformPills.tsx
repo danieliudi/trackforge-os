@@ -17,10 +17,10 @@ const pill = (isActive: boolean, disabled: boolean) =>
     "rounded-full border px-3 py-1.5 text-xs font-medium transition",
     focusRing,
     disabled
-      ? "cursor-not-allowed border-zinc-200 bg-white text-zinc-400"
+      ? "cursor-not-allowed border-line bg-surface text-faint"
       : isActive
-        ? "border-zinc-900 bg-zinc-900 text-white"
-        : "border-zinc-300 bg-white text-zinc-700 hover:border-zinc-500",
+        ? "border-acc bg-acc text-acc-ink"
+        : "border-line bg-surface text-ink2 hover:border-line3",
   );
 
 export function PlatformPills({ value, onChange, disabled = false }: PlatformPillsProps) {

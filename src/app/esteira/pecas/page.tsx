@@ -5,7 +5,7 @@ import { PenLine } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
+import { EsteiraShell, ShellPage, useFront } from "@/components/app/EsteiraShell";
 import { Button } from "@/components/ui/Button";
 import { platformOptions } from "@/constants/format";
 import { formatCost } from "@/lib/costLog";
@@ -40,15 +40,16 @@ export default function PecasPage() {
 
   return (
     <EsteiraShell>
+      <ShellPage>
       <div className="flex flex-col gap-0.5">
         <span className={labelClass}>Peças</span>
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-xl font-semibold tracking-tight text-ink">
           O que já foi montado
         </h1>
       </div>
 
       {drafts === null ? null : mine.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-zinc-300 px-3.5 py-3 text-[12.5px] text-zinc-500">
+        <p className="rounded-lg border border-dashed border-line px-3.5 py-3 text-[12.5px] text-mut">
           Nenhuma peça salva nesta frente ainda.
         </p>
       ) : (
@@ -59,10 +60,10 @@ export default function PecasPage() {
               className={clsx(panelClass, "flex flex-wrap items-center gap-3 px-3.5 py-3")}
             >
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="truncate text-[13px] font-medium text-zinc-900">
+                <span className="truncate text-[13px] font-medium text-ink">
                   {draft.title}
                 </span>
-                <span className="font-mono text-[10px] text-zinc-400">
+                <span className="font-mono text-[10px] text-faint">
                   {platformOptions.find((p) => p.id === draft.platform)?.label ?? draft.platform}
                   {" · "}
                   {draft.carousel.slides.length} slides
@@ -78,6 +79,7 @@ export default function PecasPage() {
           ))}
         </div>
       )}
+      </ShellPage>
     </EsteiraShell>
   );
 }

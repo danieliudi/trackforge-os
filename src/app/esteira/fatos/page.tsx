@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import { useMemo } from "react";
 
-import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
+import { EsteiraShell, ShellPage, useFront } from "@/components/app/EsteiraShell";
 import { TIER_LABEL, getNormativeFacts, isPublishable } from "@/knowledge/provenance";
 import type { SourceTier } from "@/knowledge/provenance";
 import { focusRing, labelClass, panelClass } from "@/lib/ui";
@@ -21,10 +21,10 @@ import { focusRing, labelClass, panelClass } from "@/lib/ui";
  */
 
 const TIER_STYLE: Record<SourceTier, string> = {
-  primaria: "border-emerald-300 bg-emerald-50 text-emerald-800",
-  secundaria: "border-zinc-300 bg-zinc-50 text-zinc-600",
-  interna: "border-zinc-300 bg-zinc-50 text-zinc-600",
-  "nao-verificado": "border-amber-300 bg-amber-50 text-amber-800",
+  primaria: "border-ok-line bg-ok-bg text-ok",
+  secundaria: "border-line bg-canvas text-mut",
+  interna: "border-line bg-canvas text-mut",
+  "nao-verificado": "border-warn-line bg-warn-bg text-warn",
 };
 
 export default function FatosPage() {
@@ -35,21 +35,22 @@ export default function FatosPage() {
 
   return (
     <EsteiraShell>
+      <ShellPage>
       <div className="flex flex-col gap-0.5">
         <span className={labelClass}>Base de fatos</span>
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-xl font-semibold tracking-tight text-ink">
           O que a ferramenta pode afirmar
         </h1>
       </div>
 
       <div className={clsx(panelClass, "flex flex-col gap-1.5 px-4 py-3.5")}>
-        <p className="text-[13px] leading-relaxed text-zinc-700">
-          <strong className="font-semibold text-zinc-900">
+        <p className="text-[13px] leading-relaxed text-ink2">
+          <strong className="font-semibold text-ink">
             {publishable.length} de {facts.length}
           </strong>{" "}
           fatos podem virar número, data ou citação de norma numa peça.
         </p>
-        <p className="text-[12px] leading-relaxed text-zinc-500">
+        <p className="text-[12px] leading-relaxed text-mut">
           Os outros entram como contexto, mas o gerador não escreve o dado a partir
           deles — e o auditor marca como “sem fonte” se ele aparecer mesmo assim.
           Conferir um fato contra a fonte original é o que o move para cá.
@@ -57,7 +58,7 @@ export default function FatosPage() {
       </div>
 
       {facts.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-zinc-300 px-3.5 py-3 text-[12.5px] text-zinc-500">
+        <p className="rounded-lg border border-dashed border-line px-3.5 py-3 text-[12.5px] text-mut">
           Nenhum fato catalogado para esta frente.
         </p>
       ) : (
@@ -68,7 +69,7 @@ export default function FatosPage() {
               className={clsx(panelClass, "flex flex-col gap-2 px-3.5 py-3")}
             >
               <div className="flex flex-wrap items-start justify-between gap-2">
-                <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-zinc-800">
+                <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-ink">
                   {fact.claim}
                 </p>
                 <span
@@ -81,7 +82,7 @@ export default function FatosPage() {
                 </span>
               </div>
 
-              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 font-mono text-[10px] text-zinc-400">
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 font-mono text-[10px] text-faint">
                 <span>{fact.source}</span>
                 {fact.checkedAt ? <span>conferido {fact.checkedAt}</span> : null}
                 {fact.revalidateBy ? <span>revalidar até {fact.revalidateBy}</span> : null}
@@ -90,7 +91,7 @@ export default function FatosPage() {
                     href={fact.url}
                     target="_blank"
                     rel="noreferrer"
-                    className={clsx("underline underline-offset-2 hover:text-zinc-700", focusRing)}
+                    className={clsx("underline underline-offset-2 hover:text-ink2", focusRing)}
                   >
                     fonte
                   </a>
@@ -98,12 +99,13 @@ export default function FatosPage() {
               </div>
 
               {fact.notes ? (
-                <p className="text-[11.5px] leading-snug text-zinc-500">{fact.notes}</p>
+                <p className="text-[11.5px] leading-snug text-mut">{fact.notes}</p>
               ) : null}
             </div>
           ))}
         </div>
       )}
+      </ShellPage>
     </EsteiraShell>
   );
 }

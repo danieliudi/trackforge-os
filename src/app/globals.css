@@ -1,29 +1,82 @@
 @import "tailwindcss";
 
 /*
- * A interface do app é clara por definição: todo o chrome usa a escala zinc e
- * os temas escuros vivem dentro do canvas do slide, nunca na UI.
+ * A identidade da ferramenta: grafite com um acento âmbar.
  *
- * O bloco `prefers-color-scheme: dark` que existia aqui trocava --background e
- * --foreground, mas nenhuma superfície consumia essas variáveis: as telas são
- * bg-zinc-100/bg-white cravados. No modo escuro do SO o resultado era só o
- * texto solto do body virando claro sobre fundo claro. Removido junto com as
- * variáveis mortas em vez de mantido como contradição latente.
+ * POR QUE ESCURA: isto é ferramenta interna, e o que ela produz é conteúdo de
+ * marca — Resibag verde, Sanwey azul. Um chrome claro e colorido competiria
+ * com a peça que aparece dentro dele. Grafite recua, o conteúdo avança.
+ *
+ * POR QUE TOKEN E NÃO ZINC CRAVADO: a versão anterior tinha 447 cores
+ * escritas à mão em 31 arquivos, e trocar a identidade significava tocar em
+ * todas. Aqui a cor tem nome semântico — `surface` é superfície, `line` é
+ * borda, `acc` é ação — e a próxima troca é só este bloco.
+ *
+ * O ACENTO É UM SÓ. Âmbar preenchido = ação. Âmbar contornado = atenção
+ * (afirmação sem fonte, termo proibido). Verde = conferido. Vermelho = erro.
+ * Informação neutra usa `surface2`, nunca acento — acento em tudo é acento em
+ * nada.
+ *
+ * O canvas do slide tem tema próprio (src/constants/themes.ts) e não consome
+ * nada daqui: peça escura em UI escura continua sendo decisão da peça.
  */
+
+@theme {
+  --color-canvas: #0f172a;
+  --color-surface: #1a2438;
+  --color-surface2: #212d45;
+  --color-line: #2b3b57;
+  --color-line2: #1e2a40;
+  --color-line3: #3c5075;
+
+  --color-ink: #f1f5f9;
+  --color-ink2: #cbd5e1;
+  --color-mut: #94a3b8;
+  --color-faint: #64748b;
+
+  --color-acc: #c2841b;
+  --color-acc-hi: #d89a2c;
+  --color-acc-tx: #e3a93f;
+  --color-acc-ink: #12182a;
+
+  --color-ok: #34d399;
+  --color-ok-bg: #0a2a20;
+  --color-ok-line: #14503c;
+
+  --color-warn: #e3a93f;
+  --color-warn-bg: #2a1f08;
+  --color-warn-line: #6b4e14;
+
+  --color-danger: #f87171;
+  --color-danger-bg: #2a1414;
+  --color-danger-line: #7f2828;
+}
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-body {
-  /* Era `Arial, Helvetica, sans-serif` e vencia a fonte carregada no layout. */
-  font-family: var(--font-sans);
-  background: #f4f4f5;
-  color: #18181b;
+html {
+  /* A barra de rolagem aparecendo e sumindo mudava a largura do body e
+   * deslocava o header horizontalmente a cada troca de tela. Reservar o espaço
+   * sempre corrige isso em toda página, não só nas que rolam. */
+  scrollbar-gutter: stable;
+  color-scheme: dark;
 }
 
-/* O canvas do slide tem tipografia própria; nada da UI deve vazar para dentro. */
+body {
+  font-family: var(--font-sans);
+  background: var(--color-canvas);
+  color: var(--color-ink);
+}
+
+/* A rolagem interna das colunas da bancada: fina e discreta, sem sumir. */
+.thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line) transparent;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

@@ -47,7 +47,7 @@ export function VerificationPanel({ verification, labels }: VerificationPanelPro
     <div
       className={clsx(
         "overflow-hidden rounded-lg border",
-        clean ? "border-zinc-200 bg-white" : "border-amber-200 bg-amber-50",
+        clean ? "border-line bg-surface" : "border-warn-line bg-warn-bg",
       )}
     >
       <button
@@ -56,18 +56,18 @@ export function VerificationPanel({ verification, labels }: VerificationPanelPro
         onClick={() => setOpen((current) => !current)}
         className={clsx(
           "flex w-full items-center justify-between gap-3 px-3.5 py-2.5 text-left transition",
-          clean ? "hover:bg-zinc-50" : "hover:bg-amber-100/60",
+          clean ? "hover:bg-canvas" : "hover:bg-warn-bg/60",
           focusRing,
         )}
       >
         <span
           className={clsx(
             "flex items-center gap-2 text-xs",
-            clean ? "text-zinc-600" : "text-amber-900",
+            clean ? "text-mut" : "text-warn",
           )}
         >
           {clean ? (
-            <Check size={13} className="shrink-0 text-emerald-600" />
+            <Check size={13} className="shrink-0 text-ok" />
           ) : (
             <AlertTriangle size={13} className="shrink-0" />
           )}
@@ -90,28 +90,28 @@ export function VerificationPanel({ verification, labels }: VerificationPanelPro
         <ChevronDown
           size={14}
           className={clsx(
-            "shrink-0 text-zinc-400 transition",
+            "shrink-0 text-faint transition",
             open && "rotate-180",
           )}
         />
       </button>
 
       {open ? (
-        <dl className="border-t border-zinc-100 bg-white px-3.5 py-1">
+        <dl className="border-t border-line2 bg-surface px-3.5 py-1">
           {ordered.map((claim, index) => (
             <div
               key={`${claim.blockNumber}-${index}`}
-              className="grid grid-cols-[auto_1fr] gap-x-2.5 border-b border-zinc-100 py-2 last:border-b-0"
+              className="grid grid-cols-[auto_1fr] gap-x-2.5 border-b border-line2 py-2 last:border-b-0"
             >
-              <dt className="max-w-[7.5rem] truncate pt-0.5 font-mono text-[10px] tabular-nums text-zinc-400">
+              <dt className="max-w-[7.5rem] truncate pt-0.5 font-mono text-[10px] tabular-nums text-faint">
                 {labels?.[claim.blockNumber] ?? `slide ${claim.blockNumber}`}
               </dt>
               <dd className="flex min-w-0 flex-col gap-0.5">
-                <span className="text-[11.5px] leading-snug text-zinc-900">{claim.claim}</span>
+                <span className="text-[11.5px] leading-snug text-ink">{claim.claim}</span>
                 <span
                   className={clsx(
                     "text-[10.5px] leading-snug",
-                    claim.verdict === "rastreado" ? "text-zinc-500" : "text-amber-700",
+                    claim.verdict === "rastreado" ? "text-mut" : "text-warn",
                   )}
                 >
                   {VERDICT_LABEL[claim.verdict] ?? claim.verdict}

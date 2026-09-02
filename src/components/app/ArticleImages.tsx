@@ -74,7 +74,7 @@ export function ArticleImages({ ideas, chosen, onChange, brandId }: ArticleImage
     <div className={clsx(panelClass, "flex flex-col")}>
       <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 px-3.5 pb-2.5 pt-3">
         <span className={labelClass}>Imagens do artigo</span>
-        <span className="font-mono text-[10.5px] text-zinc-400">
+        <span className="font-mono text-[10.5px] text-faint">
           {ideas.length} {ideas.length === 1 ? "sugestão" : "sugestões"} ·{" "}
           {count === 0
             ? "nenhuma escolhida"
@@ -87,11 +87,11 @@ export function ArticleImages({ ideas, chosen, onChange, brandId }: ArticleImage
         const open = openSlot === idea.slot;
 
         return (
-          <div key={idea.slot} className="border-t border-zinc-100">
+          <div key={idea.slot} className="border-t border-line2">
             <div
               className={clsx(
                 "flex flex-wrap items-start gap-x-3 gap-y-2 px-3.5 py-3",
-                open && "bg-zinc-50/70",
+                open && "bg-canvas/70",
               )}
             >
               {image ? (
@@ -99,20 +99,20 @@ export function ArticleImages({ ideas, chosen, onChange, brandId }: ArticleImage
                 <img
                   src={image.url}
                   alt={image.alt || idea.describes}
-                  className="h-14 w-14 shrink-0 rounded-md border border-zinc-200 object-cover"
+                  className="h-14 w-14 shrink-0 rounded-md border border-line object-cover"
                 />
               ) : null}
 
               <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                <span className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">
+                <span className="font-mono text-[10px] uppercase tracking-wide text-faint">
                   {idea.slot}
                 </span>
-                <span className="text-[13px] leading-snug text-zinc-700">
+                <span className="text-[13px] leading-snug text-ink2">
                   {image?.fileName ?? idea.describes}
                 </span>
 
                 {image ? (
-                  <span className="text-[11px] leading-snug text-zinc-500">
+                  <span className="text-[11px] leading-snug text-mut">
                     {image.fileName
                       ? `Biblioteca ${brandLabel ?? ""} · vai anexada, não por link`.replace(
                           /\s+·/,
@@ -123,7 +123,7 @@ export function ArticleImages({ ideas, chosen, onChange, brandId }: ArticleImage
                         : "Sem crédito informado"}
                   </span>
                 ) : (
-                  <span className="mt-0.5 w-fit rounded border border-zinc-200 bg-zinc-50 px-1.5 py-0.5 font-mono text-[11px] text-zinc-600">
+                  <span className="mt-0.5 w-fit rounded border border-line bg-canvas px-1.5 py-0.5 font-mono text-[11px] text-mut">
                     {idea.query}
                   </span>
                 )}
@@ -156,12 +156,12 @@ export function ArticleImages({ ideas, chosen, onChange, brandId }: ArticleImage
         );
       })}
 
-      <p className="flex items-start gap-1.5 border-t border-zinc-100 px-3.5 py-2.5 text-[11.5px] leading-snug text-zinc-400">
+      <p className="flex items-start gap-1.5 border-t border-line2 px-3.5 py-2.5 text-[11.5px] leading-snug text-faint">
         {count > 0 ? (
           <>
-            <Check size={13} className="mt-px shrink-0 text-emerald-600" />
+            <Check size={13} className="mt-px shrink-0 text-ok" />
             <span>
-              <span className="text-emerald-700">
+              <span className="text-ok">
                 {count === 1 ? "A imagem entra" : `As ${count} imagens entram`} no markdown, com
                 crédito.
               </span>{" "}

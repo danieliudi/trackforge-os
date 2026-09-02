@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import { useSyncExternalStore } from "react";
 
-import { EsteiraShell } from "@/components/app/EsteiraShell";
+import { EsteiraShell, ShellPage } from "@/components/app/EsteiraShell";
 import {
   costKindLabels,
   formatCost,
@@ -30,30 +30,31 @@ export default function CustosPage() {
 
   return (
     <EsteiraShell>
+      <ShellPage>
       <div className="flex flex-col gap-0.5">
         <span className={labelClass}>Custos</span>
-        <h1 className="text-xl font-semibold tracking-tight text-zinc-900">
+        <h1 className="text-xl font-semibold tracking-tight text-ink">
           O que a API cobrou
         </h1>
       </div>
 
       <div className="grid gap-2.5 sm:grid-cols-2">
         <div className={clsx(panelClass, "flex flex-col gap-0.5 px-4 py-3.5")}>
-          <span className="text-2xl font-bold leading-none tracking-tight tabular-nums text-emerald-700">
+          <span className="text-2xl font-bold leading-none tracking-tight tabular-nums text-ok">
             {formatCost(monthUsd).primary}
           </span>
-          <span className="text-xs text-zinc-500">neste mês</span>
+          <span className="text-xs text-mut">neste mês</span>
         </div>
         <div className={clsx(panelClass, "flex flex-col gap-0.5 px-4 py-3.5")}>
-          <span className="text-2xl font-bold leading-none tracking-tight tabular-nums text-zinc-900">
+          <span className="text-2xl font-bold leading-none tracking-tight tabular-nums text-ink">
             {formatCost(totalUsd).primary}
           </span>
-          <span className="text-xs text-zinc-500">desde que o medidor existe</span>
+          <span className="text-xs text-mut">desde que o medidor existe</span>
         </div>
       </div>
 
       {entries.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-zinc-300 px-3.5 py-3 text-[12.5px] text-zinc-500">
+        <p className="rounded-lg border border-dashed border-line px-3.5 py-3 text-[12.5px] text-mut">
           Nada gerado ainda neste navegador. O histórico é local — não sai daqui.
         </p>
       ) : (
@@ -61,29 +62,30 @@ export default function CustosPage() {
           {entries.map((entry) => (
             <div
               key={entry.id}
-              className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 border-b border-zinc-100 px-3.5 py-2.5 last:border-b-0"
+              className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 border-b border-line2 px-3.5 py-2.5 last:border-b-0"
             >
-              <span className="font-mono text-[10px] uppercase tracking-wide text-zinc-400">
+              <span className="font-mono text-[10px] uppercase tracking-wide text-faint">
                 {costKindLabels[entry.kind as CostKind] ?? entry.kind}
               </span>
-              <span className="min-w-0 flex-1 truncate text-[12.5px] text-zinc-700">
+              <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink2">
                 {entry.title}
               </span>
               {entry.failed ? (
-                <span className="font-mono text-[9.5px] uppercase text-amber-700">
+                <span className="font-mono text-[9.5px] uppercase text-warn">
                   cobrada, sem resultado
                 </span>
               ) : null}
-              <span className="font-mono text-[10px] tabular-nums text-zinc-400">
+              <span className="font-mono text-[10px] tabular-nums text-faint">
                 {new Date(entry.at).toLocaleDateString("pt-BR")}
               </span>
-              <span className="w-20 text-right font-mono text-[11px] tabular-nums text-zinc-700">
+              <span className="w-20 text-right font-mono text-[11px] tabular-nums text-ink2">
                 {formatCost(entry.usd).primary}
               </span>
             </div>
           ))}
         </div>
       )}
+      </ShellPage>
     </EsteiraShell>
   );
 }

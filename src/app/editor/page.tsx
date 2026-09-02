@@ -163,8 +163,8 @@ function TabButton({
         "rounded-md px-3 py-1.5 text-xs font-medium transition",
         focusRing,
         isActive
-          ? "bg-zinc-900 text-white"
-          : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900",
+          ? "bg-acc text-acc-ink"
+          : "text-mut hover:bg-surface2 hover:text-ink",
       )}
     >
       {children}
@@ -639,7 +639,7 @@ export default function Home() {
   }, [carousel, undo, redo]);
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-zinc-100 font-sans">
+    <div className="flex flex-1 flex-col overflow-hidden bg-surface2 font-sans">
       <AppHeader
         title={carousel?.title}
         hasCarousel={carousel !== null}
@@ -667,16 +667,16 @@ export default function Home() {
       {error ? (
         <div
           role="alert"
-          className="flex shrink-0 items-start gap-2 border-b border-red-200 bg-red-50 px-4 py-2.5 sm:px-6"
+          className="flex shrink-0 items-start gap-2 border-b border-danger-line bg-danger-bg px-4 py-2.5 sm:px-6"
         >
-          <AlertCircle size={15} className="mt-px shrink-0 text-red-600" />
-          <p className="flex-1 text-xs leading-relaxed text-red-800">{error}</p>
+          <AlertCircle size={15} className="mt-px shrink-0 text-danger" />
+          <p className="flex-1 text-xs leading-relaxed text-danger">{error}</p>
           <IconButton
             icon={X}
             label="Dispensar aviso"
             size="sm"
             onClick={() => setError(null)}
-            className="-mt-0.5 text-red-500 hover:bg-red-100 hover:text-red-700"
+            className="-mt-0.5 text-danger hover:bg-danger-bg hover:text-danger"
           />
         </div>
       ) : null}
@@ -707,7 +707,7 @@ export default function Home() {
         <>
           {/* Abaixo de lg as duas colunas empilhavam e o preview ficava depois
               de uma sidebar inteira. Aqui só uma das duas ocupa a tela. */}
-          <div className="flex shrink-0 items-center gap-1 border-b border-zinc-200 bg-white px-4 py-2 lg:hidden">
+          <div className="flex shrink-0 items-center gap-1 border-b border-line bg-surface px-4 py-2 lg:hidden">
             <TabButton
               isActive={mobileView === "editor"}
               onClick={() => setMobileView("editor")}
@@ -725,11 +725,11 @@ export default function Home() {
           <div className="grid min-h-0 flex-1 grid-cols-1 lg:grid-cols-[minmax(0,400px)_minmax(0,1fr)]">
             <aside
               className={clsx(
-                "min-h-0 flex-col border-r border-zinc-200 bg-white lg:flex",
+                "min-h-0 flex-col border-r border-line bg-surface lg:flex",
                 mobileView === "editor" ? "flex" : "hidden",
               )}
             >
-              <div className="flex shrink-0 items-center gap-1 border-b border-zinc-200 px-3 py-2">
+              <div className="flex shrink-0 items-center gap-1 border-b border-line px-3 py-2">
                 <TabButton
                   isActive={tab === "content"}
                   onClick={() => setTab("content")}
@@ -747,7 +747,7 @@ export default function Home() {
               {tab === "content" ? (
                 <>
                   {/* Fixo acima da rolagem: com 12 slides o brief sumia da vista. */}
-                  <div className="flex shrink-0 flex-col gap-3 border-b border-zinc-200 p-3">
+                  <div className="flex shrink-0 flex-col gap-3 border-b border-line p-3">
                     <Composer
                       variant="compact"
                       value={input}

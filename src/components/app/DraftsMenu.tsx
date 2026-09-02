@@ -66,7 +66,7 @@ export function DraftsMenu({ drafts, activeId, onSelect, onDelete }: DraftsMenuP
           )}
         >
           {sorted.length === 0 ? (
-            <p className="px-2.5 py-3 text-center text-xs text-zinc-500">
+            <p className="px-2.5 py-3 text-center text-xs text-mut">
               Nenhum carrossel salvo ainda
             </p>
           ) : (
@@ -77,7 +77,7 @@ export function DraftsMenu({ drafts, activeId, onSelect, onDelete }: DraftsMenuP
                   key={draft.id}
                   className={clsx(
                     "flex items-center gap-2 rounded-md px-2.5 py-2 transition",
-                    isActive ? "bg-zinc-100" : "hover:bg-zinc-50",
+                    isActive ? "bg-surface2" : "hover:bg-canvas",
                   )}
                 >
                   <button
@@ -91,16 +91,16 @@ export function DraftsMenu({ drafts, activeId, onSelect, onDelete }: DraftsMenuP
                       focusRing,
                     )}
                   >
-                    <span className="w-full truncate text-xs font-medium text-zinc-900">
+                    <span className="w-full truncate text-xs font-medium text-ink">
                       {draft.title}
                     </span>
-                    <span className="flex w-full items-baseline gap-1.5 text-[10.5px] text-zinc-400">
+                    <span className="flex w-full items-baseline gap-1.5 text-[10.5px] text-faint">
                       <span>{isActive ? "editando agora" : relativeTime(draft.updatedAt)}</span>
                       {draft.costUsd !== undefined ? (
                         <>
                           <span aria-hidden>·</span>
                           <span
-                            className="font-mono tabular-nums text-emerald-700"
+                            className="font-mono tabular-nums text-ok"
                             title="Custo de API deste rascunho, incluindo regerações de slide"
                           >
                             {formatCost(draft.costUsd).primary}
