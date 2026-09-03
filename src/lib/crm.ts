@@ -106,7 +106,7 @@ export async function publishForApproval(
       company_id: brandId ? COMPANY_ID[brandId] : null,
       // Uma peça com afirmação sem fonte não é urgência, é pendência — mas
       // precisa saltar na fila, porque é a que exige decisão sua.
-      priority: flagged > 0 ? "alta" : "normal",
+      priority: flagged > 0 ? "high" : "normal",
       payload: {
         origem: "carousel-builder",
         sinal: sourceLabel ?? null,
