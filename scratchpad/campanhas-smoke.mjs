@@ -3,9 +3,15 @@
  * verdade, com o `fetch` global trocado por um CRM de mentira.
  *
  * Existe porque o bug era invisível: o PostgREST respondia 200 com `[]` e a
- * tela dizia "crie no CRM". As linhas do caso 1 são as três campanhas reais do
- * Kanban de Campanhas em 03/09/2026 — com o filtro antigo
- * (`channel=in.(Conteúdo,Digital)`) nenhuma delas passava.
+ * tela dizia "crie no CRM" — a mesma frase de falta de credencial e de CRM
+ * recusando. O caso 4 é o que garante que os motivos não se confundam mais.
+ *
+ * O caso 1 usa as três campanhas reais do Kanban de Campanhas em 03/09/2026 e
+ * FIXA o comportamento esperado: nenhuma delas é oferecida, porque `Social` e
+ * `Evento` não são canais de conteúdo. Ampliar o conjunto é decisão de
+ * taxonomia do Daniel (DEC-1), não conserto de bug — se este caso um dia
+ * passar a oferecer "Linkedin Resibag 2026", é porque a decisão foi tomada ou
+ * porque alguém mexeu em `CONTENT_CHANNELS` sem ela.
  *
  *   node --experimental-strip-types --import ./scratchpad/campanhas-hook.mjs \
  *     scratchpad/campanhas-smoke.mjs
@@ -38,7 +44,7 @@ function crmRespondendo(rows, { status = 200, boom = null, body = null } = {}) {
 
 const nomes = (result) => result.campaigns.map((c) => c.name);
 
-// ── 1. As três campanhas reais do CRM ────────────────────────────────────────
+// ── 1. As três campanhas reais do CRM: nenhuma é de conteúdo ─────────────────
 const kanbanReal = [
   {
     id: "11111111-1111-4111-8111-111111111111",
@@ -62,18 +68,23 @@ const kanbanReal = [
 
 crmRespondendo(kanbanReal);
 const resibag = await fetchContentCampaigns("resibag");
-assert.equal(resibag.status, "ok");
-assert.deepEqual(nomes(resibag), ["Linkedin Resibag 2026"]);
-
 const sanwey = await fetchContentCampaigns("sanwey");
-assert.deepEqual(nomes(sanwey), ["Linkedin Resibag 2026"]);
+
+// `status: "ok"` com lista vazia é a resposta CERTA aqui, e é o que a tela
+// precisa distinguir do erro: não existe campanha de conteúdo, ponto.
+assert.deepEqual(resibag, { status: "ok", campaigns: [] });
+assert.deepEqual(sanwey, { status: "ok", campaigns: [] });
+
+// Reetiquetar a campanha no CRM é o que a faz aparecer — sem tocar em código.
+crmRespondendo([{ ...kanbanReal[0], channel: "Conteúdo" }]);
+const reetiquetada = await fetchContentCampaigns("resibag");
+assert.deepEqual(nomes(reetiquetada), ["Linkedin Resibag 2026"]);
+
 console.log("1. kanban real →", {
-  canaisNoCrm: kanbanReal.map((r) => r.channel),
+  canaisNoCrm: kanbanReal.map((r) => `${r.name}: ${r.channel}`),
   ofertadasResibag: nomes(resibag),
-  ofertadasSanwey: nomes(sanwey),
-  filtroAntigoOfereceria: kanbanReal
-    .filter((r) => ["Conteúdo", "Digital"].includes(r.channel))
-    .map((r) => r.name),
+  motivo: "Social e Evento não são canais de conteúdo (DEC-1 pendente)",
+  seReetiquetadaComoConteudo: nomes(reetiquetada),
 });
 
 // A query não pode mais carregar filtro de canal — é o que sumia com acento.
@@ -85,24 +96,25 @@ crmRespondendo([
   { id: "a2", name: "sem-acento", channel: "conteudo", company_ids: [] },
   { id: "a3", name: "caixa-alta", channel: "CONTEÚDO", company_ids: [] },
   { id: "a4", name: "com-espaco", channel: " Digital ", company_ids: [] },
-  { id: "a5", name: "social-minuscula", channel: "social", company_ids: [] },
-  { id: "a6", name: "email", channel: "Email", company_ids: [] },
-  { id: "a7", name: "outdoor", channel: "Outdoor", company_ids: [] },
-  { id: "a8", name: "evento", channel: "Evento", company_ids: [] },
-  { id: "a9", name: "sem-canal", channel: null, company_ids: [] },
+  { id: "a5", name: "social", channel: "Social", company_ids: [] },
+  { id: "a6", name: "social-minuscula", channel: "social", company_ids: [] },
+  { id: "a7", name: "email", channel: "Email", company_ids: [] },
+  { id: "a8", name: "outdoor", channel: "Outdoor", company_ids: [] },
+  { id: "a9", name: "evento", channel: "Evento", company_ids: [] },
+  { id: "a10", name: "sem-canal", channel: null, company_ids: [] },
 ]);
 const variantes = await fetchContentCampaigns("resibag");
-assert.deepEqual(nomes(variantes), [
-  "acentuada",
-  "sem-acento",
-  "caixa-alta",
-  "com-espaco",
-  "social-minuscula",
-]);
+assert.deepEqual(nomes(variantes), ["acentuada", "sem-acento", "caixa-alta", "com-espaco"]);
+
+// Normalizar acento/caixa não pode virar porta de entrada pra canal novo:
+// `Social` e `social` são recusados do mesmo jeito.
+assert.equal(isContentChannel("Social"), false);
+assert.equal(isContentChannel("social"), false);
+
 console.log("2. variantes de canal →", {
   canaisDeConteudo: [...CONTENT_CHANNELS],
   aceitos: nomes(variantes),
-  recusados: ["Email", "Outdoor", "Evento", "(null)"],
+  recusados: ["Social", "social", "Email", "Outdoor", "Evento", "(null)"],
 });
 
 // ── 3. Escopo por frente ─────────────────────────────────────────────────────
@@ -159,6 +171,7 @@ for (const r of [recusado, fora, lixo]) {
 }
 
 assert.equal(isContentChannel("Conteúdo"), true);
+assert.equal(isContentChannel("Digital"), true);
 assert.equal(isContentChannel("Evento"), false);
 
 console.log("ok — 4 casos, nenhum detalhe de erro carrega credencial");

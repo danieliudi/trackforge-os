@@ -946,7 +946,7 @@ export default function BancadaPage() {
                   ) : campaigns.length === 0 ? (
                     <span className="text-[11px] text-mut">
                       Nenhuma campanha de conteúdo encontrada nesta frente. Crie no CRM em canal
-                      Conteúdo, Digital ou Social, no formato frente-aaaamm-tema.
+                      Conteúdo ou Digital, no formato frente-aaaamm-tema.
                     </span>
                   ) : null}
                 </label>

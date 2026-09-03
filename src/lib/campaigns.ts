@@ -24,16 +24,17 @@ export type CampaignsResult =
   | { status: "erro"; detail: string };
 
 /**
- * Canais de `MARKETING_CHANNELS` (CRM) que um produtor de conteúdo pode
- * escolher aqui — os rótulos são do CRM, esta lista não inventa taxonomia nova.
+ * Canais de `MARKETING_CHANNELS` (CRM) que o circuito de conteúdo usa — os
+ * rótulos são do CRM, esta lista não inventa taxonomia nova.
  *
- * `Conteúdo` e `Digital` vêm do desenho do rastreio. `Social` entrou depois de
- * o seletor nascer vazio com três campanhas cadastradas: é com esse canal que o
- * time abre campanha de post/carrossel no Kanban de Campanhas, que é
- * exatamente a peça que sai desta bancada. `Email`, `Outdoor` e `Evento` ficam
- * de fora — feira e mala direta não são publicação de peça daqui.
+ * São os dois do PRD do rastreio, e só eles. `Social` NÃO entra: ampliar o
+ * conjunto de canais é decisão de taxonomia do Daniel (DEC-1 da análise do PRD
+ * v2), não conserto de bug — e este arquivo não é onde ela se toma. Efeito
+ * prático hoje: "Linkedin Resibag 2026" (canal `Social`) não aparece no
+ * seletor até ser reetiquetada como `Conteúdo` no CRM. `Evento`, `Email` e
+ * `Outdoor` seguem fora: feira e mala direta não são publicação de peça daqui.
  */
-export const CONTENT_CHANNELS = ["Conteúdo", "Digital", "Social"] as const;
+export const CONTENT_CHANNELS = ["Conteúdo", "Digital"] as const;
 
 /** Campanha de conteúdo é dezena, não milhar; uma página cobre o CRM inteiro. */
 const MAX_CAMPAIGNS = 200;

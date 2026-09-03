@@ -1,11 +1,16 @@
 /**
  * O seletor de campanha na bancada de verdade, com o CRM interceptado.
  *
- * O bug: com as três campanhas que existem no Kanban de Campanhas (canais
- * `Social` e `Evento`), a lista vinha vazia e a tela mandava criar campanha no
- * CRM — a mesma frase que aparecia quando faltava credencial ou quando o CRM
- * recusava. Este teste prova os quatro estados na tela, sem gastar geração:
- * a produção é semeada no localStorage e reaberta por `?abrir=`.
+ * O bug: qualquer lista vazia virava "crie no CRM" — a mesma frase que
+ * aparecia quando faltava credencial e quando o CRM recusava. Este teste prova
+ * os quatro estados na tela, sem gastar geração: a produção é semeada no
+ * localStorage e reaberta por `?abrir=`.
+ *
+ * As campanhas do primeiro cenário são de canal `Conteúdo` e `Digital` de
+ * propósito: são os únicos canais do circuito de conteúdo. As três que existem
+ * hoje no Kanban (`Social`, `Evento`) caem no cenário
+ * "sem-campanha-de-conteudo", que é o comportamento correto até haver decisão
+ * de taxonomia (DEC-1).
  *
  * COMO RODAR:
  *   npx next dev -p 3100
@@ -62,11 +67,11 @@ const CENARIOS = [
     corpo: {
       status: "ok",
       campaigns: [
-        { id: "11111111-1111-4111-8111-111111111111", name: "Linkedin Resibag 2026", channel: "Social" },
         { id: "44444444-4444-4444-8444-444444444444", name: "resibag-202609-rapp", channel: "Conteúdo" },
+        { id: "55555555-5555-4555-8555-555555555555", name: "resibag-202610-mtr", channel: "Digital" },
       ],
     },
-    espera: "Linkedin Resibag 2026 · Social",
+    espera: "resibag-202609-rapp · Conteúdo",
   },
   {
     nome: "sem-campanha-de-conteudo",
