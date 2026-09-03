@@ -5,6 +5,7 @@ import { AlertCircle, Check, Copy, Download, Inbox, Send } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 
 import { ArticleImages } from "@/components/app/ArticleImages";
+import { Working } from "@/components/app/Working";
 import { ArticleReader } from "@/components/app/ArticleReader";
 import { CostReceipt } from "@/components/app/CostReceipt";
 import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
@@ -473,7 +474,15 @@ export default function BancadaPage() {
             </div>
           ) : null}
 
-          {article ? (
+          {busy === "artigo" ? (
+            <div className="flex h-full items-center justify-center">
+              <Working
+                title="Escrevendo o artigo…"
+                note="O texto, as fontes e o parecer da auditoria saem juntos. Não feche a aba."
+                lines={5}
+              />
+            </div>
+          ) : article ? (
             <>
               <div className="flex flex-wrap items-center gap-2">
                 <span className={labelClass}>Artigo</span>
@@ -610,7 +619,16 @@ export default function BancadaPage() {
             </Button>
           </div>
 
-          {pieces ? (
+          {busy === "pecas" ? (
+            <>
+              <div className="h-px bg-line2" />
+              <Working
+                title={`Gerando ${kinds.length} ${kinds.length === 1 ? "peça" : "peças"}…`}
+                note="Cada peça é escrita e conferida contra a origem, uma de cada vez."
+                lines={2}
+              />
+            </>
+          ) : pieces ? (
             <>
               <div className="h-px bg-line2" />
               <OutputPieces pieces={pieces} brandId={brandId} />
