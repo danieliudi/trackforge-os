@@ -3,6 +3,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import { brands } from "@/constants/brands";
+import { jsonBody } from "@/lib/apiError";
 import { buildBrief } from "@/lib/brief";
 import { buildCarrosselSystem } from "@/lib/prompts";
 import { buildGroundedSystem } from "@/knowledge";
@@ -65,7 +66,10 @@ Regras obrigatórias de texto (o layout quebra quem violar):
 Escreva em português do Brasil. Tom claro e objetivo, para leitura rápida de liderança.`;
 
 export async function POST(request: Request) {
-  const parsed = requestSchema.safeParse(await request.json());
+  const body = await jsonBody(request);
+  if (!body.ok) return body.response;
+
+  const parsed = requestSchema.safeParse(body.value);
   if (!parsed.success) {
     return Response.json(
       { error: parsed.error.issues[0].message },

@@ -98,3 +98,32 @@ export async function readError(response: Response, fallback: string): Promise<s
   const text = issues.length > 0 ? `${base} — ${issues.join("; ")}` : base;
   return text.length > MAX ? `${text.slice(0, MAX)}…` : text;
 }
+
+/**
+ * O corpo JSON do pedido, ou a resposta a devolver quando ele não presta.
+ *
+ * POR QUE EXISTE: as onze rotas faziam `safeParse(await request.json())` — com
+ * o `await` FORA do `try`. Corpo inválido estourava sem resposta e o Next
+ * devolvia um 500 de corpo VAZIO, que na tela virava um erro de parser de JSON
+ * ("Unexpected end of JSON input") no lugar da falha real.
+ *
+ * A `/api/signals` tinha a variante silenciosa: `.catch(() => ({}))` fazia um
+ * corpo quebrado virar `{}`, que passa no schema (todo campo é opcional) e
+ * responde "nenhum sinal nesta frente". Responder VAZIO a um pedido malformado
+ * é pior que responder erro — a tela fica plausível e ninguém investiga.
+ *
+ * Devolve união discriminada em vez de lançar: rota que lança é rota que vira
+ * 500, e o ponto aqui é justamente parar de virar 500.
+ */
+export type BodyResult = { ok: true; value: unknown } | { ok: false; response: Response };
+
+export async function jsonBody(request: Request): Promise<BodyResult> {
+  try {
+    return { ok: true, value: await request.json() };
+  } catch {
+    return {
+      ok: false,
+      response: Response.json({ error: "o corpo do pedido não é JSON válido" }, { status: 400 }),
+    };
+  }
+}

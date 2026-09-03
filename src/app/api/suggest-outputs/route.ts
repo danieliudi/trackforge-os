@@ -5,6 +5,7 @@ import { z } from "zod";
 import { priceUsage, SUGGESTION_MODEL, type GenerationCost } from "@/constants/pricing";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import { OUTPUT_META, outputSuggestionSchema, type OutputKind } from "@/types/outputs";
+import { jsonBody } from "@/lib/apiError";
 
 /**
  * Que peças este material sustenta.
@@ -50,7 +51,10 @@ Regras:
 Português do Brasil.`;
 
 export async function POST(request: Request) {
-  const parsed = requestSchema.safeParse(await request.json());
+  const body = await jsonBody(request);
+  if (!body.ok) return body.response;
+
+  const parsed = requestSchema.safeParse(body.value);
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { priceUsage, type GenerationCost } from "@/constants/pricing";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbiddenInSlides } from "@/knowledge/check";
+import { jsonBody } from "@/lib/apiError";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import {
   apresentacaoSchema,
@@ -58,7 +59,10 @@ Mantenha o mesmo "type" do slide e a coerência com o título, o público-alvo e
 outros slides do documento. Escreva em português do Brasil.`;
 
 export async function POST(request: Request) {
-  const parsed = requestSchema.safeParse(await request.json());
+  const body = await jsonBody(request);
+  if (!body.ok) return body.response;
+
+  const parsed = requestSchema.safeParse(body.value);
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }

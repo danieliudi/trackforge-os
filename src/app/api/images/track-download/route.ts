@@ -1,10 +1,13 @@
+import { jsonBody } from "@/lib/apiError";
 /**
  * As diretrizes da API do Unsplash exigem chamar `download_location` sempre
  * que uma foto é efetivamente usada (não só exibida na busca).
  */
 export async function POST(request: Request) {
   const key = process.env.UNSPLASH_ACCESS_KEY;
-  const { downloadLocation } = (await request.json()) as { downloadLocation?: string };
+  const body = await jsonBody(request);
+  if (!body.ok) return body.response;
+  const { downloadLocation } = body.value as { downloadLocation?: string };
 
   if (!key || !downloadLocation?.startsWith("https://api.unsplash.com/")) {
     return Response.json({ error: "requisição inválida" }, { status: 400 });

@@ -23,6 +23,7 @@ import {
   TARGET_WORDS,
 } from "@/types/article";
 import { MAX_SUGGESTION_REASON } from "@/types/outputs";
+import { jsonBody } from "@/lib/apiError";
 
 const requestSchema = z.object({
   input: z.string().min(3, "informe uma URL ou um tema"),
@@ -90,7 +91,10 @@ Regras de texto:
   exigência e consequência.`;
 
 export async function POST(request: Request) {
-  const parsed = requestSchema.safeParse(await request.json());
+  const body = await jsonBody(request);
+  if (!body.ok) return body.response;
+
+  const parsed = requestSchema.safeParse(body.value);
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }

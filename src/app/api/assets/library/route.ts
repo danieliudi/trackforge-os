@@ -1,5 +1,6 @@
 import { access, mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
+import { jsonBody } from "@/lib/apiError";
 
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png"]);
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
@@ -111,7 +112,9 @@ export async function POST(request: Request) {
 
 export async function DELETE(request: Request) {
   const dir = dirOf(brandFrom(request));
-  const { name } = (await request.json()) as { name?: string };
+  const body = await jsonBody(request);
+  if (!body.ok) return body.response;
+  const { name } = body.value as { name?: string };
   const safeName = name ? sanitizeName(name) : null;
   if (!safeName) {
     return Response.json({ error: "nome de arquivo inválido" }, { status: 400 });

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { priceUsage, type GenerationCost } from "@/constants/pricing";
 import { buildProhibitionsBlock } from "@/knowledge";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
+import { jsonBody } from "@/lib/apiError";
 
 const requestSchema = z.object({
   context: z.string().min(1, "informe o contexto da marca"),
@@ -23,7 +24,10 @@ um carrossel denso — nunca genérica ("dicas de logística" é fraco; "3 erros
 atrasam a homologação ANTT de um big bag" é forte). Português do Brasil.`;
 
 export async function POST(request: Request) {
-  const parsed = requestSchema.safeParse(await request.json());
+  const body = await jsonBody(request);
+  if (!body.ok) return body.response;
+
+  const parsed = requestSchema.safeParse(body.value);
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }

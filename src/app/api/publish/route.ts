@@ -3,6 +3,7 @@ import { z } from "zod";
 import { crmPublishConfigured, listPendingPieces, publishForApproval } from "@/lib/crm";
 import { articleSchema } from "@/types/article";
 import { outputKindSchema } from "@/types/outputs";
+import { jsonBody } from "@/lib/apiError";
 
 /**
  * `data` é `unknown` de propósito: o formato de cada peça já foi validado pelo
@@ -59,17 +60,10 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  // Lido fora do `try` de baixo, este `await` estourava sem resposta e o Next
-  // devolvia um 500 de corpo VAZIO — que na tela virava um erro de parser de
-  // JSON em vez da falha real.
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return Response.json({ error: "o corpo do pedido não é JSON válido" }, { status: 400 });
-  }
+  const body = await jsonBody(request);
+  if (!body.ok) return body.response;
 
-  const parsed = requestSchema.safeParse(body);
+  const parsed = requestSchema.safeParse(body.value);
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }

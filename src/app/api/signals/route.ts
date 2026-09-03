@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import { fetchMarketSignals, signalsConfigured } from "@/lib/marketSignals";
+import { jsonBody } from "@/lib/apiError";
 
 const requestSchema = z.object({
   brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
@@ -17,7 +18,10 @@ const requestSchema = z.object({
  * CRM, e a interface só esconde a seção em vez de mostrar falha.
  */
 export async function POST(request: Request) {
-  const parsed = requestSchema.safeParse(await request.json().catch(() => ({})));
+  const body = await jsonBody(request);
+  if (!body.ok) return body.response;
+
+  const parsed = requestSchema.safeParse(body.value);
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }

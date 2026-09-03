@@ -5,6 +5,7 @@ import { z } from "zod";
 import { brands } from "@/constants/brands";
 import type { Platform } from "@/constants/format";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
+import { jsonBody } from "@/lib/apiError";
 import { buildBrief } from "@/lib/brief";
 import { findForbidden } from "@/knowledge/check";
 import { buildCarrosselSystem, buildOutputSystem } from "@/lib/prompts";
@@ -68,7 +69,10 @@ const PLATFORM_OF: Record<OutputKind, Platform> = {
 };
 
 export async function POST(request: Request) {
-  const parsed = requestSchema.safeParse(await request.json());
+  const body = await jsonBody(request);
+  if (!body.ok) return body.response;
+
+  const parsed = requestSchema.safeParse(body.value);
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
