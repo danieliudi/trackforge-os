@@ -12,6 +12,15 @@ Duas categorias: **reaproveitamento obrigatório** (nunca reimplemente o que já
 existe) e **processo** (mockup → implementação → conferência) para o que é
 genuinamente novo.
 
+> **Este arquivo é a fonte.** O mesmo contrato existe em `.cursor/rules/*.mdc`,
+> recortado por escopo porque o Cursor carrega regra por glob em vez de um
+> arquivo só. **Mudou uma regra aqui, mude lá também** — e vice-versa. Se os
+> dois discordarem, este vence e o outro é o que está errado.
+>
+> O mapa: `00-nucleo` (fato, segredo, mockup, pronto, entrega) ↔ seções 2, 3, 4,
+> 8 e 10 · `10-reuso` ↔ 1 e 7 · `20-telas` ↔ 4 mais a linha de cor/tema da 1 ·
+> `30-react` ↔ 6 · `40-api-e-custo` ↔ 3 e 5 · `50-conhecimento` ↔ 9.
+
 ---
 
 ## 1. Reaproveitamento obrigatório — nunca reimplemente do zero

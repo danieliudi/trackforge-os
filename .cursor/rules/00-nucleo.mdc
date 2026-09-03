@@ -13,6 +13,11 @@ As demais regras deste diretório anexam sozinhas pelo arquivo aberto:
 `30-react` (`.tsx` e stores), `40-api-e-custo` (rotas e preço),
 `50-conhecimento` (`src/knowledge/`).
 
+**A fonte deste contrato é o `CLAUDE.md` na raiz.** Estes arquivos são o mesmo
+conteúdo recortado por escopo, porque o Cursor carrega regra por glob em vez de
+um arquivo só. **Mudou uma regra aqui, mude lá também** — e vice-versa. Se os
+dois discordarem, o `CLAUDE.md` vence e este é o que está errado.
+
 ## 1. Fato e proveniência — o requisito do produto, não estilo
 
 - **Número, percentual, prazo, data e norma só saem se vierem da base de fatos
