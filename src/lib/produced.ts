@@ -47,6 +47,16 @@ export type Production = {
   pieces: ProducedPiece[];
   /** Já foi para a fila de aprovação do CRM. */
   sent: boolean;
+  /**
+   * Identificador estável da peça (`{frente}-{4 hex}`). Uma peça tem um
+   * content_id para sempre — republicação reusa o mesmo id (PRD rastreio §5.2).
+   * Opcional nas produções antigas gravadas antes desta coluna.
+   */
+  contentId?: string | null;
+  /** UUID da campanha no CRM (canal Conteúdo / Digital). */
+  campaignId?: string | null;
+  /** Nome canônico da campanha (`{frente}-{aaaamm}-{tema}`) — entra no UTM. */
+  campaignName?: string | null;
 };
 
 /** Versionado como os rascunhos: formato novo descarta payload antigo. */
