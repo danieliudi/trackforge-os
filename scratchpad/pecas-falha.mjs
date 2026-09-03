@@ -1,6 +1,9 @@
 /**
- * Peça genuinamente quebrada: o 422 continua existindo, com o campo nomeado e
- * o recibo junto. Relaxar limite não é o mesmo que aceitar qualquer coisa.
+ * NENHUMA peça saiu — o extremo do lote parcial.
+ *
+ * Aqui não se desenham seis cartões vermelhos repetindo o mesmo problema: um
+ * aviso só, as caixas em vermelho e o recibo. Com peça na mão o slot vale;
+ * sem nenhuma, ele vira ruído. Relaxar limite não é aceitar qualquer coisa.
  */
 import { chromium } from "playwright";
 
@@ -44,11 +47,15 @@ const banner = (await page.locator("div.border-danger-line").allTextContents())
   .join(" / ");
 
 console.log(`HTTP: ${r.status()}`);
-console.log(`campos reprovados: ${JSON.stringify(corpo.issues ?? null)}`);
+console.log(`peças que saíram: ${corpo.pieces.length}`);
+console.log(`falhas devolvidas: ${corpo.failures.length} — ${corpo.failures.map((f) => f.kind).join(", ")}`);
+console.log(`campos nomeados na primeira: ${JSON.stringify(corpo.failures[0]?.issues ?? null)}`);
 console.log(
   `recibo devolvido: ${corpo.cost ? `US$ ${corpo.cost.usd.toFixed(4)} em ${corpo.cost.steps.length} linha(s)` : "NENHUM (gasto escondido)"}`,
 );
-console.log(`banner na tela: "${banner}"`);
-console.log(`peças na tela: ${await page.locator("text=Copiar texto").count()}`);
+console.log(`aviso na tela: "${banner}"`);
+console.log(`cartões de peça na tela: ${await page.locator("text=Copiar texto").count()}`);
+console.log(`slots vermelhos na tela: ${await page.getByText("Gerar essa de novo").count()} (esperado 0)`);
+console.log(`caixas em vermelho: ${await page.locator("label.border-danger-line").count()}`);
 
 await browser.close();

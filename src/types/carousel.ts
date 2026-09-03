@@ -57,7 +57,7 @@ export const slideSchema = z
      * Sem teto: `MAX_BODY_LENGTH` é o contador do editor, e o layout corta.
      */
     bodyText: z.string().optional(),
-    highlightTag: z.string().min(1).optional(),
+    highlightTag: z.string().min(1, "o selo não pode vir vazio").optional(),
     footerNote: z.string().min(1, "footerNote é obrigatório"),
     /** Imagem do slide e como ela ocupa o layout. */
     image: imageSchema.optional(),
@@ -70,7 +70,7 @@ export const slideSchema = z
      * Itens da lista. Obrigatório e usado apenas no slide de type "bullets".
      * O piso vive no refine abaixo; o teto e o tamanho do item, no editor.
      */
-    bullets: z.array(z.string().min(1)).optional(),
+    bullets: z.array(z.string().min(1, "item de lista vazio")).optional(),
   })
   // O refine que exigia bodyText saiu: todo layout renderiza `bodyText ?? ""`,
   // o editor tem o campo, e o que ele fazia na prática era descartar um

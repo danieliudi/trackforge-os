@@ -110,48 +110,52 @@ export const HOOK_TARGET = {
 
 /** Post de texto do LinkedIn — o gancho é a única linha garantida antes do corte. */
 export const postTextoSchema = z.object({
-  hook: z.string().min(1),
-  paragraphs: z.array(z.string().min(1)).min(1, "o post precisa de ao menos um parágrafo"),
-  cta: z.string().min(1),
+  hook: z.string().min(1, "o gancho não pode vir vazio"),
+  paragraphs: z
+    .array(z.string().min(1, "parágrafo vazio"))
+    .min(1, "o post precisa de ao menos um parágrafo"),
+  cta: z.string().min(1, "a chamada não pode vir vazia"),
 });
 
 export const legendaSchema = z.object({
   /** Primeira linha, a única visível antes do "ver mais". */
-  hook: z.string().min(1),
-  body: z.array(z.string().min(1)).min(1, "a legenda precisa de ao menos um bloco"),
-  cta: z.string().min(1),
+  hook: z.string().min(1, "o gancho não pode vir vazio"),
+  body: z
+    .array(z.string().min(1, "bloco vazio"))
+    .min(1, "a legenda precisa de ao menos um bloco"),
+  cta: z.string().min(1, "a chamada não pode vir vazia"),
   /** Sem invenção de tag de campanha; só termo que descreve o assunto. */
-  hashtags: z.array(z.string().min(2)).default([]),
+  hashtags: z.array(z.string().min(2, "hashtag curta demais")).default([]),
 });
 
 export const reelsSchema = z.object({
-  hook: z.string().min(1),
+  hook: z.string().min(1, "o gancho não pode vir vazio"),
   beats: z
     .array(
       z.object({
         /** Sem teto: bloco de 40s é escolha editorial, e a soma aparece na tela. */
-        seconds: z.number().int().min(1),
+        seconds: z.number().int().min(1, "o bloco precisa durar ao menos 1 segundo"),
         /** O que é falado. */
-        fala: z.string().min(1),
+        fala: z.string().min(1, "o bloco precisa da fala"),
         /** O que aparece escrito na tela — curto, é legenda de vídeo. */
-        naTela: z.string().min(1),
+        naTela: z.string().min(1, "o bloco precisa do texto de tela"),
       }),
     )
     .min(1, "o roteiro precisa de ao menos um bloco"),
-  cta: z.string().min(1),
+  cta: z.string().min(1, "a chamada não pode vir vazia"),
 });
 
 export const storiesSchema = z.object({
   screens: z
     .array(
       z.object({
-        texto: z.string().min(1),
+        texto: z.string().min(1, "a tela precisa de texto"),
         /** Enquete ou caixa de pergunta, quando a tela pedir. */
         interacao: z.string().optional(),
       }),
     )
     .min(1, "a sequência precisa de ao menos uma tela"),
-  cta: z.string().min(1),
+  cta: z.string().min(1, "a chamada não pode vir vazia"),
 });
 
 /**
@@ -304,6 +308,21 @@ export const outputSuggestionSchema = z.object({
 });
 
 export type OutputSuggestion = z.infer<typeof outputSuggestionSchema>;
+
+/**
+ * Peça que não saiu — o slot dela na tela, com o motivo e o que já custou.
+ *
+ * Existe porque uma peça reprovada não pode mais derrubar as outras cinco. Ela
+ * ocupa o lugar dela na coluna, diz qual campo reprovou e mostra o gasto da
+ * tentativa: a geração foi cobrada, então some do recibo seria esconder gasto.
+ */
+export type PieceFailure = {
+  kind: OutputKind;
+  /** Campos reprovados, no formato "caminho: mensagem". */
+  issues: string[];
+  /** O que esta tentativa custou. Cobrada, logo visível. */
+  usd: number;
+};
 
 /**
  * Texto corrido de uma peça pronta, para auditoria e para o pacote de aprovação.

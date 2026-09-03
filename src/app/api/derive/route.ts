@@ -6,7 +6,12 @@ import { brands } from "@/constants/brands";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { findForbidden } from "@/knowledge/check";
 import { buildCarrosselSystem, buildOutputSystem } from "@/lib/prompts";
-import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
+import {
+  failedGenerationStep,
+  generationErrorMessage,
+  isContentFailure,
+  toTokenUsage,
+} from "@/lib/usage";
 import { verifyBlocks } from "@/lib/verify";
 import { articleSchema, articleToMarkdown, type Article } from "@/types/article";
 import type { Carousel } from "@/types/carousel";
@@ -19,6 +24,7 @@ import {
   OUTPUT_WIRE_SCHEMAS,
   outputKindSchema,
   type OutputKind,
+  type PieceFailure,
 } from "@/types/outputs";
 
 /**
@@ -91,6 +97,7 @@ export async function POST(request: Request) {
     );
 
     const pieces: Piece[] = [];
+    const failures: PieceFailure[] = [];
     let linkedinCarousel: string | null = null;
 
     for (const kind of ordered) {
@@ -102,53 +109,76 @@ export async function POST(request: Request) {
         ? `Peça de origem (carrossel do LinkedIn):\n\n${linkedinCarousel}\n\nArtigo completo, para conferir fato — não para copiar estrutura:\n\n${articleText}`
         : `Artigo de origem:\n\n${articleText}`;
 
-      const { object, usage } = await generateObject({
-        model: anthropic("claude-sonnet-5"),
-        schema: OUTPUT_WIRE_SCHEMAS[kind],
-        system: isCarousel(kind)
-          ? `${buildCarrosselSystem(PLATFORM_OF[kind], brandId)}\n${DERIVE_RULES}`
-          : `${buildOutputSystem(kind, brandId)}\n${DERIVE_RULES}`,
-        prompt: sourceText,
-        providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
-      });
+      // UMA PEÇA QUE FALHA NÃO DERRUBA AS OUTRAS. Antes o `return` aqui dentro
+      // descartava o lote inteiro — inclusive as peças que já tinham saído e
+      // sido pagas. Agora ela vira um slot com o motivo, e o laço continua.
+      try {
+        const { object, usage } = await generateObject({
+          model: anthropic("claude-sonnet-5"),
+          schema: OUTPUT_WIRE_SCHEMAS[kind],
+          system: isCarousel(kind)
+            ? `${buildCarrosselSystem(PLATFORM_OF[kind], brandId)}\n${DERIVE_RULES}`
+            : `${buildOutputSystem(kind, brandId)}\n${DERIVE_RULES}`,
+          prompt: sourceText,
+          providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
+        });
 
-      const tokens = toTokenUsage(usage);
-      costSteps.push({
-        label: `${meta.label} · ${meta.platform}`,
-        usage: tokens,
-        webSearches: 0,
-        usd: priceUsage(tokens),
-      });
+        const tokens = toTokenUsage(usage);
+        const usd = priceUsage(tokens);
 
-      // Normaliza e valida TODA peça, não só o carrossel. As de texto passavam
-      // direto porque o schema de geração já as tinha validado — agora ele é o
-      // de fio, que não valida nada de propósito, então a conferência é aqui.
-      const validated = OUTPUT_SCHEMAS[kind].safeParse(
-        normalizeOutput(kind, object, brandId ? brands[brandId].tagline : undefined),
-      );
-      if (!validated.success) {
-        return Response.json(
-          {
-            error: `a IA devolveu o ${meta.label.toLowerCase()} do ${meta.platform} fora das regras`,
+        // Normaliza e valida TODA peça, não só o carrossel. As de texto passavam
+        // direto porque o schema de geração já as tinha validado — agora ele é o
+        // de fio, que não valida nada de propósito, então a conferência é aqui.
+        const validated = OUTPUT_SCHEMAS[kind].safeParse(
+          normalizeOutput(kind, object, brandId ? brands[brandId].tagline : undefined),
+        );
+
+        costSteps.push({
+          label: validated.success
+            ? `${meta.label} · ${meta.platform}`
+            : `${meta.label} · ${meta.platform} (descartada)`,
+          usage: tokens,
+          webSearches: 0,
+          usd,
+        });
+
+        if (!validated.success) {
+          failures.push({
+            kind,
             issues: validated.error.issues.map(
               (issue) => `${issue.path.join(".") || "peça"}: ${issue.message}`,
             ),
-            cost: { usd: costSteps.reduce((t, s) => t + s.usd, 0), steps: costSteps },
-          },
-          { status: 422 },
+            usd,
+          });
+          continue;
+        }
+
+        const data: unknown = validated.data;
+        if (kind === "carrossel-linkedin") {
+          // Via `data`, que é `unknown` declarado: ler `validated.data` aqui
+          // fecharia um ciclo de inferência com `linkedinCarousel` logo acima.
+          linkedinCarousel = (data as Carousel).slides
+            .map((slide) => `${slide.headline}${slide.bodyText ? ` — ${slide.bodyText}` : ""}`)
+            .join("\n");
+        }
+
+        pieces.push({ kind, data, from, warnings: [], verification: null });
+      } catch (error) {
+        // Só erro de conteúdo fica com a peça; rede e chave são do lote e sobem.
+        if (!isContentFailure(error)) throw error;
+
+        const descartada = failedGenerationStep(
+          error,
+          `${meta.label} · ${meta.platform} (descartada)`,
         );
-      }
+        if (descartada) costSteps.push(descartada);
 
-      const data: unknown = validated.data;
-      if (kind === "carrossel-linkedin") {
-        // Via `data`, que é `unknown` declarado: ler `validated.data` aqui
-        // fecharia um ciclo de inferência com `linkedinCarousel` logo acima.
-        linkedinCarousel = (data as Carousel).slides
-          .map((slide) => `${slide.headline}${slide.bodyText ? ` — ${slide.bodyText}` : ""}`)
-          .join("\n");
+        failures.push({
+          kind,
+          issues: [generationErrorMessage(error, "a peça")],
+          usd: descartada?.usd ?? 0,
+        });
       }
-
-      pieces.push({ kind, data, from, warnings: [], verification: null });
     }
 
     const cost: GenerationCost = {
@@ -180,7 +210,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return Response.json({ pieces, cost });
+    return Response.json({ pieces, failures, cost });
   } catch (error) {
     // O gasto acontece antes do erro; o recibo vai junto — inclusive as peças que
     // já tinham saído antes de esta falhar. Ver `failedGenerationStep`.

@@ -8,7 +8,12 @@ import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pric
 import { buildBrief } from "@/lib/brief";
 import { findForbidden } from "@/knowledge/check";
 import { buildCarrosselSystem, buildOutputSystem } from "@/lib/prompts";
-import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
+import {
+  failedGenerationStep,
+  generationErrorMessage,
+  isContentFailure,
+  toTokenUsage,
+} from "@/lib/usage";
 import { verifyBlocks } from "@/lib/verify";
 import {
   isCarousel,
@@ -17,6 +22,7 @@ import {
   OUTPUT_META,
   OUTPUT_SCHEMAS,
   OUTPUT_WIRE_SCHEMAS,
+  type PieceFailure,
   outputKindSchema,
   type OutputKind,
 } from "@/types/outputs";
@@ -91,6 +97,7 @@ export async function POST(request: Request) {
     }
 
     const pieces = [];
+    const failures: PieceFailure[] = [];
 
     for (const kind of kinds) {
       const meta = OUTPUT_META[kind];
@@ -98,48 +105,68 @@ export async function POST(request: Request) {
         ? buildCarrosselSystem(PLATFORM_OF[kind], brandId)
         : buildOutputSystem(kind, brandId);
 
-      const { object, usage } = await generateObject({
-        model: anthropic("claude-sonnet-5"),
-        schema: OUTPUT_WIRE_SCHEMAS[kind],
-        system: mode === "texto" ? `${base}\n${FROM_SOURCE_RULES}` : base,
-        prompt: brief,
-        providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
-      });
+      // Uma peça que falha não derruba as outras — mesma regra da derivação.
+      try {
+        const { object, usage } = await generateObject({
+          model: anthropic("claude-sonnet-5"),
+          schema: OUTPUT_WIRE_SCHEMAS[kind],
+          system: mode === "texto" ? `${base}\n${FROM_SOURCE_RULES}` : base,
+          prompt: brief,
+          providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
+        });
 
-      const tokens = toTokenUsage(usage);
-      costSteps.push({
-        label: `${meta.label} · ${meta.platform}`,
-        usage: tokens,
-        webSearches: 0,
-        usd: priceUsage(tokens),
-      });
+        const tokens = toTokenUsage(usage);
+        const usd = priceUsage(tokens);
 
-      // Normaliza e valida TODA peça, não só o carrossel: o schema de geração
-      // agora é o de fio, que de propósito não valida nada.
-      const validated = OUTPUT_SCHEMAS[kind].safeParse(
-        normalizeOutput(kind, object, brandId ? brands[brandId].tagline : undefined),
-      );
-      if (!validated.success) {
-        return Response.json(
-          {
-            error: `a IA devolveu ${meta.label.toLowerCase()} do ${meta.platform} fora das regras`,
+        // Normaliza e valida TODA peça, não só o carrossel: o schema de geração
+        // agora é o de fio, que de propósito não valida nada.
+        const validated = OUTPUT_SCHEMAS[kind].safeParse(
+          normalizeOutput(kind, object, brandId ? brands[brandId].tagline : undefined),
+        );
+
+        costSteps.push({
+          label: validated.success
+            ? `${meta.label} · ${meta.platform}`
+            : `${meta.label} · ${meta.platform} (descartada)`,
+          usage: tokens,
+          webSearches: 0,
+          usd,
+        });
+
+        if (!validated.success) {
+          failures.push({
+            kind,
             issues: validated.error.issues.map(
               (issue) => `${issue.path.join(".") || "peça"}: ${issue.message}`,
             ),
-            cost: { usd: costSteps.reduce((t, s) => t + s.usd, 0), steps: costSteps },
-          },
-          { status: 422 },
-        );
-      }
-      const data: unknown = validated.data;
+            usd,
+          });
+          continue;
+        }
 
-      pieces.push({
-        kind,
-        data,
-        from: mode === "texto" ? "do material colado" : "do tema",
-        warnings: [] as ReturnType<typeof findForbidden>,
-        verification: null as Awaited<ReturnType<typeof verifyBlocks>>["verification"] | null,
-      });
+        pieces.push({
+          kind,
+          data: validated.data as unknown,
+          from: mode === "texto" ? "do material colado" : "do tema",
+          warnings: [] as ReturnType<typeof findForbidden>,
+          verification: null as Awaited<ReturnType<typeof verifyBlocks>>["verification"] | null,
+        });
+      } catch (error) {
+        // Só erro de conteúdo fica com a peça; rede e chave são do lote e sobem.
+        if (!isContentFailure(error)) throw error;
+
+        const descartada = failedGenerationStep(
+          error,
+          `${meta.label} · ${meta.platform} (descartada)`,
+        );
+        if (descartada) costSteps.push(descartada);
+
+        failures.push({
+          kind,
+          issues: [generationErrorMessage(error, "a peça")],
+          usd: descartada?.usd ?? 0,
+        });
+      }
     }
 
     const cost: GenerationCost = {
@@ -174,7 +201,7 @@ export async function POST(request: Request) {
       }
     }
 
-    return Response.json({ pieces, cost });
+    return Response.json({ pieces, failures, cost });
   } catch (error) {
     // O gasto acontece antes do erro; o recibo vai junto — inclusive as peças que
     // já tinham saído antes de esta falhar. Ver `failedGenerationStep`.

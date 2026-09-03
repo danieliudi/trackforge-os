@@ -1,14 +1,15 @@
 "use client";
 
 import clsx from "clsx";
-import { AlertTriangle, Check, Copy, PenLine } from "lucide-react";
+import { AlertCircle, AlertTriangle, Check, Copy, PenLine, RefreshCw } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { Button } from "@/components/ui/Button";
 import { brands, type BrandId } from "@/constants/brands";
 import type { ForbiddenHit } from "@/knowledge/check";
+import { formatCost } from "@/lib/costLog";
 import { addDraft } from "@/lib/storage";
 import { panelClass } from "@/lib/ui";
 import type { Verification } from "@/lib/verify";
@@ -18,6 +19,7 @@ import {
   OUTPUT_META,
   type Legenda,
   type OutputKind,
+  type PieceFailure,
   type PostTexto,
   type Reels,
   type Stories,
@@ -31,6 +33,9 @@ export type Piece = {
   warnings: ForbiddenHit[];
   verification: Verification | null;
 };
+
+/** Ordem de exibição: a mesma das caixas acima, para o slot vazio ser óbvio. */
+const ORDEM = Object.keys(OUTPUT_META) as OutputKind[];
 
 /**
  * Cada formato desenhado como ele é lido, não como uma lista genérica.
@@ -204,14 +209,46 @@ function toPlainText(kind: OutputKind, data: unknown): string {
 
 export function OutputPieces({
   pieces,
+  failures = [],
+  retrying = null,
+  onRetry,
   brandId,
 }: {
   pieces: Piece[];
+  /** Peças que não saíram. Ocupam o slot delas, na ordem, em vez de sumir. */
+  failures?: PieceFailure[];
+  /** Qual formato está sendo refeito agora. */
+  retrying?: OutputKind | null;
+  onRetry?: (kind: OutputKind) => void;
   brandId: BrandId | null;
 }) {
   const router = useRouter();
   const [failed, setFailed] = useState(false);
   const [copied, setCopied] = useState<string | null>(null);
+
+  /**
+   * A coluna rola até a peça que não saiu.
+   *
+   * Ela pode ser a quinta da ordem, bem abaixo da dobra — e falha que não se vê
+   * é falha que passa: o usuário publica cinco peças achando que pediu cinco.
+   */
+  const slotFalho = useRef<HTMLDivElement | null>(null);
+  const primeiroSlot = ORDEM.find((kind) => failures.some((f) => f.kind === kind));
+  // String e não o array: a identidade do array muda a cada render e faria o
+  // efeito rolar a coluna de novo a cada pintura.
+  const assinatura = failures.map((f) => f.kind).join(",");
+
+  useEffect(() => {
+    if (!slotFalho.current) return;
+    // Agendado: no mesmo tick os cartões acabaram de montar e a coluna ainda
+    // não tem a altura final, então o scroll pararia no lugar errado.
+    const suave = !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const timer = setTimeout(
+      () => slotFalho.current?.scrollIntoView({ block: "start", behavior: suave ? "smooth" : "auto" }),
+      0,
+    );
+    return () => clearTimeout(timer);
+  }, [assinatura]);
 
   const openInEditor = useCallback(
     (piece: Piece) => {
@@ -246,7 +283,72 @@ export function OutputPieces({
         </p>
       ) : null}
 
-      {pieces.map((piece) => {
+      {ORDEM.map((kind) => {
+        const falha = failures.find((f) => f.kind === kind);
+
+        // O SLOT DA PEÇA QUE NÃO SAIU. Fica no lugar dela, com a mesma
+        // geometria de cartão: um alerta solto no topo não diria QUAL formato
+        // faltou, e sumir do lugar tiraria a única referência que resta.
+        if (falha) {
+          const meta = OUTPUT_META[kind];
+          const refazendo = retrying === kind;
+
+          return (
+            <div
+              key={kind}
+              ref={kind === primeiroSlot ? slotFalho : undefined}
+              className="flex flex-col gap-3 rounded-lg border border-danger-line bg-danger-bg p-4"
+            >
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <span className="text-sm font-semibold tracking-tight text-danger">
+                  {meta.label}
+                </span>
+                {/* `text-faint` e não `text-danger/80`: a hierarquia é a mesma do
+                    cartão que deu certo (título forte, meta discreta), e opacidade
+                    sobre token vira uma cor que não está na paleta — o medidor de
+                    contraste do projeto lê `oklab(… / .8)` como outra coisa. */}
+                <span className="font-mono text-[10px] uppercase tracking-wide text-faint">
+                  {meta.platform} · não saiu
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1.5 text-[11.5px] leading-relaxed text-danger">
+                <span className="flex items-start gap-1.5">
+                  <AlertCircle size={13} className="mt-px shrink-0" />
+                  <span>
+                    A IA devolveu essa peça fora das regras.
+                    {pieces.length > 0 ? " As outras estão prontas." : ""}
+                  </span>
+                </span>
+                <span className="flex flex-col gap-0.5 font-mono text-[11px]">
+                  {falha.issues.map((issue, index) => (
+                    <span key={index}>{issue}</span>
+                  ))}
+                </span>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 border-t border-danger-line pt-3">
+                <Button
+                  icon={RefreshCw}
+                  size="sm"
+                  loading={refazendo}
+                  disabled={!onRetry}
+                  onClick={() => onRetry?.(kind)}
+                >
+                  {refazendo ? "Gerando…" : "Gerar essa de novo"}
+                </Button>
+                {/* O gasto fica onde ele aconteceu: a tentativa foi cobrada. */}
+                <span className="ml-auto font-mono text-[10px] uppercase tracking-wide text-faint">
+                  {formatCost(falha.usd).primary} cobrados nessa tentativa
+                </span>
+              </div>
+            </div>
+          );
+        }
+
+        const piece = pieces.find((p) => p.kind === kind);
+        if (!piece) return null;
+
         const meta = OUTPUT_META[piece.kind];
         const flagged = piece.verification?.flagged ?? 0;
 

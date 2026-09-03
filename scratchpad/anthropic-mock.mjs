@@ -166,7 +166,12 @@ function respostaPara(body) {
   if ("claims" in props) return AUDITORIA;
 
   // Cada peça se identifica pelo campo que só ela tem.
-  const quebrada = JSON.stringify(body?.messages ?? "").includes("PECA-QUEBRADA");
+  const pedido = JSON.stringify(body?.messages ?? "");
+  const quebrada =
+    pedido.includes("PECA-QUEBRADA") ||
+    // SÓ O REELS QUEBRA: é o caso que o lote precisa sobreviver — cinco peças
+    // saem, uma não, e nenhuma das cinco se perde por causa dela.
+    (pedido.includes("SO-O-REELS") && "beats" in props);
   for (const marca of ["slides", "beats", "screens", "hashtags", "paragraphs"]) {
     if (!(marca in props)) continue;
     // Peça genuinamente quebrada: sem título e sem nenhum item aproveitável —
@@ -180,7 +185,6 @@ function respostaPara(body) {
   }
 
   // O tema pedido decide o cenário, para um mock só servir a todos os testes.
-  const pedido = JSON.stringify(body?.messages ?? "");
   if (pedido.includes("QUEBRADO")) return QUEBRADO;
   if (pedido.includes("FORA-DE-FORMA")) return FORA_DE_FORMA;
   return ARTIGO;

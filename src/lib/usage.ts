@@ -98,6 +98,17 @@ export function failedGenerationStep(
 }
 
 /**
+ * O erro é da PEÇA ou do LOTE?
+ *
+ * `NoObjectGeneratedError` é conteúdo: aquela peça específica voltou fora do
+ * schema, e as outras do lote não têm nada com isso. Qualquer outro erro —
+ * rede, chave, tempo esgotado — atinge o lote inteiro, e seis cartões repetindo
+ * "sem conexão" seria ruído, não aviso. A separação é o que deixa uma peça
+ * falhar sozinha sem transformar uma queda de rede em seis falhas de conteúdo.
+ */
+export const isContentFailure = (error: unknown) => NoObjectGeneratedError.isInstance(error);
+
+/**
  * A mensagem de uma geração que falhou, em português e dizendo o que fazer.
  *
  * `NoObjectGeneratedError` chega como "No object generated: response did not
