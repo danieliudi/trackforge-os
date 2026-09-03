@@ -2,19 +2,21 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { brands, type BrandId } from "@/constants/brands";
+import { brands } from "@/constants/brands";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { findForbidden } from "@/knowledge/check";
 import { buildCarrosselSystem, buildOutputSystem } from "@/lib/prompts";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import { verifyBlocks } from "@/lib/verify";
 import { articleSchema, articleToMarkdown, type Article } from "@/types/article";
-import { carouselSchema } from "@/types/carousel";
+import type { Carousel } from "@/types/carousel";
 import {
   isCarousel,
+  normalizeOutput,
   outputBlocks,
   OUTPUT_META,
   OUTPUT_SCHEMAS,
+  OUTPUT_WIRE_SCHEMAS,
   outputKindSchema,
   type OutputKind,
 } from "@/types/outputs";
@@ -62,20 +64,6 @@ const PLATFORM_OF: Record<OutputKind, "linkedin" | "instagram"> = {
   stories: "instagram",
 };
 
-/** Renumera pela ordem do array e crava a assinatura canônica da marca. */
-function normalizeCarousel(object: unknown, brandId: BrandId | null | undefined) {
-  const carousel = object as { slides: { footerNote: string }[] };
-  const tagline = brandId ? brands[brandId].tagline : undefined;
-  return {
-    ...(object as object),
-    slides: carousel.slides.map((slide, index) => ({
-      ...slide,
-      slideNumber: index + 1,
-      footerNote: tagline ?? slide.footerNote,
-    })),
-  };
-}
-
 type Piece = {
   kind: OutputKind;
   data: unknown;
@@ -116,7 +104,7 @@ export async function POST(request: Request) {
 
       const { object, usage } = await generateObject({
         model: anthropic("claude-sonnet-5"),
-        schema: OUTPUT_SCHEMAS[kind],
+        schema: OUTPUT_WIRE_SCHEMAS[kind],
         system: isCarousel(kind)
           ? `${buildCarrosselSystem(PLATFORM_OF[kind], brandId)}\n${DERIVE_RULES}`
           : `${buildOutputSystem(kind, brandId)}\n${DERIVE_RULES}`,
@@ -132,25 +120,32 @@ export async function POST(request: Request) {
         usd: priceUsage(tokens),
       });
 
-      let data: unknown = object;
-      if (isCarousel(kind)) {
-        const validated = carouselSchema.safeParse(normalizeCarousel(object, brandId));
-        if (!validated.success) {
-          return Response.json(
-            {
-              error: `a IA devolveu o ${meta.label.toLowerCase()} do ${meta.platform} fora das regras`,
-              issues: validated.error.issues.map((issue) => issue.message),
-              cost: { usd: costSteps.reduce((t, s) => t + s.usd, 0), steps: costSteps },
-            },
-            { status: 422 },
-          );
-        }
-        data = validated.data;
-        if (kind === "carrossel-linkedin") {
-          linkedinCarousel = validated.data.slides
-            .map((slide) => `${slide.headline}${slide.bodyText ? ` — ${slide.bodyText}` : ""}`)
-            .join("\n");
-        }
+      // Normaliza e valida TODA peça, não só o carrossel. As de texto passavam
+      // direto porque o schema de geração já as tinha validado — agora ele é o
+      // de fio, que não valida nada de propósito, então a conferência é aqui.
+      const validated = OUTPUT_SCHEMAS[kind].safeParse(
+        normalizeOutput(kind, object, brandId ? brands[brandId].tagline : undefined),
+      );
+      if (!validated.success) {
+        return Response.json(
+          {
+            error: `a IA devolveu o ${meta.label.toLowerCase()} do ${meta.platform} fora das regras`,
+            issues: validated.error.issues.map(
+              (issue) => `${issue.path.join(".") || "peça"}: ${issue.message}`,
+            ),
+            cost: { usd: costSteps.reduce((t, s) => t + s.usd, 0), steps: costSteps },
+          },
+          { status: 422 },
+        );
+      }
+
+      const data: unknown = validated.data;
+      if (kind === "carrossel-linkedin") {
+        // Via `data`, que é `unknown` declarado: ler `validated.data` aqui
+        // fecharia um ciclo de inferência com `linkedinCarousel` logo acima.
+        linkedinCarousel = (data as Carousel).slides
+          .map((slide) => `${slide.headline}${slide.bodyText ? ` — ${slide.bodyText}` : ""}`)
+          .join("\n");
       }
 
       pieces.push({ kind, data, from, warnings: [], verification: null });

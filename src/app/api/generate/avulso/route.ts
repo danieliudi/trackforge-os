@@ -2,7 +2,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { brands, type BrandId } from "@/constants/brands";
+import { brands } from "@/constants/brands";
 import type { Platform } from "@/constants/format";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { buildBrief } from "@/lib/brief";
@@ -10,12 +10,13 @@ import { findForbidden } from "@/knowledge/check";
 import { buildCarrosselSystem, buildOutputSystem } from "@/lib/prompts";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import { verifyBlocks } from "@/lib/verify";
-import { carouselSchema } from "@/types/carousel";
 import {
   isCarousel,
+  normalizeOutput,
   outputBlocks,
   OUTPUT_META,
   OUTPUT_SCHEMAS,
+  OUTPUT_WIRE_SCHEMAS,
   outputKindSchema,
   type OutputKind,
 } from "@/types/outputs";
@@ -60,19 +61,6 @@ const PLATFORM_OF: Record<OutputKind, Platform> = {
   stories: "instagram",
 };
 
-function normalizeCarousel(object: unknown, brandId: BrandId | null | undefined) {
-  const carousel = object as { slides: { footerNote: string }[] };
-  const tagline = brandId ? brands[brandId].tagline : undefined;
-  return {
-    ...(object as object),
-    slides: carousel.slides.map((slide, index) => ({
-      ...slide,
-      slideNumber: index + 1,
-      footerNote: tagline ?? slide.footerNote,
-    })),
-  };
-}
-
 export async function POST(request: Request) {
   const parsed = requestSchema.safeParse(await request.json());
   if (!parsed.success) {
@@ -112,7 +100,7 @@ export async function POST(request: Request) {
 
       const { object, usage } = await generateObject({
         model: anthropic("claude-sonnet-5"),
-        schema: OUTPUT_SCHEMAS[kind],
+        schema: OUTPUT_WIRE_SCHEMAS[kind],
         system: mode === "texto" ? `${base}\n${FROM_SOURCE_RULES}` : base,
         prompt: brief,
         providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
@@ -126,21 +114,24 @@ export async function POST(request: Request) {
         usd: priceUsage(tokens),
       });
 
-      let data: unknown = object;
-      if (isCarousel(kind)) {
-        const validated = carouselSchema.safeParse(normalizeCarousel(object, brandId));
-        if (!validated.success) {
-          return Response.json(
-            {
-              error: `a IA devolveu o carrossel do ${meta.platform} fora das regras`,
-              issues: validated.error.issues.map((issue) => issue.message),
-              cost: { usd: costSteps.reduce((t, s) => t + s.usd, 0), steps: costSteps },
-            },
-            { status: 422 },
-          );
-        }
-        data = validated.data;
+      // Normaliza e valida TODA peça, não só o carrossel: o schema de geração
+      // agora é o de fio, que de propósito não valida nada.
+      const validated = OUTPUT_SCHEMAS[kind].safeParse(
+        normalizeOutput(kind, object, brandId ? brands[brandId].tagline : undefined),
+      );
+      if (!validated.success) {
+        return Response.json(
+          {
+            error: `a IA devolveu ${meta.label.toLowerCase()} do ${meta.platform} fora das regras`,
+            issues: validated.error.issues.map(
+              (issue) => `${issue.path.join(".") || "peça"}: ${issue.message}`,
+            ),
+            cost: { usd: costSteps.reduce((t, s) => t + s.usd, 0), steps: costSteps },
+          },
+          { status: 422 },
+        );
       }
+      const data: unknown = validated.data;
 
       pieces.push({
         kind,

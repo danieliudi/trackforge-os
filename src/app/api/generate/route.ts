@@ -11,10 +11,10 @@ import { verifySlides } from "@/lib/verify";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import {
-  apresentacaoBaseSchema,
   apresentacaoSchema,
-  carouselBaseSchema,
   carouselSchema,
+  carouselWireSchema,
+  normalizeCarousel,
 } from "@/types/carousel";
 
 const requestSchema = z.object({
@@ -96,7 +96,7 @@ export async function POST(request: Request) {
 
     const { object, usage } = await generateObject({
       model: anthropic("claude-sonnet-5"),
-      schema: isApresentacao ? apresentacaoBaseSchema : carouselBaseSchema,
+      schema: carouselWireSchema,
       system: isApresentacao
         ? buildGroundedSystem(APRESENTACAO_SYSTEM, brandId)
         : buildCarrosselSystem(platform, brandId),
@@ -121,15 +121,9 @@ export async function POST(request: Request) {
     // real, então o servidor sobrescreve pelo canônico em vez de confiar nela.
     const tagline = brandId ? brands[brandId].tagline : undefined;
 
-    // A ordem do array é a verdade; renumera antes de validar as regras finais.
-    const normalized = {
-      ...object,
-      slides: object.slides.map((slide, index) => ({
-        ...slide,
-        slideNumber: index + 1,
-        footerNote: tagline ?? slide.footerNote,
-      })),
-    };
+    // Renumera, crava a assinatura e acerta a moldura do primeiro e do último
+    // slide antes de validar. Ver `normalizeCarousel`.
+    const normalized = normalizeCarousel(object, tagline);
 
     const validated = (isApresentacao ? apresentacaoSchema : carouselSchema).safeParse(
       normalized,
@@ -141,7 +135,9 @@ export async function POST(request: Request) {
       return Response.json(
         {
           error: "a IA devolveu um carrossel fora das regras",
-          issues: validated.error.issues.map((issue) => issue.message),
+          issues: validated.error.issues.map(
+            (issue) => `${issue.path.join(".") || "peça"}: ${issue.message}`,
+          ),
           cost,
         },
         { status: 422 },

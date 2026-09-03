@@ -104,7 +104,60 @@ const QUEBRADO = {
  */
 const FORA_DE_FORMA = { ...ARTIGO, sections: "isto não é uma lista" };
 
-/** Qual das duas chamadas é esta: a redação do artigo ou a auditoria. */
+/**
+ * As peças curtas, cada uma estourando o limite que antes derrubava o lote:
+ * naTela longa, bloco de 45s, 11 parágrafos, 12 hashtags, 7 telas, 14 slides.
+ */
+const slide = (n, type, extra = {}) => ({
+  slideNumber: n,
+  type,
+  headline: `Ponto de controle ${n}`,
+  bodyText: "rótulo curto",
+  footerNote: "assinatura",
+  ...extra,
+});
+
+const PECAS = {
+  slides: {
+    title: "Descarte correto de resíduo perigoso",
+    targetAudience: "Gerente de compras",
+    slides: [
+      // Primeiro slide não é capa e a numeração vem embaralhada, de propósito.
+      slide(7, "content", { bodyText: "um rótulo de apoio bem mais longo do que trinta caracteres" }),
+      ...Array.from({ length: 12 }, (_, i) => slide(i + 20, "content")),
+      slide(3, "bullets", { bullets: ["item único"] }),
+    ],
+  },
+  paragraphs: {
+    hook: "x ".repeat(130).trim(),
+    paragraphs: Array.from({ length: 11 }, (_, i) => `Parágrafo ${i + 1} do post.`),
+    cta: "Fale com a gente antes do prazo.",
+  },
+  hashtags: {
+    hook: "O prazo venceu e ninguém avisou o comprador.",
+    body: ["Linha um.", "   ", "Linha dois."],
+    cta: "Salva esse post.",
+    hashtags: ["#bigbag", "bigbag", "BigBag", "residuos", "a", "logistica", "esg", "compliance", "antt", "inmetro", "residuoperigoso", "embalagem"],
+  },
+  beats: {
+    hook: "O prazo venceu e ninguém avisou o comprador.",
+    beats: [
+      { seconds: 45, fala: "Fala longa do primeiro bloco.", naTela: "texto de tela deliberadamente longo para estourar o limite de setenta caracteres" },
+      { seconds: 2.6, fala: "Segunda fala.", naTela: "na tela" },
+      { seconds: 7, fala: "Terceira fala.", naTela: "na tela" },
+    ],
+    cta: "Chama no direct.",
+  },
+  screens: {
+    screens: [
+      { texto: "y ".repeat(120).trim() },
+      ...Array.from({ length: 6 }, (_, i) => ({ texto: `Tela ${i + 2}.`, interacao: i === 0 ? "enquete" : "  " })),
+    ],
+    cta: "Arrasta pra cima.",
+  },
+};
+
+/** Qual das chamadas é esta: artigo, auditoria ou uma das peças. */
 function respostaPara(body) {
   const schema =
     body?.output_config?.format?.schema ??
@@ -112,7 +165,21 @@ function respostaPara(body) {
   const props = schema?.properties ?? {};
   if ("claims" in props) return AUDITORIA;
 
-  // O tema pedido decide o cenário, para um mock só servir aos três testes.
+  // Cada peça se identifica pelo campo que só ela tem.
+  const quebrada = JSON.stringify(body?.messages ?? "").includes("PECA-QUEBRADA");
+  for (const marca of ["slides", "beats", "screens", "hashtags", "paragraphs"]) {
+    if (!(marca in props)) continue;
+    // Peça genuinamente quebrada: sem título e sem nenhum item aproveitável —
+    // o que a normalização NÃO conserta e deve mesmo reprovar.
+    if (quebrada) {
+      return marca === "slides"
+        ? { title: "", targetAudience: "", slides: [] }
+        : { ...PECAS[marca], [marca]: [], hook: "", cta: "" };
+    }
+    return PECAS[marca];
+  }
+
+  // O tema pedido decide o cenário, para um mock só servir a todos os testes.
   const pedido = JSON.stringify(body?.messages ?? "");
   if (pedido.includes("QUEBRADO")) return QUEBRADO;
   if (pedido.includes("FORA-DE-FORMA")) return FORA_DE_FORMA;
@@ -138,9 +205,7 @@ const server = createServer((req, res) => {
       ? [{ type: "text", text: JSON.stringify(payload) }]
       : [{ type: "tool_use", id: "toolu_mock", name: jsonTool?.name ?? "json", input: payload }];
 
-    console.error(
-      `[mock] ${body?.model} · ${body?.output_config?.format ? "saída estruturada" : "ferramenta json"} · ${payload === ARTIGO ? "artigo" : "auditoria"}`,
-    );
+    console.error(`[mock] ${body?.model} · ${Object.keys(payload).join(",")}`);
 
     res.writeHead(200, { "content-type": "application/json" });
     res.end(

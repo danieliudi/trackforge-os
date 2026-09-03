@@ -57,7 +57,7 @@ export function buildCarrosselSystem(platform: Platform, brandId: BrandId | null
   );
 }
 
-import { OUTPUT_META, type TextKind } from "@/types/outputs";
+import { HOOK_TARGET, OUTPUT_META, type TextKind } from "@/types/outputs";
 
 /**
  * Como cada formato quer ser escrito.
@@ -71,8 +71,9 @@ import { OUTPUT_META, type TextKind } from "@/types/outputs";
 const KIND_RULES: Record<TextKind, string> = {
   "post-texto": `Você escreve o post de texto do LinkedIn.
 
-- "hook": a primeira linha. É a única garantida antes do corte — precisa dizer a
-  consequência ou o prazo, não anunciar o assunto. Nada de "você sabia que".
+- "hook": a primeira linha, em até ${HOOK_TARGET["post-texto"]} caracteres. É a
+  única garantida antes do corte — precisa dizer a consequência ou o prazo, não
+  anunciar o assunto. Nada de "você sabia que".
 - "paragraphs": de 3 a 9 parágrafos curtos, um por ideia, com linha em branco
   entre eles. Sem subtítulo, sem marcador, sem emoji.
 - "cta": uma frase. Convite a uma ação concreta, não "comente aqui o que achou".
@@ -80,7 +81,8 @@ const KIND_RULES: Record<TextKind, string> = {
 
   legenda: `Você escreve a legenda de um post único do Instagram.
 
-- "hook": a primeira linha, e só ela aparece antes do "ver mais". Uma frase.
+- "hook": a primeira linha, e só ela aparece antes do "ver mais". Uma frase, em
+  até ${HOOK_TARGET.legenda} caracteres.
 - "body": de 1 a 4 blocos curtos. Frase curta, sem parágrafo longo.
 - "cta": uma frase.
 - "hashtags": até 8, e só termo que descreve de fato o assunto ou o setor.
@@ -88,7 +90,8 @@ const KIND_RULES: Record<TextKind, string> = {
 
   reels: `Você escreve o roteiro de um Reels do Instagram.
 
-- "hook": o que é dito no primeiro segundo. Se não segurar aqui, o resto não é visto.
+- "hook": o que é dito no primeiro segundo, em até ${HOOK_TARGET.reels}
+  caracteres. Se não segurar aqui, o resto não é visto.
 - "beats": de 3 a 7 blocos. Cada um tem "seconds" (quanto dura), "fala" (o que a
   pessoa diz) e "naTela" (o texto que aparece escrito, curto, até 70 caracteres).
   A soma dos tempos deve ficar entre 20 e 60 segundos.
@@ -97,8 +100,8 @@ const KIND_RULES: Record<TextKind, string> = {
 
   stories: `Você escreve uma sequência de Stories do Instagram.
 
-- "screens": de 3 a 5 telas. Cada uma tem "texto" curto — cabe pouco na tela e
-  a pessoa passa rápido.
+- "screens": de 3 a 5 telas. Cada uma tem "texto" curto, até
+  ${HOOK_TARGET.stories} caracteres — cabe pouco na tela e a pessoa passa rápido.
 - "interacao" é opcional e só quando a tela pedir: enquete de duas opções, caixa
   de pergunta, ou contagem. Não force nas cinco.
 - "cta": a frase final.

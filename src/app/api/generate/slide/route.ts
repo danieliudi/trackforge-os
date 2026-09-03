@@ -15,6 +15,7 @@ import {
   slideSchema,
 } from "@/types/carousel";
 
+
 const requestSchema = z.object({
   // Teto de 20 (apresentação), não o de 12 do carrossel: aqui o documento é só
   // contexto e vale para os dois formatos. Com `carouselSchema` regerar um slide
@@ -25,13 +26,18 @@ const requestSchema = z.object({
   brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
 });
 
+/**
+ * O que se pede ao modelo: forma, sem limite. Os números estão no prompt, que é
+ * onde eles de fato influenciam a resposta — a Anthropic descarta `maxLength` e
+ * `minItems` antes de gerar, e cobrá-los na volta só perdia o slide reescrito.
+ */
 const slideContentSchema = z.object({
-  headline: z.string().min(1),
+  headline: z.string(),
   /** Ausente em slides "bullets"/"section" — não são renderizados nesses tipos. */
-  bodyText: z.string().max(MAX_BODY_LENGTH).optional(),
-  highlightTag: z.string().min(1).optional(),
+  bodyText: z.string().nullish(),
+  highlightTag: z.string().nullish(),
   /** Só em slides "bullets". */
-  bullets: z.array(z.string().min(1).max(MAX_BULLET_LENGTH)).min(MIN_BULLETS).max(MAX_BULLETS).optional(),
+  bullets: z.array(z.string()).nullish(),
 });
 
 const SYSTEM = `Você é redator de carrosséis e apresentações B2B, reescrevendo UM slide
@@ -41,11 +47,11 @@ Regras obrigatórias de texto (o layout quebra quem violar):
 - "headline" é o texto principal do slide. Sem jargão, sem emoji.
 - Em slides "data_metric" a headline é APENAS o número, nada mais.
   Válido: "22%", "3,4x", "R$ 1,2 mi". Inválido: qualquer frase.
-- Em slides "bullets", preencha o array "bullets" com 2 a 6 itens curtos (até 70
-  caracteres cada) e NÃO preencha "bodyText".
+- Em slides "bullets", preencha o array "bullets" com ${MIN_BULLETS} a ${MAX_BULLETS}
+  itens curtos (até ${MAX_BULLET_LENGTH} caracteres cada) e NÃO preencha "bodyText".
 - Em slides "section", só a "headline" importa — NÃO preencha "bodyText".
-- Nos demais tipos, "bodyText" tem NO MÁXIMO 30 CARACTERES — é um rótulo de apoio,
-  não uma frase.
+- Nos demais tipos, "bodyText" tem NO MÁXIMO ${MAX_BODY_LENGTH} CARACTERES — é um
+  rótulo de apoio, não uma frase.
 - "highlightTag" é opcional e curto (1-2 palavras).
 
 Mantenha o mesmo "type" do slide e a coerência com o título, o público-alvo e os
@@ -102,19 +108,28 @@ export async function POST(request: Request) {
     };
 
     // Só o texto é da IA — imagem, QR code e o resto da estrutura do slide não mudam.
+    const headline = object.headline.trim();
+    const bodyText = object.bodyText?.trim();
+    const highlightTag = object.highlightTag?.trim();
+    const bullets = (object.bullets ?? []).map((item) => item.trim()).filter(Boolean);
+
     const updated = slideSchema.safeParse({
       ...target,
-      headline: object.headline,
-      bodyText: object.bodyText ?? target.bodyText,
-      highlightTag: object.highlightTag ?? target.highlightTag,
-      bullets: object.bullets ?? target.bullets,
+      headline: headline || target.headline,
+      bodyText: bodyText || target.bodyText,
+      highlightTag: highlightTag || target.highlightTag,
+      // Lista com menos de dois itens não substitui a que já estava: o slide
+      // volta com a lista antiga em vez de virar uma lista de um item só.
+      bullets: bullets.length >= MIN_BULLETS ? bullets : target.bullets,
     });
 
     if (!updated.success) {
       return Response.json(
         {
           error: "a IA devolveu um slide fora das regras",
-          issues: updated.error.issues.map((issue) => issue.message),
+          issues: updated.error.issues.map(
+            (issue) => `${issue.path.join(".") || "slide"}: ${issue.message}`,
+          ),
           cost,
         },
         { status: 422 },

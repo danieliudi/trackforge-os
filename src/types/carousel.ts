@@ -1,11 +1,24 @@
 import { z } from "zod";
 
+/**
+ * Limites do slide — da UI e do prompt, NÃO do schema de validação.
+ *
+ * Era o schema que os fazia valer, e isso custava a peça inteira: a Anthropic
+ * não aplica `maxLength` nem `maxItems` (o provider os arranca antes de enviar,
+ * ver `src/types/article.ts`), então um `bodyText` com 34 caracteres derrubava
+ * o carrossel todo na validação de volta, depois de pago.
+ *
+ * O editor já trata excesso do jeito certo e sempre tratou: `headline` nunca
+ * teve teto de schema, tem contador que fica negativo, e o layout corta com
+ * `line-clamp`. `bodyText` tinha as duas coisas — contador E portão —, e o
+ * portão era o único que destruía trabalho. Agora os dois são contador.
+ */
 export const MAX_BODY_LENGTH = 30;
 export const MAX_BULLET_LENGTH = 70;
 export const MIN_BULLETS = 2;
 export const MAX_BULLETS = 6;
 
-/** Fonte única de verdade — o schema valida e a UI trava os botões nos mesmos limites. */
+/** Alvo do prompt e teto dos botões do editor. O schema aceita o que vier. */
 export const MIN_SLIDES = 4;
 export const MAX_SLIDES = 12;
 /** Apresentação lê como documento, não como scroll — cabe mais conteúdo por peça. */
@@ -39,11 +52,11 @@ export const slideSchema = z
     slideNumber: z.number().int().positive(),
     type: slideTypeSchema,
     headline: z.string().min(1, "headline é obrigatório"),
-    /** Não usado em "bullets"/"section" — o refine abaixo só exige nos demais tipos. */
-    bodyText: z
-      .string()
-      .max(MAX_BODY_LENGTH, `bodyText deve ter no máximo ${MAX_BODY_LENGTH} caracteres`)
-      .optional(),
+    /**
+     * Não usado em "bullets"/"section" — o refine abaixo só exige nos demais tipos.
+     * Sem teto: `MAX_BODY_LENGTH` é o contador do editor, e o layout corta.
+     */
+    bodyText: z.string().optional(),
     highlightTag: z.string().min(1).optional(),
     footerNote: z.string().min(1, "footerNote é obrigatório"),
     /** Imagem do slide e como ela ocupa o layout. */
@@ -53,22 +66,15 @@ export const slideSchema = z
       .string()
       .regex(HTTP_URL, "qrCodeUrl deve começar com http:// ou https://")
       .optional(),
-    /** Itens da lista. Obrigatório e usado apenas no slide de type "bullets". */
-    bullets: z
-      .array(
-        z
-          .string()
-          .min(1)
-          .max(MAX_BULLET_LENGTH, `cada item deve ter no máximo ${MAX_BULLET_LENGTH} caracteres`),
-      )
-      .min(MIN_BULLETS)
-      .max(MAX_BULLETS)
-      .optional(),
+    /**
+     * Itens da lista. Obrigatório e usado apenas no slide de type "bullets".
+     * O piso vive no refine abaixo; o teto e o tamanho do item, no editor.
+     */
+    bullets: z.array(z.string().min(1)).optional(),
   })
-  .refine(
-    (slide) => slide.type === "bullets" || slide.type === "section" || !!slide.bodyText,
-    { message: "bodyText é obrigatório para este tipo de slide", path: ["bodyText"] },
-  )
+  // O refine que exigia bodyText saiu: todo layout renderiza `bodyText ?? ""`,
+  // o editor tem o campo, e o que ele fazia na prática era descartar um
+  // carrossel inteiro por causa de um subtítulo que faltou.
   .refine(
     (slide) => slide.type !== "bullets" || (slide.bullets?.length ?? 0) >= MIN_BULLETS,
     {
@@ -77,18 +83,22 @@ export const slideSchema = z
     },
   );
 
-function buildBaseSchema(maxSlides: number) {
+/**
+ * Piso de um slide, sem teto.
+ *
+ * `MIN_SLIDES` e `MAX_SLIDES` continuam sendo o alvo do prompt e o limite dos
+ * botões do editor — mas reprovar aqui um carrossel de treze slides só apagaria
+ * treze slides pagos. Tirar três no editor leva segundos; regerar custa de novo.
+ */
+function buildBaseSchema() {
   return z.object({
     title: z.string().min(1, "title é obrigatório"),
     targetAudience: z.string().min(1, "targetAudience é obrigatório"),
-    slides: z
-      .array(slideSchema)
-      .min(MIN_SLIDES, `deve ter no mínimo ${MIN_SLIDES} slides`)
-      .max(maxSlides, `deve ter no máximo ${maxSlides} slides`),
+    slides: z.array(slideSchema).min(1, "a peça precisa de ao menos um slide"),
   });
 }
 
-export const carouselBaseSchema = buildBaseSchema(MAX_SLIDES);
+export const carouselBaseSchema = buildBaseSchema();
 
 export const carouselSchema = carouselBaseSchema
   .refine(
@@ -107,8 +117,91 @@ export const carouselSchema = carouselBaseSchema
     path: ["slides"],
   });
 
-/** Mesmas regras estruturais do carrossel — só o teto de slides muda. */
-export const apresentacaoBaseSchema = buildBaseSchema(MAX_SLIDES_APRESENTACAO);
+/** Mesmas regras estruturais do carrossel; o teto de slides é do editor. */
+export const apresentacaoBaseSchema = buildBaseSchema();
+
+/**
+ * O slide como ele vai PARA o modelo: forma, sem teto e sem refine.
+ *
+ * Refine no schema de geração é a armadilha menos óbvia desta família de bugs.
+ * A Anthropic não sabe executar um `refine` — ele roda só na volta, dentro do
+ * AI SDK —, então um slide "bullets" que veio com um item só não vira um aviso:
+ * vira `NoObjectGeneratedError`, e leva junto os outros cinco slides e as
+ * outras cinco peças do lote. `normalizeCarousel` conserta isso depois.
+ */
+export const slideWireSchema = z.object({
+  slideNumber: z.number(),
+  type: slideTypeSchema,
+  headline: z.string(),
+  bodyText: z.string().nullish(),
+  highlightTag: z.string().nullish(),
+  footerNote: z.string().nullish(),
+  image: z.object({ url: z.string(), layout: imageLayoutSchema }).nullish(),
+  qrCodeUrl: z.string().nullish(),
+  bullets: z.array(z.string()).nullish(),
+});
+
+export const carouselWireSchema = z.object({
+  title: z.string(),
+  targetAudience: z.string(),
+  slides: z.array(slideWireSchema),
+});
+
+export type SlideWire = z.infer<typeof slideWireSchema>;
+export type CarouselWire = z.infer<typeof carouselWireSchema>;
+
+/**
+ * Conserta o carrossel antes de validar — determinístico, sem segunda chamada.
+ *
+ * Vivia copiado em `derive` e `avulso` fazendo só duas coisas (renumerar e
+ * cravar a assinatura). É a terceira ocorrência com a chegada do schema de fio,
+ * que é quando este repo extrai, e agora ele também resolve o que os refines
+ * cobravam — porque cobrar sem consertar era o que apagava a peça:
+ *
+ * - renumera pela ordem do array, que é a verdade;
+ * - crava a assinatura canônica da marca, que a IA nunca sabe;
+ * - primeiro slide vira "cover", último vira "cta". `type` escolhe LAYOUT, não
+ *   conteúdo: trocar a moldura não mexe numa palavra do que o slide diz;
+ * - slide "bullets" que sobrou com menos de dois itens vira "content", porque
+ *   uma lista de um item não é uma lista;
+ * - URL que não é http(s) sai. Um QR code apontando para lixo é pior que
+ *   nenhum QR code — e este é impresso.
+ */
+export function normalizeCarousel(wire: CarouselWire, tagline?: string) {
+  const limpos = wire.slides.map((slide) => {
+    const bullets = (slide.bullets ?? []).map((item) => item.trim()).filter(Boolean);
+    const bodyText = slide.bodyText?.trim();
+    const qrCodeUrl = slide.qrCodeUrl?.trim();
+
+    return {
+      type: slide.type,
+      headline: slide.headline.trim(),
+      ...(bodyText ? { bodyText } : {}),
+      ...(slide.highlightTag?.trim() ? { highlightTag: slide.highlightTag.trim() } : {}),
+      footerNote: tagline ?? slide.footerNote?.trim() ?? "",
+      ...(slide.image && IMAGE_SRC.test(slide.image.url.trim())
+        ? { image: { url: slide.image.url.trim(), layout: slide.image.layout } }
+        : {}),
+      ...(qrCodeUrl && HTTP_URL.test(qrCodeUrl) ? { qrCodeUrl } : {}),
+      ...(bullets.length > 0 ? { bullets } : {}),
+    };
+  });
+
+  const ultimo = limpos.length - 1;
+
+  return {
+    title: wire.title.trim(),
+    targetAudience: wire.targetAudience.trim(),
+    slides: limpos.map((slide, index) => {
+      let type = slide.type;
+      if (index === 0) type = "cover";
+      else if (index === ultimo) type = "cta";
+      else if (type === "bullets" && (slide.bullets?.length ?? 0) < MIN_BULLETS) type = "content";
+
+      return { ...slide, slideNumber: index + 1, type };
+    }),
+  };
+}
 
 export const apresentacaoSchema = apresentacaoBaseSchema
   .refine(
