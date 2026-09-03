@@ -1,6 +1,10 @@
 "use client";
 
 import { shouldShowLogo, type Brand } from "@/constants/brands";
+import {
+  DEFAULT_COMPOSITION,
+  type CompositionId,
+} from "@/constants/compositions";
 import type { Format, Platform } from "@/constants/format";
 import { resolveCanvasSize, resolvePadding, resolveTheme, type SlideThemeId } from "@/constants/themes";
 import type { ImageLayout, Slide } from "@/types/carousel";
@@ -35,6 +39,8 @@ type CarouselSlideProps = {
   /** Formato/plataforma determinam a proporção do canvas. Default: carrossel LinkedIn (4:5). */
   format?: Format;
   platform?: Platform;
+  /** Composição tipográfica — eixo aparte do tema de cor. */
+  compositionId?: CompositionId;
   /** Fator de escala do canvas virtual. 1 = tamanho de export. */
   scale?: number;
 };
@@ -46,6 +52,7 @@ export function CarouselSlide({
   logo,
   format = "carrossel",
   platform = "linkedin",
+  compositionId = DEFAULT_COMPOSITION,
   scale = 1,
 }: CarouselSlideProps) {
   // Só o layout 'background' escurece o slide inteiro; split e card não.
@@ -79,6 +86,7 @@ export function CarouselSlide({
       logoSrc={logoSrc}
       logoAlt={logo?.alt}
       logoPlacement={slide.type === "cover" || slide.type === "section" ? "header" : "footer"}
+      compositionId={compositionId}
       width={width}
       height={height}
       padding={padding}
@@ -88,6 +96,7 @@ export function CarouselSlide({
         slide={slide}
         theme={theme}
         density={slide.image ? DENSITY[slide.image.layout] : 1}
+        compositionId={compositionId}
       />
     </SlideFrame>
   );

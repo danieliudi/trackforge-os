@@ -21,6 +21,7 @@ import {
 } from "@/components/app/OriginPicker";
 import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { Button } from "@/components/ui/Button";
+import { QrUrlPreview } from "@/components/carousel/QrUrlPreview";
 import type { GenerationCost } from "@/constants/pricing";
 import type { ForbiddenHit } from "@/knowledge/check";
 import { readError } from "@/lib/apiError";
@@ -910,12 +911,18 @@ export default function BancadaPage() {
                     placeholder="rapp"
                     className={fieldClass}
                   />
-                  {contentId && brandId ? (
-                    <span className="break-all font-mono text-[10px] text-faint">
-                      {buildQrCodeUrl(brandId, contentId, campaignName, qrPath || null)}
-                    </span>
-                  ) : null}
                 </label>
+                {contentId && brandId ? (
+                  <QrUrlPreview
+                    url={buildQrCodeUrl(brandId, contentId, campaignName, qrPath || null)}
+                    note="Fórmula: {landing}/{path?}?utm_source=qr&utm_medium=impresso&utm_campaign={campanha?}&utm_content={content_id}. No envio, o QR do slide CTA é substituído por este link."
+                  />
+                ) : (
+                  <p className="text-[11px] leading-relaxed text-mut">
+                    O link final aparece aqui assim que a peça ganhar content_id (primeira
+                    gravação ou envio).
+                  </p>
+                )}
                 <Button
                   icon={Send}
                   variant="primary"

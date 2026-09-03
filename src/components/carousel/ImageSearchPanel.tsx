@@ -1,7 +1,8 @@
 "use client";
 
 import clsx from "clsx";
-import { ExternalLink, Loader2, SearchX } from "lucide-react";
+import { ExternalLink, Loader2, SearchX, Sparkles, Wand2 } from "lucide-react";
+import { Button } from "@/components/ui/Button";
 import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
@@ -28,8 +29,15 @@ const SEARCH_DELAY = 400;
 const TABS = [
   { id: "unsplash", label: "Unsplash" },
   { id: "biblioteca", label: "Biblioteca" },
+  { id: "gerar", label: "Gerar" },
 ] as const;
 type Tab = (typeof TABS)[number]["id"];
+
+export type SlideImageBrief = {
+  headline: string;
+  bodyText?: string;
+  slideType?: string;
+};
 
 type ImageSearchPanelProps = {
   onSelect: (image: PickedImage) => void;
@@ -41,6 +49,8 @@ type ImageSearchPanelProps = {
   initialTab?: Tab;
   /** Nome da frente na aba: "Biblioteca Resibag" diz de quem é a pasta aberta. */
   brandLabel?: string;
+  /** Brief do slide/artigo para sugerir prompt de imagem. */
+  slideBrief?: SlideImageBrief | null;
 };
 
 /**
@@ -64,6 +74,7 @@ export function ImageSearchPanel({
   initialQuery,
   initialTab = "unsplash",
   brandLabel,
+  slideBrief,
 }: ImageSearchPanelProps) {
   const [tab, setTab] = useState<Tab>(initialTab);
 
@@ -89,9 +100,178 @@ export function ImageSearchPanel({
 
       {tab === "unsplash" ? (
         <UnsplashTab onSelect={onSelect} initialQuery={initialQuery} />
-      ) : (
+      ) : tab === "biblioteca" ? (
         <LibraryTab onSelect={onSelect} brandId={brandId} />
+      ) : (
+        <GenerateTab onSelect={onSelect} brandId={brandId} slideBrief={slideBrief} />
       )}
+    </div>
+  );
+}
+
+function GenerateTab({
+  onSelect,
+  brandId,
+  slideBrief,
+}: {
+  onSelect: (image: PickedImage) => void;
+  brandId?: BrandId | null;
+  slideBrief?: SlideImageBrief | null;
+}) {
+  const [prompt, setPrompt] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [briefPt, setBriefPt] = useState("");
+  const [generateConfigured, setGenerateConfigured] = useState(false);
+  const [busy, setBusy] = useState<"prompt" | "generate" | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    void fetch("/api/images/generate")
+      .then((response) => response.json())
+      .then((data) => setGenerateConfigured(data.configured === true))
+      .catch(() => setGenerateConfigured(false));
+  }, []);
+
+  async function buildPrompt() {
+    if (!slideBrief?.headline.trim()) {
+      setError("preencha a headline do slide antes de pedir o prompt");
+      return;
+    }
+    setBusy("prompt");
+    setError(null);
+    try {
+      const response = await fetch("/api/images/prompt", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          headline: slideBrief.headline,
+          bodyText: slideBrief.bodyText,
+          slideType: slideBrief.slideType,
+          brandId: brandId ?? null,
+        }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "falha ao gerar prompt");
+      setPrompt(data.generationPrompt ?? "");
+      setSearchQuery(data.searchQuery ?? "");
+      setBriefPt(data.briefPt ?? "");
+      if (typeof data.generateConfigured === "boolean") {
+        setGenerateConfigured(data.generateConfigured);
+      }
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "falha ao gerar prompt");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  async function generate() {
+    if (!prompt.trim()) {
+      setError("gere ou cole um prompt antes");
+      return;
+    }
+    setBusy("generate");
+    setError(null);
+    try {
+      const response = await fetch("/api/images/generate", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.error ?? "falha ao gerar imagem");
+      setPreviewUrl(data.url);
+      onSelect({
+        url: data.url,
+        alt: briefPt || "imagem gerada",
+        credit: "OpenAI",
+        creditUrl: null,
+        fileName: null,
+      });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "falha ao gerar imagem");
+    } finally {
+      setBusy(null);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      <p className="text-[11px] leading-relaxed text-mut">
+        Atmosfera editorial — não use para foto de produto/embalagem real (isso
+        vem da Biblioteca). Sem <span className="font-mono">OPENAI_API_KEY</span>,
+        o prompt serve para buscar no Unsplash.
+      </p>
+
+      <Button
+        icon={Wand2}
+        size="sm"
+        loading={busy === "prompt"}
+        onClick={() => void buildPrompt()}
+        disabled={!slideBrief?.headline.trim()}
+      >
+        Sugerir prompt do slide
+      </Button>
+
+      {briefPt ? <p className="text-[11px] leading-relaxed text-ink2">{briefPt}</p> : null}
+
+      <label className="flex flex-col gap-1">
+        <span className="text-[11px] text-mut">Prompt (EN)</span>
+        <textarea
+          rows={4}
+          value={prompt}
+          onChange={(event) => setPrompt(event.target.value)}
+          placeholder="Descreva a foto editorial…"
+          className={clsx(fieldClass, "resize-y font-mono text-[11px]")}
+        />
+      </label>
+
+      {searchQuery ? (
+        <p className="text-[11px] text-mut">
+          Unsplash:{" "}
+          <button
+            type="button"
+            className={clsx("font-medium text-ink underline-offset-2 hover:underline", focusRing)}
+            onClick={() => {
+              void navigator.clipboard.writeText(searchQuery);
+            }}
+          >
+            {searchQuery}
+          </button>{" "}
+          (copiado ao clicar)
+        </p>
+      ) : null}
+
+      {generateConfigured ? (
+        <Button
+          icon={Sparkles}
+          size="sm"
+          variant="primary"
+          loading={busy === "generate"}
+          onClick={() => void generate()}
+          disabled={!prompt.trim()}
+        >
+          Gerar e aplicar no slide
+        </Button>
+      ) : (
+        <p className="rounded-md border border-line2 bg-surface px-2.5 py-2 text-[11px] leading-relaxed text-mut">
+          Geração desligada. Defina <span className="font-mono">OPENAI_API_KEY</span>{" "}
+          no ambiente para habilitar. Até lá, use o prompt sugerido no Unsplash ou
+          a Biblioteca.
+        </p>
+      )}
+
+      {previewUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={previewUrl}
+          alt={briefPt || "prévia gerada"}
+          className="max-h-40 w-full rounded-md object-cover"
+        />
+      ) : null}
+
+      {error ? <p className="text-xs text-danger">{error}</p> : null}
     </div>
   );
 }

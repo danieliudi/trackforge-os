@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, LayoutGrid, Square } from "lucide-react";
 import { useState } from "react";
 
 import { IconButton } from "@/components/ui/Button";
+import type { CompositionId } from "@/constants/compositions";
 import type { Format, Platform } from "@/constants/format";
 import { resolveCanvasSize, type SlideThemeId } from "@/constants/themes";
 import { useElementSize } from "@/hooks/useElementSize";
@@ -25,6 +26,7 @@ type CarouselPreviewProps = {
   logo?: LogoConfig | null;
   format: Format;
   platform: Platform;
+  compositionId?: CompositionId;
   activeIndex: number;
   onActiveIndexChange: (index: number) => void;
 };
@@ -62,6 +64,7 @@ export function CarouselPreview({
   logo,
   format,
   platform,
+  compositionId,
   activeIndex,
   onActiveIndexChange,
 }: CarouselPreviewProps) {
@@ -151,6 +154,7 @@ export function CarouselPreview({
                   logo={logo}
                   format={format}
                   platform={platform}
+                  compositionId={compositionId}
                   scale={scale}
                 />
               </button>
@@ -164,6 +168,7 @@ export function CarouselPreview({
             logo={logo}
             format={format}
             platform={platform}
+            compositionId={compositionId}
             scale={scale}
           />
         )}

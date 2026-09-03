@@ -41,7 +41,7 @@ export const brands: Record<BrandId, Brand> = {
   resibag: {
     id: "resibag",
     label: "Resibag",
-    logoSrc: "/logos/resibag-preto.svg",
+    logoSrc: "/logos/resibag.svg",
     logoSrcOnDark: "/logos/resibag-branco.svg",
     themeId: "resibag",
     logoPolicy: "all",

@@ -6,9 +6,11 @@ import { Upload, X } from "lucide-react";
 import { BrandPills } from "@/components/app/BrandPills";
 import { FormatSelect } from "@/components/app/FormatSelect";
 import { PlatformPills } from "@/components/app/PlatformPills";
+import { CompositionSelect } from "@/components/carousel/CompositionSelect";
 import { ThemeSelect } from "@/components/carousel/ThemeSelect";
 import { IconButton } from "@/components/ui/Button";
 import type { BrandId } from "@/constants/brands";
+import type { CompositionId } from "@/constants/compositions";
 import { getPlatformToneNote, type Format, type Platform } from "@/constants/format";
 import type { SlideThemeId } from "@/constants/themes";
 import { focusRing, labelClass } from "@/lib/ui";
@@ -16,6 +18,8 @@ import { focusRing, labelClass } from "@/lib/ui";
 type StylePanelProps = {
   themeId: SlideThemeId;
   onThemeChange: (id: SlideThemeId) => void;
+  compositionId: CompositionId;
+  onCompositionChange: (id: CompositionId) => void;
   brandId: BrandId | null;
   onBrandChange: (id: BrandId | null) => void;
   customLogo: string | null;
@@ -45,6 +49,8 @@ function readAsDataUrl(file: Blob) {
 export function StylePanel({
   themeId,
   onThemeChange,
+  compositionId,
+  onCompositionChange,
   brandId,
   onBrandChange,
   customLogo,
@@ -117,6 +123,10 @@ export function StylePanel({
             O logo customizado tem prioridade sobre o da marca em todos os slides.
           </p>
         ) : null}
+      </div>
+
+      <div className="flex flex-col gap-3 border-t border-line pt-6">
+        <CompositionSelect value={compositionId} onChange={onCompositionChange} />
       </div>
 
       <div className="flex flex-col gap-3 border-t border-line pt-6">
