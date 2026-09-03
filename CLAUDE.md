@@ -115,9 +115,10 @@ na largura real do monitor dele (1900px). Página única longa com scroll foi
 rejeitada explicitamente.
 
 **Contraste é gate, não gosto, e vale nos dois temas.** Texto de corpo ≥ 4,5:1
-sobre o fundo; rótulo pequeno e ornamento ≥ 3:1. O medidor está em
-`scratchpad/contraste.mjs` e roda sobre o app de verdade, em todas as telas —
-rode com `colorScheme: "dark"` também, porque um token que passa no claro pode
+sobre o fundo; rótulo pequeno e ornamento ≥ 3:1. Meça sobre o app de verdade,
+não sobre o hex isolado — modelo pronto para copiar em
+`scratchpad/contraste-slot.mjs` (Playwright, lê a cor computada nos dois temas).
+Rode com `colorScheme: "dark"` também, porque um token que passa no claro pode
 reprovar no escuro. Quando uma cor da paleta não passa
 como letra, ela vira preenchimento ou borda — nunca se escurece a cor da marca
 para caber texto branco: troca-se a letra. Foi a decisão do laranja `#E56515`
@@ -157,9 +158,9 @@ servidor renderizar diferente do cliente.
 
 Mesmo critério do `sanwey-gestão`: quando a mesma lógica visual/estrutural for
 escrita pela **terceira** vez em lugares diferentes, extraia para
-`src/components/app/` ou `src/lib/` naquele momento. Foi assim que `Steps` e
-`lib/ui.ts` nasceram. Não construa abstração especulativa: o custo de uma
-abstração errada é maior que o de duas cópias.
+`src/components/app/` ou `src/lib/` naquele momento. Foi assim que
+`src/lib/ui.ts` e `src/lib/apiError.ts` nasceram. Não construa abstração
+especulativa: o custo de uma abstração errada é maior que o de duas cópias.
 
 ## 8. Como testar — sem chave de API, no navegador
 

@@ -49,7 +49,7 @@ tipo manual.
 
 Quando a mesma lógica visual/estrutural for escrita pela **terceira** vez em
 lugares diferentes, extraia para `src/components/app/` ou `src/lib/` naquele
-momento. Foi assim que `lib/ui.ts` e `lib/apiError.ts` nasceram.
+momento. Foi assim que `src/lib/ui.ts` e `src/lib/apiError.ts` nasceram.
 
 Não construa abstração especulativa: o custo de uma abstração errada é maior que
 o de duas cópias.
