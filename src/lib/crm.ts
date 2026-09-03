@@ -53,6 +53,12 @@ export type PublishInput = {
   brandId?: BrandId | null;
   /** Sinal que originou a pauta, quando houve um. */
   sourceLabel?: string;
+  /** Identificador estável da peça (PRD rastreio §5.2). Cruza pro entregável. */
+  contentId?: string | null;
+  /** UUID da campanha no CRM — chave de agregação com leads. */
+  campaignId?: string | null;
+  /** Nome canônico da campanha — espelhado em custom_fields pra a agência. */
+  campaignName?: string | null;
 };
 
 /** Título da peça, que só o carrossel carrega dentro de si. */
@@ -91,7 +97,8 @@ export async function publishForApproval(
     throw new Error("o CRM não está configurado nesta instalação");
   }
 
-  const { article, pieces, images, brandId, sourceLabel } = input;
+  const { article, pieces, images, brandId, sourceLabel, contentId, campaignId, campaignName } =
+    input;
   const flagged = pieces.reduce((total, piece) => total + piece.flagged, 0);
 
   const response = await fetch(`${config.url}?action=create`, {
@@ -110,6 +117,12 @@ export async function publishForApproval(
       payload: {
         origem: "carousel-builder",
         sinal: sourceLabel ?? null,
+        // content_id e campaign_id atravessam pro entregável (custom_fields),
+        // mesmo caminho que `sinal`. Intencional: a agência passa a ver o
+        // código da peça (CLAUDE.md regra 10).
+        content_id: contentId ?? null,
+        campaign_id: campaignId ?? null,
+        campaign_name: campaignName ?? null,
         artigo_markdown: articleToMarkdown(article, images ?? []),
         artigo: article,
         imagens: images ?? [],

@@ -99,6 +99,7 @@ export default function PecasPage() {
                       ? ` · ${run.pieces.map((p) => OUTPUT_META[p.kind].label).join(", ")}`
                       : " · nenhuma peça ainda"}
                     {run.images.length > 0 ? ` · ${run.images.length} imagem(ns)` : ""}
+                    {run.contentId ? ` · ${run.contentId.toUpperCase()}` : ""}
                     {` · ${new Date(run.at).toLocaleDateString("pt-BR")}`}
                   </span>
                 </span>

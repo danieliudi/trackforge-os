@@ -24,13 +24,21 @@ import { Button } from "@/components/ui/Button";
 import type { GenerationCost } from "@/constants/pricing";
 import type { ForbiddenHit } from "@/knowledge/check";
 import { readError } from "@/lib/apiError";
+import {
+  allocateContentId,
+  buildQrCodeUrl,
+  displayContentId,
+} from "@/lib/attribution";
 import { entryFromCost, pushCostEntry } from "@/lib/costLog";
 import { getProduction, saveProduction, type Production } from "@/lib/produced";
 import type { MarketSignal } from "@/lib/marketSignals";
 import { fieldClass, focusRing, labelClass, metaClass, panelClass } from "@/lib/ui";
 import type { Verification } from "@/lib/verify";
 import { articleBlocks, articleToMarkdown, type Article, type ChosenImage } from "@/types/article";
-import { OUTPUT_META, type OutputKind, type PieceFailure } from "@/types/outputs";
+import type { Carousel } from "@/types/carousel";
+import { isCarousel, OUTPUT_META, type OutputKind, type PieceFailure } from "@/types/outputs";
+
+type ContentCampaignOption = { id: string; name: string; channel: string };
 
 /**
  * A bancada: origem à esquerda, artigo no centro, saídas à direita.
@@ -85,6 +93,13 @@ export default function BancadaPage() {
   const [runId, setRunId] = useState<string | null>(null);
   /** Reescrever descarta um artigo pago e paga outro: pede confirmação. */
   const [confirmarReescrita, setConfirmarReescrita] = useState(false);
+  /** content_id estável da peça — alocado na primeira gravação desta produção. */
+  const [contentId, setContentId] = useState<string | null>(null);
+  const [campaignId, setCampaignId] = useState<string | null>(null);
+  const [campaignName, setCampaignName] = useState<string | null>(null);
+  const [campaigns, setCampaigns] = useState<ContentCampaignOption[]>([]);
+  /** Path opcional da landing no QR (ex.: rapp). */
+  const [qrPath, setQrPath] = useState("");
 
   const load = useCallback(() => {
     void fetch("/api/signals", {
@@ -106,6 +121,13 @@ export default function BancadaPage() {
         setPending(data.pending ?? []);
       })
       .catch(() => setCrmReady(false));
+
+    void fetch(`/api/campaigns?brandId=${brandId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setCampaigns(Array.isArray(data.campaigns) ? data.campaigns : []);
+      })
+      .catch(() => setCampaigns([]));
   }, [brandId]);
 
   // Agendado: setState síncrono dentro do efeito encadeia render antes da pintura.
@@ -142,6 +164,9 @@ export default function BancadaPage() {
         })),
       );
       setSent(run.sent);
+      setContentId(run.contentId ?? null);
+      setCampaignId(run.campaignId ?? null);
+      setCampaignName(run.campaignName ?? null);
       // A origem volta inteira quando foi guardada. Produção antiga, gravada
       // antes de o campo existir, cai no rótulo — que é o que havia.
       setOrigin(
@@ -177,6 +202,10 @@ export default function BancadaPage() {
     setImages({});
     setSent(false);
     setError(null);
+    setContentId(null);
+    setCampaignId(null);
+    setCampaignName(null);
+    setQrPath("");
   };
 
   /** O que a rota recebe como entrada, seja qual for a origem escolhida. */
@@ -197,6 +226,14 @@ export default function BancadaPage() {
       if (!runId) setRunId(id);
 
       const previous = getProduction(id);
+      // content_id nasce na primeira gravação desta produção e não muda mais.
+      // Alocar aqui (callback), nunca no corpo do render (CLAUDE.md regra 6).
+      const nextContentId =
+        patch.contentId !== undefined
+          ? patch.contentId
+          : (previous?.contentId ?? contentId ?? (brandId ? allocateContentId(brandId) : null));
+      if (nextContentId && nextContentId !== contentId) setContentId(nextContentId);
+
       saveProduction({
         id,
         at: Date.now(),
@@ -208,11 +245,16 @@ export default function BancadaPage() {
         images: previous?.images ?? [],
         pieces: previous?.pieces ?? [],
         sent: previous?.sent ?? false,
+        campaignId: previous?.campaignId ?? campaignId,
+        campaignName: previous?.campaignName ?? campaignName,
         ...patch,
+        // Sempre reafirma o id alocado nesta chamada — patch sem contentId
+        // não pode apagar o que acabamos de gerar.
+        contentId: nextContentId,
       });
       return id;
     },
-    [runId, brandId, source, origin],
+    [runId, brandId, source, origin, contentId, campaignId, campaignName],
   );
 
   const write = useCallback(async () => {
@@ -381,10 +423,36 @@ export default function BancadaPage() {
   );
 
   const send = useCallback(async () => {
-    if (!article || !pieces) return;
+    if (!article || !pieces || !brandId) return;
     setBusy("envio");
     setError(null);
     try {
+      // Garante content_id antes do pacote sair — peça sem id quebra o rastro.
+      const idForPiece = contentId ?? allocateContentId(brandId);
+      if (idForPiece !== contentId) setContentId(idForPiece);
+
+      const qrUrl = buildQrCodeUrl(brandId, idForPiece, campaignName, qrPath || null);
+
+      // Carrossel: QR derivado no slide CTA no momento do envio (não texto livre).
+      const piecesForPublish = pieces.map((piece) => {
+        if (!isCarousel(piece.kind)) {
+          return {
+            kind: piece.kind,
+            data: piece.data,
+            flagged: piece.verification?.flagged ?? 0,
+          };
+        }
+        const carousel = piece.data as Carousel;
+        const slides = carousel.slides.map((slide) =>
+          slide.type === "cta" ? { ...slide, qrCodeUrl: qrUrl } : slide,
+        );
+        return {
+          kind: piece.kind,
+          data: { ...carousel, slides },
+          flagged: piece.verification?.flagged ?? 0,
+        };
+      });
+
       const response = await fetch("/api/publish", {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -392,24 +460,47 @@ export default function BancadaPage() {
           article,
           brandId,
           sourceLabel: source,
+          contentId: idForPiece,
+          campaignId,
+          campaignName,
           images: Object.values(images),
-          pieces: pieces.map((piece) => ({
-            kind: piece.kind,
-            data: piece.data,
-            flagged: piece.verification?.flagged ?? 0,
-          })),
+          pieces: piecesForPublish,
         }),
       });
       if (!response.ok) throw new Error(await readError(response, "não foi possível enviar"));
       setSent(true);
-      keep({ sent: true, images: Object.values(images) });
+      keep({
+        sent: true,
+        images: Object.values(images),
+        contentId: idForPiece,
+        campaignId,
+        campaignName,
+        pieces: pieces.map((piece, index) => ({
+          kind: piece.kind,
+          data: piecesForPublish[index]?.data ?? piece.data,
+          from: piece.from,
+          flagged: piece.verification?.flagged ?? 0,
+        })),
+      });
       load();
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "erro desconhecido");
     } finally {
       setBusy(null);
     }
-  }, [article, pieces, brandId, source, images, load, keep]);
+  }, [
+    article,
+    pieces,
+    brandId,
+    source,
+    images,
+    load,
+    keep,
+    contentId,
+    campaignId,
+    campaignName,
+    qrPath,
+  ]);
 
   const markdown = article ? articleToMarkdown(article, Object.values(images)) : "";
   const blockLabels = article
@@ -762,19 +853,79 @@ export default function BancadaPage() {
                 <Check size={14} className="mt-px shrink-0" />
                 <span>
                   Na sua fila de aprovação no CRM. O artigo, as fontes e o parecer foram junto — a
-                  agência não vê nada disso.
+                  agência não vê nada disso
+                  {contentId ? (
+                    <>
+                      {" "}
+                      · peça <span className="font-mono">{displayContentId(contentId)}</span>
+                    </>
+                  ) : null}
+                  .
                 </span>
               </div>
             ) : crmReady ? (
-              <Button
-                icon={Send}
-                variant="primary"
-                className="w-full"
-                loading={busy === "envio"}
-                onClick={() => void send()}
-              >
-                {busy === "envio" ? "Enviando…" : "Enviar para aprovação"}
-              </Button>
+              <div className="flex flex-col gap-2">
+                {contentId ? (
+                  <p className={metaClass}>
+                    peça {displayContentId(contentId)}
+                    {campaignName ? ` · campanha ${campaignName}` : ""}
+                  </p>
+                ) : null}
+                <label className="flex flex-col gap-1">
+                  <span className={labelClass}>Campanha (Conteúdo)</span>
+                  <select
+                    value={campaignId ?? ""}
+                    onChange={(event) => {
+                      const nextId = event.target.value || null;
+                      const next = campaigns.find((item) => item.id === nextId) ?? null;
+                      setCampaignId(next?.id ?? null);
+                      setCampaignName(next?.name ?? null);
+                      keep({
+                        campaignId: next?.id ?? null,
+                        campaignName: next?.name ?? null,
+                      });
+                    }}
+                    className={fieldClass}
+                  >
+                    <option value="">Sem campanha — preencha no CRM depois</option>
+                    {campaigns.map((campaign) => (
+                      <option key={campaign.id} value={campaign.id}>
+                        {campaign.name}
+                        {campaign.channel ? ` · ${campaign.channel}` : ""}
+                      </option>
+                    ))}
+                  </select>
+                  {campaigns.length === 0 ? (
+                    <span className="text-[11px] text-mut">
+                      Nenhuma campanha Conteúdo/Digital nesta frente. Crie no CRM (Fase 0) no
+                      formato frente-aaaamm-tema.
+                    </span>
+                  ) : null}
+                </label>
+                <label className="flex flex-col gap-1">
+                  <span className={labelClass}>Path do QR (opcional)</span>
+                  <input
+                    value={qrPath}
+                    onChange={(event) => setQrPath(event.target.value)}
+                    placeholder="rapp"
+                    className={fieldClass}
+                  />
+                  {contentId && brandId ? (
+                    <span className="break-all font-mono text-[10px] text-faint">
+                      {buildQrCodeUrl(brandId, contentId, campaignName, qrPath || null)}
+                    </span>
+                  ) : null}
+                </label>
+                <Button
+                  icon={Send}
+                  variant="primary"
+                  className="w-full"
+                  loading={busy === "envio"}
+                  onClick={() => void send()}
+                >
+                  {busy === "envio" ? "Enviando…" : "Enviar para aprovação"}
+                </Button>
+              </div>
             ) : (
               <p className="text-[11.5px] text-faint">
                 CRM não configurado — copie o texto ou baixe o .md.

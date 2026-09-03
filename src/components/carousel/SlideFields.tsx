@@ -17,6 +17,7 @@ import { useId, useState, type Ref } from "react";
 import { Button, IconButton } from "@/components/ui/Button";
 import type { BrandId } from "@/constants/brands";
 import { ImageSearchPanel } from "@/components/carousel/ImageSearchPanel";
+import { buildQrCodeUrl, displayContentId } from "@/lib/attribution";
 import { fieldClass, focusRing, labelClass } from "@/lib/ui";
 import {
   MAX_BULLET_LENGTH,
@@ -74,6 +75,17 @@ type SlideFieldsProps = {
   canMoveDown: boolean;
   /** Frente da peça: decide de qual biblioteca a busca de imagem parte. */
   brandId?: BrandId | null;
+  /**
+   * Quando a peça já tem `content_id`, o QR deixa de ser texto livre e passa
+   * a ser derivado (PRD rastreio §7.1). Sem attribution, o campo antigo
+   * permanece — rascunhos do editor sem produção vinculada.
+   */
+  attribution?: {
+    contentId: string;
+    campaignName?: string | null;
+    path?: string | null;
+    onPathChange?: (path: string) => void;
+  } | null;
   cardRef?: Ref<HTMLDivElement>;
 };
 
@@ -102,6 +114,7 @@ export function SlideFields({
   canMoveUp,
   canMoveDown,
   brandId,
+  attribution,
   cardRef,
 }: SlideFieldsProps) {
   const bodyRemaining = BODY_MAX - (slide.bodyText?.length ?? 0);
@@ -407,15 +420,45 @@ export function SlideFields({
       </div>
 
       {slide.type === "cta" ? (
-        <label className="flex flex-col gap-1">
-          <span className={labelClass}>URL do QR Code</span>
-          <input
-            value={slide.qrCodeUrl ?? ""}
-            placeholder="https://sanwey.com.br/contato"
-            onChange={(event) => onChange({ qrCodeUrl: event.target.value || undefined })}
-            className={fieldClass}
-          />
-        </label>
+        attribution && brandId ? (
+          <div className="flex flex-col gap-1.5">
+            <span className={labelClass}>QR Code (derivado)</span>
+            <label className="flex flex-col gap-1">
+              <span className="text-[11px] text-mut">Path da landing (opcional)</span>
+              <input
+                value={attribution.path ?? ""}
+                placeholder="rapp"
+                onChange={(event) => attribution.onPathChange?.(event.target.value)}
+                className={fieldClass}
+              />
+            </label>
+            <p className="break-all rounded-md border border-line2 bg-canvas px-2.5 py-2 font-mono text-[11px] text-ink">
+              {buildQrCodeUrl(
+                brandId,
+                attribution.contentId,
+                attribution.campaignName,
+                attribution.path,
+              )}
+            </p>
+            <p className="text-[11px] text-mut">
+              Peça {displayContentId(attribution.contentId)}. Link publicado não se edita depois —
+              path e campanha certos antes de sair.
+            </p>
+          </div>
+        ) : (
+          <label className="flex flex-col gap-1">
+            <span className={labelClass}>URL do QR Code</span>
+            <input
+              value={slide.qrCodeUrl ?? ""}
+              placeholder="https://sanwey.com.br/contato"
+              onChange={(event) => onChange({ qrCodeUrl: event.target.value || undefined })}
+              className={fieldClass}
+            />
+            <span className="text-[11px] text-mut">
+              Na bancada, o QR passa a ser derivado do content_id da produção.
+            </span>
+          </label>
+        )
       ) : null}
     </div>
   );
