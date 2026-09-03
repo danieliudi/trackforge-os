@@ -6,6 +6,11 @@ import {
   SLIDE_WIDTH,
   type SlideTheme,
 } from "@/constants/themes";
+import {
+  compositions,
+  DEFAULT_COMPOSITION,
+  type CompositionId,
+} from "@/constants/compositions";
 import type { SlideImage } from "@/types/carousel";
 
 export type LogoPlacement = "header" | "footer";
@@ -22,6 +27,7 @@ type SlideFrameProps = {
   logoAlt?: string;
   /** Capa destaca o logo no topo; internas levam no rodapé. */
   logoPlacement?: LogoPlacement;
+  compositionId?: CompositionId;
   /** Canvas virtual em px. Default é o 1080x1350 do carrossel LinkedIn. */
   width?: number;
   height?: number;
@@ -64,6 +70,7 @@ export function SlideFrame({
   logoSrc,
   logoAlt = "",
   logoPlacement = "footer",
+  compositionId = DEFAULT_COMPOSITION,
   width = SLIDE_WIDTH,
   height = SLIDE_HEIGHT,
   padding = SLIDE_PADDING,
@@ -73,6 +80,9 @@ export function SlideFrame({
   const headerLogo = logoSrc && logoPlacement === "header" ? logoSrc : undefined;
   const footerLogo = logoSrc && logoPlacement === "footer" ? logoSrc : undefined;
   const crossOrigin = image && isRemote(image.url) ? "anonymous" : undefined;
+  const chrome = compositions[compositionId].chrome;
+  const counterSize = chrome === "minimal" ? 22 : 26;
+  const tagSize = chrome === "minimal" ? 20 : 24;
 
   return (
     <div
@@ -131,12 +141,13 @@ export function SlideFrame({
             ) : null}
             {highlightTag ? (
               <span
-                className="inline-block max-w-[620px] truncate border text-[24px] font-semibold uppercase leading-none tracking-[0.14em]"
+                className="inline-block max-w-[620px] truncate border font-semibold uppercase leading-none tracking-[0.14em]"
                 style={{
                   borderColor: theme.accent,
                   borderRadius: theme.badgeRadius,
                   color: theme.accent,
-                  padding: "16px 28px",
+                  padding: chrome === "minimal" ? "12px 22px" : "16px 28px",
+                  fontSize: tagSize,
                 }}
               >
                 {highlightTag}
@@ -144,8 +155,8 @@ export function SlideFrame({
             ) : null}
           </div>
           <span
-            className="shrink-0 text-[26px] font-medium tabular-nums tracking-[0.18em]"
-            style={{ color: theme.muted }}
+            className="shrink-0 font-medium tabular-nums tracking-[0.18em]"
+            style={{ color: theme.muted, fontSize: counterSize, opacity: chrome === "minimal" ? 0.72 : 1 }}
           >
             {pad(slideNumber)} / {pad(totalSlides)}
           </span>

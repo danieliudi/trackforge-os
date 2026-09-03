@@ -41,7 +41,11 @@ export const brands: Record<BrandId, Brand> = {
   resibag: {
     id: "resibag",
     label: "Resibag",
-    logoSrc: "/logos/resibag-preto.svg",
+    /**
+     * Wordmark verde do kit (`#12855c` em public/logos/resibag.svg).
+     * O preto (`resibag-preto.svg`) fica só se alguém precisar de monocromático.
+     */
+    logoSrc: "/logos/resibag.svg",
     logoSrcOnDark: "/logos/resibag-branco.svg",
     themeId: "resibag",
     logoPolicy: "all",

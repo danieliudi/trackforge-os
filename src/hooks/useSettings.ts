@@ -3,6 +3,11 @@
 import { useReducer } from "react";
 
 import { brands, type BrandId } from "@/constants/brands";
+import {
+  DEFAULT_COMPOSITION,
+  isCompositionId,
+  type CompositionId,
+} from "@/constants/compositions";
 import type { Format, Platform } from "@/constants/format";
 import type { SlideThemeId } from "@/constants/themes";
 
@@ -12,6 +17,7 @@ export type Settings = {
   customLogo: string | null;
   format: Format;
   platform: Platform;
+  compositionId: CompositionId;
 };
 
 type State = Settings & {
@@ -25,6 +31,7 @@ type Action =
   | { type: "logo"; customLogo: string | null }
   | { type: "format"; format: Format }
   | { type: "platform"; platform: Platform }
+  | { type: "composition"; compositionId: CompositionId }
   | { type: "restore"; settings: Partial<Settings> };
 
 const INITIAL: State = {
@@ -33,6 +40,7 @@ const INITIAL: State = {
   customLogo: null,
   format: "carrossel",
   platform: "linkedin",
+  compositionId: DEFAULT_COMPOSITION,
   restored: false,
 };
 
@@ -59,6 +67,9 @@ function reducer(state: State, action: Action): State {
     case "platform":
       return { ...state, platform: action.platform };
 
+    case "composition":
+      return { ...state, compositionId: action.compositionId };
+
     // Restaurar num dispatch só, e não em quatro setState encadeados: além do
     // render em cascata, o autosave podia rodar no meio e gravar por cima da
     // sessão que estava sendo lida.
@@ -69,6 +80,11 @@ function reducer(state: State, action: Action): State {
         customLogo: action.settings.customLogo ?? state.customLogo,
         format: action.settings.format ?? state.format,
         platform: action.settings.platform ?? state.platform,
+        compositionId:
+          typeof action.settings.compositionId === "string" &&
+          isCompositionId(action.settings.compositionId)
+            ? action.settings.compositionId
+            : state.compositionId,
         restored: true,
       };
   }

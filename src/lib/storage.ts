@@ -1,5 +1,9 @@
 import type { BrandId } from "@/constants/brands";
 import { brands } from "@/constants/brands";
+import {
+  isCompositionId,
+  type CompositionId,
+} from "@/constants/compositions";
 import { formatOptions, platformOptions, type Format, type Platform } from "@/constants/format";
 import { slideThemes, type SlideThemeId } from "@/constants/themes";
 import { apresentacaoSchema, carouselSchema, type Carousel } from "@/types/carousel";
@@ -20,6 +24,10 @@ export type Draft = {
   customLogo: string | null;
   format: Format;
   platform: Platform;
+  /**
+   * Composição tipográfica. Opcional: rascunhos antigos caem no institucional.
+   */
+  compositionId?: CompositionId;
   /**
    * Dólares gastos neste rascunho, somando a geração e as regerações de slide
    * feitas depois. Opcional porque rascunhos salvos antes do medidor não têm o
@@ -54,6 +62,8 @@ function isValidDraft(value: unknown): value is Draft {
     (data.customLogo === null || typeof data.customLogo === "string") &&
     typeof data.platform === "string" &&
     VALID_PLATFORMS.has(data.platform as Platform) &&
+    (data.compositionId === undefined ||
+      (typeof data.compositionId === "string" && isCompositionId(data.compositionId))) &&
     (data.costUsd === undefined || typeof data.costUsd === "number")
   );
 }

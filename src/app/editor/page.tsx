@@ -187,7 +187,7 @@ export default function Home() {
 
   const [front] = useFront();
   const [settings, dispatchSettings] = useSettings();
-  const { themeId, brandId, customLogo, format, platform, restored } = settings;
+  const { themeId, brandId, customLogo, format, platform, compositionId, restored } = settings;
   const maxSlides = maxSlidesFor(format);
 
   const [activeIndex, setActiveIndex] = useState(0);
@@ -271,14 +271,14 @@ export default function Home() {
       setDrafts((current) =>
         current.map((draft) =>
           draft.id === activeDraftId
-            ? { ...draft, carousel, themeId, brandId, customLogo, format, platform, updatedAt: Date.now() }
+            ? { ...draft, carousel, themeId, brandId, customLogo, format, platform, compositionId, updatedAt: Date.now() }
             : draft,
         ),
       );
     }, PERSIST_DELAY);
 
     return () => clearTimeout(timer);
-  }, [restored, activeDraftId, carousel, themeId, brandId, customLogo, format, platform]);
+  }, [restored, activeDraftId, carousel, themeId, brandId, customLogo, format, platform, compositionId]);
 
   // Persiste sempre que a lista muda — o efeito acima já debounceu a escrita
   // durante digitação, então aqui não precisa de um segundo delay.
@@ -389,6 +389,7 @@ export default function Home() {
           customLogo,
           format,
           platform,
+          compositionId,
           costUsd,
         },
       ]);
@@ -795,6 +796,10 @@ export default function Home() {
                   <StylePanel
                     themeId={themeId}
                     onThemeChange={(id) => dispatchSettings({ type: "theme", themeId: id })}
+                    compositionId={compositionId}
+                    onCompositionChange={(id) =>
+                      dispatchSettings({ type: "composition", compositionId: id })
+                    }
                     brandId={brandId}
                     onBrandChange={selectBrand}
                     customLogo={customLogo}
@@ -835,6 +840,7 @@ export default function Home() {
                 logo={logo}
                 format={format}
                 platform={platform}
+                compositionId={compositionId}
                 activeIndex={safeIndex}
                 onActiveIndexChange={setActiveIndex}
               />
@@ -860,6 +866,7 @@ export default function Home() {
                 logo={logo}
                 format={format}
                 platform={platform}
+                compositionId={compositionId}
                 scale={1}
               />
             </div>

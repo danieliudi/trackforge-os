@@ -17,6 +17,7 @@ import { useId, useState, type Ref } from "react";
 import { Button, IconButton } from "@/components/ui/Button";
 import type { BrandId } from "@/constants/brands";
 import { ImageSearchPanel } from "@/components/carousel/ImageSearchPanel";
+import { QrUrlPreview } from "@/components/carousel/QrUrlPreview";
 import { buildQrCodeUrl, displayContentId } from "@/lib/attribution";
 import { fieldClass, focusRing, labelClass } from "@/lib/ui";
 import {
@@ -387,6 +388,11 @@ export function SlideFields({
         {searchOpen ? (
           <ImageSearchPanel
             brandId={brandId}
+            slideBrief={{
+              headline: slide.headline,
+              bodyText: slide.bodyText,
+              slideType: slide.type,
+            }}
             onSelect={(image) => {
               setImageUrl(image.url);
               setSearchOpen(false);
@@ -421,10 +427,9 @@ export function SlideFields({
 
       {slide.type === "cta" ? (
         attribution && brandId ? (
-          <div className="flex flex-col gap-1.5">
-            <span className={labelClass}>QR Code (derivado)</span>
+          <div className="flex flex-col gap-2">
             <label className="flex flex-col gap-1">
-              <span className="text-[11px] text-mut">Path da landing (opcional)</span>
+              <span className={labelClass}>Path da landing (opcional)</span>
               <input
                 value={attribution.path ?? ""}
                 placeholder="rapp"
@@ -432,32 +437,40 @@ export function SlideFields({
                 className={fieldClass}
               />
             </label>
-            <p className="break-all rounded-md border border-line2 bg-canvas px-2.5 py-2 font-mono text-[11px] text-ink">
-              {buildQrCodeUrl(
+            <QrUrlPreview
+              url={buildQrCodeUrl(
                 brandId,
                 attribution.contentId,
                 attribution.campaignName,
                 attribution.path,
               )}
-            </p>
-            <p className="text-[11px] text-mut">
-              Peça {displayContentId(attribution.contentId)}. Link publicado não se edita depois —
-              path e campanha certos antes de sair.
-            </p>
+              note={`Peça ${displayContentId(attribution.contentId)}. Este é o link que o QR da CTA imprime no envio — path e campanha certos antes de sair.`}
+            />
           </div>
         ) : (
-          <label className="flex flex-col gap-1">
-            <span className={labelClass}>URL do QR Code</span>
-            <input
-              value={slide.qrCodeUrl ?? ""}
-              placeholder="https://sanwey.com.br/contato"
-              onChange={(event) => onChange({ qrCodeUrl: event.target.value || undefined })}
-              className={fieldClass}
-            />
-            <span className="text-[11px] text-mut">
-              Na bancada, o QR passa a ser derivado do content_id da produção.
-            </span>
-          </label>
+          <div className="flex flex-col gap-2">
+            <label className="flex flex-col gap-1">
+              <span className={labelClass}>URL do QR Code</span>
+              <input
+                value={slide.qrCodeUrl ?? ""}
+                placeholder="https://sanwey.com.br/contato"
+                onChange={(event) => onChange({ qrCodeUrl: event.target.value || undefined })}
+                className={fieldClass}
+              />
+            </label>
+            {slide.qrCodeUrl ? (
+              <QrUrlPreview
+                url={slide.qrCodeUrl}
+                label="Prévia do QR neste slide"
+                note="Na Esteira, ao enviar para aprovação, o QR do CTA é reescrito pelo content_id da produção (utm_source=qr, utm_medium=impresso, utm_content=<id>)."
+              />
+            ) : (
+              <p className="text-[11px] leading-relaxed text-mut">
+                Sem URL, o slide CTA sai sem QR. Na Esteira o destino final vem do content_id
+                no painel de envio (Path do QR + campanha).
+              </p>
+            )}
+          </div>
         )
       ) : null}
     </div>
