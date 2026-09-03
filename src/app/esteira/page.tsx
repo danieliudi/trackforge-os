@@ -23,6 +23,7 @@ import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { Button } from "@/components/ui/Button";
 import type { GenerationCost } from "@/constants/pricing";
 import type { ForbiddenHit } from "@/knowledge/check";
+import { readError } from "@/lib/apiError";
 import { entryFromCost, pushCostEntry } from "@/lib/costLog";
 import { getProduction, saveProduction, type Production } from "@/lib/produced";
 import type { MarketSignal } from "@/lib/marketSignals";
@@ -226,14 +227,21 @@ export default function BancadaPage() {
           signalIds: origin.signalId ? [origin.signalId] : undefined,
         }),
       });
-      const data = await response.json();
+      // A mensagem sai do clone: o original ainda precisa ser lido como JSON
+      // para o custo, e um corpo só pode ser consumido uma vez.
+      const failure = response.ok
+        ? null
+        : await readError(response.clone(), "não foi possível escrever o artigo");
+      const data = await response.json().catch(() => ({}));
       if (data.cost) {
         setCost(data.cost);
         pushCostEntry(
           entryFromCost(data.cost, "artigo", data.article?.title ?? source, !response.ok),
         );
       }
-      if (!response.ok) throw new Error(data.error ?? "não foi possível escrever o artigo");
+      // Depois do custo de propósito: geração cobrada que falhou continua entrando
+      // no log com `failed: true`.
+      if (failure) throw new Error(failure);
 
       setArticle(data.article);
       setWarnings(data.warnings ?? []);
@@ -272,7 +280,10 @@ export default function BancadaPage() {
             }),
           });
 
-      const data = await response.json();
+      const failure = response.ok
+        ? null
+        : await readError(response.clone(), "não foi possível gerar as peças");
+      const data = await response.json().catch(() => ({}));
       if (data.cost) {
         pushCostEntry(
           entryFromCost(
@@ -283,7 +294,7 @@ export default function BancadaPage() {
           ),
         );
       }
-      if (!response.ok) throw new Error(data.error ?? "não foi possível gerar as peças");
+      if (failure) throw new Error(failure);
       const produced: Piece[] = data.pieces ?? [];
       setPieces(produced);
       keep({
@@ -321,8 +332,7 @@ export default function BancadaPage() {
           })),
         }),
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error ?? "não foi possível enviar");
+      if (!response.ok) throw new Error(await readError(response, "não foi possível enviar"));
       setSent(true);
       keep({ sent: true, images: Object.values(images) });
       load();

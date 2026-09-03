@@ -59,7 +59,17 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const parsed = requestSchema.safeParse(await request.json());
+  // Lido fora do `try` de baixo, este `await` estourava sem resposta e o Next
+  // devolvia um 500 de corpo VAZIO — que na tela virava um erro de parser de
+  // JSON em vez da falha real.
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ error: "o corpo do pedido não é JSON válido" }, { status: 400 });
+  }
+
+  const parsed = requestSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
