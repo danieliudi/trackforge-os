@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { priceUsage, type GenerationCost } from "@/constants/pricing";
 import { buildProhibitionsBlock } from "@/knowledge";
-import { toTokenUsage } from "@/lib/usage";
+import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 
 const requestSchema = z.object({
   context: z.string().min(1, "informe o contexto da marca"),
@@ -57,7 +57,16 @@ export async function POST(request: Request) {
 
     return Response.json({ ...object, cost });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "erro desconhecido";
-    return Response.json({ error: message }, { status: 500 });
+    // O gasto acontece antes do erro; o recibo vai junto. Ver `failedGenerationStep`.
+    const descartada = failedGenerationStep(error, "Sugestões de tema (descartadas)");
+    const steps = descartada ? [descartada] : [];
+    const message = generationErrorMessage(error, "as sugestões");
+    return Response.json(
+      {
+        error: message,
+        cost: { usd: steps.reduce((total, step) => total + step.usd, 0), steps },
+      },
+      { status: 500 },
+    );
   }
 }

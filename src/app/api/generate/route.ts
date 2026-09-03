@@ -8,13 +8,13 @@ import { buildCarrosselSystem } from "@/lib/prompts";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbiddenInSlides } from "@/knowledge/check";
 import { verifySlides } from "@/lib/verify";
-import { priceUsage, type GenerationCost } from "@/constants/pricing";
-import { toTokenUsage } from "@/lib/usage";
+import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
+import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import {
-  apresentacaoBaseSchema,
   apresentacaoSchema,
-  carouselBaseSchema,
   carouselSchema,
+  carouselWireSchema,
+  normalizeCarousel,
 } from "@/types/carousel";
 
 const requestSchema = z.object({
@@ -77,8 +77,12 @@ export async function POST(request: Request) {
     parsed.data;
   const isApresentacao = format === "apresentacao";
 
+  // Fora do `try` para o recibo sobreviver ao erro: a busca na web é a linha
+  // mais cara da geração e ela já foi cobrada quando a redação falha.
+  const costSteps: CostStep[] = [];
+
   try {
-    const { brief, costSteps } = await buildBrief({
+    const { brief, costSteps: briefSteps } = await buildBrief({
       input,
       context,
       includeNews,
@@ -88,10 +92,11 @@ export async function POST(request: Request) {
       piece: isApresentacao ? "apresentação" : "carrossel",
       pieceArticle: isApresentacao ? "a" : "o",
     });
+    costSteps.push(...briefSteps);
 
     const { object, usage } = await generateObject({
       model: anthropic("claude-sonnet-5"),
-      schema: isApresentacao ? apresentacaoBaseSchema : carouselBaseSchema,
+      schema: carouselWireSchema,
       system: isApresentacao
         ? buildGroundedSystem(APRESENTACAO_SYSTEM, brandId)
         : buildCarrosselSystem(platform, brandId),
@@ -116,15 +121,9 @@ export async function POST(request: Request) {
     // real, então o servidor sobrescreve pelo canônico em vez de confiar nela.
     const tagline = brandId ? brands[brandId].tagline : undefined;
 
-    // A ordem do array é a verdade; renumera antes de validar as regras finais.
-    const normalized = {
-      ...object,
-      slides: object.slides.map((slide, index) => ({
-        ...slide,
-        slideNumber: index + 1,
-        footerNote: tagline ?? slide.footerNote,
-      })),
-    };
+    // Renumera, crava a assinatura e acerta a moldura do primeiro e do último
+    // slide antes de validar. Ver `normalizeCarousel`.
+    const normalized = normalizeCarousel(object, tagline);
 
     const validated = (isApresentacao ? apresentacaoSchema : carouselSchema).safeParse(
       normalized,
@@ -136,7 +135,9 @@ export async function POST(request: Request) {
       return Response.json(
         {
           error: "a IA devolveu um carrossel fora das regras",
-          issues: validated.error.issues.map((issue) => issue.message),
+          issues: validated.error.issues.map(
+            (issue) => `${issue.path.join(".") || "peça"}: ${issue.message}`,
+          ),
           cost,
         },
         { status: 422 },
@@ -166,7 +167,20 @@ export async function POST(request: Request) {
 
     return Response.json({ carousel: validated.data, cost, warnings, verification });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "erro desconhecido";
-    return Response.json({ error: message }, { status: 500 });
+    // O gasto acontece antes do erro; o recibo vai junto. Ver `failedGenerationStep`.
+    const descartada = failedGenerationStep(
+      error,
+      isApresentacao ? "Redação da apresentação (descartada)" : "Redação do carrossel (descartada)",
+    );
+    if (descartada) costSteps.push(descartada);
+
+    const message = generationErrorMessage(error, "a peça");
+    return Response.json(
+      {
+        error: message,
+        cost: { usd: costSteps.reduce((total, step) => total + step.usd, 0), steps: costSteps },
+      },
+      { status: 500 },
+    );
   }
 }

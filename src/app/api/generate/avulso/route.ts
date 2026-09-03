@@ -2,20 +2,27 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { brands, type BrandId } from "@/constants/brands";
+import { brands } from "@/constants/brands";
 import type { Platform } from "@/constants/format";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { buildBrief } from "@/lib/brief";
 import { findForbidden } from "@/knowledge/check";
 import { buildCarrosselSystem, buildOutputSystem } from "@/lib/prompts";
-import { toTokenUsage } from "@/lib/usage";
+import {
+  failedGenerationStep,
+  generationErrorMessage,
+  isContentFailure,
+  toTokenUsage,
+} from "@/lib/usage";
 import { verifyBlocks } from "@/lib/verify";
-import { carouselSchema } from "@/types/carousel";
 import {
   isCarousel,
+  normalizeOutput,
   outputBlocks,
   OUTPUT_META,
   OUTPUT_SCHEMAS,
+  OUTPUT_WIRE_SCHEMAS,
+  type PieceFailure,
   outputKindSchema,
   type OutputKind,
 } from "@/types/outputs";
@@ -60,19 +67,6 @@ const PLATFORM_OF: Record<OutputKind, Platform> = {
   stories: "instagram",
 };
 
-function normalizeCarousel(object: unknown, brandId: BrandId | null | undefined) {
-  const carousel = object as { slides: { footerNote: string }[] };
-  const tagline = brandId ? brands[brandId].tagline : undefined;
-  return {
-    ...(object as object),
-    slides: carousel.slides.map((slide, index) => ({
-      ...slide,
-      slideNumber: index + 1,
-      footerNote: tagline ?? slide.footerNote,
-    })),
-  };
-}
-
 export async function POST(request: Request) {
   const parsed = requestSchema.safeParse(await request.json());
   if (!parsed.success) {
@@ -103,6 +97,7 @@ export async function POST(request: Request) {
     }
 
     const pieces = [];
+    const failures: PieceFailure[] = [];
 
     for (const kind of kinds) {
       const meta = OUTPUT_META[kind];
@@ -110,45 +105,68 @@ export async function POST(request: Request) {
         ? buildCarrosselSystem(PLATFORM_OF[kind], brandId)
         : buildOutputSystem(kind, brandId);
 
-      const { object, usage } = await generateObject({
-        model: anthropic("claude-sonnet-5"),
-        schema: OUTPUT_SCHEMAS[kind],
-        system: mode === "texto" ? `${base}\n${FROM_SOURCE_RULES}` : base,
-        prompt: brief,
-        providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
-      });
+      // Uma peça que falha não derruba as outras — mesma regra da derivação.
+      try {
+        const { object, usage } = await generateObject({
+          model: anthropic("claude-sonnet-5"),
+          schema: OUTPUT_WIRE_SCHEMAS[kind],
+          system: mode === "texto" ? `${base}\n${FROM_SOURCE_RULES}` : base,
+          prompt: brief,
+          providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
+        });
 
-      const tokens = toTokenUsage(usage);
-      costSteps.push({
-        label: `${meta.label} · ${meta.platform}`,
-        usage: tokens,
-        webSearches: 0,
-        usd: priceUsage(tokens),
-      });
+        const tokens = toTokenUsage(usage);
+        const usd = priceUsage(tokens);
 
-      let data: unknown = object;
-      if (isCarousel(kind)) {
-        const validated = carouselSchema.safeParse(normalizeCarousel(object, brandId));
+        // Normaliza e valida TODA peça, não só o carrossel: o schema de geração
+        // agora é o de fio, que de propósito não valida nada.
+        const validated = OUTPUT_SCHEMAS[kind].safeParse(
+          normalizeOutput(kind, object, brandId ? brands[brandId].tagline : undefined),
+        );
+
+        costSteps.push({
+          label: validated.success
+            ? `${meta.label} · ${meta.platform}`
+            : `${meta.label} · ${meta.platform} (descartada)`,
+          usage: tokens,
+          webSearches: 0,
+          usd,
+        });
+
         if (!validated.success) {
-          return Response.json(
-            {
-              error: `a IA devolveu o carrossel do ${meta.platform} fora das regras`,
-              issues: validated.error.issues.map((issue) => issue.message),
-              cost: { usd: costSteps.reduce((t, s) => t + s.usd, 0), steps: costSteps },
-            },
-            { status: 422 },
-          );
+          failures.push({
+            kind,
+            issues: validated.error.issues.map(
+              (issue) => `${issue.path.join(".") || "peça"}: ${issue.message}`,
+            ),
+            usd,
+          });
+          continue;
         }
-        data = validated.data;
-      }
 
-      pieces.push({
-        kind,
-        data,
-        from: mode === "texto" ? "do material colado" : "do tema",
-        warnings: [] as ReturnType<typeof findForbidden>,
-        verification: null as Awaited<ReturnType<typeof verifyBlocks>>["verification"] | null,
-      });
+        pieces.push({
+          kind,
+          data: validated.data as unknown,
+          from: mode === "texto" ? "do material colado" : "do tema",
+          warnings: [] as ReturnType<typeof findForbidden>,
+          verification: null as Awaited<ReturnType<typeof verifyBlocks>>["verification"] | null,
+        });
+      } catch (error) {
+        // Só erro de conteúdo fica com a peça; rede e chave são do lote e sobem.
+        if (!isContentFailure(error)) throw error;
+
+        const descartada = failedGenerationStep(
+          error,
+          `${meta.label} · ${meta.platform} (descartada)`,
+        );
+        if (descartada) costSteps.push(descartada);
+
+        failures.push({
+          kind,
+          issues: [generationErrorMessage(error, "a peça")],
+          usd: descartada?.usd ?? 0,
+        });
+      }
     }
 
     const cost: GenerationCost = {
@@ -183,9 +201,20 @@ export async function POST(request: Request) {
       }
     }
 
-    return Response.json({ pieces, cost });
+    return Response.json({ pieces, failures, cost });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "erro desconhecido";
-    return Response.json({ error: message }, { status: 500 });
+    // O gasto acontece antes do erro; o recibo vai junto — inclusive as peças que
+    // já tinham saído antes de esta falhar. Ver `failedGenerationStep`.
+    const descartada = failedGenerationStep(error, "Peça descartada");
+    if (descartada) costSteps.push(descartada);
+
+    const message = generationErrorMessage(error, "a peça");
+    return Response.json(
+      {
+        error: message,
+        cost: { usd: costSteps.reduce((total, step) => total + step.usd, 0), steps: costSteps },
+      },
+      { status: 500 },
+    );
   }
 }

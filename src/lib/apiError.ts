@@ -47,11 +47,26 @@ function findMessage(value: unknown, depth = 0): string | null {
   }
 
   const record = value as Record<string, unknown>;
-  for (const key of ["error", "message", "detail", "hint", "errors", "issues"]) {
+  // `issues` fica de fora de propósito: é a LISTA de campos reprovados, anexada
+  // à parte por `readError`. Se entrasse aqui, a primeira regra reprovada
+  // viraria a mensagem inteira e as outras sumiriam.
+  for (const key of ["error", "message", "detail", "hint", "errors"]) {
     const found = findMessage(record[key], depth + 1);
     if (found) return found;
   }
   return null;
+}
+
+/**
+ * A lista de campos reprovados, quando a rota mandou uma.
+ *
+ * Sem ela a tela diz "a IA devolveu o artigo fora das regras" e não diz QUAL
+ * regra — e é isso que decide entre clicar de novo e mexer no prompt.
+ */
+function readIssues(value: unknown): string[] {
+  if (typeof value !== "object" || value === null) return [];
+  const issues = (value as Record<string, unknown>).issues;
+  return Array.isArray(issues) ? issues.filter((item) => typeof item === "string") : [];
 }
 
 /**
@@ -65,8 +80,11 @@ export async function readError(response: Response, fallback: string): Promise<s
   const raw = await response.text().catch(() => "");
 
   let message: string | null = null;
+  let issues: string[] = [];
   try {
-    message = findMessage(JSON.parse(raw));
+    const parsed: unknown = JSON.parse(raw);
+    message = findMessage(parsed);
+    issues = readIssues(parsed);
   } catch {
     // Corpo que não é JSON não vira mensagem: despejar HTML na tela é tão
     // inútil quanto `[object Object]`.
@@ -76,6 +94,7 @@ export async function readError(response: Response, fallback: string): Promise<s
   // diagnosticar a próxima falha sem depender de print de quem usou.
   if (!message) console.error(`falha em ${response.url} (HTTP ${response.status})`, raw.slice(0, 2000));
 
-  const text = message ?? `${fallback} (HTTP ${response.status})`;
+  const base = message ?? `${fallback} (HTTP ${response.status})`;
+  const text = issues.length > 0 ? `${base} — ${issues.join("; ")}` : base;
   return text.length > MAX ? `${text.slice(0, MAX)}…` : text;
 }
