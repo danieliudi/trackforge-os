@@ -7,6 +7,10 @@ import { getProductionsSnapshot } from "@/lib/produced";
  * `content_id` nasce na produção, nunca no corpo do render. Colisão contra as
  * peças já guardadas em `produced.ts` gera outro sufixo — o TrackForge não tem
  * banco próprio, então o sufixo é aleatório (UUID truncado), não sequencial.
+ *
+ * Encurtador (Fase 3): só emite short link se `NEXT_PUBLIC_SHORTENER_BASE`
+ * estiver definido. Link publicado não aceita implementação parcial — sem
+ * domínio estável o QR continua na URL completa com UTM.
  */
 
 export const CONTENT_ID_PREFIX: Record<BrandId, string> = {
@@ -54,6 +58,39 @@ export function allocateContentId(brandId: BrandId): string {
   return `${prefix}-${fallback}`;
 }
 
+/**
+ * Base do encurtador (`NEXT_PUBLIC_SHORTENER_BASE`), ou null.
+ * Não inventar domínio — sem env, short link não existe.
+ */
+export function getShortenerBase(): string | null {
+  const raw = (process.env.NEXT_PUBLIC_SHORTENER_BASE || "").trim();
+  if (!raw) return null;
+  try {
+    const withProto = raw.includes("://") ? raw : `https://${raw}`;
+    const u = new URL(withProto);
+    if (u.protocol !== "http:" && u.protocol !== "https:") return null;
+    return u.origin;
+  } catch {
+    return null;
+  }
+}
+
+export function isShortenerConfigured(): boolean {
+  return getShortenerBase() !== null;
+}
+
+/**
+ * `{base}/{content_id}` em minúsculas. Null se encurtador off ou id inválido.
+ * Não usar em material publicado até o host do domínio redirecionar de verdade.
+ */
+export function buildShortUrl(contentId: string): string | null {
+  const base = getShortenerBase();
+  if (!base) return null;
+  const id = contentId.trim().toLowerCase();
+  if (!CONTENT_ID_RE.test(id)) return null;
+  return `${base}/${id}`;
+}
+
 export type AttributionUrlInput = {
   brandId: BrandId;
   contentId: string;
@@ -63,6 +100,12 @@ export type AttributionUrlInput = {
   utmMedium?: string;
   /** Path relativo à landing da frente, sem barra inicial. Ex.: `rapp`. */
   path?: string | null;
+  /**
+   * Se true e o encurtador estiver configurado, devolve o short link.
+   * Default false: QR/impresso só usa short quando Daniel ligar o domínio
+   * E a rota de redirect estiver no ar.
+   */
+  preferShort?: boolean;
 };
 
 /**
@@ -75,7 +118,13 @@ export function buildAttributionUrl({
   utmSource = "qr",
   utmMedium = "impresso",
   path,
+  preferShort = false,
 }: AttributionUrlInput): string {
+  if (preferShort) {
+    const short = buildShortUrl(contentId);
+    if (short) return short;
+  }
+
   const base = BRAND_LANDING[brandId].replace(/\/$/, "");
   const cleanedPath = (path ?? "").replace(/^\/+/, "").replace(/\/+$/, "");
   const url = new URL(cleanedPath ? `${base}/${cleanedPath}` : base);
@@ -96,5 +145,7 @@ export function buildQrCodeUrl(
   campaignName?: string | null,
   path?: string | null,
 ): string {
+  // preferShort fica false de propósito: sem domínio+redirect no ar,
+  // short link em QR impresso é permanente e irrecuperável (PRD §3).
   return buildAttributionUrl({ brandId, contentId, campaignName, path });
 }
