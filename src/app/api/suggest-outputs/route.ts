@@ -3,7 +3,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import { priceUsage, SUGGESTION_MODEL, type GenerationCost } from "@/constants/pricing";
-import { toTokenUsage } from "@/lib/usage";
+import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import { OUTPUT_META, outputSuggestionSchema, type OutputKind } from "@/types/outputs";
 
 /**
@@ -74,7 +74,20 @@ export async function POST(request: Request) {
 
     return Response.json({ suggestions: object.suggestions, cost });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "erro desconhecido";
-    return Response.json({ error: message }, { status: 500 });
+    // O gasto acontece antes do erro; o recibo vai junto. Ver `failedGenerationStep`.
+    const descartada = failedGenerationStep(
+      error,
+      "Leitura do material (descartada)",
+      SUGGESTION_MODEL,
+    );
+    const steps = descartada ? [descartada] : [];
+
+    return Response.json(
+      {
+        error: generationErrorMessage(error, "as sugestões"),
+        cost: { usd: steps.reduce((total, step) => total + step.usd, 0), steps },
+      },
+      { status: 500 },
+    );
   }
 }

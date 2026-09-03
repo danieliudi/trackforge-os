@@ -5,7 +5,7 @@ import { z } from "zod";
 import { priceUsage, type GenerationCost } from "@/constants/pricing";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbiddenInSlides } from "@/knowledge/check";
-import { toTokenUsage } from "@/lib/usage";
+import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import {
   apresentacaoSchema,
   MAX_BODY_LENGTH,
@@ -125,7 +125,16 @@ export async function POST(request: Request) {
 
     return Response.json({ slide: updated.data, cost, warnings });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "erro desconhecido";
-    return Response.json({ error: message }, { status: 500 });
+    // O gasto acontece antes do erro; o recibo vai junto. Ver `failedGenerationStep`.
+    const descartada = failedGenerationStep(error, `Slide ${slideIndex + 1} descartado`);
+    const steps = descartada ? [descartada] : [];
+    const message = generationErrorMessage(error, "o slide");
+    return Response.json(
+      {
+        error: message,
+        cost: { usd: steps.reduce((total, step) => total + step.usd, 0), steps },
+      },
+      { status: 500 },
+    );
   }
 }

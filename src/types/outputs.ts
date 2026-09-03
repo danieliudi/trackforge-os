@@ -146,11 +146,14 @@ export type Legenda = z.infer<typeof legendaSchema>;
 export type Reels = z.infer<typeof reelsSchema>;
 export type Stories = z.infer<typeof storiesSchema>;
 
+/** Teto do rótulo de motivo. Vive fora do schema porque `normalizeArticle` corta por ele. */
+export const MAX_SUGGESTION_REASON = 180;
+
 /** Sugestão que o redator do artigo devolve junto — não custa chamada extra. */
 export const outputSuggestionSchema = z.object({
   kind: outputKindSchema,
   /** Uma frase dizendo por que este formato serve a ESTE conteúdo. */
-  reason: z.string().min(1).max(180),
+  reason: z.string().min(1).max(MAX_SUGGESTION_REASON),
 });
 
 export type OutputSuggestion = z.infer<typeof outputSuggestionSchema>;

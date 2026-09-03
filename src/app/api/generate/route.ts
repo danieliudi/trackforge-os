@@ -8,8 +8,8 @@ import { buildCarrosselSystem } from "@/lib/prompts";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbiddenInSlides } from "@/knowledge/check";
 import { verifySlides } from "@/lib/verify";
-import { priceUsage, type GenerationCost } from "@/constants/pricing";
-import { toTokenUsage } from "@/lib/usage";
+import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
+import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import {
   apresentacaoBaseSchema,
   apresentacaoSchema,
@@ -77,8 +77,12 @@ export async function POST(request: Request) {
     parsed.data;
   const isApresentacao = format === "apresentacao";
 
+  // Fora do `try` para o recibo sobreviver ao erro: a busca na web é a linha
+  // mais cara da geração e ela já foi cobrada quando a redação falha.
+  const costSteps: CostStep[] = [];
+
   try {
-    const { brief, costSteps } = await buildBrief({
+    const { brief, costSteps: briefSteps } = await buildBrief({
       input,
       context,
       includeNews,
@@ -88,6 +92,7 @@ export async function POST(request: Request) {
       piece: isApresentacao ? "apresentação" : "carrossel",
       pieceArticle: isApresentacao ? "a" : "o",
     });
+    costSteps.push(...briefSteps);
 
     const { object, usage } = await generateObject({
       model: anthropic("claude-sonnet-5"),
@@ -166,7 +171,20 @@ export async function POST(request: Request) {
 
     return Response.json({ carousel: validated.data, cost, warnings, verification });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "erro desconhecido";
-    return Response.json({ error: message }, { status: 500 });
+    // O gasto acontece antes do erro; o recibo vai junto. Ver `failedGenerationStep`.
+    const descartada = failedGenerationStep(
+      error,
+      isApresentacao ? "Redação da apresentação (descartada)" : "Redação do carrossel (descartada)",
+    );
+    if (descartada) costSteps.push(descartada);
+
+    const message = generationErrorMessage(error, "a peça");
+    return Response.json(
+      {
+        error: message,
+        cost: { usd: costSteps.reduce((total, step) => total + step.usd, 0), steps: costSteps },
+      },
+      { status: 500 },
+    );
   }
 }

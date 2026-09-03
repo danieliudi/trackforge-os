@@ -6,7 +6,7 @@ import { brands, type BrandId } from "@/constants/brands";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { findForbidden } from "@/knowledge/check";
 import { buildCarrosselSystem, buildOutputSystem } from "@/lib/prompts";
-import { toTokenUsage } from "@/lib/usage";
+import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import { verifyBlocks } from "@/lib/verify";
 import { articleSchema, articleToMarkdown, type Article } from "@/types/article";
 import { carouselSchema } from "@/types/carousel";
@@ -187,7 +187,18 @@ export async function POST(request: Request) {
 
     return Response.json({ pieces, cost });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "erro desconhecido";
-    return Response.json({ error: message }, { status: 500 });
+    // O gasto acontece antes do erro; o recibo vai junto — inclusive as peças que
+    // já tinham saído antes de esta falhar. Ver `failedGenerationStep`.
+    const descartada = failedGenerationStep(error, "Peça descartada");
+    if (descartada) costSteps.push(descartada);
+
+    const message = generationErrorMessage(error, "a peça");
+    return Response.json(
+      {
+        error: message,
+        cost: { usd: costSteps.reduce((total, step) => total + step.usd, 0), steps: costSteps },
+      },
+      { status: 500 },
+    );
   }
 }

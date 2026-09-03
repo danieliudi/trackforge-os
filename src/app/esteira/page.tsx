@@ -53,6 +53,18 @@ type PendingPiece = { id: string; title: string; summary: string | null; priorit
 
 const column = "thin-scroll flex h-full min-h-0 flex-col gap-3 overflow-y-auto p-4";
 
+/**
+ * A mensagem de erro da rota, com os campos reprovados quando houver.
+ *
+ * Sem os `issues` a tela diz "a IA devolveu o artigo fora das regras" e não diz
+ * QUAL regra — e é justamente isso que decide entre clicar de novo e mexer no
+ * prompt. As rotas já mandavam a lista; era a tela que a jogava fora.
+ */
+function messageOf(data: { error?: string; issues?: string[] }, fallback: string): string {
+  const base = data.error ?? fallback;
+  return data.issues && data.issues.length > 0 ? `${base} — ${data.issues.join("; ")}` : base;
+}
+
 export default function BancadaPage() {
   const [brandId] = useFront();
 
@@ -232,7 +244,7 @@ export default function BancadaPage() {
           entryFromCost(data.cost, "artigo", data.article?.title ?? source, !response.ok),
         );
       }
-      if (!response.ok) throw new Error(data.error ?? "não foi possível escrever o artigo");
+      if (!response.ok) throw new Error(messageOf(data, "não foi possível escrever o artigo"));
 
       setArticle(data.article);
       setWarnings(data.warnings ?? []);
@@ -282,7 +294,7 @@ export default function BancadaPage() {
           ),
         );
       }
-      if (!response.ok) throw new Error(data.error ?? "não foi possível gerar as peças");
+      if (!response.ok) throw new Error(messageOf(data, "não foi possível gerar as peças"));
       const produced: Piece[] = data.pieces ?? [];
       setPieces(produced);
       keep({
