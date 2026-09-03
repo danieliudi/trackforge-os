@@ -37,6 +37,9 @@ const requestSchema = z.object({
     .optional(),
   brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
   sourceLabel: z.string().optional(),
+  contentId: z.string().min(1).nullable().optional(),
+  campaignId: z.string().uuid().nullable().optional(),
+  campaignName: z.string().min(1).nullable().optional(),
 });
 
 /**
