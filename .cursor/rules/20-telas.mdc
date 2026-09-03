@@ -1,0 +1,62 @@
+---
+description: Cor, tema claro/escuro, contraste como gate e o portão de mockup para mudança visual
+globs: src/**/*.tsx,src/app/globals.css
+alwaysApply: false
+---
+
+# Telas — cor, tema e o que exige mockup
+
+## Mockup aprovado antes de implementar
+
+Mudou **como a plataforma se parece ou se organiza** — cor, tema, ícone, layout,
+componente, ordem de tela, agrupamento de dado? Precisa de mockup aprovado pelo
+Daniel **antes** do código. Vale para pedido dele e para sugestão sua.
+
+- **Bug fix puro não precisa** — algo que já deveria funcionar e não funciona, ou
+  asset quebrado voltando ao original.
+- Na dúvida, mostre o mockup. Não decida sozinho que "é pequeno o bastante".
+- Formato que funciona: **HTML clicável com 3-4 estados**, mais screenshots na
+  largura real do monitor (1900px). Página única longa com scroll foi rejeitada
+  explicitamente.
+
+## Nunca escreva cor à mão
+
+Use os tokens semânticos de `src/app/globals.css`: `canvas`, `surface`,
+`surface2`, `line`, `line2`, `line3`, `ink`, `ink2`, `mut`, `faint`, `acc`,
+`acc-hi`, `acc-soft`, `acc-tint`, `acc-tx`, `acc-ink`, `ok`, `warn`, `danger`
+(e as variantes `-bg` / `-line`).
+
+**Proibido num arquivo de tela:** hex (`#E56515`), `rgb()`, ou escala do Tailwind
+(`zinc-200`, `white`, `slate-500`).
+
+Claro e escuro são o **mesmo conjunto de nomes** com valores diferentes. Escrever
+cor à mão quebra o modo escuro sem ninguém perceber — a tela parece certa no tema
+em que você testou.
+
+O tema tem três estados (`sistema` / `claro` / `escuro`) em `src/lib/theme.ts`;
+o atributo `data-tema` no `<html>` é a fonte da verdade, escrito por um script
+que roda **antes da primeira pintura** (`src/app/layout.tsx`). Sem ele a tela
+nasce clara e pisca para escura a cada navegação — não remova nem adie esse
+script.
+
+## Contraste é gate, não gosto — e vale nos dois temas
+
+- Texto de corpo **≥ 4,5:1** sobre o fundo.
+- Rótulo pequeno e ornamento **≥ 3:1**.
+- Meça sobre o **app de verdade**, não sobre o hex isolado. Modelo pronto para
+  copiar: `scratchpad/contraste-slot.mjs` (Playwright, lê a cor computada e
+  mede nos dois temas).
+- **Rode também com `colorScheme: "dark"`** — token que passa no claro pode
+  reprovar no escuro.
+
+Quando uma cor da paleta não passa como letra, ela vira **preenchimento ou
+borda**. Nunca escureça a cor da marca para caber texto branco: troque a letra.
+Foi a decisão do laranja `#E56515` — branco em cima dá 3,4:1 (reprova),
+quase-preto dá 5,0:1 (passa).
+
+## Acessibilidade que o repo já cobra
+
+- `IconButton` exige `label` (nome acessível) — botão só de ícone sem nome é
+  invisível para leitor de tela.
+- Estado de carregamento usa `role="status"` com `aria-live="polite"`.
+- Foco visível vem de `focusRing` (`src/lib/ui.ts`), não de `outline-none`.

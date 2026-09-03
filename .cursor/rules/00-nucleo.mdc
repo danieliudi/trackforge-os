@@ -1,0 +1,93 @@
+---
+description: Regras inegociáveis do trackforge-os — fato e proveniência, segredo, portão de mockup, definição de pronto
+alwaysApply: true
+---
+
+# trackforge-os — núcleo
+
+Esta ferramenta escreve material que sai com o nome de uma empresa real. O erro
+caro aqui não é retrabalho: é **publicar um número que ninguém pode sustentar**.
+
+As demais regras deste diretório anexam sozinhas pelo arquivo aberto:
+`10-reuso` (qualquer `src/`), `20-telas` (`.tsx` e `globals.css`),
+`30-react` (`.tsx` e stores), `40-api-e-custo` (rotas e preço),
+`50-conhecimento` (`src/knowledge/`).
+
+## 1. Fato e proveniência — o requisito do produto, não estilo
+
+- **Número, percentual, prazo, data e norma só saem se vierem da base de fatos
+  (`src/knowledge/`) ou do material recebido.** Falta o dado que a frase pediria?
+  A frase sai sem ele. Não estimar, não arredondar de cabeça, não usar "cerca de"
+  para disfarçar chute.
+- **Só fonte primária vira citação.** Níveis: `primaria` / `secundaria` /
+  `interna` / `nao-verificado`. Secundária e interna dão contexto — nunca viram
+  o número no slide.
+- **Peça derivada não inventa fora da origem.** O artigo é a fonte factual das
+  peças curtas; o material colado é a fonte da peça avulsa. A auditoria confere
+  contra a origem: não afrouxe isso para "melhorar" um CTA.
+- **Nada de imagem gerada por IA.** Foto sintética de um produto real é uma
+  afirmação visual feita por um modelo que nunca o viu — e a imagem é a
+  afirmação em que o leitor acredita primeiro. A ferramenta sugere o termo de
+  busca; a foto vem da biblioteca da marca ou do acervo.
+- **Erro conhecido, não reintroduzir:** a Resolução ANTT nº 6.078/2026 **não**
+  substituiu a Resolução nº 5.998/2022 — tratam de assuntos diferentes do setor
+  de transportes. Se isso reaparecer na base curada, é erro a corrigir, não fato
+  a propagar.
+
+## 2. Segredo e fronteira de dado
+
+- **`SUPABASE_SERVICE_ROLE_KEY` ignora RLS.** Nunca ganha prefixo
+  `NEXT_PUBLIC_`, nunca chega ao cliente, nunca aparece em log. As variáveis
+  lidas hoje: `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, `CRM_AGENT_KEY`,
+  `UNSPLASH_ACCESS_KEY`, `NEXT_PUBLIC_USD_BRL` — só a última é pública, e de
+  propósito.
+- **Nunca imprima o valor de um segredo**, nem para depurar. Cite o nome da
+  variável e se está definida.
+- **Fronteira da agência.** O papel `agencia` no CRM lê `marketing_deliverables`,
+  não `agent_actions.payload`. Rascunho, fonte por afirmação e parecer do auditor
+  ficam no `payload` de propósito — só o texto aprovado atravessa. Ao mexer em
+  `src/lib/crm.ts`, diga na entrega o que a agência passa a ver. Exceção
+  registrada: `custom_fields.sinal` cruza para o entregável.
+- **Não aplique migration nem faça deploy de edge function sem confirmação
+  explícita do Daniel.** Vale para qualquer escrita em produção no CRM.
+- **Publicar exige `APP_PASSWORD`.** Sem essa variável o `src/proxy.ts` não pede
+  nada — correto em `localhost`, inaceitável numa URL pública.
+
+## 3. Portão de mockup — pare antes de editar aparência
+
+Qualquer coisa que mude **como a plataforma se parece ou se organiza** — cor,
+tema, ícone, layout, componente, ordem de tela, agrupamento de dado — precisa de
+mockup aprovado pelo Daniel **antes** da implementação. Vale para pedido dele e
+para sugestão sua.
+
+Na dúvida, mostre o mockup. Não decida sozinho que "é pequeno o bastante para
+pular": foi assim que a plataforma derivou do mockup aprovado e teve de ser
+reconstruída. **Bug fix puro é exceção** — algo que já deveria funcionar e não
+funciona. Detalhes em `20-telas`.
+
+## 4. Definição de pronto — nunca reporte com base só em typecheck
+
+1. `npx tsc --noEmit` limpo.
+2. `npm run lint` limpo — **aviso também**, não só erro.
+3. Teste de navegador cobrindo o caminho que você mexeu, **imprimindo o que
+   verificou** (não "passou": `formatos oferecidos: 6`, `kinds enviados: [...]`).
+4. Screenshot na largura real do monitor (1900px), conferido contra o mockup.
+
+Padrão de teste do repo: **Playwright com interceptação de rota** — respostas do
+modelo fixas, app rodando de verdade, custo zero. Exemplos em `scratchpad/`.
+Não existe banco de teste, e a maioria das rotas gasta dinheiro para rodar.
+
+O bug do `.stage{display:flex}` vencendo o atributo `hidden` passou por
+typecheck, lint e um teste que media a propriedade errada — só a captura de tela
+mostrou as telas empilhadas.
+
+## 5. Entrega
+
+- Commit explica **por que**, não só o quê. Decisão que teve alternativa
+  descartada merece a frase que diz qual e por quê.
+- **Nunca abra PR sem o Daniel pedir. Nunca suba direto para a `main`.**
+- Débito deixado de propósito vira comentário no código, com o motivo — não fica
+  só na conversa.
+- Antes de escrever código, leia o guia relevante em `node_modules/next/dist/docs/`:
+  este Next.js tem mudanças que quebram o que você aprendeu (ex.: `middleware.ts`
+  virou `proxy.ts`).

@@ -1,0 +1,62 @@
+---
+description: React 19 e React Compiler — os padrões que o lint deste repo reprova como erro
+globs: src/**/*.tsx,src/lib/*.ts
+alwaysApply: false
+---
+
+# React 19 + React Compiler
+
+**O lint do compilador é erro, não aviso.** `npm run lint` precisa sair limpo,
+inclusive de avisos. Três padrões que este repo já cometeu e corrigiu:
+
+## 1. `setState` síncrono dentro de efeito
+
+Encadeia um render antes da pintura. O padrão do repo é agendar:
+
+```tsx
+useEffect(() => {
+  const t = setTimeout(carregar, 0);
+  return () => clearTimeout(t);
+}, [carregar]);
+```
+
+Ver `src/app/esteira/page.tsx` e `src/app/biblioteca/page.tsx`.
+
+## 2. `Date.now()` / `Math.random()` no corpo do render
+
+Viola `react-hooks/purity`. Só dentro de callback ou efeito. Id novo é
+`crypto.randomUUID()`, nunca `Math.random().toString(36)`.
+
+## 3. Memoização manual com dependência incompleta
+
+`useCallback` / `useMemo` exigem a lista completa — **inclusive o `setState`**
+quando o callback o chama (`react-hooks/preserve-manual-memoization`).
+
+## Estado que vem do `localStorage`
+
+Use `useSyncExternalStore` com snapshot de servidor. Ler no inicializador de
+`useState` fazia o servidor renderizar diferente do cliente (erro de hidratação).
+
+Exemplos completos no repo — copie a estrutura deles:
+`src/lib/costLog.ts`, `src/lib/front.ts`, `src/lib/theme.ts`, `src/lib/produced.ts`.
+
+O trio é sempre o mesmo: `subscribeX`, `getXSnapshot` (com cache
+referencialmente estável, ou o React entra em loop) e `getXServerSnapshot`
+(valor fixo, normalmente vazio).
+
+## Erro de fetch na tela
+
+Nunca faça `new Error(data.error)` com o corpo cru: se `data.error` vier como
+objeto, a tela mostra `[object Object]`. Use `readError(response, fallback)` de
+`src/lib/apiError.ts` — ele lê o corpo como texto, sobrevive a corpo vazio e a
+página de erro HTML, e sempre devolve string.
+
+Quando a resposta também carrega custo, leia a mensagem do **clone** para o corpo
+original continuar disponível:
+
+```tsx
+const failure = response.ok ? null : await readError(response.clone(), "não foi possível gerar");
+const data = await response.json().catch(() => ({}));
+if (data.cost) pushCostEntry(entryFromCost(data.cost, "artigo", titulo, !response.ok));
+if (failure) throw new Error(failure); // depois do custo: gasto que aconteceu não se esconde
+```

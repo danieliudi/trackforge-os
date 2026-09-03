@@ -1,0 +1,75 @@
+---
+description: Rotas de API — leitura do corpo, formato de erro, recibo de custo e o pacote que vai ao CRM
+globs: src/app/api/**/*.ts,src/constants/pricing.ts,src/lib/costLog.ts,src/lib/crm.ts
+alwaysApply: false
+---
+
+# Rotas de API, custo e o pacote do CRM
+
+## Toda rota lê o corpo pelo helper
+
+```ts
+const body = await jsonBody(request);   // de "@/lib/apiError"
+if (!body.ok) return body.response;
+
+const parsed = requestSchema.safeParse(body.value);
+if (!parsed.success) {
+  return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
+}
+```
+
+`await request.json()` solto **fora de um `try`** estoura sem resposta: o Next
+devolve 500 de corpo vazio e a tela mostra "Unexpected end of JSON input" — erro
+de parser de JavaScript no lugar da falha. As onze rotas já usam o helper.
+
+Também não use `.catch(() => ({}))`: corpo quebrado vira `{}`, passa em schema de
+campos opcionais e a rota responde vazio a um pedido malformado. Resposta vazia é
+pior que erro — a tela fica plausível e ninguém investiga.
+
+## O campo `error` é sempre string
+
+Objeto em `error` chega à tela como `[object Object]`. Quando repassar erro de um
+serviço externo, converta:
+
+```ts
+throw new Error(typeof data?.error === "string" ? data.error : `o CRM recusou (HTTP ${response.status})`);
+```
+
+Quando a validação reprovar campos, mande a lista em `issues: string[]` no
+formato `"caminho: mensagem"` — é o que diz ao usuário QUAL regra falhou, e a
+tela já sabe anexar.
+
+## Custo é visível ou não existe
+
+Toda chamada de modelo vira uma linha no recibo, com rótulo em português.
+
+- Use `priceUsage(usage, webSearches, model)` — o **terceiro parâmetro importa**:
+  cobrar Haiku a preço de Sonnet mente no recibo.
+- Modelo novo exige linha nova em `MODEL_PRICING`. O `satisfies` no fim de
+  `src/constants/pricing.ts` quebra o build de propósito se faltar — preço errado
+  é pior que preço nenhum.
+- Busca na web é **linha separada** (US$ 0,01 por busca), não diluída no total: é
+  o item mais caro e o que surpreende.
+- Geração cobrada que não virou conteúdo entra no log com `failed: true`. Não
+  esconda gasto que aconteceu — o `costSteps` fica **fora** do `try` justamente
+  para o recibo sobreviver ao erro.
+- Uma peça reprovada não derruba o lote: ela vira `PieceFailure`
+  (`{ kind, issues, usd }`) e o resto segue.
+
+## Pacote que vai ao CRM (`src/lib/crm.ts`)
+
+O papel `agencia` lê `marketing_deliverables`, **não** `agent_actions.payload`.
+Rascunho, fonte por afirmação e parecer do auditor ficam no `payload` de
+propósito — só o texto aprovado atravessa.
+
+**Ao mexer no que é enviado, diga na entrega o que a agência passa a ver.**
+Exceção já registrada: `custom_fields.sinal` cruza para o entregável.
+
+Achatar peça em blocos é `outputBlocks(kind, data)`, sempre — nunca um segundo
+achatamento local.
+
+## Segredo
+
+`SUPABASE_SERVICE_ROLE_KEY` ignora RLS: nunca com prefixo `NEXT_PUBLIC_`, nunca
+no cliente, nunca em log. Não imprima valor de segredo nem para depurar — cite o
+nome da variável e se está definida.

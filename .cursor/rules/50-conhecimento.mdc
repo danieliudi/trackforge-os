@@ -1,0 +1,42 @@
+---
+description: Base de fatos curada — níveis de fonte e por que o aviso de drift não é tarefa
+globs: src/knowledge/**/*.ts,scripts/check-knowledge.mjs
+alwaysApply: false
+---
+
+# Base de conhecimento curada
+
+`src/knowledge/` é a fonte do que a ferramenta pode afirmar. O que não está aqui
+(nem no material que o usuário colou) não vira número, prazo, norma ou data numa
+peça.
+
+## Níveis de fonte
+
+`primaria` / `secundaria` / `interna` / `nao-verificado`.
+
+**Só `primaria` vira citação.** Secundária e interna dão contexto — nunca viram o
+número no slide. Ao adicionar fato, o nível é obrigatório e conservador: na
+dúvida entre primária e secundária, é secundária.
+
+## Drift é aviso, não tarefa
+
+`scripts/check-knowledge.mjs` roda no `predev`/`prebuild` e compara a versão da
+fonte de origem com a curadoria. Ele **sempre sai com 0** — não é gate, é aviso.
+
+- **Origem à frente da curadoria** → revise **à mão** o que mudou e só então
+  `npm run knowledge:sync`.
+- **Curadoria à frente** → não faça nada. Sincronizar sobrescreveria correção
+  deliberada.
+
+**Nunca rode `npm run knowledge:sync` "para limpar o aviso".** Foi exatamente o
+caso do erro da ANTT: a curadoria carrega a correção de que a **Resolução ANTT
+nº 6.078/2026 não substituiu a nº 5.998/2022** — tratam de assuntos diferentes do
+setor de transportes. Um sync cego reintroduz o erro numa peça que vai para
+cliente.
+
+## Termo proibido
+
+`src/knowledge/check.ts` faz a varredura determinística por marca. Ela **não
+bloqueia** — quem edita é o usuário; ela só impede que a violação passe
+despercebida até a publicação. Não a transforme em bloqueio, e não gere peça
+pulando a checagem.

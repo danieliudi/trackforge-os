@@ -1,0 +1,55 @@
+---
+description: O que já existe no repo e deve ser importado em vez de reescrito
+globs: src/**/*.ts,src/**/*.tsx
+alwaysApply: false
+---
+
+# Reaproveitamento obrigatório
+
+**Antes de escrever um componente, um helper ou um estilo, procure na tabela.**
+Se o que você precisa está aqui, **importe** — não copie o padrão, não reescreva
+parecido, não crie uma variante "só para este caso".
+
+A coluna "uso real" veio de grep no repo: é o número de arquivos que já importam
+aquilo. Quanto maior, mais caro é divergir.
+
+| Precisa de | Importe de | Uso real |
+|---|---|---|
+| Cor (`canvas`, `surface`, `line`, `ink`, `mut`, `acc`, `ok`, `warn`, `danger`) | `src/app/globals.css` — bloco `@theme` + os dois blocos escuros | toda a UI |
+| Tema claro/escuro (`sistema`/`claro`/`escuro`) | `src/lib/theme.ts` + script inline em `src/app/layout.tsx` | `data-tema` no `<html>` é a fonte da verdade |
+| Classes de UI (`focusRing`, `labelClass`, `fieldClass`, `panelClass`, `metaClass`) | `src/lib/ui.ts` | 29 arquivos |
+| Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 — `IconButton` exige `label` |
+| Casca do app (barra, frente ativa, seções) | `src/components/app/EsteiraShell.tsx` | 5 telas |
+| Frente ativa (store global) | `src/lib/front.ts`, via `useFront()` | global de propósito |
+| Renderizar peça por formato + `toPlainText` | `src/components/app/OutputPieces.tsx` | 2 telas |
+| Recibo de custo | `src/components/app/CostReceipt.tsx` | 3 telas |
+| Parecer da auditoria | `src/components/app/VerificationPanel.tsx` | 3 telas |
+| Busca de imagem (Unsplash + biblioteca) | `src/components/carousel/ImageSearchPanel.tsx` | 2 telas — devolve `PickedImage` com crédito |
+| Preâmbulo do brief (URL, sinais, notícia) | `src/lib/brief.ts` | 3 rotas partem do MESMO preâmbulo |
+| Auditoria de afirmações | `src/lib/verify.ts` | 8 arquivos |
+| Varredura de termo proibido | `src/knowledge/check.ts` | 9 arquivos |
+| Preço por modelo e `priceUsage` | `src/constants/pricing.ts` | 17 arquivos |
+| Marcas, tagline canônica, política de logo | `src/constants/brands.ts` | 29 arquivos |
+| Formatos de saída (`OUTPUT_META`, `OUTPUT_SCHEMAS`, `outputBlocks`, `isCarousel`) | `src/types/outputs.ts` | 9 arquivos |
+| Log de custo (`entryFromCost`, `pushCostEntry`, `formatCost`) | `src/lib/costLog.ts` | 9 — assinatura `entryFromCost(cost, kind, title, failed?)` |
+| Erro de API legível (`readError`) e corpo do pedido (`jsonBody`) | `src/lib/apiError.ts` | tela e rotas |
+| Rascunhos em localStorage | `src/lib/storage.ts` | 5 arquivos |
+
+## Dois pontos que já quebraram este repo
+
+**Achatar peça em blocos numerados é `outputBlocks`, sempre.** É o que a
+auditoria consome e o que o pacote do CRM carrega. Um segundo achatamento foi
+como a rota de publish quebrou quando Reels e Stories nasceram.
+
+**`isCarousel` é predicado de tipo, não `boolean`** — para o compilador estreitar
+`kind` nos dois ramos. Sem isso, formato novo passa batido numa afirmação de
+tipo manual.
+
+## Extração: na 3ª ocorrência, nunca antes
+
+Quando a mesma lógica visual/estrutural for escrita pela **terceira** vez em
+lugares diferentes, extraia para `src/components/app/` ou `src/lib/` naquele
+momento. Foi assim que `lib/ui.ts` e `lib/apiError.ts` nasceram.
+
+Não construa abstração especulativa: o custo de uma abstração errada é maior que
+o de duas cópias.
