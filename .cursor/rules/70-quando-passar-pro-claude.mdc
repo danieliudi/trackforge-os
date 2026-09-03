@@ -1,0 +1,62 @@
+---
+description: Quando parar e passar a tarefa para o Claude Code em vez de continuar — e como escrever o recado de passagem.
+alwaysApply: true
+---
+
+# Quando parar e passar pro Claude Code
+
+O Daniel usa duas ferramentas de propósito. **Cursor** é o dia a dia: mudança
+já decidida, em um ou dois arquivos, seguindo padrão que já existe.
+**Claude Code** é onde ele faz planejamento, auditoria, mudança de risco e
+qualquer coisa que exija ler a plataforma inteira.
+
+Ele **não** é programador de formação. Então não basta você parar — você tem
+que **dizer que parou, por quê, e o que ele deve pedir lá.**
+
+## Pare e passe quando bater qualquer um destes
+
+| Situação | Por quê |
+|---|---|
+| Mudança visual ou estrutural **sem mockup aprovado** | a regra é mockup antes de código, e o mockup se faz melhor lá |
+| Toca **migration, RLS, segredo, o pacote enviado ao CRM (`lib/crm.ts`) ou o proxy** | exige o passe de segurança e confirmação explícita dele antes de aplicar |
+| Toca **componente compartilhado** (`EsteiraShell`, `Button`, `lib/ui.ts`, `OutputPieces`, `outputBlocks`, `front.ts`) | o raio de alcance é a esteira inteira; um erro aqui quebra várias telas de uma vez |
+| Precisa **conferir dado de produção** ("isso é usado?", "quantas linhas tem?", "quebrou pra quem?") | você não alcança o banco; lá tem acesso de leitura |
+| É **varredura ou auditoria** em muitos arquivos | é trabalho de fôlego, feito melhor lá |
+| É **feature nova do zero**, ou planejamento | precisa de spec antes de código |
+| A entrega exige **teste de navegador com interceptação + captura a 1900px** | roda melhor lá, e a captura precisa ser conferida contra o mockup |
+| Envolve **número, norma ou fato** cuja origem você não consegue provar | publicar número sem proveniência é o erro mais caro desta ferramenta |
+| Você tentou duas vezes e **não achou a causa raiz** | insistir na terceira costuma piorar; lá dá pra investigar com mais contexto |
+
+## O que fazer quando bater
+
+**Não pare no meio calado, e não force a barra.** Faça o que dá com segurança,
+e entregue o recado.
+
+1. Termine e reporte o que **já dava** para fazer com segurança.
+2. Diga com clareza o que **ficou faltando** e por que você parou.
+3. Escreva o pedido pronto, para ele copiar e colar no Claude Code.
+
+## Formato do recado
+
+> **Fiz:** ajustei o rótulo do botão em `src/app/esteira/page.tsx:214` e
+> conferi que `tsc` e o lint passam.
+>
+> **Parei aqui porque:** a próxima parte muda a casca da esteira, que é a
+> mesma em 5 telas. A regra pede mockup aprovado antes, e mexer nela sem ver o
+> efeito nas outras telas é arriscado.
+>
+> **Pra levar pro Claude Code, copie isto:**
+> "Preciso reorganizar a casca da esteira — quero X e Y. Mostra mockup antes
+> (HTML clicável, 3-4 estados, 1900px) e confere o efeito nas outras telas."
+
+Três blocos, sempre: **Fiz · Parei porque · Copie isto**. Em português, sem
+jargão — ele é publicitário, não programador. Explique o *porquê* em
+consequência prática ("isso pode apagar dados de clientes"), não em termo
+técnico ("viola a policy RLS").
+
+## O contrário também vale
+
+Se a tarefa **é** do seu tamanho, faça. Não empurre para o Claude Code coisa
+simples só por cautela — trocar um texto, corrigir um espaçamento, renomear,
+seguir um padrão que já existe no arquivo ao lado. Mandar tudo embora custa o
+tempo dele.
