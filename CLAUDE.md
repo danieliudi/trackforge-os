@@ -1,6 +1,15 @@
 @AGENTS.md
 
-# carousel-builder — padrão de consistência
+# trackforge-os — padrão de consistência
+
+<!-- O repo se chamava `carousel-builder` e foi renomeado. O nome antigo
+     CONTINUA no código de propósito: ele é prefixo das chaves de localStorage
+     (`carousel-builder:producoes:v1`, `:cost-log:v1`, `:drafts:v1`, `:tema:v1`,
+     `:front:v1`, `:brand-context:v1`), do `name` no package.json e do campo
+     `origem` que o gateway do CRM lê. Renomear as chaves apaga rascunho, peça
+     produzida e log de custo de quem já usa — é a mesma classe do bug em que as
+     peças sumiram. Só o título mudou. -->
+
 
 Carregado automaticamente em toda sessão do Claude Code neste repo. Existe pelo
 mesmo motivo do arquivo equivalente do `sanwey-gestão`: evitar que cada sessão
