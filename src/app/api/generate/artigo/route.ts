@@ -6,18 +6,23 @@ import { buildBrief } from "@/lib/brief";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbidden } from "@/knowledge/check";
 import { verifyBlocks } from "@/lib/verify";
-import { priceUsage, type GenerationCost } from "@/constants/pricing";
-import { toTokenUsage } from "@/lib/usage";
+import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
+import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import {
   articleBlocks,
   articleSchema,
+  articleWireSchema,
+  MAX_IMAGE_DESCRIBES,
+  MAX_IMAGE_IDEAS,
   MAX_PARAGRAPHS,
   MAX_SECTIONS,
   MAX_TAKEAWAYS,
   MIN_SECTIONS,
   MIN_TAKEAWAYS,
+  normalizeArticle,
   TARGET_WORDS,
 } from "@/types/article";
+import { MAX_SUGGESTION_REASON } from "@/types/outputs";
 
 const requestSchema = z.object({
   input: z.string().min(3, "informe uma URL ou um tema"),
@@ -55,18 +60,20 @@ Regras obrigatórias de fato — a razão de esta ferramenta existir:
 
 Regras de "suggestedOutputs" — o que o conteúdo sustenta:
 - Liste de 1 a 5 formatos entre: "carrossel-linkedin", "carrossel-instagram",
-  "post-texto", "legenda", "reels", "stories". Em "reason", uma frase dizendo por que aquele formato serve a ESTE
-  conteúdo — não o que o formato é.
+  "post-texto", "legenda", "reels", "stories". Nunca repita um formato. Em
+  "reason", UMA frase de no máximo ${MAX_SUGGESTION_REASON} caracteres dizendo
+  por que aquele formato serve a ESTE conteúdo — não o que o formato é.
 - Sugira pelo que o assunto pede, não pelo que dá mais peça. Notícia de uma
   linha não vira carrossel de oito slides sem virar enchimento; prazo com data
   cabe em post de texto e em stories; passo a passo é carrossel.
 - Não liste um formato só para completar a lista.
 
 Regras de "imageIdeas" — que imagem o artigo pede:
-- De 1 a 4 ideias. "slot" é "capa" ou o título EXATO de uma das seções que você
-  escreveu — nunca um título que não existe no artigo.
-- "describes" é o que a foto deve mostrar, em português, concreto: "operador
-  movimentando big bag com empilhadeira em pátio industrial", não "logística".
+- De 1 a ${MAX_IMAGE_IDEAS} ideias. "slot" é "capa" ou o título EXATO de uma das
+  seções que você escreveu — nunca um título que não existe no artigo.
+- "describes" é o que a foto deve mostrar, em português, concreto e em no máximo
+  ${MAX_IMAGE_DESCRIBES} caracteres: "operador movimentando big bag com
+  empilhadeira em pátio industrial", não "logística".
 - "query" é o termo de busca EM INGLÊS, de 2 a 5 palavras, do jeito que se
   procura foto de banco de imagem: "industrial warehouse forklift", não uma
   frase. O acervo é indexado em inglês; termo em português não acha nada.
@@ -90,8 +97,15 @@ export async function POST(request: Request) {
 
   const { input, context, includeNews, useSignals, signalIds, verify, brandId } = parsed.data;
 
+  // Vive fora do `try` porque o recibo precisa sobreviver ao erro: quando a
+  // validação reprova, a leitura da URL, a busca de notícia e a redação inteira
+  // já foram cobradas. Devolvê-lo junto do erro é o que impede o "US$ 0,0000"
+  // depois de 2,4 minutos de Sonnet.
+  const costSteps: CostStep[] = [];
+  const totalOf = () => costSteps.reduce((total, step) => total + step.usd, 0);
+
   try {
-    const { brief, costSteps } = await buildBrief({
+    const built = await buildBrief({
       input,
       context,
       includeNews,
@@ -101,12 +115,13 @@ export async function POST(request: Request) {
       piece: "artigo",
       pieceArticle: "o",
     });
+    costSteps.push(...built.costSteps);
 
     const { object, usage } = await generateObject({
       model: anthropic("claude-sonnet-5"),
-      schema: articleSchema,
+      schema: articleWireSchema,
       system: buildGroundedSystem(ARTIGO_SYSTEM, brandId),
-      prompt: brief,
+      prompt: built.brief,
       providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
     });
 
@@ -118,12 +133,27 @@ export async function POST(request: Request) {
       usd: priceUsage(writeUsage),
     });
 
-    const cost: GenerationCost = {
-      usd: costSteps.reduce((total, step) => total + step.usd, 0),
-      steps: costSteps,
-    };
+    // Mesma ordem do carrossel: normaliza e só então valida no schema estrito.
+    // O que sobra aqui é artigo genuinamente quebrado — seção sem parágrafo,
+    // título vazio — e não estilo fora do alvo, que a normalização já resolveu.
+    const validated = articleSchema.safeParse(normalizeArticle(object));
+    if (!validated.success) {
+      return Response.json(
+        {
+          error: "a IA devolveu o artigo fora das regras",
+          issues: validated.error.issues.map(
+            (issue) => `${issue.path.join(".") || "artigo"}: ${issue.message}`,
+          ),
+          cost: { usd: totalOf(), steps: costSteps },
+        },
+        { status: 422 },
+      );
+    }
+    const article = validated.data;
 
-    const blocks = articleBlocks(object);
+    const cost: GenerationCost = { usd: totalOf(), steps: costSteps };
+
+    const blocks = articleBlocks(article);
 
     // Mesma varredura determinística do carrossel: o prompt manda não usar termo
     // proibido, isto confere se ele obedeceu. Avisa, não bloqueia — quem edita
@@ -147,9 +177,18 @@ export async function POST(request: Request) {
       }
     }
 
-    return Response.json({ article: object, cost, warnings, verification });
+    return Response.json({ article, cost, warnings, verification });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "erro desconhecido";
-    return Response.json({ error: message }, { status: 500 });
+    // Geração cobrada que não virou conteúdo entra no recibo mesmo assim, com o
+    // rótulo dizendo que foi descartada — o cliente já registra a linha como
+    // `failed`. Esconder o gasto seria pior que a falha.
+    const descartada = failedGenerationStep(error, "Redação do artigo (descartada)");
+    if (descartada) costSteps.push(descartada);
+
+    const message = generationErrorMessage(error, "o artigo");
+    return Response.json(
+      { error: message, cost: { usd: totalOf(), steps: costSteps } },
+      { status: 500 },
+    );
   }
 }

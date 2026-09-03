@@ -28,7 +28,7 @@ import type { MarketSignal } from "@/lib/marketSignals";
 import { fieldClass, focusRing, labelClass, metaClass, panelClass } from "@/lib/ui";
 import type { Verification } from "@/lib/verify";
 import { articleBlocks, articleToMarkdown, type Article, type ChosenImage } from "@/types/article";
-import { OUTPUT_META, type OutputKind } from "@/types/outputs";
+import { OUTPUT_META, type OutputKind, type PieceFailure } from "@/types/outputs";
 
 /**
  * A bancada: origem à esquerda, artigo no centro, saídas à direita.
@@ -53,6 +53,18 @@ type PendingPiece = { id: string; title: string; summary: string | null; priorit
 
 const column = "thin-scroll flex h-full min-h-0 flex-col gap-3 overflow-y-auto p-4";
 
+/**
+ * A mensagem de erro da rota, com os campos reprovados quando houver.
+ *
+ * Sem os `issues` a tela diz "a IA devolveu o artigo fora das regras" e não diz
+ * QUAL regra — e é justamente isso que decide entre clicar de novo e mexer no
+ * prompt. As rotas já mandavam a lista; era a tela que a jogava fora.
+ */
+function messageOf(data: { error?: string; issues?: string[] }, fallback: string): string {
+  const base = data.error ?? fallback;
+  return data.issues && data.issues.length > 0 ? `${base} — ${data.issues.join("; ")}` : base;
+}
+
 export default function BancadaPage() {
   const [brandId] = useFront();
 
@@ -73,6 +85,9 @@ export default function BancadaPage() {
   const [verification, setVerification] = useState<Verification | null>(null);
   const [kinds, setKinds] = useState<OutputKind[]>([]);
   const [pieces, setPieces] = useState<Piece[] | null>(null);
+  /** Peças que não saíram. Ficam no slot delas em vez de derrubar o lote. */
+  const [failures, setFailures] = useState<PieceFailure[]>([]);
+  const [retrying, setRetrying] = useState<OutputKind | null>(null);
   const [images, setImages] = useState<Record<string, ChosenImage>>({});
   const [sent, setSent] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -168,6 +183,7 @@ export default function BancadaPage() {
     setVerification(null);
     setKinds([]);
     setPieces(null);
+    setFailures([]);
     setImages({});
     setSent(false);
     setError(null);
@@ -232,7 +248,7 @@ export default function BancadaPage() {
           entryFromCost(data.cost, "artigo", data.article?.title ?? source, !response.ok),
         );
       }
-      if (!response.ok) throw new Error(data.error ?? "não foi possível escrever o artigo");
+      if (!response.ok) throw new Error(messageOf(data, "não foi possível escrever o artigo"));
 
       setArticle(data.article);
       setWarnings(data.warnings ?? []);
@@ -246,18 +262,21 @@ export default function BancadaPage() {
     }
   }, [inputFor, material, angle, brandId, origin.signalId, source, setKinds, keep]);
 
-  const generate = useCallback(async () => {
-    if (kinds.length === 0) return;
-    setBusy("pecas");
-    setError(null);
-    try {
-      // Com artigo, as peças derivam dele. Sem artigo, saem direto da origem — e
-      // a regra factual acompanha: material colado é fonte, tema não é.
+  /**
+   * Pede os formatos à rota. Serve ao lote inteiro e a uma peça só.
+   *
+   * A rota devolve `pieces` e `failures` lado a lado: uma peça reprovada não
+   * derruba as outras, então o resultado quase nunca é "tudo ou nada" e quem
+   * chama precisa dos dois. Erro de verdade (rede, chave) continua sendo
+   * exceção, e sobe.
+   */
+  const runPieces = useCallback(
+    async (alvo: OutputKind[]) => {
       const response = article
         ? await fetch("/api/derive", {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ article, brandId, kinds }),
+            body: JSON.stringify({ article, brandId, kinds: alvo }),
           })
         : await fetch("/api/generate/avulso", {
             method: "POST",
@@ -265,40 +284,99 @@ export default function BancadaPage() {
             body: JSON.stringify({
               mode: material ? "texto" : "tema",
               input: inputFor(),
-              kinds,
+              kinds: alvo,
               brandId,
               signalIds: origin.signalId ? [origin.signalId] : undefined,
             }),
           });
 
       const data = await response.json();
+      const saiu: Piece[] = data.pieces ?? [];
+
       if (data.cost) {
+        // `failed` só quando NADA saiu: com peça na mão, o gasto virou conteúdo.
         pushCostEntry(
           entryFromCost(
             data.cost,
             article ? "derivacao" : "avulso",
             article?.title ?? source,
-            !response.ok,
+            saiu.length === 0,
           ),
         );
       }
-      if (!response.ok) throw new Error(data.error ?? "não foi possível gerar as peças");
-      const produced: Piece[] = data.pieces ?? [];
-      setPieces(produced);
+      if (!response.ok) throw new Error(messageOf(data, "não foi possível gerar as peças"));
+
+      return { saiu, falhas: (data.failures ?? []) as PieceFailure[] };
+    },
+    [article, brandId, material, inputFor, origin.signalId, source],
+  );
+
+  /** Guarda no localStorage só o que sobreviveu — falha não é rascunho. */
+  const keepPieces = useCallback(
+    (lista: Piece[]) => {
       keep({
-        pieces: produced.map((piece) => ({
+        pieces: lista.map((piece) => ({
           kind: piece.kind,
           data: piece.data,
           from: piece.from,
           flagged: piece.verification?.flagged ?? 0,
         })),
       });
+    },
+    [keep],
+  );
+
+  const generate = useCallback(async () => {
+    if (kinds.length === 0) return;
+    setBusy("pecas");
+    setError(null);
+    try {
+      // Com artigo, as peças derivam dele. Sem artigo, saem direto da origem — e
+      // a regra factual acompanha: material colado é fonte, tema não é.
+      const { saiu, falhas } = await runPieces(kinds);
+      setPieces(saiu);
+      setFailures(falhas);
+      keepPieces(saiu);
+
+      // Nenhuma saiu: um aviso só, e não seis cartões vermelhos repetindo o
+      // mesmo problema. Com peça na mão o slot vale; sem nenhuma, ele é ruído.
+      if (saiu.length === 0 && falhas.length > 0) {
+        setError(
+          `Nenhuma das ${falhas.length} ${falhas.length === 1 ? "peça saiu" : "peças saiu"} — a IA devolveu tudo fora das regras. O gasto está no recibo.`,
+        );
+      }
     } catch (caught) {
       setError(caught instanceof Error ? caught.message : "erro desconhecido");
     } finally {
       setBusy(null);
     }
-  }, [kinds, article, brandId, material, inputFor, origin.signalId, source, keep]);
+  }, [kinds, runPieces, keepPieces]);
+
+  /**
+   * Refaz UMA peça, não o lote.
+   *
+   * A rota já aceita um formato só, então a segunda tentativa custa uma peça em
+   * vez de seis — e as cinco que já estão prontas não são pagas de novo.
+   */
+  const retry = useCallback(
+    async (kind: OutputKind) => {
+      setRetrying(kind);
+      setError(null);
+      try {
+        const { saiu, falhas } = await runPieces([kind]);
+
+        const lista = [...(pieces ?? []).filter((p) => p.kind !== kind), ...saiu];
+        setPieces(lista);
+        keepPieces(lista);
+        setFailures((atuais) => [...atuais.filter((f) => f.kind !== kind), ...falhas]);
+      } catch (caught) {
+        setError(caught instanceof Error ? caught.message : "erro desconhecido");
+      } finally {
+        setRetrying(null);
+      }
+    },
+    [runPieces, pieces, keepPieces],
+  );
 
   const send = useCallback(async () => {
     if (!article || !pieces) return;
@@ -552,7 +630,11 @@ export default function BancadaPage() {
           <div className="flex items-baseline gap-2">
             <span className={labelClass}>Peças</span>
             <span className={metaClass}>
-              {kinds.length} de {Object.keys(OUTPUT_META).length} marcadas
+              {failures.length > 0
+                ? pieces && pieces.length > 0
+                  ? `${pieces.length} de ${pieces.length + failures.length} saíram`
+                  : `nenhuma das ${failures.length} saiu`
+                : `${kinds.length} de ${Object.keys(OUTPUT_META).length} marcadas`}
             </span>
           </div>
 
@@ -560,15 +642,20 @@ export default function BancadaPage() {
             {(Object.keys(OUTPUT_META) as OutputKind[]).map((kind) => {
               const meta = OUTPUT_META[kind];
               const on = kinds.includes(kind);
+              const falhou = failures.some((f) => f.kind === kind);
               const suggested = article?.suggestedOutputs.find((s) => s.kind === kind);
 
               return (
                 <label
                   key={kind}
-                  title={suggested ? suggested.reason : meta.note}
+                  title={falhou ? "essa peça não saiu" : suggested ? suggested.reason : meta.note}
                   className={clsx(
                     "flex cursor-pointer items-start gap-2 rounded-lg border px-2.5 py-2 transition",
-                    on ? "border-acc bg-surface" : "border-line2 bg-surface hover:border-line3",
+                    falhou
+                      ? "border-danger-line bg-danger-bg"
+                      : on
+                        ? "border-acc bg-surface"
+                        : "border-line2 bg-surface hover:border-line3",
                   )}
                 >
                   <input
@@ -584,7 +671,12 @@ export default function BancadaPage() {
                     className={clsx("mt-0.5 h-3.5 w-3.5 rounded border-line bg-canvas", focusRing)}
                   />
                   <span className="flex min-w-0 flex-col">
-                    <span className="text-[12px] font-medium leading-tight text-ink">
+                    <span
+                      className={clsx(
+                        "text-[12px] font-medium leading-tight",
+                        falhou ? "text-danger" : "text-ink",
+                      )}
+                    >
                       {meta.label}
                     </span>
                     <span className={metaClass}>{meta.platform}</span>
@@ -595,10 +687,16 @@ export default function BancadaPage() {
           </div>
 
           <div className="flex items-center gap-2">
-            {article ? <span className={metaClass}>marcados = sugeridos pelo artigo</span> : null}
+            {failures.length > 0 ? (
+              <span className={metaClass}>cada tentativa entra no recibo</span>
+            ) : article ? (
+              <span className={metaClass}>marcados = sugeridos pelo artigo</span>
+            ) : null}
             <span className="flex-1" />
             <Button
-              variant="primary"
+              // Sem laranja depois que parte do lote saiu: preenchido é a ação
+              // principal, e aqui ela convidaria a pagar de novo pelas prontas.
+              variant={pieces || failures.length > 0 ? "secondary" : "primary"}
               size="sm"
               loading={busy === "pecas"}
               disabled={kinds.length === 0 || (!article && !ready)}
@@ -606,14 +704,22 @@ export default function BancadaPage() {
             >
               {busy === "pecas"
                 ? "Gerando…"
-                : `Gerar ${kinds.length} ${kinds.length === 1 ? "peça" : "peças"}`}
+                : pieces || failures.length > 0
+                  ? `Gerar ${kinds.length === 1 ? "de novo" : `as ${kinds.length} de novo`}`
+                  : `Gerar ${kinds.length} ${kinds.length === 1 ? "peça" : "peças"}`}
             </Button>
           </div>
 
-          {pieces ? (
+          {pieces && pieces.length > 0 ? (
             <>
               <div className="h-px bg-line2" />
-              <OutputPieces pieces={pieces} brandId={brandId} />
+              <OutputPieces
+                pieces={pieces}
+                failures={failures}
+                retrying={retrying}
+                onRetry={(kind) => void retry(kind)}
+                brandId={brandId}
+              />
             </>
           ) : null}
 
