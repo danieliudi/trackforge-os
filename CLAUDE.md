@@ -59,10 +59,12 @@ responder o que cada tela faz, porque nenhuma das 10 páginas tem comentário de
 propósito e o `README` descreve o produto, não a superfície. No repositório
 irmão, o mesmo buraco foi encontrado antes e resolvido com um mapa separado.
 
-**O mapa ainda não existe** — conferido em 03/09/2026: não há `docs/`, e
-`doc:check` não está no `package.json`. Esta seção é a especificação dele, não
-um ponteiro. Enquanto não for escrito, quem precisar da resposta lê o código
-mesmo; não mande ninguém abrir um arquivo que não está lá.
+**O mapa ainda não existe completo** — conferido em 03/09/2026. Em 04/09/2026
+entrou `docs/ui-diretrizes.md` (identidade visual Situação) e
+`docs/dashboard-spec.json` (slots do painel). O mapa funcional das 10 páginas
+ainda falta. Esta seção é a especificação dele, não um ponteiro. Enquanto o
+mapa funcional não for escrito, quem precisar da resposta lê o código mesmo;
+não mande ninguém abrir `docs/mapa-funcional.md`.
 
 Quando existir, mora em **`docs/mapa-funcional.md`** e cobre:
 
