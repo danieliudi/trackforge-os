@@ -2,6 +2,8 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
+import { brandIdSchema } from "@/constants/brands";
+
 import { buildBrief } from "@/lib/brief";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbidden } from "@/knowledge/check";
@@ -32,7 +34,7 @@ const requestSchema = z.object({
   useSignals: z.boolean().optional().default(true),
   signalIds: z.array(z.string()).optional(),
   verify: z.boolean().optional().default(true),
-  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
+  brandId: brandIdSchema.nullable().optional(),
 });
 
 const ARTIGO_SYSTEM = `Você escreve o artigo de blog que abre um ciclo editorial B2B.

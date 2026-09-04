@@ -5,6 +5,7 @@ import { useMemo } from "react";
 
 import { EsteiraShell, ShellPage, useFront } from "@/components/app/EsteiraShell";
 import { KpiCard } from "@/components/dashboard/KpiCard";
+import { brandLabel } from "@/constants/brands";
 import { factVerificationQueue } from "@/lib/factQueue";
 import { TIER_LABEL, getNormativeFacts, isExpired, isPublishable } from "@/knowledge/provenance";
 import type { SourceTier } from "@/knowledge/provenance";
@@ -29,7 +30,7 @@ export default function FatosPage() {
   const publishable = facts.filter((fact) => isPublishable(fact));
   const expired = facts.filter((fact) => isExpired(fact)).length;
   const hardInQueue = queue.filter((fact) => fact.hasHardData).length;
-  const brandLabel = front === "resibag" ? "Resibag" : "Sanwey";
+  const frente = brandLabel(front);
 
   return (
     <EsteiraShell>
@@ -40,7 +41,7 @@ export default function FatosPage() {
             O que a ferramenta pode afirmar
           </h1>
           <p className="text-[13px] text-mut">
-            Só fonte primária vira número numa peça · {brandLabel}
+            Só fonte primária vira número numa peça · {frente}
           </p>
         </div>
 

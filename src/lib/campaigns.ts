@@ -1,4 +1,4 @@
-import type { BrandId } from "@/constants/brands";
+import { isPersonalFront, type BrandId } from "@/constants/brands";
 import { COMPANY_ID } from "@/lib/marketSignals";
 
 /**
@@ -6,6 +6,7 @@ import { COMPANY_ID } from "@/lib/marketSignals";
  *
  * Só canal "Conteúdo" (e "Digital" pra mídia paga com o mesmo formato de nome).
  * Sem credencial devolve lista vazia — o seletor some em vez de derrubar o envio.
+ * Frente Meu não lista campanha: peça pessoal não entra no CRM.
  */
 
 export type ContentCampaign = {
@@ -50,7 +51,7 @@ export async function fetchContentCampaigns(
   brandId: BrandId | null | undefined,
 ): Promise<ContentCampaign[]> {
   const config = readConfig();
-  if (!config) return [];
+  if (!config || isPersonalFront(brandId)) return [];
 
   // PostgREST: `in` nos canais do circuito de conteúdo; filtro de frente no JS
   // porque `company_ids` é array e campanha sem empresa ainda deve aparecer.
@@ -76,6 +77,7 @@ export async function fetchContentCampaigns(
     if (!brandId) return rows;
 
     const companyId = COMPANY_ID[brandId];
+    if (!companyId) return [];
     return rows.filter(
       (campaign) =>
         campaign.companyIds.length === 0 || campaign.companyIds.includes(companyId),

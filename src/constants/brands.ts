@@ -1,6 +1,16 @@
+import { z } from "zod";
+
 import type { SlideThemeId } from "./themes";
 
-export type BrandId = "sanwey" | "resibag";
+export const BRAND_IDS = ["sanwey", "resibag", "meu"] as const;
+export type BrandId = (typeof BRAND_IDS)[number];
+
+export const brandIdSchema = z.enum(BRAND_IDS);
+
+/** Frente pessoal: gera e exporta local; nunca entra na fila do CRM. */
+export function isPersonalFront(brandId: BrandId | null | undefined): boolean {
+  return brandId === "meu";
+}
 
 export type Brand = {
   id: BrandId;
@@ -47,12 +57,25 @@ export const brands: Record<BrandId, Brand> = {
     logoPolicy: "all",
     tagline: "Gestão inteligente de resíduos industriais.",
   },
+  meu: {
+    id: "meu",
+    label: "Meu",
+    logoSrc: "/logos/meu.svg",
+    logoSrcOnDark: "/logos/meu-branco.svg",
+    themeId: "dark-modern",
+    logoPolicy: "cover-and-last",
+    tagline: "Trabalho pessoal — não é peça do Grupo.",
+  },
 };
 
 export const brandOptions = Object.values(brands).map(({ id, label }) => ({
   id,
   label,
 }));
+
+export function brandLabel(brandId: BrandId | null | undefined): string {
+  return brandId ? brands[brandId].label : "";
+}
 
 export function shouldShowLogo(
   policy: Brand["logoPolicy"],

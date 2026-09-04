@@ -16,18 +16,26 @@ import { getProductionsSnapshot } from "@/lib/produced";
 export const CONTENT_ID_PREFIX: Record<BrandId, string> = {
   resibag: "rb",
   sanwey: "sw",
+  meu: "eu",
 };
 
 /** Landing usada no QR quando a peça ainda não tem path de conversão próprio. */
 export const BRAND_LANDING: Record<BrandId, string> = {
   resibag: "https://resibag.com.br",
   sanwey: "https://www.sanwey.com.br",
+  // Frente pessoal: sem site corporativo. QR só faz sentido com path explícito
+  // depois — até lá a bancada esconde o bloco de atribuição CRM.
+  meu: "",
 };
 
-const CONTENT_ID_RE = /^(rb|sw)-[0-9a-f]{4}$/;
+const CONTENT_ID_RE = /^(rb|sw|eu)-[0-9a-f]{4}$/;
 
 export function isContentId(value: string): boolean {
   return CONTENT_ID_RE.test(value);
+}
+
+export function hasBrandLanding(brandId: BrandId): boolean {
+  return BRAND_LANDING[brandId].trim().length > 0;
 }
 
 /** Forma falada/impressa: maiúsculas. Na URL, minúsculas. */
@@ -126,6 +134,9 @@ export function buildAttributionUrl({
   }
 
   const base = BRAND_LANDING[brandId].replace(/\/$/, "");
+  if (!base) {
+    throw new Error("a frente Meu não tem landing para QR — peça pessoal fica sem atribuição web");
+  }
   const cleanedPath = (path ?? "").replace(/^\/+/, "").replace(/\/+$/, "");
   const url = new URL(cleanedPath ? `${base}/${cleanedPath}` : base);
 

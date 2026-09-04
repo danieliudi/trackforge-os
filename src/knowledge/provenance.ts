@@ -1,5 +1,6 @@
 import type { BrandId } from "@/constants/brands";
 
+import meuNormas from "./facts/meu-normas.json";
 import resibagNormas from "./facts/resibag-normas.json";
 import sanweyNormas from "./facts/sanwey-normas.json";
 
@@ -44,6 +45,7 @@ export type FactRecord = {
 const NORMAS: Record<BrandId, FactRecord[]> = {
   resibag: resibagNormas.facts as FactRecord[],
   sanwey: sanweyNormas.facts as FactRecord[],
+  meu: meuNormas.facts as FactRecord[],
 };
 
 export function getNormativeFacts(brandId: BrandId | null | undefined): FactRecord[] {

@@ -6,7 +6,7 @@ import { useCallback, useEffect, useId, useState } from "react";
 
 import { EsteiraShell, ShellPage, useFront } from "@/components/app/EsteiraShell";
 import { fieldClass, focusRing, labelClass, panelClass } from "@/lib/ui";
-import { brandOptions, type BrandId } from "@/constants/brands";
+import { brandLabel, brandOptions, type BrandId } from "@/constants/brands";
 
 type LibraryImage = {
   name: string;
@@ -24,7 +24,7 @@ export default function BibliotecaPage() {
   const [filter, setFilter] = useState("");
   const [uploading, setUploading] = useState(false);
   const uploadId = useId();
-  const brandLabel = front === "resibag" ? "Resibag" : "Sanwey";
+  const frente = brandLabel(front);
 
   const loadImages = useCallback(() => {
     return fetch(`/api/assets/library?brandId=${front}`)
@@ -97,7 +97,7 @@ export default function BibliotecaPage() {
             Imagens da frente
           </h1>
           <p className="text-[13px] text-mut">
-            O que está aqui aparece primeiro na busca de imagem · {brandLabel}
+            O que está aqui aparece primeiro na busca de imagem · {frente}
             {images ? ` · n=${images.length}` : ""}
           </p>
         </div>

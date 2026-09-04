@@ -2,7 +2,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { brands } from "@/constants/brands";
+import {brands, brandIdSchema} from "@/constants/brands";
 import type { Platform } from "@/constants/format";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { jsonBody } from "@/lib/apiError";
@@ -45,7 +45,7 @@ const requestSchema = z.object({
   /** No modo tema: o assunto ou uma URL. No modo texto: o material inteiro. */
   input: z.string().min(3, "informe um tema ou cole o texto"),
   kinds: z.array(outputKindSchema).min(1, "escolha ao menos um formato").max(6),
-  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
+  brandId: brandIdSchema.nullable().optional(),
   includeNews: z.boolean().optional(),
   useSignals: z.boolean().optional().default(true),
   signalIds: z.array(z.string()).optional(),

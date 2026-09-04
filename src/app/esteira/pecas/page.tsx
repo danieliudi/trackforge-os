@@ -5,6 +5,7 @@ import { Check, PenLine, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
+import { brandLabel } from "@/constants/brands";
 import { EsteiraShell, ShellPage, useFront } from "@/components/app/EsteiraShell";
 import { KpiCard } from "@/components/dashboard/KpiCard";
 import { Button, IconButton } from "@/components/ui/Button";
@@ -58,7 +59,7 @@ export default function PecasPage() {
   );
   const unsent = runs.filter((run) => !run.sent).length;
   const sent = runs.filter((run) => run.sent).length;
-  const brandLabel = front === "resibag" ? "Resibag" : "Sanwey";
+  const frente = brandLabel(front);
 
   return (
     <EsteiraShell>
@@ -69,7 +70,7 @@ export default function PecasPage() {
             O que já foi produzido
           </h1>
           <p className="text-[13px] text-mut">
-            Tudo que sai da bancada é salvo aqui sozinho, neste navegador · {brandLabel}
+            Tudo que sai da bancada é salvo aqui sozinho, neste navegador · {frente}
           </p>
         </div>
 

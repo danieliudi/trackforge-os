@@ -10,6 +10,7 @@ import { KpiCard } from "@/components/dashboard/KpiCard";
 import { MonthCostPanel } from "@/components/dashboard/MonthCostPanel";
 import { PendingOrFactsPanel } from "@/components/dashboard/PendingOrFactsPanel";
 import { UnsentList } from "@/components/dashboard/UnsentList";
+import { brandLabel } from "@/constants/brands";
 import {
   buildDashboardStats,
   monthsWithCost,
@@ -111,7 +112,7 @@ export default function SituacaoPage() {
 
   const monthLabel = `${MONTHS[reference.getMonth()]}/${reference.getFullYear()}`;
   const cost = formatCost(stats.month.usd);
-  const brandLabel = brandId === "resibag" ? "Resibag" : "Sanwey";
+  const frente = brandLabel(brandId);
 
   return (
     <EsteiraShell>
@@ -121,7 +122,7 @@ export default function SituacaoPage() {
             <div className="flex flex-col gap-0.5">
               <span className={labelClass}>Situação</span>
               <h1 className="text-2xl font-semibold tracking-tight text-ink">
-                Situação · {brandLabel}
+                Situação · {frente}
               </h1>
               <p className="text-[13px] text-mut">
                 O que falta enviar, o que a API cobrou e o que precisa de decisão · {monthLabel}
