@@ -90,7 +90,7 @@ export function EsteiraShell({
             focusRing,
           )}
         >
-          Esteira
+          Trackforge OS
         </Link>
 
         <span className="flex items-center gap-2">

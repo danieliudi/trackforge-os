@@ -73,7 +73,7 @@ Seções do topo (ordem):
 `Situação` (`/`) · `Peças` · `Fatos` · `Custos` · `Instalação`
 
 - Home = Situação. Bancada = `/esteira`.
-- Link “Esteira” na marca leva à Situação (`/`).
+- Link “Trackforge OS” na marca leva à Situação (`/`).
 - Rotas órfãs legadas (`/artigo`, `/esteira/avulso`) redirecionam; não ganham
   item de menu. `/slides-preview` continua lab, fora do menu.
 

@@ -91,7 +91,7 @@ export function AppHeader({
           title="Voltar para a esteira"
         >
           <ArrowLeft size={14} />
-          Esteira
+          Trackforge OS
         </Link>
         <span aria-hidden className="shrink-0 text-faint">
           /

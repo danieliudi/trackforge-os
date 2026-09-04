@@ -51,8 +51,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Carousel Builder",
-  description: "Gerador de carrosséis B2B",
+  title: "Trackforge OS",
+  description: "Esteira de conteúdo B2B — Resibag, Sanwey e trabalho pessoal",
 };
 
 const fontVariables = [
