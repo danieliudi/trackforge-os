@@ -282,16 +282,18 @@ Nunca rode `knowledge:sync` "para limpar o aviso".
   porque é o campo que o gateway em produção lê hoje; o comentário diz isso e
   diz quando sai.
 
-## 11. O build não é gate, e hoje não existe nenhum
+## 11. O gate de publicação — existe desde 03/09/2026
 
-Conferido em 03/09/2026, e este é o achado mais grave da comparação com o
-repositório irmão.
+Antes desta data não havia nenhum, e era o achado mais grave da comparação com o
+repositório irmão. **Está ligado agora**; o que segue é o diagnóstico que levou
+a ele e as regras que valem daqui em diante.
 
-O `prebuild` roda só `scripts/check-knowledge.mjs`, que **sai sempre com 0**
-por definição, porque é aviso e não gate (seção 9). O `eslint.config.mjs` é o
+O `prebuild` rodava só `scripts/check-knowledge.mjs`, que **sai sempre com 0**
+por definição, porque é aviso e não gate (seção 9). O `eslint.config.mjs` era o
 padrão do `eslint-config-next`, sem nenhuma regra escolhida. E o Next deixou de
-rodar ESLint dentro do `build`. Somando as três coisas: **não existe nenhuma
-verificação bloqueante entre escrever o código e publicar**.
+rodar ESLint dentro do `build` — isto continua valendo. Somando as três coisas:
+**não existia nenhuma verificação bloqueante entre escrever o código e
+publicar**.
 
 O repositório irmão pagou essa conta e mantém o placar: quatro telas mortas em
 três semanas, uma delas quinze dias no ar, todas por erro de escopo puro. Um
@@ -301,13 +303,29 @@ a de quinze dias foi o ESLint, não o build. Aqui o TypeScript cobre parte dessa
 classe, e não cobre `rules-of-hooks`, condição que nunca faz o que parece, nem
 duplicação silenciosa.
 
-**Regra.** O `prebuild` passa a rodar lint bloqueante junto com o aviso de
-drift. A configuração escolhe **só regra que pega erro de execução**:
-`rules-of-hooks`, escopo, duplicação silenciosa. **Zero regra de estilo, de
-propósito** — gate que apita por formatação vira gate ignorado. O ruído que não
-quebra nada (variável não usada, dependência incompleta) fica num script
-separado que não trava o build. O racional de cada bloco, e das regras que
-ficaram de fora, mora no cabeçalho do próprio arquivo de configuração.
+**O que foi feito.** `prebuild` agora é
+`node scripts/check-knowledge.mjs && eslint` — o aviso de drift continua saindo
+com 0, e o lint bloqueia. **Zero regra de estilo, de propósito**: gate que apita
+por formatação vira gate ignorado. O ruído que não quebra nada (variável não
+usada, dependência incompleta) continua como AVISO e sai em `npm run lint:ruido`,
+que não trava o build. O racional de cada bloco, e das regras que ficaram de
+fora, mora no cabeçalho do `eslint.config.mjs`.
+
+**O achado que mudou o remédio.** Sondando as classes de erro uma a uma,
+`react-hooks/rules-of-hooks` **já era erro** aqui, pelos presets — hook dentro de
+`if` e hook dentro de laço eram pegos. A regra funcionava; ninguém a executava
+antes de publicar. O ganho maior não veio de configurar regra nova, veio de
+ligar o lint no `prebuild`.
+
+O que o TypeScript já cobre ficou de fora, sondado e não suposto: chave
+duplicada (TS1117), variável usada antes de declarar (TS2448/TS2454), negação
+insegura (TS2322, porque o código é todo tipado) e membro duplicado de classe
+(TS2393). Sobraram para o ESLint: condição constante, autocomparação, `else if`
+duplicado e `case` duplicado — as que passam pelo compilador inteiras porque o
+ramo errado simplesmente nunca roda.
+
+**Verificado.** Com um `else if` duplicado plantado, `npm run build` sai com
+código 1 e não chega a compilar o Next. Sem ele, sai 0 e compila.
 
 Continua valendo o que a seção 8 já diz: nunca reportar pronto com base só em
 typecheck.

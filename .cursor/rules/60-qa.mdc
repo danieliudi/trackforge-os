@@ -8,30 +8,37 @@ alwaysApply: false
 
 Espelha as seções 11 e 12 do `CLAUDE.md`, que é a fonte. Mudou aqui, mude lá.
 
-## Hoje não existe nenhum gate bloqueante
+## O gate existe desde 03/09/2026
 
-Conferido em 03/09/2026. Três coisas somadas:
+Antes disso não havia nenhum. Três coisas somadas:
 
-- `prebuild` roda só `scripts/check-knowledge.mjs`, que **sai sempre com 0** por
+- `prebuild` rodava só `scripts/check-knowledge.mjs`, que **sai sempre com 0** por
   definição — é aviso, não gate (ver `50-conhecimento`).
-- `eslint.config.mjs` é o padrão do `eslint-config-next`, sem nenhuma regra
+- `eslint.config.mjs` era o padrão do `eslint-config-next`, sem nenhuma regra
   escolhida.
-- O Next deixou de rodar ESLint dentro do `build`.
+- O Next deixou de rodar ESLint dentro do `build` (isto continua valendo).
 
-Resultado: **nada bloqueia entre escrever o código e publicar.** O TypeScript
+Resultado: **nada bloqueava entre escrever o código e publicar.** O TypeScript
 cobre parte da classe de erro de escopo; não cobre `rules-of-hooks`, condição
 que nunca faz o que parece, nem duplicação silenciosa. No repositório irmão essa
 conta apareceu como quatro telas mortas em três semanas, uma delas quinze dias
 no ar — todas erro de escopo puro, e quem pegou a de quinze dias foi o ESLint,
 não o build.
 
-**Regra.** O `prebuild` passa a rodar lint bloqueante junto com o aviso de
-drift. A configuração escolhe **só regra que pega erro de execução**:
-`rules-of-hooks`, escopo, duplicação silenciosa. **Zero regra de estilo, de
-propósito** — gate que apita por formatação vira gate ignorado. O ruído que não
-quebra nada (variável não usada, dependência incompleta) fica num script
-separado que não trava o build. O racional de cada bloco, e das regras que
-ficaram de fora, mora no cabeçalho do próprio arquivo de configuração.
+**O que está ligado.** `prebuild` é `node scripts/check-knowledge.mjs && eslint`:
+o aviso de drift continua saindo com 0, e o lint bloqueia. **Zero regra de
+estilo, de propósito** — gate que apita por formatação vira gate ignorado. O
+ruído que não quebra nada (variável não usada, dependência incompleta) continua
+como AVISO e sai em `npm run lint:ruido`, que não trava o build. O racional de
+cada bloco, e das regras que ficaram de fora, mora no cabeçalho do
+`eslint.config.mjs`.
+
+**Antes de adicionar regra nova, sonde se ela já dispara.** `rules-of-hooks` já
+era erro pelos presets — funcionava, só nunca era executada antes de publicar. E
+o TypeScript já cobre chave duplicada, uso antes da declaração, negação insegura
+e membro duplicado de classe; repetir no ESLint só faz o gate demorar mais para
+dizer o mesmo. Sobraram condição constante, autocomparação, `else if` duplicado
+e `case` duplicado.
 
 ## Varredura em navegador: script, não rascunho
 
