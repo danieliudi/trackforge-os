@@ -19,7 +19,9 @@ aquilo. Quanto maior, mais caro é divergir.
 | Tema claro/escuro (`sistema`/`claro`/`escuro`) | `src/lib/theme.ts` + script inline em `src/app/layout.tsx` | `data-tema` no `<html>` é a fonte da verdade |
 | Classes de UI (`focusRing`, `labelClass`, `fieldClass`, `panelClass`, `metaClass`) | `src/lib/ui.ts` | 29 arquivos |
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 — `IconButton` exige `label` |
-| Casca do app (barra, frente ativa, seções) | `src/components/app/EsteiraShell.tsx` | 5 telas |
+| Casca do app (barra, frente ativa, seções) | `src/components/app/EsteiraShell.tsx` | toda tela da esteira |
+| KPI / gráfico / lista do padrão Situação | `src/components/dashboard/*` | painel e telas na densidade aprovada |
+| Diretrizes visuais (identidade Situação) | `docs/ui-diretrizes.md` | leia antes de tela nova ou redesign |
 | Frente ativa (store global) | `src/lib/front.ts`, via `useFront()` | global de propósito |
 | Renderizar peça por formato + `toPlainText` | `src/components/app/OutputPieces.tsx` | 2 telas |
 | Recibo de custo | `src/components/app/CostReceipt.tsx` | 3 telas |

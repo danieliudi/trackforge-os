@@ -1,16 +1,32 @@
 ---
-description: Cor, tema claro/escuro, contraste como gate e o portão de mockup para mudança visual
+description: Cor, tema, identidade Situação, contraste e portão de mockup
 globs: src/**/*.tsx,src/app/globals.css
 alwaysApply: false
 ---
 
-# Telas — cor, tema e o que exige mockup
+# Telas — identidade Situação, cor, tema e mockup
+
+## Identidade visual única (aprovada 04/09/2026)
+
+A plataforma inteira segue o visual do painel de Situação.
+
+- **Diretrizes:** `docs/ui-diretrizes.md` — leia antes de qualquer tela nova ou
+  redesign.
+- **Mockup canônico:** `scratchpad/painel-mockup.html`
+- **Código de referência:** `src/app/page.tsx` + `src/components/dashboard/`
+
+Não invente segundo visual. Hex de referência externa (Sanwey OS, Worktail)
+mapeia para token Clockwork — não entra no TSX. Cabeçalho de página =
+`labelClass` → `h1` → subtítulo `text-mut`. Superfície = `panelClass`. Vazio =
+borda tracejada. KPI urgente = `bg-acc` + letra `acc-ink` (nunca branco no
+laranja). Percentual sempre com `n` ao lado. Gráfico = Recharts +
+`var(--color-*)` + tooltip com hover.
 
 ## Mockup aprovado antes de implementar
 
 Mudou **como a plataforma se parece ou se organiza** — cor, tema, ícone, layout,
 componente, ordem de tela, agrupamento de dado? Precisa de mockup aprovado pelo
-Daniel **antes** do código. Vale para pedido dele e para sugestão sua.
+Daniel **antes** do código. O mockup se confere **contra `docs/ui-diretrizes.md`**.
 
 - **Bug fix puro não precisa** — algo que já deveria funcionar e não funciona, ou
   asset quebrado voltando ao original.
@@ -45,7 +61,7 @@ script.
 - Rótulo pequeno e ornamento **≥ 3:1**.
 - Meça sobre o **app de verdade**, não sobre o hex isolado. Modelo pronto para
   copiar: `scratchpad/contraste-slot.mjs` (Playwright, lê a cor computada e
-  mede nos dois temas).
+  mede nos dois temas). Também `scratchpad/painel-contraste.mjs` para o painel.
 - **Rode também com `colorScheme: "dark"`** — token que passa no claro pode
   reprovar no escuro.
 

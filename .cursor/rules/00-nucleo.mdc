@@ -65,6 +65,10 @@ tema, ícone, layout, componente, ordem de tela, agrupamento de dado — precisa
 mockup aprovado pelo Daniel **antes** da implementação. Vale para pedido dele e
 para sugestão sua.
 
+**A identidade visual é a do painel de Situação** (`docs/ui-diretrizes.md`,
+mockup `scratchpad/painel-mockup.html`). Mockup novo se confere contra essas
+diretrizes — não contra um visual inventado na hora.
+
 Na dúvida, mostre o mockup. Não decida sozinho que "é pequeno o bastante para
 pular": foi assim que a plataforma derivou do mockup aprovado e teve de ser
 reconstruída. **Bug fix puro é exceção** — algo que já deveria funcionar e não

@@ -1,8 +1,10 @@
 {
   "metadata": {
     "project": "trackforge-os-painel",
-    "version": "1.0.0",
-    "description": "Spec de slots do painel de produção. Estrutura/proporção da referência Sanwey OS (4 KPIs → 2 charts → 3 widgets). Cores só por token Clockwork — hex da referência não entra no código."
+    "version": "1.1.0",
+    "approved": "2026-09-04",
+    "status": "identidade-visual-da-plataforma",
+    "description": "Spec de slots do painel de Situação — referência canônica de densidade/proporção da plataforma. Diretrizes completas em docs/ui-diretrizes.md. Cores só por token Clockwork."
   },
   "token_map": {
     "canvas_background": "canvas",

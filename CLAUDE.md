@@ -105,7 +105,9 @@ parecido**.
 | Tema claro/escuro (`sistema` / `claro` / `escuro`) | `src/lib/theme.ts` + o script inline em `src/app/layout.tsx` | o atributo `data-tema` no `<html>` é a fonte da verdade. O script roda ANTES da primeira pintura: sem ele a tela nasce clara e pisca para escura em toda navegação |
 | Tokens de classe da UI (`focusRing`, `labelClass`, `fieldClass`, `panelClass`, `metaClass`) | `src/lib/ui.ts` | 29 arquivos — nunca monte painel ou campo na mão |
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 arquivos — `IconButton` exige `label` (nome acessível) |
-| Casca do app: barra lateral, frente ativa, seções | `src/components/app/EsteiraShell.tsx` | 5 telas — toda tela nova dentro da esteira nasce aqui, não com layout próprio |
+| Casca do app: barra, frente ativa, seções | `src/components/app/EsteiraShell.tsx` | 5 telas — toda tela nova dentro da esteira nasce aqui, não com layout próprio |
+| KPI / gráfico / lista do padrão Situação | `src/components/dashboard/*` | painel e telas que reusam a densidade aprovada |
+| Diretrizes visuais (identidade Situação) | `docs/ui-diretrizes.md` | obrigatório antes de tela nova ou redesign |
 | Frente ativa como store global | `src/lib/front.ts` | via `useFront()` do shell. É global de propósito: estar no painel da Resibag lendo fato da Sanwey é a classe de bug que isto previne |
 | Renderização de peça por formato + `toPlainText` | `src/components/app/OutputPieces.tsx` | 2 telas — Reels mostra tempo, Stories mostra telas; não renderize formato novo como parágrafo genérico |
 | Recibo de custo | `src/components/app/CostReceipt.tsx` | 3 telas |
@@ -177,12 +179,23 @@ Isto não é preferência de estilo. É o requisito do produto.
   é certo em `localhost` e inaceitável numa URL pública. Ao subir a ferramenta
   para qualquer lugar, definir a variável faz parte de "no ar".
 
-## 4. Mockup antes de código — mudança visual ou estrutural
+## 4. Mockup antes de código — e a identidade visual é uma só
+
+**A identidade visual da plataforma é a do painel de Situação**, aprovada em
+04/09/2026. Fonte: `docs/ui-diretrizes.md`. Mockup canônico:
+`scratchpad/painel-mockup.html`. Implementação de referência: `/` +
+`src/components/dashboard/`.
+
+Tela nova e redesign **seguem essas diretrizes**. Não invente um segundo visual
+(outra paleta, outra densidade de card, outro empty state, outro padrão de
+cabeçalho). Hex de referências externas (Sanwey OS, Worktail) mapeia para token
+Clockwork — não entra no código.
 
 Regra do Daniel, já em vigor: qualquer coisa que mude **como a plataforma se
 parece ou se organiza** — cor, tema, ícone, layout, componente, ordem de tela,
 como um dado é agrupado — precisa de mockup aprovado **antes** da
-implementação. Vale para pedido dele e para sugestão sua.
+implementação. Vale para pedido dele e para sugestão sua. O mockup se confere
+**contra `docs/ui-diretrizes.md`**, não contra um visual inventado na hora.
 
 Na dúvida se conta como mudança visual, mostre o mockup. Não decida sozinho que
 "é pequeno o bastante para pular" — foi assim que a plataforma derivou do mockup
@@ -203,7 +216,8 @@ Rode com `colorScheme: "dark"` também, porque um token que passa no claro pode
 reprovar no escuro. Quando uma cor da paleta não passa
 como letra, ela vira preenchimento ou borda — nunca se escurece a cor da marca
 para caber texto branco: troca-se a letra. Foi a decisão do laranja `#E56515`
-(branco em cima dá 3,4:1; quase-preto dá 5,0:1).
+(branco em cima dá 3,4:1; quase-preto dá 5,0:1). Percentual na UI sempre com o
+`n` ao lado.
 
 ## 5. Custo é visível ou não existe
 
