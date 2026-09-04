@@ -1,0 +1,116 @@
+{
+  "metadata": {
+    "project": "trackforge-os-painel",
+    "version": "1.0.0",
+    "description": "Spec de slots do painel de produção. Estrutura/proporção da referência Sanwey OS (4 KPIs → 2 charts → 3 widgets). Cores só por token Clockwork — hex da referência não entra no código."
+  },
+  "token_map": {
+    "canvas_background": "canvas",
+    "surface_card": "surface",
+    "surface_muted": "surface2",
+    "border_card": "line2",
+    "border_subtle": "line",
+    "accent_primary": "acc",
+    "accent_soft": "acc-soft",
+    "accent_tint": "acc-tint",
+    "nav_active": "ink",
+    "tooltip_dark": "ink",
+    "text_primary": "ink",
+    "text_secondary": "ink2",
+    "text_muted": "mut",
+    "text_faint": "faint",
+    "ok": "ok",
+    "warn": "warn",
+    "danger": "danger",
+    "panel": "panelClass (rounded-lg border border-line2 bg-surface)"
+  },
+  "layout": {
+    "shell": "EsteiraShell",
+    "page": "ShellPage max-w-5xl → painel usa max-w-[1440px] dentro do main",
+    "grids": {
+      "kpi": "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4",
+      "charts": "grid grid-cols-1 lg:grid-cols-2 gap-4",
+      "widgets": "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+    }
+  },
+  "navigation": {
+    "sections": [
+      { "href": "/", "label": "Situação" },
+      { "href": "/esteira/pecas", "label": "Peças" },
+      { "href": "/esteira/fatos", "label": "Fatos" },
+      { "href": "/esteira/custos", "label": "Custos" },
+      { "href": "/esteira/instalacao", "label": "Instalação" }
+    ],
+    "home": "/",
+    "bancada": "/esteira"
+  },
+  "header": {
+    "greeting": "Situação · {frente}",
+    "subtitle": "O que falta enviar, o que a API cobrou e o que precisa de decisão",
+    "period": "mês corrente (summarizeMonth); seletor troca mês no histórico local"
+  },
+  "kpi_cards": [
+    {
+      "id": "pending_crm",
+      "title": "Na fila do CRM",
+      "source": "GET /api/publish?brandId= → pending.length",
+      "theme": "accent_attention quando count > 0, senão surface",
+      "subtitle": "esperando aprovação"
+    },
+    {
+      "id": "unsent",
+      "title": "Não enviados",
+      "source": "productions where !sent && brandId === front",
+      "subtitle": "pagos, ainda na bancada"
+    },
+    {
+      "id": "flagged",
+      "title": "Sem fonte",
+      "source": "productions com pieces.some(p => p.flagged > 0)",
+      "subtitle": "afirmações marcadas pelo auditor",
+      "percent_rule": "sempre mostrar n ao lado de qualquer %"
+    },
+    {
+      "id": "month_cost",
+      "title": "Custo do mês",
+      "source": "summarizeMonth(entries).usd via formatCost",
+      "subtitle": "{count} gerações · média/post quando houver"
+    }
+  ],
+  "charts": [
+    {
+      "id": "cost_by_kind",
+      "title": "Gasto por tipo",
+      "type": "bar",
+      "source": "summarizeMonth.byKind",
+      "interactive": "hover + tooltip custom (panelClass)"
+    },
+    {
+      "id": "daily_spend",
+      "title": "Gerações no mês",
+      "type": "area_line",
+      "source": "cost log agrupado por dia (usd e count)",
+      "interactive": "hover + tooltip custom"
+    }
+  ],
+  "widgets": [
+    {
+      "id": "unsent_list",
+      "title": "Produzido e não enviado",
+      "source": "productions !sent",
+      "action": "Abrir na bancada → /esteira?abrir={id}"
+    },
+    {
+      "id": "month_cost_panel",
+      "title": "Resumo do mês",
+      "source": "searchUsd, searchCount, averagePostUsd, byKind"
+    },
+    {
+      "id": "pending_or_facts",
+      "title": "Fila do CRM · fatos a conferir",
+      "source": "pending API + fatos isExpired / sem checkedAt / nao-verificado"
+    }
+  ],
+  "data_scope": "localStorage deste navegador (cost-log:v1, producoes:v1). Sem tabela compartilhada.",
+  "states": ["empty", "with_data", "crm_off", "dark_theme"]
+}

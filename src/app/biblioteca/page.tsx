@@ -120,7 +120,7 @@ export default function BibliotecaPage() {
     <div className="flex flex-1 flex-col overflow-y-auto bg-surface2 font-sans">
       <header className="flex shrink-0 items-center justify-between gap-4 border-b border-line bg-surface px-4 py-2.5 sm:px-6">
         <Link
-          href="/esteira"
+          href="/"
           className={`flex items-center gap-1.5 text-sm text-mut transition hover:text-ink ${focusRing}`}
         >
           <ArrowLeft size={15} />

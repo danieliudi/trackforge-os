@@ -45,9 +45,11 @@ import { focusRing, labelClass } from "@/lib/ui";
  */
 
 const SECTIONS = [
+  { href: "/", label: "Situação" },
   { href: "/esteira/pecas", label: "Peças" },
-  { href: "/esteira/fatos", label: "Base de fatos" },
+  { href: "/esteira/fatos", label: "Fatos" },
   { href: "/esteira/custos", label: "Custos" },
+  { href: "/esteira/instalacao", label: "Instalação" },
 ];
 
 export function useFront(): [BrandId, (id: BrandId) => void] {
@@ -82,7 +84,7 @@ export function EsteiraShell({
     <div className="flex h-screen flex-col bg-canvas">
       <header className="flex shrink-0 items-center gap-4 border-b border-line2 bg-surface px-5 py-2.5">
         <Link
-          href="/esteira"
+          href="/"
           className={clsx(
             "rounded-md px-1 py-0.5 text-sm font-semibold tracking-tight text-ink",
             focusRing,
@@ -141,7 +143,10 @@ export function EsteiraShell({
 
         <nav className="flex items-center gap-0.5">
           {SECTIONS.map(({ href, label }) => {
-            const active = pathname === href;
+            const active =
+              href === "/"
+                ? pathname === "/"
+                : pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
                 key={href}
