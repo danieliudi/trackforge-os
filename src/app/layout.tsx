@@ -73,8 +73,15 @@ const fontVariables = [
  *
  * "sistema" não escreve atributo nenhum, de propósito: a ausência dele deixa a
  * mídia `prefers-color-scheme` mandar, sem uma terceira regra no CSS.
+ *
+ * LÊ AS DUAS CHAVES porque o prefixo mudou de `carousel-builder` para
+ * `trackforge` (ver `src/lib/localKeys.ts`). Este script não importa nada — roda
+ * antes de qualquer bundle — então a herança precisa estar escrita aqui à mão.
+ * Sem ela, quem já tinha escolhido escuro veria a tela piscar em toda navegação
+ * até que algo mais gravasse a chave nova. Ele só LÊ: promover o valor é
+ * trabalho do `theme.ts`, e este script bloqueia a primeira pintura.
  */
-const TEMA_ANTES_DA_PINTURA = `try{var t=localStorage.getItem("carousel-builder:tema:v1");if(t==="claro"||t==="escuro")document.documentElement.setAttribute("data-tema",t)}catch(e){}`;
+const TEMA_ANTES_DA_PINTURA = `try{var t=localStorage.getItem("trackforge:tema:v1")||localStorage.getItem("carousel-builder:tema:v1");if(t==="claro"||t==="escuro")document.documentElement.setAttribute("data-tema",t)}catch(e){}`;
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (

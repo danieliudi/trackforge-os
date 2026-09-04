@@ -1,7 +1,8 @@
 import { usdToBrlRate, type GenerationCost } from "@/constants/pricing";
+import { readLocal, writeLocal } from "@/lib/localKeys";
 
 /** Versionado igual aos rascunhos: formato novo descarta o payload antigo. */
-const KEY = "carousel-builder:cost-log:v1";
+const KEY = "cost-log:v1";
 
 /**
  * Teto de entradas guardadas.
@@ -71,7 +72,7 @@ export function loadCostLog(): CostEntry[] {
   if (typeof window === "undefined") return [];
 
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = readLocal(KEY);
     if (!raw) return [];
 
     const parsed: unknown = JSON.parse(raw);
@@ -125,7 +126,7 @@ export function pushCostEntry(entry: Omit<CostEntry, "id" | "at">): void {
 
   if (typeof window !== "undefined") {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify(cache));
+      writeLocal(KEY, JSON.stringify(cache));
     } catch {
       // segue com o valor em memória
     }

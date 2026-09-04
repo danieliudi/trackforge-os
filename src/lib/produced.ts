@@ -1,6 +1,7 @@
 import type { BrandId } from "@/constants/brands";
 import type { Article, ChosenImage } from "@/types/article";
 import type { OutputKind } from "@/types/outputs";
+import { readLocal, writeLocal } from "@/lib/localKeys";
 
 /**
  * O que a bancada produziu, guardado assim que sai do modelo.
@@ -60,7 +61,7 @@ export type Production = {
 };
 
 /** Versionado como os rascunhos: formato novo descarta payload antigo. */
-const KEY = "carousel-builder:producoes:v1";
+const KEY = "producoes:v1";
 
 /**
  * Teto de produções guardadas.
@@ -88,7 +89,7 @@ function isValid(value: unknown): value is Production {
 function load(): Production[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = readLocal(KEY);
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
     return Array.isArray(parsed) ? parsed.filter(isValid) : [];
@@ -127,7 +128,7 @@ function persist(next: Production[]) {
   cache = next.slice(0, MAX);
   if (typeof window !== "undefined") {
     try {
-      window.localStorage.setItem(KEY, JSON.stringify(cache));
+      writeLocal(KEY, JSON.stringify(cache));
     } catch {
       // Segue com o valor em memória: falhar aqui não pode derrubar a geração
       // que o usuário acabou de pagar.

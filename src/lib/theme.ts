@@ -12,9 +12,11 @@
  * para escura, que é pior que não ter modo escuro.
  */
 
+import { readLocal, writeLocal } from "@/lib/localKeys";
+
 export type Theme = "sistema" | "claro" | "escuro";
 
-const KEY = "carousel-builder:tema:v1";
+const KEY = "tema:v1";
 const DEFAULT: Theme = "sistema";
 
 const isTheme = (value: unknown): value is Theme =>
@@ -26,7 +28,7 @@ const listeners = new Set<() => void>();
 function read(): Theme {
   if (typeof window === "undefined") return DEFAULT;
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = readLocal(KEY);
     return isTheme(raw) ? raw : DEFAULT;
   } catch {
     return DEFAULT;
@@ -53,7 +55,7 @@ export function setTheme(theme: Theme): void {
 
   if (typeof window !== "undefined") {
     try {
-      window.localStorage.setItem(KEY, theme);
+      writeLocal(KEY, theme);
     } catch {
       // Segue com o valor em memória: o tema volta ao padrão no próximo
       // carregamento, o que é bem menos grave que travar a troca.

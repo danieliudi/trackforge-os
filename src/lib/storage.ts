@@ -3,9 +3,10 @@ import { brands } from "@/constants/brands";
 import { formatOptions, platformOptions, type Format, type Platform } from "@/constants/format";
 import { slideThemes, type SlideThemeId } from "@/constants/themes";
 import { apresentacaoSchema, carouselSchema, type Carousel } from "@/types/carousel";
+import { readLocal, writeLocal } from "@/lib/localKeys";
 
 /** Versionado: mudar o formato invalida o payload antigo em vez de quebrar. */
-const KEY = "carousel-builder:drafts:v1";
+const KEY = "drafts:v1";
 
 const VALID_FORMATS = new Set(formatOptions.map(({ id }) => id));
 const VALID_PLATFORMS = new Set(platformOptions.map(({ id }) => id));
@@ -67,7 +68,7 @@ export function loadState(): StoredState {
   if (typeof window === "undefined") return { drafts: [], activeId: null };
 
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = readLocal(KEY);
     if (!raw) return { drafts: [], activeId: null };
 
     const parsed: unknown = JSON.parse(raw);
@@ -97,7 +98,7 @@ export function saveState(state: StoredState): boolean {
   if (typeof window === "undefined") return false;
 
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(state));
+    writeLocal(KEY, JSON.stringify(state));
     return true;
   } catch {
     return false;
@@ -120,7 +121,7 @@ export function addDraft(draft: Draft): boolean {
   });
 }
 
-const CONTEXT_KEY = "carousel-builder:brand-context:v1";
+const CONTEXT_KEY = "brand-context:v1";
 
 /** Estratégia/posicionamento colado pelo usuário — um texto por marca. */
 export type BrandContext = Record<BrandId, string>;
@@ -131,7 +132,7 @@ export function loadBrandContext(): BrandContext {
   if (typeof window === "undefined") return EMPTY_CONTEXT;
 
   try {
-    const raw = window.localStorage.getItem(CONTEXT_KEY);
+    const raw = readLocal(CONTEXT_KEY);
     if (!raw) return EMPTY_CONTEXT;
 
     const parsed: unknown = JSON.parse(raw);
@@ -151,7 +152,7 @@ export function saveBrandContext(context: BrandContext): boolean {
   if (typeof window === "undefined") return false;
 
   try {
-    window.localStorage.setItem(CONTEXT_KEY, JSON.stringify(context));
+    writeLocal(CONTEXT_KEY, JSON.stringify(context));
     return true;
   } catch {
     return false;

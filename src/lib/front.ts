@@ -1,4 +1,5 @@
 import type { BrandId } from "@/constants/brands";
+import { readLocal, writeLocal } from "@/lib/localKeys";
 
 /**
  * A frente ativa, compartilhada entre as seções do app.
@@ -13,7 +14,7 @@ import type { BrandId } from "@/constants/brands";
  * ler localStorage direto no render dá divergência de hidratação.
  */
 
-const KEY = "carousel-builder:front:v1";
+const KEY = "front:v1";
 const DEFAULT: BrandId = "resibag";
 
 let cache: BrandId | null = null;
@@ -22,7 +23,7 @@ const listeners = new Set<() => void>();
 function read(): BrandId {
   if (typeof window === "undefined") return DEFAULT;
   try {
-    const raw = window.localStorage.getItem(KEY);
+    const raw = readLocal(KEY);
     return raw === "sanwey" || raw === "resibag" ? raw : DEFAULT;
   } catch {
     return DEFAULT;
@@ -47,7 +48,7 @@ export function getFrontServerSnapshot(): BrandId {
 export function setFront(brandId: BrandId): void {
   cache = brandId;
   try {
-    window.localStorage.setItem(KEY, brandId);
+    writeLocal(KEY, brandId);
   } catch {
     // Sessão sem localStorage ainda troca de frente — só não lembra depois.
   }
