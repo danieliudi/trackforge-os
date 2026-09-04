@@ -42,6 +42,11 @@ genuinamente novo.
 > a sugestão original fosse o núcleo: ela dispara em arquivos nomeáveis — rota
 > que gasta, `src/lib/crm.ts`, `proxy.ts` — e no Cursor isso é glob, que carrega a
 > regra na hora certa sem pesar em todo pedido.
+>
+> `70-quando-passar-pro-claude` **não espelha seção nenhuma daqui, de propósito**:
+> ela diz ao Cursor quando parar e passar a tarefa para o Claude Code, e só faz
+> sentido do lado de lá. É a única regra sem contraparte — se aparecer outra,
+> provavelmente é conteúdo que deveria estar neste arquivo também.
 
 ---
 

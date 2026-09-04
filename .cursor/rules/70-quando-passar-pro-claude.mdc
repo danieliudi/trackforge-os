@@ -18,8 +18,8 @@ que **dizer que parou, por quê, e o que ele deve pedir lá.**
 | Situação | Por quê |
 |---|---|
 | Mudança visual ou estrutural **sem mockup aprovado** | a regra é mockup antes de código, e o mockup se faz melhor lá |
-| Toca **migration, RLS, segredo, o pacote enviado ao CRM (`lib/crm.ts`) ou o proxy** | exige o passe de segurança e confirmação explícita dele antes de aplicar |
-| Toca **componente compartilhado** (`EsteiraShell`, `Button`, `lib/ui.ts`, `OutputPieces`, `outputBlocks`, `front.ts`) | o raio de alcance é a esteira inteira; um erro aqui quebra várias telas de uma vez |
+| Toca **migration, RLS, segredo, o pacote enviado ao CRM (`src/lib/crm.ts`) ou o proxy** | exige o passe de segurança e confirmação explícita dele antes de aplicar |
+| Toca **componente compartilhado** (`EsteiraShell`, `Button`, `src/lib/ui.ts`, `OutputPieces`, `outputBlocks`, `front.ts`) | o raio de alcance é a esteira inteira; um erro aqui quebra várias telas de uma vez |
 | Precisa **conferir dado de produção** ("isso é usado?", "quantas linhas tem?", "quebrou pra quem?") | você não alcança o banco; lá tem acesso de leitura |
 | É **varredura ou auditoria** em muitos arquivos | é trabalho de fôlego, feito melhor lá |
 | É **feature nova do zero**, ou planejamento | precisa de spec antes de código |
