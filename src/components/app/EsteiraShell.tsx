@@ -170,11 +170,13 @@ export function EsteiraShell({
   );
 }
 
-/** Container das telas de leitura — as que não são a bancada de três colunas. */
+/** Container das telas de leitura — mesma largura do painel Situação. */
 export function ShellPage({ children }: { children: ReactNode }) {
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6 py-6">{children}</div>
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-6 py-6 md:px-8">
+        {children}
+      </div>
     </div>
   );
 }

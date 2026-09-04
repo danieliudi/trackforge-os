@@ -46,7 +46,7 @@ export default function InstalacaoPage() {
       <ShellPage>
         <div className="flex flex-col gap-0.5">
           <span className={labelClass}>Instalação</span>
-          <h1 className="text-xl font-semibold tracking-tight text-ink">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">
             O que está ligado aqui
           </h1>
           <p className="text-[13px] text-mut">

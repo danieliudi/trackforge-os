@@ -4,14 +4,15 @@ import clsx from "clsx";
 import { useMemo } from "react";
 
 import { EsteiraShell, ShellPage, useFront } from "@/components/app/EsteiraShell";
+import { KpiCard } from "@/components/dashboard/KpiCard";
 import { factVerificationQueue } from "@/lib/factQueue";
-import { TIER_LABEL, getNormativeFacts, isPublishable } from "@/knowledge/provenance";
+import { TIER_LABEL, getNormativeFacts, isExpired, isPublishable } from "@/knowledge/provenance";
 import type { SourceTier } from "@/knowledge/provenance";
 import { focusRing, labelClass, panelClass } from "@/lib/ui";
 
 /**
- * A base de fatos, do jeito que o gerador a enxerga — e a fila do que falta
- * conferir, na mesma ordem de risco do `knowledge:audit`.
+ * A base de fatos — fila de risco no topo, todos os fatos abaixo.
+ * Densidade Situação (KPIs + listas em 1440px).
  */
 
 const TIER_STYLE: Record<SourceTier, string> = {
@@ -26,35 +27,51 @@ export default function FatosPage() {
   const facts = useMemo(() => getNormativeFacts(front), [front]);
   const queue = useMemo(() => factVerificationQueue(front), [front]);
   const publishable = facts.filter((fact) => isPublishable(fact));
+  const expired = facts.filter((fact) => isExpired(fact)).length;
+  const hardInQueue = queue.filter((fact) => fact.hasHardData).length;
+  const brandLabel = front === "resibag" ? "Resibag" : "Sanwey";
 
   return (
     <EsteiraShell>
       <ShellPage>
         <div className="flex flex-col gap-0.5">
           <span className={labelClass}>Base de fatos</span>
-          <h1 className="text-xl font-semibold tracking-tight text-ink">
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">
             O que a ferramenta pode afirmar
           </h1>
+          <p className="text-[13px] text-mut">
+            Só fonte primária vira número numa peça · {brandLabel}
+          </p>
         </div>
 
-        <div className={clsx(panelClass, "flex flex-col gap-1.5 px-4 py-3.5")}>
-          <p className="text-[13px] leading-relaxed text-ink2">
-            <strong className="font-semibold text-ink">
-              {publishable.length} de {facts.length}
-            </strong>{" "}
-            fatos podem virar número, data ou citação de norma numa peça
-            <span className="text-mut"> · n={facts.length}</span>.
-          </p>
-          <p className="text-[12px] leading-relaxed text-mut">
-            Os outros entram como contexto, mas o gerador não escreve o dado a partir
-            deles — e o auditor marca como “sem fonte” se ele aparecer mesmo assim.
-            Conferir um fato contra a fonte original é o que o move para cá.
-          </p>
-        </div>
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <KpiCard
+            title="Publicáveis"
+            value={String(publishable.length)}
+            subtitle={`de ${facts.length} · n=${facts.length}`}
+          />
+          <KpiCard
+            title="Fila de risco"
+            value={String(queue.length)}
+            subtitle="para conferir"
+            urgent={queue.length > 0}
+          />
+          <KpiCard
+            title="Vencidos"
+            value={String(expired)}
+            subtitle="revalidar já"
+          />
+          <KpiCard
+            title="Dado duro"
+            value={String(hardInQueue)}
+            subtitle="na fila"
+          />
+        </section>
 
         <div className="flex flex-col gap-2">
-          <span className={labelClass}>
-            Para conferir, em ordem de risco · n={queue.length}
+          <span className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-warn" aria-hidden />
+            <span className={labelClass}>Para conferir, em ordem de risco · n={queue.length}</span>
           </span>
 
           {queue.length === 0 ? (
@@ -65,7 +82,7 @@ export default function FatosPage() {
             queue.map((fact) => (
               <div
                 key={fact.id}
-                className={clsx(panelClass, "flex flex-col gap-2 px-3.5 py-3")}
+                className={clsx(panelClass, "flex flex-col gap-2 px-4 py-3.5")}
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-ink">
@@ -102,8 +119,11 @@ export default function FatosPage() {
           )}
         </div>
 
-        <div className="mt-2 flex flex-col gap-2">
-          <span className={labelClass}>Todos os fatos</span>
+        <div className="flex flex-col gap-2">
+          <span className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-ok" aria-hidden />
+            <span className={labelClass}>Todos os fatos · n={facts.length}</span>
+          </span>
 
           {facts.length === 0 ? (
             <p className="rounded-lg border border-dashed border-line px-3.5 py-3 text-[12.5px] text-mut">
@@ -113,7 +133,7 @@ export default function FatosPage() {
             facts.map((fact) => (
               <div
                 key={fact.id}
-                className={clsx(panelClass, "flex flex-col gap-2 px-3.5 py-3")}
+                className={clsx(panelClass, "flex flex-col gap-2 px-4 py-3.5")}
               >
                 <div className="flex flex-wrap items-start justify-between gap-2">
                   <p className="min-w-0 flex-1 text-[13px] leading-relaxed text-ink">

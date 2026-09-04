@@ -3,9 +3,10 @@
 import clsx from "clsx";
 import { Check, PenLine, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState, useSyncExternalStore } from "react";
+import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { EsteiraShell, ShellPage, useFront } from "@/components/app/EsteiraShell";
+import { KpiCard } from "@/components/dashboard/KpiCard";
 import { Button, IconButton } from "@/components/ui/Button";
 import { platformOptions } from "@/constants/format";
 import { formatCost } from "@/lib/costLog";
@@ -22,17 +23,8 @@ import { OUTPUT_META } from "@/types/outputs";
 /**
  * O que já foi produzido, e a porta de volta para ele.
  *
- * ANTES ESTA TELA MENTIA NO RÓTULO. Ela dizia "o que já foi montado" e listava
- * só rascunhos do editor de slides — porque a persistência do app nasceu para
- * o editor, quando peça era sinônimo de carrossel. Post de texto, legenda,
- * Reels, Stories e o artigo não apareciam aqui por um motivo pior que um bug de
- * listagem: não estavam salvos em lugar nenhum. O Daniel gerou peças, viu o
- * gasto no extrato e não encontrou o conteúdo.
- *
- * São duas listas de propósito, e não uma. Produção é o que saiu da bancada,
- * com artigo e peças juntos; rascunho é um carrossel aberto no editor, que tem
- * tema, logo e slides editados à mão. Misturar os dois numa lista só obrigaria
- * a inventar um denominador comum que não existe.
+ * Duas listas de propósito: produção (bancada) e rascunho (editor de slides).
+ * Densidade Situação — KPIs + listas em max-w-[1440px].
  */
 export default function PecasPage() {
   const router = useRouter();
@@ -56,22 +48,60 @@ export default function PecasPage() {
     router.push("/editor");
   };
 
-  const mine = (drafts ?? []).filter((draft) => draft.brandId === front);
-  const runs = productions.filter((run) => run.brandId === front);
+  const mine = useMemo(
+    () => (drafts ?? []).filter((draft) => draft.brandId === front),
+    [drafts, front],
+  );
+  const runs = useMemo(
+    () => productions.filter((run) => run.brandId === front),
+    [productions, front],
+  );
+  const unsent = runs.filter((run) => !run.sent).length;
+  const sent = runs.filter((run) => run.sent).length;
+  const brandLabel = front === "resibag" ? "Resibag" : "Sanwey";
 
   return (
     <EsteiraShell>
       <ShellPage>
         <div className="flex flex-col gap-0.5">
           <span className={labelClass}>Peças</span>
-          <h1 className="text-xl font-semibold tracking-tight text-ink">O que já foi produzido</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">
+            O que já foi produzido
+          </h1>
           <p className="text-[13px] text-mut">
-            Tudo que sai da bancada é salvo aqui sozinho, no seu navegador.
+            Tudo que sai da bancada é salvo aqui sozinho, neste navegador · {brandLabel}
           </p>
         </div>
 
-        <div className="mt-2 flex flex-col gap-2">
-          <span className={labelClass}>Da bancada</span>
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <KpiCard
+            title="Da bancada"
+            value={String(runs.length)}
+            subtitle="produções nesta frente"
+          />
+          <KpiCard
+            title="Não enviados"
+            value={String(unsent)}
+            subtitle="pagos, ainda na bancada"
+            urgent={unsent > 0}
+          />
+          <KpiCard
+            title="Na fila do CRM"
+            value={String(sent)}
+            subtitle="já enviados"
+          />
+          <KpiCard
+            title="No editor"
+            value={drafts === null ? "—" : String(mine.length)}
+            subtitle="carrosséis abertos"
+          />
+        </section>
+
+        <div className="flex flex-col gap-2">
+          <span className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-acc" aria-hidden />
+            <span className={labelClass}>Da bancada · n={runs.length}</span>
+          </span>
 
           {runs.length === 0 ? (
             <p className="rounded-lg border border-dashed border-line px-3.5 py-3 text-[12.5px] text-mut">
@@ -81,7 +111,7 @@ export default function PecasPage() {
             runs.map((run) => (
               <div
                 key={run.id}
-                className={clsx(panelClass, "flex flex-wrap items-center gap-3 px-3.5 py-3")}
+                className={clsx(panelClass, "flex flex-wrap items-center gap-3 px-4 py-3.5")}
               >
                 <span className="flex min-w-0 flex-1 flex-col gap-1">
                   <span className="flex flex-wrap items-baseline gap-2">
@@ -118,8 +148,13 @@ export default function PecasPage() {
           )}
         </div>
 
-        <div className="mt-3 flex flex-col gap-2">
-          <span className={labelClass}>Carrosséis no editor</span>
+        <div className="flex flex-col gap-2">
+          <span className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-ok" aria-hidden />
+            <span className={labelClass}>
+              Carrosséis no editor · n={drafts === null ? "…" : mine.length}
+            </span>
+          </span>
 
           {drafts === null ? null : mine.length === 0 ? (
             <p className="rounded-lg border border-dashed border-line px-3.5 py-3 text-[12.5px] text-mut">
@@ -129,7 +164,7 @@ export default function PecasPage() {
             mine.map((draft) => (
               <div
                 key={draft.id}
-                className={clsx(panelClass, "flex flex-wrap items-center gap-3 px-3.5 py-3")}
+                className={clsx(panelClass, "flex flex-wrap items-center gap-3 px-4 py-3.5")}
               >
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className="truncate text-[13px] font-medium text-ink">{draft.title}</span>

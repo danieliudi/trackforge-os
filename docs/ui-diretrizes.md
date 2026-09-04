@@ -33,9 +33,9 @@ Toda tela que não é a bancada de três colunas nem o editor de slides:
 1. **`EsteiraShell`** — nunca invente outra casca.
 2. **Cabeçalho de página:** `labelClass` (seção) → `h1` (título) → uma frase em
    `text-[13px] text-mut` (o que a tela decide).
-3. **Largura:** painéis e listagens densas usam `max-w-[1440px]` com
-   `px-6 py-6 md:px-8`. Listas longas de leitura (ex.: fatos completos) podem
-   ficar em `ShellPage` (`max-w-5xl`) — a densidade muda, o vocabulário visual não.
+3. **Largura:** `ShellPage` e painéis usam `max-w-[1440px]` com
+   `px-6 py-6 md:px-8` — a mesma largura da Situação. Não volte para `max-w-5xl`
+   em tela de listagem.
 4. **Superfície:** bloco agrupado = `panelClass` (`rounded-lg border border-line2 bg-surface`).
 5. **Vazio:** `border border-dashed border-line` + texto `text-[12.5px] text-mut`.
    Nunca invente um empty state decorado.
