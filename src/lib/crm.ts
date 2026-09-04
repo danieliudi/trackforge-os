@@ -13,10 +13,15 @@ import type { Carousel } from "@/types/carousel";
  * uma segunda fila daria duas caixas de entrada para a mesma decisão.
  *
  * O QUE FICA DE FORA DE PROPÓSITO: rascunho, fontes por afirmação e parecer do
- * auditor vão no `payload`, que o papel `agencia` não lê. Na entrega para a
- * agência entra só o texto aprovado. Foi a decisão de setembro/2026 — em vez de
- * mexer na política de leitura, o material sensível não vai para a tabela que
- * ela enxerga.
+ * auditor vão no `payload`, que o papel `agencia` não lê. Foi a decisão de
+ * setembro/2026 — em vez de mexer na política de leitura, o material sensível
+ * não vai para a tabela que ela enxerga.
+ *
+ * O QUE A AGÊNCIA PASSA A VER (após aprovação no CRM): título, brief com a
+ * lista de peças a produzir, URLs/créditos de imagem (anexos quando a URL é
+ * pública), artigo em texto, e o aprovador como responsável. O gateway do
+ * CRM monta isso em `publishMarketResearchIfApproved` — este arquivo só
+ * empacota o payload.
  */
 
 const ACTION_TYPE = "sugestao_peca_conteudo";
