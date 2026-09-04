@@ -1,0 +1,67 @@
+---
+description: Gate de build e varredura de navegador — o que bloqueia publicação e onde os roteiros de teste moram
+globs: package.json,eslint.config.mjs,scripts/**/*.mjs,scratchpad/**/*.mjs
+alwaysApply: false
+---
+
+# Gate e varredura
+
+Espelha as seções 11 e 12 do `CLAUDE.md`, que é a fonte. Mudou aqui, mude lá.
+
+## Hoje não existe nenhum gate bloqueante
+
+Conferido em 03/09/2026. Três coisas somadas:
+
+- `prebuild` roda só `scripts/check-knowledge.mjs`, que **sai sempre com 0** por
+  definição — é aviso, não gate (ver `50-conhecimento`).
+- `eslint.config.mjs` é o padrão do `eslint-config-next`, sem nenhuma regra
+  escolhida.
+- O Next deixou de rodar ESLint dentro do `build`.
+
+Resultado: **nada bloqueia entre escrever o código e publicar.** O TypeScript
+cobre parte da classe de erro de escopo; não cobre `rules-of-hooks`, condição
+que nunca faz o que parece, nem duplicação silenciosa. No repositório irmão essa
+conta apareceu como quatro telas mortas em três semanas, uma delas quinze dias
+no ar — todas erro de escopo puro, e quem pegou a de quinze dias foi o ESLint,
+não o build.
+
+**Regra.** O `prebuild` passa a rodar lint bloqueante junto com o aviso de
+drift. A configuração escolhe **só regra que pega erro de execução**:
+`rules-of-hooks`, escopo, duplicação silenciosa. **Zero regra de estilo, de
+propósito** — gate que apita por formatação vira gate ignorado. O ruído que não
+quebra nada (variável não usada, dependência incompleta) fica num script
+separado que não trava o build. O racional de cada bloco, e das regras que
+ficaram de fora, mora no cabeçalho do próprio arquivo de configuração.
+
+## Varredura em navegador: script, não rascunho
+
+O padrão de teste do repo é bom — as rotas custam dinheiro, então Playwright com
+interceptação de rota roda o app de verdade a custo zero. O problema é onde ele
+mora: os exemplos estão em `scratchpad/`, e pasta com esse nome ninguém trata
+como suíte.
+
+**Regra.** Os roteiros que valem viram `scripts/qa/`, com entrada no
+`package.json`: uma passada de rotas (todas as páginas, largura de desktop e de
+celular, reportando exceção não tratada, erro de console, tela em branco e
+rolagem horizontal) e uma passada de interação com dado interceptado. Playwright
+continua fora das dependências do projeto, instalado sob demanda, com o motivo
+escrito no `README` da pasta.
+
+**Armadilha específica deste repo.** `src/proxy.ts` protege tudo por senha
+quando `APP_PASSWORD` está definida. Varredura rodando com a variável ligada e
+sem a senha reporta N rotas limpas que são N telas de bloqueio.
+
+> Varredura que passa sem provar que renderizou a tela certa vale menos que
+> nada, porque dá sensação de cobertura.
+
+O roteiro confere o **texto renderizado** antes de declarar sucesso.
+
+**Quando rodar:** o gate acima roda sozinho em todo build. A varredura é para
+entrega que mexeu em mais de uma tela, e para rodada de auditoria.
+
+## Continua valendo
+
+Nunca reporte pronto com base só em typecheck — ver a definição de pronto em
+`00-nucleo`. O bug do `.stage{display:flex}` vencendo o atributo `hidden` passou
+por typecheck, por lint e por um teste que media a propriedade errada; só a
+captura de tela mostrou as telas empilhadas.

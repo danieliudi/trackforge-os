@@ -1,6 +1,6 @@
 ---
-description: Rotas de API — leitura do corpo, formato de erro, recibo de custo e o pacote que vai ao CRM
-globs: src/app/api/**/*.ts,src/constants/pricing.ts,src/lib/costLog.ts,src/lib/crm.ts
+description: Rotas de API — leitura do corpo, formato de erro, recibo de custo, pacote que vai ao CRM e a revisão de segurança
+globs: src/app/api/**/*.ts,src/constants/pricing.ts,src/lib/costLog.ts,src/lib/crm.ts,src/proxy.ts
 alwaysApply: false
 ---
 
@@ -73,3 +73,28 @@ achatamento local.
 `SUPABASE_SERVICE_ROLE_KEY` ignora RLS: nunca com prefixo `NEXT_PUBLIC_`, nunca
 no cliente, nunca em log. Não imprima valor de segredo nem para depurar — cite o
 nome da variável e se está definida.
+
+## Revisão de segurança — quarta lente, condicional
+
+Espelha a seção 13 do `CLAUDE.md`. **Dispara quando a mudança tocar:** rota que
+gasta dinheiro por chamada, o pacote que atravessa para o CRM, qualquer uso da
+chave de serviço do Supabase, a chave de agente do gateway, ou o comportamento
+de `src/proxy.ts` — que é exatamente o conjunto de arquivos em que esta regra
+anexa.
+
+**Só revisa.** Aprova, ou devolve achado específico no formato
+`arquivo:linha — o que está errado — o que deveria ser`. Nunca escreve no CRM
+por conta própria: isso exige confirmação explícita do Daniel.
+
+Checklist mínimo:
+
+- Nenhum segredo ganha o prefixo `NEXT_PUBLIC_`. A chave de serviço ignora RLS e
+  no navegador entregaria o banco inteiro a qualquer visitante. O `.env.example`
+  já avisa em maiúsculas; a revisão confere que continua verdade.
+- Leitura que usa a chave de serviço acontece **só no servidor**, e o que chega
+  ao cliente é o recorte, nunca a resposta crua.
+- Rota que gasta dinheiro não é acionável em laço sem limite, nem por requisição
+  que o usuário consegue repetir sem custo próprio.
+- Mudança no pacote que vai ao CRM declara **o que a agência passa a ver**.
+- A chave de agente identifica quem assina a sugestão. Trocar a chave é trocar a
+  autoria no CRM — não é detalhe de configuração.

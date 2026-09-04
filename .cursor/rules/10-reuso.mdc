@@ -32,7 +32,8 @@ aquilo. Quanto maior, mais caro é divergir.
 | Marcas, tagline canônica, política de logo | `src/constants/brands.ts` | 29 arquivos |
 | Formatos de saída (`OUTPUT_META`, `OUTPUT_SCHEMAS`, `outputBlocks`, `isCarousel`) | `src/types/outputs.ts` | 9 arquivos |
 | Log de custo (`entryFromCost`, `pushCostEntry`, `formatCost`) | `src/lib/costLog.ts` | 9 — assinatura `entryFromCost(cost, kind, title, failed?)` |
-| Erro de API legível (`readError`) e corpo do pedido (`jsonBody`) | `src/lib/apiError.ts` | tela e rotas |
+| Erro de API legível (`readError`) e corpo do pedido (`jsonBody`) | `src/lib/apiError.ts` | tela e as 11 rotas |
+| Chave de localStorage com herança da antiga (`readLocal`, `writeLocal`) | `src/lib/localKeys.ts` | os 5 stores — nenhum outro arquivo chama `localStorage` direto |
 | Rascunhos em localStorage | `src/lib/storage.ts` | 5 arquivos |
 
 ## Dois pontos que já quebraram este repo

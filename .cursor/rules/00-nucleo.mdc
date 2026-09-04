@@ -96,3 +96,33 @@ mostrou as telas empilhadas.
 - Antes de escrever código, leia o guia relevante em `node_modules/next/dist/docs/`:
   este Next.js tem mudanças que quebram o que você aprendeu (ex.: `middleware.ts`
   virou `proxy.ts`).
+
+## 6. Erro da sessão vira regra, não anedota
+
+Afirmação errada sua que chegou a mudar uma decisão do Daniel volta para o
+`CLAUDE.md` como correção **datada**, com a regra derivada, no lugar onde ela
+teria evitado o erro. Não some no histórico da conversa.
+
+Vale também para número: preço, contagem, limite de API e prazo se conferem
+**antes** de afirmar, e a origem da conferência entra junto.
+
+## 7. Não pare por mensagem que chega no meio do trabalho
+
+Instrução do Daniel, permanente. Chegou mensagem nova com trabalho em andamento:
+não pare nem peça confirmação.
+
+1. Dá para paralelizar sem conflito? Faça em paralelo, sem soltar o fio do que
+   já estava em curso.
+2. Não dá? Ponha na fila e siga até um ponto de corte natural.
+
+Só interrompa de verdade quando a mensagem for correção de rumo do que está em
+andamento, ou pedido explícito de parar.
+
+## 8. Este arquivo é "como construir", não "o que a ferramenta faz"
+
+Nenhuma seção descreve funcionalidade, de propósito. O mapa funcional (as 10
+páginas, as 13 rotas de API, a camada de conhecimento, a fronteira com o CRM)
+**ainda não existe** — a especificação dele está na seção 0 do `CLAUDE.md`.
+
+Enquanto não for escrito, quem precisar da resposta lê o código. Não mande
+ninguém abrir `docs/mapa-funcional.md`: esse arquivo não está lá.
