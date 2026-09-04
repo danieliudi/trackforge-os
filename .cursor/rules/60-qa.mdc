@@ -40,6 +40,24 @@ e membro duplicado de classe; repetir no ESLint só faz o gate demorar mais para
 dizer o mesmo. Sobraram condição constante, autocomparação, `else if` duplicado
 e `case` duplicado.
 
+## `npm run doc:check` — o documento tem que descrever o repo que existe
+
+Confere quatro coisas e sai com 1 na primeira divergência:
+
+- todo caminho citado no `CLAUDE.md` e nas regras daqui **existe**;
+- o espelho CLAUDE.md ↔ `.cursor/rules` bate **nos dois sentidos** (regra citada
+  tem arquivo, arquivo aparece no mapa);
+- o `globs` de cada regra casa com **algum** arquivo — glob morto é regra que
+  nunca dispara e ninguém percebe;
+- as contagens que o `CLAUDE.md` afirma (páginas, rotas) batem com o código.
+
+Nasceu porque em 03/09/2026 três documentos apontaram para arquivos que não
+estavam no repo, escritos por três agentes diferentes, todos passando porque a
+conferência era manual. **Rode depois de mexer em qualquer documento de regra.**
+
+Fica **fora do `prebuild`** de propósito: documento defasado não deve travar
+deploy. Ele avisa; o gate acima é que bloqueia.
+
 ## Varredura em navegador: script, não rascunho
 
 O padrão de teste do repo é bom — as rotas custam dinheiro, então Playwright com

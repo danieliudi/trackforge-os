@@ -33,6 +33,10 @@ genuinamente novo.
 > arquivo só. **Mudou uma regra aqui, mude lá também** — e vice-versa. Se os
 > dois discordarem, este vence e o outro é o que está errado.
 >
+> Depois de mexer em qualquer um dos dois, rode **`npm run doc:check`**: ele
+> confere caminho citado, espelho nos dois sentidos, glob morto e as contagens.
+> Não é gate — avisa e sai com 1, mas fica fora do `prebuild` (seção 0).
+>
 > O mapa: `00-nucleo` (fato, segredo, mockup, pronto, entrega, mais 0, 14 e 15)
 > ↔ seções 0, 2, 3, 4, 8, 10, 14 e 15 · `10-reuso` ↔ 1 e 7 · `20-telas` ↔ 4
 > mais a linha de cor/tema da 1 · `30-react` ↔ 6 · `40-api-e-custo` ↔ 3, 5 e 13
@@ -59,10 +63,14 @@ responder o que cada tela faz, porque nenhuma das 10 páginas tem comentário de
 propósito e o `README` descreve o produto, não a superfície. No repositório
 irmão, o mesmo buraco foi encontrado antes e resolvido com um mapa separado.
 
-**O mapa ainda não existe** — conferido em 03/09/2026: não há `docs/`, e
-`doc:check` não está no `package.json`. Esta seção é a especificação dele, não
-um ponteiro. Enquanto não for escrito, quem precisar da resposta lê o código
-mesmo; não mande ninguém abrir um arquivo que não está lá.
+**O mapa ainda não existe** — conferido em 03/09/2026: a pasta `docs/` existe,
+mas só com `docs/prompt-correcao-antt-6078.md`. Esta seção é a especificação do
+mapa, não um ponteiro. Enquanto não for escrito, quem precisar da resposta lê o
+código mesmo; não mande ninguém abrir um arquivo que não está lá.
+
+O `npm run doc:check` **já existe** e confere o que dá para conferir sem o mapa:
+todo caminho citado nos documentos de regra, o espelho CLAUDE.md ↔
+`.cursor/rules` nos dois sentidos, os globs de cada regra, e as contagens abaixo.
 
 Quando existir, mora em **`docs/mapa-funcional.md`** e cobre:
 

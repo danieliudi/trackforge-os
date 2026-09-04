@@ -12,7 +12,8 @@
     "knowledge:check": "node scripts/check-knowledge.mjs",
     "knowledge:sync": "node scripts/check-knowledge.mjs --sync",
     "knowledge:audit": "node scripts/audit-knowledge.mjs",
-    "lint:ruido": "eslint --max-warnings 0 || true"
+    "lint:ruido": "eslint --max-warnings 0 || true",
+    "doc:check": "node scripts/check-docs.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.42",
