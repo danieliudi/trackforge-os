@@ -126,7 +126,7 @@ const CONTEXT_KEY = "brand-context:v1";
 /** Estratégia/posicionamento colado pelo usuário — um texto por marca. */
 export type BrandContext = Record<BrandId, string>;
 
-const EMPTY_CONTEXT: BrandContext = { sanwey: "", resibag: "" };
+const EMPTY_CONTEXT: BrandContext = { sanwey: "", resibag: "", meu: "" };
 
 export function loadBrandContext(): BrandContext {
   if (typeof window === "undefined") return EMPTY_CONTEXT;
@@ -142,6 +142,7 @@ export function loadBrandContext(): BrandContext {
     return {
       sanwey: typeof data.sanwey === "string" ? data.sanwey : "",
       resibag: typeof data.resibag === "string" ? data.resibag : "",
+      meu: typeof data.meu === "string" ? data.meu : "",
     };
   } catch {
     return EMPTY_CONTEXT;

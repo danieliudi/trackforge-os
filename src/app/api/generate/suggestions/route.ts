@@ -2,6 +2,8 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
+import { brandIdSchema } from "@/constants/brands";
+
 import { priceUsage, type GenerationCost } from "@/constants/pricing";
 import { buildProhibitionsBlock } from "@/knowledge";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
@@ -9,7 +11,7 @@ import { jsonBody } from "@/lib/apiError";
 
 const requestSchema = z.object({
   context: z.string().min(1, "informe o contexto da marca"),
-  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
+  brandId: brandIdSchema.nullable().optional(),
 });
 
 const suggestionsSchema = z.object({

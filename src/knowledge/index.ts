@@ -1,6 +1,7 @@
 import type { BrandId } from "@/constants/brands";
 
 import { buildNormativeBlock } from "./provenance";
+import { meuKnowledge } from "./meu";
 import { resibagKnowledge } from "./resibag";
 import { sanweyKnowledge } from "./sanwey";
 import type { BrandKnowledge } from "./types";
@@ -10,6 +11,7 @@ export type { BrandKnowledge };
 const knowledgeByBrand: Record<BrandId, BrandKnowledge> = {
   resibag: resibagKnowledge,
   sanwey: sanweyKnowledge,
+  meu: meuKnowledge,
 };
 
 export function getBrandKnowledge(brandId: BrandId | null | undefined) {

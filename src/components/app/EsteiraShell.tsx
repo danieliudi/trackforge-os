@@ -90,7 +90,7 @@ export function EsteiraShell({
             focusRing,
           )}
         >
-          Esteira
+          Trackforge OS
         </Link>
 
         <span className="flex items-center gap-2">
@@ -113,17 +113,6 @@ export function EsteiraShell({
                 {label}
               </button>
             ))}
-            {/* Listada e desligada: esconder sugeriria que não é parte do
-                desenho; habilitar deixaria sair peça sem o auditor de fronteira. */}
-            {/* Recuada, mas legível: a 2,2:1 ela sumia, e item invisível não
-                comunica "em breve" — comunica que não existe. */}
-            <span
-              className="flex items-center gap-1.5 px-3 py-1 text-[12.5px] text-faint"
-              title="Em breve — falta o auditor de fronteira para esta frente"
-            >
-              Meu
-              <span className="font-mono text-[9px] uppercase tracking-wide">em breve</span>
-            </span>
           </span>
         </span>
 

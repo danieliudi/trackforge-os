@@ -21,7 +21,7 @@ import { NextResponse, type NextRequest } from "next/server";
  * convenção; a versão com o nome antigo funciona e avisa que vai sair.
  */
 
-const REALM = 'Basic realm="Esteira", charset="UTF-8"';
+const REALM = 'Basic realm="Trackforge OS", charset="UTF-8"';
 
 /** Comparação de tamanho fixo: sai depois de olhar tudo, não no primeiro erro. */
 function mesmaSenha(recebida: string, esperada: string): boolean {

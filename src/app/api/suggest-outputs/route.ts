@@ -2,6 +2,8 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
+import { brandIdSchema } from "@/constants/brands";
+
 import { priceUsage, SUGGESTION_MODEL, type GenerationCost } from "@/constants/pricing";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import { OUTPUT_META, outputSuggestionSchema, type OutputKind } from "@/types/outputs";
@@ -20,7 +22,7 @@ import { jsonBody } from "@/lib/apiError";
 
 const requestSchema = z.object({
   material: z.string().min(200, "material curto demais para sugerir formato"),
-  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
+  brandId: brandIdSchema.nullable().optional(),
 });
 
 const responseSchema = z.object({

@@ -1,4 +1,4 @@
-import type { BrandId } from "@/constants/brands";
+import { isPersonalFront, type BrandId } from "@/constants/brands";
 import { COMPANY_ID } from "@/lib/marketSignals";
 import { articleToMarkdown, type Article, type ChosenImage } from "@/types/article";
 import { isCarousel, outputBlocks, OUTPUT_META, type OutputKind } from "@/types/outputs";
@@ -17,6 +17,8 @@ import type { Carousel } from "@/types/carousel";
  * agência entra só o texto aprovado. Foi a decisão de setembro/2026 — em vez de
  * mexer na política de leitura, o material sensível não vai para a tabela que
  * ela enxerga.
+ *
+ * Frente Meu nunca chama isto: peça pessoal fica só no navegador.
  */
 
 const ACTION_TYPE = "sugestao_peca_conteudo";
@@ -92,6 +94,12 @@ function summarize({ article, pieces }: PublishInput): string {
 export async function publishForApproval(
   input: PublishInput,
 ): Promise<PublishResult> {
+  if (isPersonalFront(input.brandId)) {
+    throw new Error(
+      "a frente Meu não envia para o CRM — peça pessoal fica só neste navegador",
+    );
+  }
+
   const config = readConfig();
   if (!config) {
     throw new Error("o CRM não está configurado nesta instalação");
@@ -100,6 +108,7 @@ export async function publishForApproval(
   const { article, pieces, images, brandId, sourceLabel, contentId, campaignId, campaignName } =
     input;
   const flagged = pieces.reduce((total, piece) => total + piece.flagged, 0);
+  const companyId = brandId ? COMPANY_ID[brandId] ?? null : null;
 
   const response = await fetch(`${config.url}?action=create`, {
     method: "POST",
@@ -110,7 +119,7 @@ export async function publishForApproval(
       summary: summarize(input),
       // Frente obrigatória por decisão de desenho: peça sem dono de frente é o
       // que faz material de uma marca sair com dado de outra.
-      company_id: brandId ? COMPANY_ID[brandId] : null,
+      company_id: companyId,
       // Uma peça com afirmação sem fonte não é urgência, é pendência — mas
       // precisa saltar na fila, porque é a que exige decisão sua.
       priority: flagged > 0 ? "high" : "normal",
@@ -179,11 +188,14 @@ export type PendingPiece = {
 export async function listPendingPieces(
   brandId?: BrandId | null,
 ): Promise<PendingPiece[]> {
+  if (isPersonalFront(brandId)) return [];
+
   const config = readConfig();
   if (!config) return [];
 
   const params = new URLSearchParams({ action: "list", status: "pending", limit: "20" });
-  if (brandId) params.set("company_id", COMPANY_ID[brandId]);
+  const companyId = brandId ? COMPANY_ID[brandId] : undefined;
+  if (companyId) params.set("company_id", companyId);
 
   const response = await fetch(`${config.url}?${params}`, {
     headers: { "x-agent-key": config.key },

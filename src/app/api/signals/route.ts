@@ -1,10 +1,12 @@
 import { z } from "zod";
 
+import { brandIdSchema, isPersonalFront } from "@/constants/brands";
+
 import { fetchMarketSignals, signalsConfigured } from "@/lib/marketSignals";
 import { jsonBody } from "@/lib/apiError";
 
 const requestSchema = z.object({
-  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
+  brandId: brandIdSchema.nullable().optional(),
 });
 
 /**
@@ -24,6 +26,10 @@ export async function POST(request: Request) {
   const parsed = requestSchema.safeParse(body.value);
   if (!parsed.success) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
+  }
+
+  if (isPersonalFront(parsed.data.brandId)) {
+    return Response.json({ configured: false, signals: [], personal: true });
   }
 
   if (!signalsConfigured()) {
