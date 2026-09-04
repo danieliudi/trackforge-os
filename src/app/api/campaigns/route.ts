@@ -1,23 +1,21 @@
-import { fetchContentCampaigns, campaignsConfigured } from "@/lib/campaigns";
+import { fetchContentCampaigns } from "@/lib/campaigns";
 
 /**
- * Lista campanhas de canal Conteúdo/Digital pra seletor da bancada.
- * `configured: false` é resposta legítima — mesma lógica de `/api/publish`.
+ * Lista campanhas de conteúdo do CRM pro seletor da bancada.
+ *
+ * O `status` viaja junto com a lista porque lista vazia sozinha não diz nada:
+ * a bancada precisa distinguir "não há campanha de conteúdo cadastrada" de
+ * "não consigo perguntar ao CRM". Responder sempre 200 é deliberado — nenhum
+ * destes casos é falha do pedido, e o seletor trata os três.
  */
 export async function GET(request: Request) {
-  if (!campaignsConfigured()) {
-    return Response.json({ configured: false, campaigns: [] });
-  }
-
   const brand = new URL(request.url).searchParams.get("brandId");
   const brandId = brand === "sanwey" || brand === "resibag" ? brand : null;
+  const result = await fetchContentCampaigns(brandId);
 
-  try {
-    return Response.json({
-      configured: true,
-      campaigns: await fetchContentCampaigns(brandId),
-    });
-  } catch {
-    return Response.json({ configured: true, campaigns: [], unreachable: true });
-  }
+  return Response.json({
+    status: result.status,
+    campaigns: result.status === "ok" ? result.campaigns : [],
+    detail: result.status === "erro" ? result.detail : undefined,
+  });
 }

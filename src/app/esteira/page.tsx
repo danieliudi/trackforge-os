@@ -41,6 +41,18 @@ import { isCarousel, OUTPUT_META, type OutputKind, type PieceFailure } from "@/t
 type ContentCampaignOption = { id: string; name: string; channel: string };
 
 /**
+ * Por que o seletor de campanha guarda estado e não só a lista: lista vazia
+ * respondia igual para "ninguém cadastrou campanha de conteúdo", "o servidor
+ * não tem credencial do CRM" e "o CRM recusou" — e a tela dizia "crie no CRM"
+ * nos três, mandando o usuário arrumar o que não estava quebrado.
+ */
+type CampaignsState =
+  | { kind: "carregando" }
+  | { kind: "ok" }
+  | { kind: "sem-credencial" }
+  | { kind: "erro"; detail: string };
+
+/**
  * A bancada: origem à esquerda, artigo no centro, saídas à direita.
  *
  * SUBSTITUI OS QUATRO PASSOS, e o motivo é o trabalho real: o que se faz aqui é
@@ -98,6 +110,7 @@ export default function BancadaPage() {
   const [campaignId, setCampaignId] = useState<string | null>(null);
   const [campaignName, setCampaignName] = useState<string | null>(null);
   const [campaigns, setCampaigns] = useState<ContentCampaignOption[]>([]);
+  const [campaignsState, setCampaignsState] = useState<CampaignsState>({ kind: "carregando" });
   /** Path opcional da landing no QR (ex.: rapp). */
   const [qrPath, setQrPath] = useState("");
 
@@ -122,12 +135,35 @@ export default function BancadaPage() {
       })
       .catch(() => setCrmReady(false));
 
+    setCampaignsState({ kind: "carregando" });
     void fetch(`/api/campaigns?brandId=${brandId}`)
-      .then((response) => response.json())
-      .then((data) => {
+      .then(async (response) => {
+        if (!response.ok) {
+          setCampaigns([]);
+          setCampaignsState({
+            kind: "erro",
+            detail: await readError(response, "a lista de campanhas falhou"),
+          });
+          return;
+        }
+
+        const data = await response.json();
         setCampaigns(Array.isArray(data.campaigns) ? data.campaigns : []);
+        setCampaignsState(
+          data.status === "sem-credencial"
+            ? { kind: "sem-credencial" }
+            : data.status === "erro"
+              ? { kind: "erro", detail: String(data.detail ?? "o CRM não respondeu") }
+              : { kind: "ok" },
+        );
       })
-      .catch(() => setCampaigns([]));
+      .catch((cause: unknown) => {
+        setCampaigns([]);
+        setCampaignsState({
+          kind: "erro",
+          detail: cause instanceof Error ? cause.message : "falha de rede",
+        });
+      });
   }, [brandId]);
 
   // Agendado: setState síncrono dentro do efeito encadeia render antes da pintura.
@@ -895,10 +931,22 @@ export default function BancadaPage() {
                       </option>
                     ))}
                   </select>
-                  {campaigns.length === 0 ? (
+                  {campaignsState.kind === "carregando" ? (
+                    <span className="text-[11px] text-mut">Lendo campanhas do CRM…</span>
+                  ) : campaignsState.kind === "erro" ? (
+                    <span className="text-[11px] text-danger">
+                      Erro ao carregar campanhas: {campaignsState.detail}. A peça pode ser enviada
+                      sem campanha e vinculada no CRM depois.
+                    </span>
+                  ) : campaignsState.kind === "sem-credencial" ? (
+                    <span className="text-[11px] text-warn">
+                      Campanhas não carregadas: este servidor não tem SUPABASE_URL e
+                      SUPABASE_SERVICE_ROLE_KEY definidas.
+                    </span>
+                  ) : campaigns.length === 0 ? (
                     <span className="text-[11px] text-mut">
-                      Nenhuma campanha Conteúdo/Digital nesta frente. Crie no CRM (Fase 0) no
-                      formato frente-aaaamm-tema.
+                      Nenhuma campanha de conteúdo encontrada nesta frente. Crie no CRM em canal
+                      Conteúdo ou Digital, no formato frente-aaaamm-tema.
                     </span>
                   ) : null}
                 </label>
