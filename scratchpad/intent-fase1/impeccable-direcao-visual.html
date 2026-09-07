@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Impeccable — escolha o mundo visual · trackforge Fase 1</title>
+<style>
+  :root {
+    --page: #0c0c0f;
+    --ink: #f2f2f6;
+    --mut: #9a9aa8;
+    --line: #2a2a34;
+    --card: #14141a;
+    --sans: "Segoe UI", system-ui, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--page); color: var(--ink);
+    font: 14px/1.45 var(--sans); padding: 28px 24px 80px;
+  }
+  h1 { font-size: 26px; letter-spacing: -0.03em; margin: 0 0 6px; }
+  .meta { font: 600 10px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--mut); }
+  .lede { color: var(--mut); max-width: 68ch; margin: 10px 0 28px; }
+  .hand { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+  @media (max-width: 1100px) { .hand { grid-template-columns: 1fr; } }
+  .dir {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+    overflow: hidden; display: flex; flex-direction: column; min-height: 100%;
+  }
+  .dir.lead { border-color: #7c6ff0; box-shadow: 0 0 0 1px rgba(124,111,240,0.35); }
+  .kicker {
+    font: 700 10px/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase;
+    padding: 12px 14px 0; color: #a89bff;
+  }
+  .dir h2 { font-size: 18px; margin: 8px 14px 4px; letter-spacing: -0.02em; }
+  .thesis { color: var(--mut); margin: 0 14px 12px; font-size: 13px; }
+  .swatches { display: flex; gap: 6px; padding: 0 14px 12px; }
+  .swatch { width: 28px; height: 28px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.12); }
+  .preview {
+    margin: 0 14px; border-radius: 8px; border: 1px solid var(--line);
+    overflow: hidden; aspect-ratio: 16/10; position: relative;
+  }
+  .facts { padding: 12px 14px 16px; font-size: 12px; color: var(--mut); }
+  .facts strong { color: var(--ink); font-weight: 600; }
+  .risk { margin-top: 8px; color: #c4a484; }
+  .raise { margin-top: 6px; color: #9ed0b0; }
+  .actions { padding: 0 14px 16px; display: flex; gap: 8px; }
+  .btn {
+    appearance: none; border: 1px solid var(--line); background: #1c1c24; color: var(--ink);
+    border-radius: 8px; padding: 10px 12px; font: 600 13px var(--sans); cursor: pointer; flex: 1;
+  }
+  .btn.primary { background: #7c6ff0; border-color: #7c6ff0; color: #0b0b0e; }
+  .btn:hover { filter: brightness(1.08); }
+  .declined {
+    margin-top: 28px; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px;
+  }
+  @media (max-width: 900px) { .declined { grid-template-columns: 1fr 1fr; } }
+  .mini {
+    opacity: 0.72; background: #121218; border: 1px dashed var(--line); border-radius: 10px; padding: 12px;
+  }
+  .mini h3 { margin: 0 0 4px; font-size: 13px; }
+  .mini p { margin: 0; font-size: 11px; color: var(--mut); }
+  .footer-tools { margin-top: 28px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  .footer-tools .btn { flex: 0 0 auto; }
+
+  /* ===== Preview A: Night Desk (assigned) ===== */
+  .p-a { background: #0a0b10; color: #e8eaf2; font-family: "IBM Plex Sans", var(--sans); }
+  .p-a .bar { display:flex; align-items:center; gap:8px; padding:8px 10px; border-bottom:1px solid #232636; background:#0f1118; }
+  .p-a .mark { font:700 11px/1 "IBM Plex Mono", var(--mono); letter-spacing:0.12em; text-transform:uppercase; color:#9aa3c7; }
+  .p-a .chip { font:600 10px/1 var(--mono); padding:5px 8px; border-radius:999px; border:1px solid #2c3148; color:#c5cae0; }
+  .p-a .chip.on { background:#2a3358; border-color:#6e7cff; color:#fff; }
+  .p-a .tabs { display:flex; gap:10px; padding:6px 10px; border-bottom:1px solid #232636; font:600 10px/1 var(--sans); color:#7d85a5; }
+  .p-a .tabs .on { color:#e8eaf2; box-shadow: inset 0 -2px 0 #6e7cff; padding-bottom:4px; }
+  .p-a .plus { width:18px; height:18px; border-radius:50%; background:#6e7cff; color:#0a0b10; display:grid; place-items:center; font-weight:700; }
+  .p-a .body { padding:10px; display:grid; gap:8px; }
+  .p-a h3 { margin:0; font-size:13px; }
+  .p-a .sub { margin:0; font-size:9px; color:#8b92b0; }
+  .p-a .kpis { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; }
+  .p-a .kpi { background:#121522; border:1px solid #2a3050; border-radius:6px; padding:6px; }
+  .p-a .kpi.hot { border-color:#6e7cff; background:#171c33; }
+  .p-a .kpi b { display:block; font-size:14px; margin-top:2px; }
+  .p-a .kpi span { font-size:8px; color:#8b92b0; }
+  .p-a .status { font:500 9px/1.3 "IBM Plex Mono", var(--mono); color:#7ddea8; background:#0f1a16; border:1px solid #1e3a30; border-radius:4px; padding:5px 7px; }
+
+  /* ===== Preview B: Wire Service (pick) ===== */
+  .p-b { background:#f4f1ea; color:#1a1814; font-family: "Newsreader", Georgia, serif; }
+  .p-b .mast {
+    display:flex; justify-content:space-between; align-items:flex-end;
+    padding:8px 10px 6px; border-bottom:3px solid #1a1814;
+  }
+  .p-b .brand { font:800 16px/1 "Fraunces", Georgia, serif; letter-spacing:-0.03em; }
+  .p-b .edition { font:600 9px/1 var(--sans); letter-spacing:0.08em; text-transform:uppercase; }
+  .p-b .wire {
+    display:flex; gap:8px; padding:5px 10px; background:#1a1814; color:#f4f1ea;
+    font:600 9px/1 var(--sans); letter-spacing:0.04em; text-transform:uppercase;
+  }
+  .p-b .wire .live { color:#e24a2b; }
+  .p-b .cols { display:grid; grid-template-columns: 1.2fr 1fr 1fr 1fr; gap:8px; padding:8px 10px; }
+  .p-b .lead-col { border-right:1px solid #d5cfc3; padding-right:8px; }
+  .p-b .kicker2 { font:700 8px/1 var(--sans); letter-spacing:0.1em; text-transform:uppercase; color:#e24a2b; }
+  .p-b h3 { margin:4px 0; font-size:15px; letter-spacing:-0.02em; }
+  .p-b .deck { font:400 10px/1.35 var(--sans); color:#5a554c; margin:0; }
+  .p-b .stat { font-family: var(--sans); }
+  .p-b .stat b { display:block; font-size:18px; font-weight:800; }
+  .p-b .stat span { font-size:8px; text-transform:uppercase; letter-spacing:0.06em; color:#5a554c; }
+  .p-b .urgent { outline:2px solid #e24a2b; outline-offset:2px; }
+
+  /* ===== Preview C: Saville Catalog fused ===== */
+  .p-c { background:#0d0d0d; color:#f5f5f5; font-family: "Helvetica Neue", Helvetica, Arial, sans-serif; }
+  .p-c .top { display:flex; align-items:center; justify-content:space-between; padding:8px 10px; border-bottom:1px solid #222; }
+  .p-c .fac { font:500 10px/1 var(--mono); letter-spacing:0.16em; text-transform:uppercase; color:#aaa; }
+  .p-c .codes { display:flex; gap:3px; }
+  .p-c .codes i { display:block; width:10px; height:18px; }
+  .p-c .pulse { height:42px; margin:8px 10px; background:
+    repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 6px);
+    opacity:0.85; mask-image: linear-gradient(90deg, transparent, #000 10%, #000 90%, transparent);
+  }
+  .p-c .row { display:grid; grid-template-columns: 56px 1fr auto; gap:8px; align-items:center; padding:6px 10px; border-top:1px solid #1a1a1a; font-size:10px; }
+  .p-c .row.on { background:#161616; }
+  .p-c .row .n { font:500 10px var(--mono); color:#888; }
+  .p-c .row .label { letter-spacing:0.04em; }
+  .p-c .row .val { font:700 12px var(--mono); }
+  .p-c .hint { padding:6px 10px 10px; font-size:9px; color:#777; }
+</style>
+</head>
+<body>
+  <p class="meta">Impeccable · new-work · operate · seed b028dc0e · Fase 1 entrada+casca</p>
+  <h1>Escolha o mundo visual</h1>
+  <p class="lede">
+    A Intent fechou estrutura e copy. Agora a Impeccable propõe o <strong>mundo</strong> —
+    tipografia, material, ritmo, motion — fundido com a tarefa real (orientar → saltar).
+    Sem código no app até você travar uma direção. Contagens nos previews são ilustrativas.
+  </p>
+
+  <div class="hand">
+    <!-- ASSIGNED -->
+    <article class="dir lead" id="assigned">
+      <div class="kicker">The roll</div>
+      <h2>Night Desk Editorial</h2>
+      <p class="thesis">Mesa noturna de edição: escuro preciso, fila de publicação como manchete operacional, frente como edição ativa.</p>
+      <div class="swatches">
+        <span class="swatch" style="background:#0a0b10"></span>
+        <span class="swatch" style="background:#121522"></span>
+        <span class="swatch" style="background:#6e7cff"></span>
+        <span class="swatch" style="background:#7ddea8"></span>
+        <span class="swatch" style="background:#e8eaf2"></span>
+      </div>
+      <div class="preview p-a" aria-label="Preview Night Desk">
+        <div class="bar">
+          <span class="mark">trackforge</span>
+          <span class="chip on">Resibag</span>
+          <span class="chip">Sanwey</span>
+          <span class="chip">Meu</span>
+        </div>
+        <div class="tabs">
+          <span class="on">Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span><span>Custos</span>
+        </div>
+        <div class="body">
+          <div>
+            <h3>Situação · Resibag</h3>
+            <p class="sub">O que precisa de decisão · set/2026</p>
+          </div>
+          <div class="status">status · crm online · 3 aguardando · custo mês visível</div>
+          <div class="kpis">
+            <div class="kpi hot"><span>fila crm</span><b>3</b></div>
+            <div class="kpi"><span>não enviados</span><b>2</b></div>
+            <div class="kpi"><span>sem fonte</span><b>1</b></div>
+            <div class="kpi"><span>custo</span><b>12,40</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="facts">
+        <div><strong>Materiais:</strong> vidro escuro, mono para status, grotesk quieta no corpo.</div>
+        <div><strong>1º viewport:</strong> chrome + status line + 4 KPIs; urgência por borda + peso, não só cor.</div>
+        <div class="raise"><strong>Raise · Phosphor:</strong> estados do sistema se anunciam numa linha de status tipada.</div>
+        <div class="raise"><strong>Raise · Datamatics:</strong> densidade tabular sem strobe; reduced-motion = still.</div>
+        <div class="raise"><strong>Raise · Dive:</strong> progressive disclosure — superfície → detalhe por profundidade.</div>
+        <div class="risk"><strong>Risco:</strong> escuro demais pode parecer “dev tool”; precisa calor humano nos empty states.</div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" onclick="choose('Night Desk Editorial')">Travar esta</button>
+      </div>
+    </article>
+
+    <!-- PICK -->
+    <article class="dir" id="pick">
+      <div class="kicker">Impeccable’s pick</div>
+      <h2>Wire Service</h2>
+      <p class="thesis">Sala de telex/jornal: masthead, edição do dia, urgência tipográfica. A casa lê como boletim — não como dashboard genérico.</p>
+      <div class="swatches">
+        <span class="swatch" style="background:#f4f1ea"></span>
+        <span class="swatch" style="background:#1a1814"></span>
+        <span class="swatch" style="background:#e24a2b"></span>
+        <span class="swatch" style="background:#d5cfc3"></span>
+      </div>
+      <div class="preview p-b" aria-label="Preview Wire Service">
+        <div class="mast">
+          <div class="brand">trackforge</div>
+          <div class="edition">Edição · Resibag</div>
+        </div>
+        <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span>+</span><span>Fatos</span><span>Custos</span></div>
+        <div class="cols">
+          <div class="lead-col">
+            <div class="kicker2">Prioridade</div>
+            <h3>3 na fila do CRM</h3>
+            <p class="deck">Esperando aprovação. O resto da bancada segue.</p>
+          </div>
+          <div class="stat urgent"><span>Não enviados</span><b>2</b></div>
+          <div class="stat"><span>Sem fonte</span><b>1</b></div>
+          <div class="stat"><span>Custo mês</span><b>12</b></div>
+        </div>
+      </div>
+      <div class="facts">
+        <div><strong>Materiais:</strong> papel quente, preto tipográfico, vermelho de urgência, serif de display + sans de UI.</div>
+        <div><strong>1º viewport:</strong> masthead da frente + fio “live” + lead story = maior prioridade.</div>
+        <div class="risk"><strong>Risco:</strong> também é o caminho que mais runs nesta categoria escolhem — familiar e eficaz.</div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" onclick="choose('Wire Service')">Travar esta</button>
+      </div>
+    </article>
+
+    <!-- CHALLENGER competitive -->
+    <article class="dir" id="challenger-saville">
+      <div class="kicker">Challenger · competitive</div>
+      <h2>Catalog Sleeve</h2>
+      <p class="thesis">Identidade de catálogo Saville fundida: matte black, plot de pulso, frentes como códigos de cor — rótulos sempre legíveis (clareza vence).</p>
+      <div class="swatches">
+        <span class="swatch" style="background:#0d0d0d"></span>
+        <span class="swatch" style="background:#ffffff"></span>
+        <span class="swatch" style="background:#e56515"></span>
+        <span class="swatch" style="background:#2f6fed"></span>
+        <span class="swatch" style="background:#c4ff4d"></span>
+      </div>
+      <div class="preview p-c" aria-label="Preview Catalog Sleeve">
+        <div class="top">
+          <span class="fac">fac 001 · trackforge</span>
+          <div class="codes" title="Frente Resibag">
+            <i style="background:#e56515"></i><i style="background:#2f6fed"></i><i style="background:#c4ff4d"></i>
+          </div>
+        </div>
+        <div class="pulse" aria-hidden="true"></div>
+        <div class="row on"><span class="n">01</span><span class="label">Situação · fila CRM</span><span class="val">3</span></div>
+        <div class="row"><span class="n">02</span><span class="label">Não enviados</span><span class="val">2</span></div>
+        <div class="row"><span class="n">03</span><span class="label">Sem fonte</span><span class="val">1</span></div>
+        <div class="row"><span class="n">04</span><span class="label">Custo do mês</span><span class="val">12.40</span></div>
+        <div class="hint">código de cor = frente · texto sempre presente</div>
+      </div>
+      <div class="facts">
+        <div><strong>Caso:</strong> ousadia 2026 alta; identificação forte para quem curte craft gráfico.</div>
+        <div><strong>Clareza:</strong> segura se cada linha tiver label textual (não só bloco de cor).</div>
+        <div class="risk"><strong>Risco:</strong> pode intimidar; empty states precisam de humanidade.</div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" onclick="choose('Catalog Sleeve')">Travar esta</button>
+      </div>
+    </article>
+  </div>
+
+  <p class="meta" style="margin-top:28px;">Declined · compactos (doação já absorvida no Roll)</p>
+  <div class="declined">
+    <div class="mini"><h3>Phosphor Terminal</h3><p>Declined · doou a status line tipada.</p></div>
+    <div class="mini"><h3>Datamatics</h3><p>Declined · doou densidade sem strobe.</p></div>
+    <div class="mini"><h3>Mesophotic Dive</h3><p>Declined · doou progressive disclosure.</p></div>
+    <div class="mini"><h3>Orizuru / Racing</h3><p>Declined / low fit · fora do Operate diário.</p></div>
+  </div>
+
+  <div class="footer-tools">
+    <button class="btn" type="button" onclick="choose('Canon · ferramenta Operate limpa 2026')">Canon (padrão de categoria)</button>
+    <button class="btn" type="button" onclick="alert('Diga no chat: reroll safer | reroll | reroll bolder')">Re-roll…</button>
+    <span class="meta" id="choice">Nenhuma travada ainda</span>
+  </div>
+
+  <script>
+    function choose(name) {
+      document.getElementById('choice').textContent = 'Escolha: ' + name + ' — confirme no chat com esse nome.';
+      try { navigator.clipboard.writeText(name); } catch (e) {}
+    }
+  </script>
+</body>
+</html>
