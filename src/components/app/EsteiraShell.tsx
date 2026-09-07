@@ -4,9 +4,10 @@ import clsx from "clsx";
 import { Monitor, Moon, Sun } from "lucide-react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import { useSyncExternalStore, type ReactNode } from "react";
+import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
 
 import { brandOptions, type BrandId } from "@/constants/brands";
+import { esperandoDecisao } from "@/lib/dashboardStats";
 import {
   formatCost,
   getCostLogServerSnapshot,
@@ -19,6 +20,11 @@ import {
   setFront,
   subscribeFront,
 } from "@/lib/front";
+import {
+  getProductionsServerSnapshot,
+  getProductionsSnapshot,
+  subscribeProductions,
+} from "@/lib/produced";
 import {
   getThemeServerSnapshot,
   getThemeSnapshot,
@@ -84,6 +90,54 @@ export function EsteiraShell({
   const month = entries
     .filter((entry) => new Date(entry.at).getMonth() === agora.getMonth())
     .reduce((total, entry) => total + entry.usd, 0);
+
+  /**
+   * O que espera decisão, na faixa, em toda tela.
+   *
+   * A fila do CRM vem da rota; o resto sai do localStorage que já está em
+   * memória. `null` enquanto não respondeu, e `null` quando o CRM não está
+   * configurado — fila desconhecida não é fila vazia, e chutar zero aqui faria a
+   * faixa dizer "em dia" para quem tem três peças esperando aprovação.
+   */
+  const productions = useSyncExternalStore(
+    subscribeProductions,
+    getProductionsSnapshot,
+    getProductionsServerSnapshot,
+  );
+  /**
+   * Três estados, não dois. "Não sei" precisa ser distinguível de "zero": a
+   * fila fora do ar com a faixa dizendo "em dia" é uma afirmação falsa no lugar
+   * mais visível da casca, e falsa justamente sobre o que exige decisão sua.
+   */
+  const [fila, setFila] = useState<
+    { estado: "ok"; total: number } | { estado: "sem-crm" } | { estado: "fora-do-ar" }
+  >({ estado: "sem-crm" });
+
+  useEffect(() => {
+    let vivo = true;
+    const timer = setTimeout(() => {
+      void fetch(`/api/publish?brandId=${front}`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (!vivo) return;
+          if (data.configured !== true) setFila({ estado: "sem-crm" });
+          else if (data.unreachable === true) setFila({ estado: "fora-do-ar" });
+          else setFila({ estado: "ok", total: Array.isArray(data.pending) ? data.pending.length : 0 });
+        })
+        // Rede caída é fila fora do ar, não instalação sem CRM.
+        .catch(() => vivo && setFila({ estado: "fora-do-ar" }));
+    }, 0);
+    return () => {
+      vivo = false;
+      clearTimeout(timer);
+    };
+  }, [front]);
+
+  const espera = esperandoDecisao({
+    productions,
+    brandId: front,
+    pendingCount: fila.estado === "ok" ? fila.total : null,
+  });
 
   const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
   const ThemeIcon = theme === "claro" ? Sun : theme === "escuro" ? Moon : Monitor;
@@ -156,12 +210,27 @@ export function EsteiraShell({
 
       {/* ══ FAIXA ══ preta nos dois temas; LIVE é status, não rota */}
       <nav className="flex shrink-0 flex-wrap items-center gap-x-3.5 gap-y-1 bg-band px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-band-ink">
-        {/* Marca de edição do wire service, não indicador de conexão: esta casca
-            não observa nada em tempo real, e um ponto que promete isso sem
-            observar seria número inventado em forma de enfeite. */}
-        <span className="text-urgent" aria-hidden="true">
-          • Live
-        </span>
+        {/* O ponto diz o que espera VOCÊ, com a mesma regra do glifo da home
+            (`esperandoDecisao`). Vermelho só quando há algo: cor de urgência sem
+            urgência treina a pessoa a ignorar a cor. */}
+        <Link
+          href="/"
+          className={clsx(
+            "uppercase tracking-[0.06em] transition",
+            focusRing,
+            espera
+              ? "text-urgent"
+              : fila.estado === "fora-do-ar"
+                ? "opacity-100"
+                : "opacity-70 hover:opacity-100",
+          )}
+        >
+          {espera
+            ? `• ${espera.total} ${espera.total === 1 ? "espera" : "esperam"} · ${espera.rotulo}`
+            : fila.estado === "fora-do-ar"
+              ? "• fila indisponível"
+              : "• em dia"}
+        </Link>
 
         {SECTIONS.map(({ href, label }, i) => {
           const active =

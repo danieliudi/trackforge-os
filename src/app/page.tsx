@@ -8,6 +8,7 @@ import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
 import { brandLabel } from "@/constants/brands";
 import {
   buildDashboardStats,
+  esperandoDecisao,
   monthsWithCost,
   type PendingPieceRow,
 } from "@/lib/dashboardStats";
@@ -179,7 +180,15 @@ export default function SituacaoPage() {
    * (item 3). Além de ser o combinado, evita o glifo virar "R$ 0,00" a 200px,
    * que atropela a legenda e transforma a manchete da casa num extrato.
    */
-  const padrao = celulas.find((c) => c.peso > 0)?.id ?? null;
+  // A ordem NÃO mora aqui: mora em `esperandoDecisao`, que a faixa da casca
+  // também usa. Duas telas respondendo "o que espera decisão" com regras
+  // separadas é como uma passa a mentir sem ninguém notar.
+  const padrao =
+    esperandoDecisao({
+      productions,
+      brandId,
+      pendingCount: crmConfigured && !filaForaDoAr ? stats.pendingCount : null,
+    })?.id ?? null;
   const ativa = escolhida ?? padrao;
   const nadaPedindo = padrao === null && escolhida === null;
   const cell = celulas.find((c) => c.id === ativa) ?? null;

@@ -171,3 +171,44 @@ export function monthsWithCost(entries: CostEntry[]): { year: number; month: num
       label: `${MONTHS[month]}/${year}`,
     }));
 }
+
+/**
+ * O que espera decisão sua, e qual é o primeiro da fila.
+ *
+ * POR QUE ISTO É UMA FUNÇÃO E NÃO DUAS CONTAS: a faixa da casca e o glifo da
+ * home respondem à MESMA pergunta em telas diferentes. Se cada uma ordenasse por
+ * conta própria, um dia a faixa diria "2 esperando" e a home mostraria outra
+ * coisa — e aí nenhuma das duas seria confiável. A ordem mora aqui.
+ *
+ * Custo NÃO entra: é leitura, não pendência. Uma conta alta pede atenção sua
+ * noutro momento, não interrompe o trabalho.
+ *
+ * Devolve `null` quando nada pede decisão — o que é uma resposta, não a ausência
+ * de uma: é o que autoriza a faixa a dizer "em dia".
+ */
+export type EsperaId = "fila" | "nao-enviados" | "sem-fonte";
+
+export type Espera = {
+  id: EsperaId;
+  /** Quantos itens, para o glifo e para a faixa. */
+  total: number;
+  /** Rótulo curto, na voz da faixa. */
+  rotulo: string;
+};
+
+export function esperandoDecisao(input: {
+  productions: Production[];
+  brandId: BrandId;
+  /** `null` quando o CRM não está configurado: fila desconhecida ≠ fila vazia. */
+  pendingCount: number | null;
+}): Espera | null {
+  const mine = productionsForFront(input.productions, input.brandId);
+  const naoEnviados = mine.filter((item) => !item.sent).length;
+  const semFonte = mine.filter((item) => flaggedClaimTotal(item) > 0).length;
+
+  const fila = input.pendingCount ?? 0;
+  if (fila > 0) return { id: "fila", total: fila, rotulo: "na fila do CRM" };
+  if (naoEnviados > 0) return { id: "nao-enviados", total: naoEnviados, rotulo: "não enviados" };
+  if (semFonte > 0) return { id: "sem-fonte", total: semFonte, rotulo: "sem fonte" };
+  return null;
+}

@@ -199,6 +199,11 @@ export async function listPendingPieces(
 
   const response = await fetch(`${config.url}?${params}`, {
     headers: { "x-agent-key": config.key },
+    // A casca passou a mostrar o que espera decisão, então esta leitura acontece
+    // em TODA tela e não só na home. 5 minutos de cache tornam isso uma leitura
+    // por sessão em vez de uma por navegação — e a fila de aprovação não muda
+    // em segundos: quem aprova é gente, do outro lado, no CRM.
+    next: { revalidate: 300 },
   });
   if (!response.ok) return [];
 
