@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wire Service × Catalog Sleeve — aprofundamento</title>
+<style>
+  :root {
+    --page: #111114;
+    --ink: #f3f3f7;
+    --mut: #9b9ba8;
+    --line: #2c2c36;
+    --card: #18181f;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--page); color: var(--ink); font: 14px/1.45 var(--sans); }
+  header.top {
+    position: sticky; top: 0; z-index: 5;
+    backdrop-filter: blur(10px); background: rgba(17,17,20,0.88);
+    border-bottom: 1px solid var(--line);
+    padding: 14px 24px; display: flex; gap: 16px; flex-wrap: wrap; align-items: baseline;
+  }
+  header.top h1 { font-size: 18px; margin: 0; letter-spacing: -0.02em; }
+  header.top .meta { font: 600 10px/1.4 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--mut); }
+  header.top nav { margin-left: auto; display: flex; gap: 8px; flex-wrap: wrap; }
+  header.top a {
+    color: var(--ink); text-decoration: none; font: 600 12px/1 var(--sans);
+    border: 1px solid var(--line); padding: 8px 10px; border-radius: 8px;
+  }
+  header.top a:hover { border-color: #888; }
+  .wrap { padding: 24px; max-width: 1400px; margin: 0 auto; }
+  .lede { color: var(--mut); max-width: 70ch; margin: 0 0 28px; }
+  .note { border-left: 2px solid #c4a484; padding-left: 12px; color: #c4a484; font-size: 13px; margin: 0 0 28px; }
+
+  .world { margin-bottom: 56px; }
+  .world-head {
+    display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
+    align-items: end; margin-bottom: 16px; padding-bottom: 12px; border-bottom: 1px solid var(--line);
+  }
+  .world-head h2 { margin: 0; font-size: 28px; letter-spacing: -0.03em; }
+  .world-head p { margin: 6px 0 0; color: var(--mut); max-width: 52ch; }
+  .swatches { display: flex; gap: 6px; }
+  .swatch { width: 26px; height: 26px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.15); }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 1000px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--card); border: 1px solid var(--line); border-radius: 12px; overflow: hidden;
+  }
+  .panel-cap {
+    font: 600 10px/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase;
+    color: var(--mut); padding: 10px 12px; border-bottom: 1px solid var(--line);
+  }
+  .frame { aspect-ratio: 16/10; overflow: hidden; position: relative; }
+  .frame.tall { aspect-ratio: 4/5; }
+  .blurb { padding: 12px; font-size: 12px; color: var(--mut); }
+  .blurb strong { color: var(--ink); }
+
+  .compare {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 12px;
+  }
+  @media (max-width: 900px) { .compare { grid-template-columns: 1fr; } }
+  table.matrix { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table.matrix th, table.matrix td {
+    text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top;
+  }
+  table.matrix th { font: 600 10px/1.3 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--mut); }
+
+  .lockrow { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .btn {
+    appearance: none; border: 1px solid var(--line); background: #22222c; color: var(--ink);
+    border-radius: 8px; padding: 12px 14px; font: 600 13px var(--sans); cursor: pointer;
+  }
+  .btn.primary { background: #f3f3f7; color: #111; border-color: #f3f3f7; }
+  .btn:hover { filter: brightness(1.06); }
+
+  /* ========== WIRE SERVICE SYSTEM ========== */
+  .ws {
+    --paper: #f3efe6;
+    --ink2: #16140f;
+    --rule: #1a1814;
+    --muted2: #5c574d;
+    --urgent: #d63a22;
+    --band: #16140f;
+    background: var(--paper); color: var(--ink2);
+    font-family: Georgia, "Times New Roman", serif;
+    height: 100%; display: flex; flex-direction: column;
+  }
+  .ws.narrow { font-size: 12px; }
+  .ws .mast {
+    display: flex; justify-content: space-between; align-items: flex-end;
+    padding: 10px 12px 8px; border-bottom: 3px solid var(--rule);
+  }
+  .ws .brand {
+    font-family: "Fraunces", Georgia, serif; font-weight: 800; font-size: 20px;
+    letter-spacing: -0.04em; line-height: 1;
+  }
+  .ws .edition {
+    font-family: var(--sans); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.1em; text-transform: uppercase;
+  }
+  .ws .dateline {
+    font-family: var(--sans); font-size: 9px; color: var(--muted2);
+    padding: 4px 12px; border-bottom: 1px solid #d8d1c3;
+    display: flex; justify-content: space-between;
+  }
+  .ws .wire {
+    display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+    padding: 6px 12px; background: var(--band); color: var(--paper);
+    font-family: var(--sans); font-size: 9px; font-weight: 700;
+    letter-spacing: 0.06em; text-transform: uppercase;
+  }
+  .ws .wire .live { color: #ff6b52; }
+  .ws .wire .plus {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--paper); color: var(--band);
+    display: grid; place-items: center; font-size: 12px; font-weight: 800;
+  }
+  .ws .body { padding: 10px 12px; flex: 1; display: flex; flex-direction: column; gap: 10px; }
+  .ws .headline-block { border-bottom: 1px solid #d8d1c3; padding-bottom: 8px; }
+  .ws .kicker {
+    font-family: var(--sans); font-size: 9px; font-weight: 800;
+    letter-spacing: 0.12em; text-transform: uppercase; color: var(--urgent);
+  }
+  .ws h3 { margin: 4px 0; font-size: 22px; letter-spacing: -0.03em; line-height: 1.1; }
+  .ws .deck { margin: 0; font-family: var(--sans); font-size: 11px; color: var(--muted2); line-height: 1.35; }
+  .ws .stats {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+  }
+  .ws .stat {
+    font-family: var(--sans); border-top: 2px solid var(--rule); padding-top: 6px;
+  }
+  .ws .stat.urgent { box-shadow: inset 0 0 0 2px var(--urgent); padding: 6px; border-top: 0; }
+  .ws .stat b { display: block; font-size: 22px; font-weight: 800; letter-spacing: -0.03em; }
+  .ws .stat span { font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted2); }
+  .ws .columns { display: grid; grid-template-columns: 1.3fr 1fr 1fr; gap: 10px; }
+  .ws .col { border-top: 1px solid #d8d1c3; padding-top: 6px; }
+  .ws .col h4 {
+    margin: 0 0 6px; font-family: var(--sans); font-size: 10px; font-weight: 800;
+    letter-spacing: 0.08em; text-transform: uppercase;
+  }
+  .ws .item { font-family: var(--sans); font-size: 11px; padding: 5px 0; border-bottom: 1px dotted #cfc7b8; }
+  .ws .item em { display: block; font-style: normal; color: var(--muted2); font-size: 9px; }
+  .ws .empty {
+    border: 2px dashed #cfc7b8; padding: 16px; text-align: center;
+  }
+  .ws .empty h3 { font-size: 18px; }
+  .ws .cta {
+    display: inline-block; margin-top: 8px; font-family: var(--sans); font-size: 11px; font-weight: 800;
+    background: var(--rule); color: var(--paper); padding: 8px 12px; text-decoration: none;
+  }
+  .ws .callout {
+    font-family: var(--sans); font-size: 11px; background: #efe6d6; border: 1px solid #d8d1c3;
+    padding: 8px 10px;
+  }
+  .ws .callout b { display: block; font-size: 11px; margin-bottom: 2px; }
+  .ws.variant-stark { --paper: #faf8f4; --urgent: #b42318; }
+  .ws.variant-ink { --paper: #ebe4d6; --band: #0e0d0b; }
+
+  /* ========== CATALOG SLEEVE SYSTEM ========== */
+  .cs {
+    --void: #0a0a0a;
+    --fg: #f2f2f2;
+    --dim: #7a7a7a;
+    --hair: #1f1f1f;
+    --a: #e56515;
+    --b: #3d7cff;
+    --c: #c8ff3d;
+    background: var(--void); color: var(--fg);
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    height: 100%; display: flex; flex-direction: column;
+  }
+  .cs .top {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 12px; border-bottom: 1px solid var(--hair);
+  }
+  .cs .fac {
+    font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--dim);
+  }
+  .cs .codes { display: flex; gap: 3px; align-items: center; }
+  .cs .codes i { width: 9px; height: 20px; display: block; }
+  .cs .codes span {
+    font-size: 10px; letter-spacing: 0.06em; margin-left: 8px; color: var(--fg);
+  }
+  .cs .nav {
+    display: flex; gap: 14px; padding: 8px 12px; border-bottom: 1px solid var(--hair);
+    font-size: 10px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim);
+  }
+  .cs .nav .on { color: var(--fg); }
+  .cs .nav .plus {
+    width: 18px; height: 18px; border-radius: 50%; background: var(--fg); color: var(--void);
+    display: grid; place-items: center; font-weight: 700; font-size: 12px;
+  }
+  .cs .pulse-wrap { padding: 10px 12px 4px; }
+  .cs .pulse {
+    height: 48px;
+    background: repeating-linear-gradient(90deg, #fff 0 1px, transparent 1px 5px);
+    opacity: 0.9;
+    mask-image: radial-gradient(ellipse at center, #000 40%, transparent 75%);
+    -webkit-mask-image: radial-gradient(ellipse at center, #000 40%, transparent 75%);
+  }
+  .cs .pulse.soft {
+    height: 28px; opacity: 0.45;
+    mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+  }
+  .cs .list { flex: 1; }
+  .cs .row {
+    display: grid; grid-template-columns: 48px 1fr auto; gap: 10px; align-items: center;
+    padding: 9px 12px; border-top: 1px solid var(--hair); font-size: 11px;
+  }
+  .cs .row.on { background: #111; box-shadow: inset 3px 0 0 var(--a); }
+  .cs .row .n { font-family: var(--mono); color: var(--dim); letter-spacing: 0.06em; }
+  .cs .row .lab { letter-spacing: 0.03em; }
+  .cs .row .lab em { display: block; font-style: normal; color: var(--dim); font-size: 9px; margin-top: 2px; }
+  .cs .row .val { font-family: var(--mono); font-weight: 700; font-size: 13px; }
+  .cs .foot {
+    padding: 8px 12px 12px; font-size: 9px; color: var(--dim); letter-spacing: 0.04em;
+    border-top: 1px solid var(--hair);
+  }
+  .cs .empty {
+    margin: 16px 12px; border: 1px solid var(--hair); padding: 20px; text-align: center;
+  }
+  .cs .empty h3 { margin: 0 0 6px; font-size: 14px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; }
+  .cs .empty p { margin: 0; color: var(--dim); font-size: 11px; }
+  .cs .empty .cta {
+    display: inline-block; margin-top: 12px; border: 1px solid var(--fg); padding: 8px 12px;
+    font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg); text-decoration: none;
+  }
+  .cs .callout {
+    margin: 10px 12px 0; border: 1px solid #333; padding: 8px 10px; font-size: 10px; color: var(--dim);
+  }
+  .cs .callout b { color: var(--fg); display: block; margin-bottom: 2px; font-weight: 500; letter-spacing: 0.06em; text-transform: uppercase; }
+  .cs.variant-decode .row.on { box-shadow: inset 3px 0 0 var(--c); }
+  .cs.variant-grid .pulse { display: none; }
+  .cs.variant-grid .pulse-wrap::before {
+    content: ""; display: block; height: 1px; background: #fff; opacity: 0.25; margin: 8px 0 4px;
+  }
+</style>
+</head>
+<body>
+  <header class="top">
+    <div>
+      <div class="meta">Impeccable · aprofundamento · Night Desk descartado</div>
+      <h1>Wire Service × Catalog Sleeve</h1>
+    </div>
+    <nav>
+      <a href="#wire">Wire Service</a>
+      <a href="#catalog">Catalog Sleeve</a>
+      <a href="#matriz">Matriz</a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <p class="lede">
+      Mais matéria dos dois que você curtiu: casa cheia, vazia, CRM off, casca, variante tipográfica
+      e como cada mundo trata urgência e frente. Contagens ilustrativas. Sem código no app até você travar.
+    </p>
+    <p class="note">Night Desk saiu: cara demais de “IA dark dashboard”. Não volta nesta rodada.</p>
+
+    <!-- ================= WIRE ================= -->
+    <section class="world" id="wire">
+      <div class="world-head">
+        <div>
+          <div class="meta">Opção A</div>
+          <h2>Wire Service</h2>
+          <p>Boletim operacional. Masthead da frente, fio live, prioridade como lead story. Papel, tipografia, urgência vermelha.</p>
+        </div>
+        <div class="swatches" aria-label="Paleta Wire Service">
+          <span class="swatch" style="background:#f3efe6"></span>
+          <span class="swatch" style="background:#16140f"></span>
+          <span class="swatch" style="background:#d63a22"></span>
+          <span class="swatch" style="background:#5c574d"></span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-cap">Casa · com prioridades</div>
+          <div class="frame">
+            <div class="ws">
+              <div class="mast">
+                <div class="brand">trackforge</div>
+                <div class="edition">Edição · Resibag</div>
+              </div>
+              <div class="dateline"><span>São Paulo · set 2026</span><span>Tema · claro</span></div>
+              <div class="wire">
+                <span class="live">● live</span>
+                <span>Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span><span>Custos</span><span>Instalação</span>
+              </div>
+              <div class="body">
+                <div class="headline-block">
+                  <div class="kicker">Prioridade</div>
+                  <h3>3 na fila do CRM</h3>
+                  <p class="deck">Esperando aprovação. O que a API cobrou e o que ainda não saiu da bancada estão abaixo.</p>
+                </div>
+                <div class="stats">
+                  <div class="stat urgent"><span>Não enviados</span><b>2</b></div>
+                  <div class="stat"><span>Sem fonte</span><b>1</b></div>
+                  <div class="stat"><span>Custo do mês</span><b>12</b></div>
+                </div>
+                <div class="columns">
+                  <div class="col">
+                    <h4>Não enviados</h4>
+                    <div class="item">ANTT · prazo<em>carrossel · pago, na bancada</em></div>
+                    <div class="item">Embalagem retornável<em>artigo · pago, na bancada</em></div>
+                  </div>
+                  <div class="col">
+                    <h4>Fila / fatos</h4>
+                    <div class="item">3 na fila do CRM<em>esperando aprovação</em></div>
+                    <div class="item">1 fato sem fonte<em>precisa de decisão</em></div>
+                  </div>
+                  <div class="col">
+                    <h4>Custo</h4>
+                    <div class="item">Total US$ 12,40<em>7 gerações · 1 falha cobrada</em></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="blurb"><strong>Assinatura:</strong> lead tipográfico + colunas de jornal. Urgência = outline vermelho + kicker, não glow.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">Casa · vazia + CRM off</div>
+          <div class="frame">
+            <div class="ws">
+              <div class="mast">
+                <div class="brand">trackforge</div>
+                <div class="edition">Edição · Resibag</div>
+              </div>
+              <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span></div>
+              <div class="body">
+                <div class="callout">
+                  <b>CRM não configurado nesta instalação</b>
+                  A fila de aprovação não aparece até a instalação estar pronta. O resto da casa continua utilizável.
+                </div>
+                <div class="empty">
+                  <div class="kicker">Situação</div>
+                  <h3>Nada pedindo decisão</h3>
+                  <p class="deck">Quando houver peça paga não enviada, fato sem fonte ou item na fila, eles aparecem aqui.</p>
+                  <a class="cta" href="#">Ir para Peças</a>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="blurb"><strong>Empty:</strong> ainda parece edição — dashed rule, CTA preto sólido, sem ilustração fake.</div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="panel">
+          <div class="panel-cap">Variante · stark (mais ar)</div>
+          <div class="frame">
+            <div class="ws variant-stark">
+              <div class="mast"><div class="brand">trackforge</div><div class="edition">Resibag</div></div>
+              <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span class="plus">+</span></div>
+              <div class="body">
+                <div class="headline-block">
+                  <div class="kicker">Prioridade</div>
+                  <h3>2 não enviados</h3>
+                  <p class="deck">Pagos, ainda na bancada.</p>
+                </div>
+                <div class="stats">
+                  <div class="stat"><span>Fila</span><b>—</b></div>
+                  <div class="stat urgent"><span>Bancada</span><b>2</b></div>
+                  <div class="stat"><span>Custo</span><b>0</b></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-cap">Variante · ink (papel mais quente)</div>
+          <div class="frame">
+            <div class="ws variant-ink">
+              <div class="mast"><div class="brand">trackforge</div><div class="edition">Sanwey</div></div>
+              <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span class="plus">+</span></div>
+              <div class="body">
+                <div class="headline-block">
+                  <div class="kicker">Frente ativa</div>
+                  <h3>Situação · Sanwey</h3>
+                  <p class="deck">Troca de frente no masthead — a edição muda, a página permanece.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-cap">Motion / interação (especificado)</div>
+          <div class="blurb" style="min-height:180px;">
+            <strong>Entrada:</strong> masthead fixo; fio live com pulse sutil no ● (some em reduced-motion).<br><br>
+            <strong>Troca de frente:</strong> dateline/edition crossfade 180ms; conteúdo da casa reflow sem modal.<br><br>
+            <strong>Hover em item:</strong> underline tipográfico, sem lift de card.<br><br>
+            <strong>Salto:</strong> clique na linha = navega; sem menu extra.
+          </div>
+        </div>
+      </div>
+
+      <div class="lockrow">
+        <button class="btn primary" type="button" onclick="pick('Wire Service')">Travar Wire Service</button>
+        <button class="btn" type="button" onclick="pick('Wire Service · stark')">Preferir variante stark</button>
+        <button class="btn" type="button" onclick="pick('Wire Service · ink')">Preferir variante ink</button>
+      </div>
+    </section>
+
+    <!-- ================= CATALOG ================= -->
+    <section class="world" id="catalog">
+      <div class="world-head">
+        <div>
+          <div class="meta">Opção B</div>
+          <h2>Catalog Sleeve</h2>
+          <p>Catálogo matte: FAC, plot de pulso, frentes em código de cor com rótulo sempre legível. Densidade de craft, Operate intacto.</p>
+        </div>
+        <div class="swatches" aria-label="Paleta Catalog Sleeve">
+          <span class="swatch" style="background:#0a0a0a"></span>
+          <span class="swatch" style="background:#f2f2f2"></span>
+          <span class="swatch" style="background:#e56515"></span>
+          <span class="swatch" style="background:#3d7cff"></span>
+          <span class="swatch" style="background:#c8ff3d"></span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-cap">Casa · com prioridades</div>
+          <div class="frame">
+            <div class="cs">
+              <div class="top">
+                <span class="fac">fac 001 · trackforge</span>
+                <div class="codes">
+                  <i style="background:#e56515"></i><i style="background:#3d7cff"></i><i style="background:#c8ff3d"></i>
+                  <span>Resibag</span>
+                </div>
+              </div>
+              <div class="nav">
+                <span class="on">01 Situação</span><span>02 Peças</span><span class="plus">+</span><span>03 Fatos</span><span>04 Custos</span>
+              </div>
+              <div class="pulse-wrap"><div class="pulse" aria-hidden="true"></div></div>
+              <div class="list">
+                <div class="row on"><span class="n">01</span><span class="lab">Fila do CRM<em>esperando aprovação</em></span><span class="val">3</span></div>
+                <div class="row"><span class="n">02</span><span class="lab">Não enviados<em>pagos, na bancada</em></span><span class="val">2</span></div>
+                <div class="row"><span class="n">03</span><span class="lab">Sem fonte<em>afirmações marcadas</em></span><span class="val">1</span></div>
+                <div class="row"><span class="n">04</span><span class="lab">Custo do mês<em>US$ · gerações no recibo</em></span><span class="val">12.40</span></div>
+              </div>
+              <div class="foot">código de cor = frente · texto sempre presente · plot = ritmo do mês (ilustrativo)</div>
+            </div>
+          </div>
+          <div class="blurb"><strong>Assinatura:</strong> index numerado + plot. Seleção = barra lateral da cor da frente, não card roxo.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">Casa · vazia + CRM off</div>
+          <div class="frame">
+            <div class="cs">
+              <div class="top">
+                <span class="fac">fac 001 · trackforge</span>
+                <div class="codes"><i style="background:#e56515"></i><i style="background:#3d7cff"></i><i style="background:#c8ff3d"></i><span>Resibag</span></div>
+              </div>
+              <div class="nav"><span class="on">01 Situação</span><span>02 Peças</span><span class="plus">+</span></div>
+              <div class="callout">
+                <b>CRM não configurado</b>
+                Nesta instalação a fila não aparece. A casa segue utilizável.
+              </div>
+              <div class="empty">
+                <h3>Nada pedindo decisão</h3>
+                <p>Index vazio. O atalho é produzir.</p>
+                <a class="cta" href="#">02 · Ir para Peças</a>
+              </div>
+              <div class="pulse-wrap"><div class="pulse soft" aria-hidden="true"></div></div>
+            </div>
+          </div>
+          <div class="blurb"><strong>Empty:</strong> plot mais fraco; tipografia quieta; CTA outline — humanidade sem mascote.</div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="panel">
+          <div class="panel-cap">Variante · decode (cor + peso)</div>
+          <div class="frame">
+            <div class="cs variant-decode">
+              <div class="top"><span class="fac">fac 001</span><div class="codes"><i style="background:#c8ff3d"></i><span>Meu</span></div></div>
+              <div class="nav"><span class="on">01 Situação</span><span>02 Peças</span></div>
+              <div class="pulse-wrap"><div class="pulse soft"></div></div>
+              <div class="list">
+                <div class="row on"><span class="n">01</span><span class="lab">Sem fonte</span><span class="val">1</span></div>
+                <div class="row"><span class="n">02</span><span class="lab">Não enviados</span><span class="val">0</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-cap">Variante · grid (sem plot)</div>
+          <div class="frame">
+            <div class="cs variant-grid">
+              <div class="top"><span class="fac">fac 001 · trackforge</span><div class="codes"><i style="background:#3d7cff"></i><span>Sanwey</span></div></div>
+              <div class="nav"><span class="on">01 Situação</span><span>02 Peças</span><span class="plus">+</span></div>
+              <div class="pulse-wrap"></div>
+              <div class="list">
+                <div class="row on"><span class="n">01</span><span class="lab">Fila do CRM</span><span class="val">3</span></div>
+                <div class="row"><span class="n">02</span><span class="lab">Não enviados</span><span class="val">2</span></div>
+                <div class="row"><span class="n">03</span><span class="lab">Custo do mês</span><span class="val">12.40</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-cap">Motion / interação</div>
+          <div class="blurb" style="min-height:180px;">
+            <strong>Plot:</strong> varre lento no idle; para em reduced-motion; no vazio vira hairline.<br><br>
+            <strong>Frente:</strong> blocos de cor trocam; label textual atualiza junto (nunca só cor).<br><br>
+            <strong>Seleção:</strong> barra lateral da cor da frente + fundo #111.<br><br>
+            <strong>Nav:</strong> índices 01–04; (+) é disco branco.
+          </div>
+        </div>
+      </div>
+
+      <div class="lockrow">
+        <button class="btn primary" type="button" onclick="pick('Catalog Sleeve')">Travar Catalog Sleeve</button>
+        <button class="btn" type="button" onclick="pick('Catalog Sleeve · decode')">Preferir variante decode</button>
+        <button class="btn" type="button" onclick="pick('Catalog Sleeve · grid')">Preferir variante grid (sem plot)</button>
+      </div>
+    </section>
+
+    <!-- MATRIX -->
+    <section class="world" id="matriz">
+      <div class="world-head">
+        <div>
+          <div class="meta">Comparação</div>
+          <h2>Mesma tarefa, dois sistemas</h2>
+          <p>O que muda de verdade se você travar um ou outro.</p>
+        </div>
+      </div>
+      <div class="panel">
+        <table class="matrix">
+          <thead>
+            <tr><th></th><th>Wire Service</th><th>Catalog Sleeve</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>Primeira leitura</strong></td><td>Manchete: o que é urgente</td><td>Index: o que existe e quanto</td></tr>
+            <tr><td><strong>Frente</strong></td><td>“Edição · Resibag” no masthead</td><td>Blocos de cor + nome</td></tr>
+            <tr><td><strong>Urgência</strong></td><td>Kicker vermelho + outline</td><td>Barra lateral + peso do número</td></tr>
+            <tr><td><strong>Densidade</strong></td><td>Média — colunas de jornal</td><td>Alta — lista FAC</td></tr>
+            <tr><td><strong>Risco</strong></td><td>Pode parecer editorial demais / familiar</td><td>Pode intimidar; precisa empty humano</td></tr>
+            <tr><td><strong>2026 craft</strong></td><td>Tipo expressivo, papel, ritmo tipográfico</td><td>Matte, plot, código, precisão gráfica</td></tr>
+            <tr><td><strong>Híbrido possível?</strong></td><td colspan="2">Sim, se você pedir: masthead Wire + index Catalog — mas aí vira 3ª direção; só sob demanda.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="lede" id="choice" style="margin-top:16px;">Nenhuma travada ainda — use os botões ou diga no chat.</p>
+      <div class="lockrow">
+        <button class="btn" type="button" onclick="pick('Híbrido Wire+Catalog — quero ver mock')">Quero ver um híbrido primeiro</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function pick(name) {
+      document.getElementById('choice').textContent = 'Escolha registrada neste preview: ' + name + ' — confirme no chat.';
+      try { navigator.clipboard.writeText(name); } catch (e) {}
+    }
+  </script>
+</body>
+</html>
