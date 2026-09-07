@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Híbrido · Wire masthead + Specimen glifo</title>
+<style>
+  :root {
+    --page:#0c0c10; --ink:#f3f3f7; --mut:#9a9aa8; --line:#2a2a34; --card:#15151b;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); font:14px/1.45 var(--sans); }
+  header.top {
+    position:sticky; top:0; z-index:5; backdrop-filter:blur(12px);
+    background:rgba(12,12,16,.9); border-bottom:1px solid var(--line);
+    padding:14px 22px; display:flex; gap:14px; flex-wrap:wrap; align-items:baseline;
+  }
+  header.top h1 { margin:0; font-size:18px; letter-spacing:-.02em; }
+  .meta { font:600 10px/1.4 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--mut); }
+  header.top nav { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
+  header.top a {
+    color:var(--ink); text-decoration:none; font:600 12px var(--sans);
+    border:1px solid var(--line); padding:8px 10px; border-radius:8px;
+  }
+  .wrap { max-width:1480px; margin:0 auto; padding:24px; }
+  .lede { color:var(--mut); max-width:72ch; margin:0 0 20px; }
+  .recipe {
+    display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:28px;
+  }
+  @media (max-width:900px){ .recipe { grid-template-columns:1fr; } }
+  .recipe .box {
+    background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px;
+  }
+  .recipe .box h3 { margin:0 0 6px; font-size:14px; }
+  .recipe .box p { margin:0; color:var(--mut); font-size:12px; }
+  .recipe .box .tag {
+    display:inline-block; margin-bottom:8px; font:700 9px/1 var(--mono);
+    letter-spacing:.08em; text-transform:uppercase; color:#ff8a72;
+  }
+  .world-head {
+    display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:end;
+    margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line);
+  }
+  .world-head h2 { margin:0; font-size:28px; letter-spacing:-.03em; }
+  .world-head p { margin:6px 0 0; color:var(--mut); max-width:60ch; }
+  .swatches { display:flex; gap:6px; }
+  .swatch { width:24px; height:24px; border-radius:6px; border:1px solid rgba(255,255,255,.14); }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:1100px){ .grid-2,.grid-3 { grid-template-columns:1fr; } }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .panel-cap {
+    font:600 10px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--mut);
+    padding:10px 12px; border-bottom:1px solid var(--line);
+  }
+  .frame { aspect-ratio:16/10; overflow:hidden; }
+  .frame.phone { aspect-ratio:9/16; max-width:280px; margin:0 auto; }
+  .blurb { padding:10px 12px; font-size:12px; color:var(--mut); }
+  .blurb strong { color:var(--ink); }
+  .lockrow { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .btn {
+    appearance:none; border:1px solid var(--line); background:#22222c; color:var(--ink);
+    border-radius:8px; padding:11px 14px; font:600 13px var(--sans); cursor:pointer;
+  }
+  .btn.primary { background:#f3f3f7; color:#111; border-color:#f3f3f7; }
+  #choice { margin-top:12px; color:var(--mut); }
+
+  /* ========== HYBRID = Wire chrome + Specimen body ========== */
+  .hx {
+    --paper:#f3efe6; --ink2:#16140f; --muted2:#5c574d; --urgent:#d63a22;
+    --band:#16140f; --rule:#d8d1c3; --cell:#f7f4ec; --soft:#666;
+    background:var(--paper); color:var(--ink2); height:100%;
+    display:flex; flex-direction:column;
+  }
+  .hx.ink {
+    --paper:#12110f; --ink2:#f2efe6; --muted2:#a39c8f; --band:#000;
+    --rule:#2c2a26; --cell:#1a1916; --soft:#9a9488; --urgent:#ff6b52;
+  }
+  .hx .mast {
+    display:flex; justify-content:space-between; align-items:flex-end;
+    padding:9px 11px 7px; border-bottom:3px solid var(--ink2);
+    font-family:Georgia,"Times New Roman",serif;
+  }
+  .hx .brand { font-weight:800; font-size:18px; letter-spacing:-.04em; line-height:1; }
+  .hx .edition {
+    font:700 9px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase;
+    font-family:var(--sans);
+  }
+  .hx .date {
+    font:500 9px/1.3 var(--sans); color:var(--muted2); padding:4px 11px;
+    border-bottom:1px solid var(--rule); display:flex; justify-content:space-between;
+  }
+  .hx .wire {
+    display:flex; gap:9px; flex-wrap:wrap; align-items:center; padding:6px 11px;
+    background:var(--band); color:var(--paper); font:700 9px/1 var(--sans);
+    letter-spacing:.06em; text-transform:uppercase;
+  }
+  .hx .live { color:#ff6b52; }
+  .hx .plus {
+    width:16px; height:16px; border-radius:50%; background:var(--paper); color:var(--band);
+    display:grid; place-items:center; font-size:11px; font-weight:800;
+  }
+  .hx .body {
+    flex:1; display:flex; flex-direction:column; overflow:hidden;
+    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+  }
+  .hx .proof {
+    display:flex; justify-content:space-between; align-items:center; gap:8px;
+    padding:6px 11px 0; font:500 8px/1 var(--mono); letter-spacing:.08em;
+    text-transform:uppercase; color:var(--muted2);
+  }
+  .hx .hero {
+    padding:2px 11px 0; font-weight:900; font-size:78px; line-height:.82;
+    letter-spacing:-.07em; min-height:72px; display:flex; align-items:flex-end;
+  }
+  .hx .hero.sm { font-size:56px; min-height:52px; }
+  .hx .hero.quiet { opacity:.28; font-weight:500; }
+  .hx .hero em { font-style:normal; color:var(--urgent); }
+  .hx .caption {
+    padding:0 11px 8px; font:500 11px/1.35 var(--sans); color:var(--muted2);
+  }
+  .hx .caption b { color:var(--ink2); font-weight:700; }
+  .hx .grid {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:1px;
+    background:var(--rule); border-top:1px solid var(--rule); margin-top:auto;
+  }
+  .hx .grid.two { grid-template-columns:1fr 1fr; }
+  .hx .cell { background:var(--cell); padding:8px; min-height:52px; }
+  .hx .cell.on { background:var(--ink2); color:var(--paper); }
+  .hx .cell .n { font:600 8px/1 var(--mono); color:var(--muted2); }
+  .hx .cell.on .n { color:#aaa; }
+  .hx .cell b { display:block; font-size:20px; font-weight:800; letter-spacing:-.04em; margin-top:3px; }
+  .hx .cell span { font-size:8px; color:var(--muted2); text-transform:uppercase; letter-spacing:.04em; }
+  .hx .cell.on span { color:#bbb; }
+  .hx .list { border-top:1px solid var(--rule); background:var(--cell); }
+  .hx .row {
+    display:grid; grid-template-columns:36px 1fr auto; gap:8px; align-items:center;
+    padding:7px 11px; border-bottom:1px dotted var(--rule); font-size:11px;
+  }
+  .hx .row .idx { font:600 9px/1 var(--mono); color:var(--muted2); }
+  .hx .row .lab em { display:block; font-style:normal; color:var(--muted2); font-size:9px; }
+  .hx .row .val { font-weight:800; font-size:14px; letter-spacing:-.03em; }
+  .hx .callout {
+    margin:8px 11px 0; font:400 11px/1.35 var(--sans); background:#efe6d6;
+    border:1px solid #d8d1c3; padding:8px 10px;
+  }
+  .hx.ink .callout { background:#1f1c18; border-color:#3a342c; color:var(--muted2); }
+  .hx .callout b { display:block; margin-bottom:2px; color:var(--ink2); }
+  .hx .empty {
+    margin:10px 11px; border:2px dashed #cfc7b8; padding:14px; text-align:center;
+  }
+  .hx.ink .empty { border-color:#3a342c; }
+  .hx .empty .kicker {
+    font:800 9px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--urgent);
+  }
+  .hx .empty h3 {
+    margin:6px 0 4px; font-family:Georgia,"Times New Roman",serif;
+    font-size:18px; letter-spacing:-.03em;
+  }
+  .hx .empty p { margin:0; font-size:11px; color:var(--muted2); }
+  .hx .cta {
+    display:inline-block; margin-top:10px; font:800 11px var(--sans);
+    background:var(--ink2); color:var(--paper); padding:8px 11px; text-decoration:none;
+  }
+  .hx .err {
+    margin:8px 11px 0; font:400 11px/1.35 var(--sans); background:#f6e4df;
+    border:1px solid #e2b4a8; padding:8px 10px;
+  }
+  .hx.ink .err { background:#2a1814; border-color:#5a3030; color:#f0c8bc; }
+  .hx .err b { display:block; color:#8a2a1a; }
+  .hx.ink .err b { color:#ffb4a0; }
+  .hx .axes {
+    display:flex; gap:10px; align-items:center; padding:7px 11px;
+    border-top:1px solid var(--rule); font:500 8px/1 var(--mono); color:var(--muted2);
+  }
+  .hx .axes i { flex:1; height:3px; background:var(--ink2); border-radius:2px; position:relative; }
+  .hx .axes i::after {
+    content:""; position:absolute; top:-4px; right:30%; width:9px; height:9px;
+    border-radius:50%; background:var(--urgent);
+  }
+  .hx .byline {
+    padding:5px 11px 8px; font:600 9px/1.3 var(--sans); letter-spacing:.04em;
+    text-transform:uppercase; color:var(--muted2);
+  }
+  .hx .split {
+    display:grid; grid-template-columns:1.1fr 1fr; gap:0; flex:1; min-height:0;
+  }
+  .hx .split .left { border-right:1px solid var(--rule); display:flex; flex-direction:column; }
+  .hx .split .right { display:flex; flex-direction:column; min-height:0; }
+</style>
+</head>
+<body>
+  <header class="top">
+    <div>
+      <div class="meta">Impeccable · híbrido sob demanda</div>
+      <h1>Wire masthead + Specimen glifo</h1>
+    </div>
+    <nav>
+      <a href="impeccable-wire-specimen-telas.html">Voltar aos puros</a>
+      <a href="#telas">Telas</a>
+      <a href="#decide">Decidir</a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <p class="lede">
+      Receita: casca e navegação do <strong style="color:var(--ink)">Wire Service</strong>
+      (masthead serif, edição, dateline, faixa LIVE). Corpo da Situação do
+      <strong style="color:var(--ink)">Type Specimen Desk</strong> (glifo = prioridade,
+      grade de células, lista tipográfica). Contagens ilustrativas.
+    </p>
+
+    <div class="recipe">
+      <div class="box">
+        <span class="tag">Do Wire</span>
+        <h3>Casca editorial</h3>
+        <p>trackforge em serif, EDIÇÃO · frente, São Paulo · data, faixa preta LIVE + nav.</p>
+      </div>
+      <div class="box">
+        <span class="tag">Do Specimen</span>
+        <h3>Decisão tipográfica</h3>
+        <p>Número gigante = o que pede ação. Célula invertida = seleção. Sem manchete longa.</p>
+      </div>
+      <div class="box">
+        <span class="tag">A cola</span>
+        <h3>Papel Wire, hierarquia Specimen</h3>
+        <p>Fundo paper / ink do Wire. Urgência vermelha nos dois. CTA preto sólido.</p>
+      </div>
+    </div>
+
+    <section class="world" id="telas">
+      <div class="world-head">
+        <div>
+          <div class="meta">Mundo C · híbrido</div>
+          <h2>Seis estados da casa</h2>
+          <p>Mesma estrutura de informação dos puros — só a linguagem visual muda.</p>
+        </div>
+        <div class="swatches" aria-hidden="true">
+          <span class="swatch" style="background:#f3efe6"></span>
+          <span class="swatch" style="background:#16140f"></span>
+          <span class="swatch" style="background:#d63a22"></span>
+          <span class="swatch" style="background:#12110f"></span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-cap">01 · Prioridade = fila CRM</div>
+          <div class="frame"><div class="hx">
+            <div class="mast">
+              <div class="brand">trackforge</div>
+              <div class="edition">Edição · Resibag</div>
+            </div>
+            <div class="date"><span>São Paulo · set 2026</span><span>Tema · claro</span></div>
+            <div class="wire">
+              <span class="live">• Live</span>
+              <span>Situação</span><span>Peças</span><span class="plus">+</span>
+              <span>Fatos</span><span>Custos</span><span>Instalação</span>
+            </div>
+            <div class="body">
+              <div class="proof"><span>prova · situação</span><span>wght 900 · opsz 144</span></div>
+              <div class="hero">3<em>.</em></div>
+              <div class="caption"><b>na fila do CRM</b> · esperando aprovação</div>
+              <div class="grid">
+                <div class="cell on"><div class="n">01</div><b>3</b><span>fila crm</span></div>
+                <div class="cell"><div class="n">02</div><b>2</b><span>não enviados</span></div>
+                <div class="cell"><div class="n">03</div><b>1</b><span>sem fonte</span></div>
+                <div class="cell"><div class="n">04</div><b>12</b><span>custo</span></div>
+              </div>
+            </div>
+          </div></div>
+          <div class="blurb"><strong>Leitura:</strong> masthead de jornal; o “3.” é o lead — não a manchete escrita.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">02 · Troca de prioridade → bancada</div>
+          <div class="frame"><div class="hx">
+            <div class="mast">
+              <div class="brand">trackforge</div>
+              <div class="edition">Edição · Sanwey</div>
+            </div>
+            <div class="date"><span>São Paulo · set 2026</span><span>Tema · claro</span></div>
+            <div class="wire">
+              <span class="live">• Live</span>
+              <span>Situação</span><span>Peças</span><span class="plus">+</span>
+              <span>Fatos</span><span>Custos</span>
+            </div>
+            <div class="body">
+              <div class="proof"><span>prova · situação</span><span>seleção 02</span></div>
+              <div class="hero sm">2<em>.</em></div>
+              <div class="caption"><b>não enviados</b> · pagos, ainda na bancada</div>
+              <div class="grid">
+                <div class="cell"><div class="n">01</div><b>0</b><span>fila crm</span></div>
+                <div class="cell on"><div class="n">02</div><b>2</b><span>não enviados</span></div>
+                <div class="cell"><div class="n">03</div><b>0</b><span>sem fonte</span></div>
+                <div class="cell"><div class="n">04</div><b>4</b><span>custo</span></div>
+              </div>
+              <div class="list">
+                <div class="row"><span class="idx">A</span><span class="lab">ANTT · prazo<em>carrossel</em></span><span class="val">→</span></div>
+                <div class="row"><span class="idx">B</span><span class="lab">Embalagem retornável<em>artigo</em></span><span class="val">→</span></div>
+              </div>
+            </div>
+          </div></div>
+          <div class="blurb"><strong>Troca:</strong> glifo + célula; lista Wire-lite (pontilhado) sob a grade.</div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="panel">
+          <div class="panel-cap">03 · Vazia + CRM off</div>
+          <div class="frame"><div class="hx">
+            <div class="mast">
+              <div class="brand">trackforge</div>
+              <div class="edition">Edição · Resibag</div>
+            </div>
+            <div class="date"><span>São Paulo · set 2026</span><span>Tema · claro</span></div>
+            <div class="wire">
+              <span class="live">• Live</span>
+              <span>Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span>
+            </div>
+            <div class="body">
+              <div class="callout"><b>CRM não configurado</b>A fila não aparece nesta instalação. A casa segue utilizável.</div>
+              <div class="proof"><span>prova · quieta</span><span>wght 400</span></div>
+              <div class="hero sm quiet">0<em>.</em></div>
+              <div class="empty">
+                <div class="kicker">Situação</div>
+                <h3>Nada pedindo decisão</h3>
+                <p>O atalho é produzir.</p>
+                <a class="cta" href="#">Ir para Peças</a>
+              </div>
+            </div>
+          </div></div>
+          <div class="blurb">Glifo quieto + empty dashed do Wire.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">04 · Erro de fila</div>
+          <div class="frame"><div class="hx">
+            <div class="mast">
+              <div class="brand">trackforge</div>
+              <div class="edition">Edição · Meu</div>
+            </div>
+            <div class="date"><span>São Paulo · set 2026</span><span>Tema · claro</span></div>
+            <div class="wire">
+              <span class="live">• Live</span>
+              <span>Situação</span><span>Peças</span><span class="plus">+</span>
+            </div>
+            <div class="body">
+              <div class="err"><b>Não foi possível carregar a fila.</b>Tente de novo. Dados locais continuam.</div>
+              <div class="hero sm">2<em>.</em></div>
+              <div class="caption"><b>não enviados</b> · locais, ainda na bancada</div>
+              <div class="grid two">
+                <div class="cell on"><div class="n">02</div><b>2</b><span>não enviados</span></div>
+                <div class="cell"><div class="n">04</div><b>12</b><span>custo</span></div>
+              </div>
+              <div class="byline">Retry · local intacto</div>
+            </div>
+          </div></div>
+          <div class="blurb">Erro Wire no topo; corpo Specimen segue.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">05 · Split lead + grade</div>
+          <div class="frame"><div class="hx">
+            <div class="mast">
+              <div class="brand">trackforge</div>
+              <div class="edition">Edição · Resibag</div>
+            </div>
+            <div class="date"><span>São Paulo · set 2026</span><span>Tema · claro</span></div>
+            <div class="wire">
+              <span class="live">• Live</span>
+              <span>Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span><span>Custos</span>
+            </div>
+            <div class="body">
+              <div class="split">
+                <div class="left">
+                  <div class="proof"><span>lead</span><span>fila</span></div>
+                  <div class="hero sm">3<em>.</em></div>
+                  <div class="caption"><b>na fila do CRM</b></div>
+                  <div class="axes"><span>opsz</span><i></i><span>wght</span></div>
+                </div>
+                <div class="right">
+                  <div class="list" style="border-top:0;flex:1">
+                    <div class="row"><span class="idx">01</span><span class="lab">Fila CRM<em>3 aguardando</em></span><span class="val">3</span></div>
+                    <div class="row"><span class="idx">02</span><span class="lab">Não enviados<em>bancada</em></span><span class="val">2</span></div>
+                    <div class="row"><span class="idx">03</span><span class="lab">Sem fonte<em>precisa decisão</em></span><span class="val">1</span></div>
+                    <div class="row"><span class="idx">04</span><span class="lab">Custo do mês<em>US$ ilustrativo</em></span><span class="val">12</span></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div></div>
+          <div class="blurb">Variante densa: glifo à esquerda, índice Wire à direita.</div>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-top:14px;">
+        <div class="panel">
+          <div class="panel-cap">06 · Tema ink (noite)</div>
+          <div class="frame"><div class="hx ink">
+            <div class="mast">
+              <div class="brand">trackforge</div>
+              <div class="edition">Edição · Sanwey</div>
+            </div>
+            <div class="date"><span>São Paulo · set 2026</span><span>Tema · escuro</span></div>
+            <div class="wire">
+              <span class="live">• Live</span>
+              <span>Situação</span><span>Peças</span><span class="plus">+</span>
+              <span>Fatos</span><span>Custos</span>
+            </div>
+            <div class="body">
+              <div class="proof"><span>night proof</span><span>seleção 03</span></div>
+              <div class="hero sm">1<em>.</em></div>
+              <div class="caption"><b>sem fonte</b> · precisa de decisão</div>
+              <div class="grid">
+                <div class="cell"><div class="n">01</div><b>0</b><span>fila</span></div>
+                <div class="cell"><div class="n">02</div><b>0</b><span>bancada</span></div>
+                <div class="cell on"><div class="n">03</div><b>1</b><span>sem fonte</span></div>
+                <div class="cell"><div class="n">04</div><b>3</b><span>custo</span></div>
+              </div>
+            </div>
+          </div></div>
+          <div class="blurb">Paper ink do Wire + glifo Specimen no escuro.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">07 · Narrow / phone</div>
+          <div class="frame phone"><div class="hx">
+            <div class="mast">
+              <div class="brand">trackforge</div>
+              <div class="edition">Resibag</div>
+            </div>
+            <div class="wire">
+              <span class="live">•</span>
+              <span>Sit.</span><span>Peças</span><span class="plus">+</span>
+            </div>
+            <div class="body">
+              <div class="hero sm">3<em>.</em></div>
+              <div class="caption"><b>fila crm</b></div>
+              <div class="grid two">
+                <div class="cell on"><div class="n">01</div><b>3</b><span>fila</span></div>
+                <div class="cell"><div class="n">02</div><b>2</b><span>bancada</span></div>
+              </div>
+              <div class="list">
+                <div class="row"><span class="idx">A</span><span class="lab">ANTT · prazo<em>carrossel</em></span><span class="val">→</span></div>
+              </div>
+            </div>
+          </div></div>
+          <div class="blurb">Masthead encolhe; glifo + 2 células cabem.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="world" id="decide" style="margin-top:48px;">
+      <div class="world-head">
+        <div>
+          <div class="meta">Próximo</div>
+          <h2>Travar depois de ver</h2>
+          <p>Se o híbrido resolver, trava aqui. Se não, volta ao Wire puro ou Specimen puro.</p>
+        </div>
+      </div>
+      <div class="lockrow">
+        <button class="btn primary" type="button" onclick="pick('Híbrido Wire + Specimen')">Travar híbrido</button>
+        <button class="btn" type="button" onclick="pick('Wire Service')">Wire puro</button>
+        <button class="btn" type="button" onclick="pick('Type Specimen Desk')">Specimen puro</button>
+      </div>
+      <p id="choice">Nenhuma travada — diga no chat.</p>
+    </section>
+  </div>
+  <script>
+    function pick(name) {
+      document.getElementById('choice').textContent = 'Escolha: ' + name + ' — confirme no chat.';
+      try { navigator.clipboard.writeText(name); } catch (e) {}
+    }
+  </script>
+</body>
+</html>
