@@ -2,6 +2,8 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
+import { brandIdSchema } from "@/constants/brands";
+
 import { priceUsage, type GenerationCost } from "@/constants/pricing";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbiddenInSlides } from "@/knowledge/check";
@@ -24,7 +26,7 @@ const requestSchema = z.object({
   carousel: apresentacaoSchema,
   slideIndex: z.number().int().nonnegative(),
   instruction: z.string().optional(),
-  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
+  brandId: brandIdSchema.nullable().optional(),
 });
 
 /**

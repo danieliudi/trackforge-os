@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wire Service + 2 da Impeccable (bolder)</title>
+<style>
+  :root {
+    --page:#0e0e12; --ink:#f4f4f8; --mut:#9a9aa8; --line:#2a2a34; --card:#16161c;
+    --sans: system-ui, -apple-system, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); font:14px/1.45 var(--sans); padding:24px; }
+  .meta { font:600 10px/1.4 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--mut); }
+  h1 { font-size:26px; letter-spacing:-.03em; margin:6px 0 8px; }
+  .lede { color:var(--mut); max-width:70ch; margin:0 0 22px; }
+  .note { border-left:2px solid #c4a484; padding-left:12px; color:#c4a484; font-size:13px; margin:0 0 24px; }
+  .hand { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:14px; }
+  @media (max-width:1100px){ .hand { grid-template-columns:1fr; } }
+  .card {
+    background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden;
+    display:flex; flex-direction:column;
+  }
+  .card.pinned { border-color:#e8d9b5; box-shadow:0 0 0 1px rgba(232,217,181,.25); }
+  .card.roll { border-color:#7c6ff0; box-shadow:0 0 0 1px rgba(124,111,240,.3); }
+  .kicker { font:700 10px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; color:#a89bff; padding:12px 14px 0; }
+  .card.pinned .kicker { color:#e8d9b5; }
+  h2 { margin:8px 14px 4px; font-size:18px; letter-spacing:-.02em; }
+  .thesis { margin:0 14px 10px; color:var(--mut); font-size:13px; }
+  .swatches { display:flex; gap:6px; padding:0 14px 10px; }
+  .swatch { width:26px; height:26px; border-radius:6px; border:1px solid rgba(255,255,255,.12); }
+  .frame { margin:0 14px; border:1px solid var(--line); border-radius:8px; overflow:hidden; aspect-ratio:16/10; }
+  .facts { padding:12px 14px; font-size:12px; color:var(--mut); flex:1; }
+  .facts strong { color:var(--ink); }
+  .risk { color:#c4a484; margin-top:6px; }
+  .actions { padding:0 14px 14px; display:flex; gap:8px; }
+  .btn {
+    flex:1; appearance:none; border:1px solid var(--line); background:#22222c; color:var(--ink);
+    border-radius:8px; padding:10px 12px; font:600 13px var(--sans); cursor:pointer;
+  }
+  .btn.primary { background:#f3f3f7; color:#111; border-color:#f3f3f7; }
+  .btn.accent { background:#7c6ff0; border-color:#7c6ff0; color:#0b0b0e; }
+  .declined { margin-top:28px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  @media (max-width:800px){ .declined { grid-template-columns:1fr; } }
+  .mini { opacity:.7; border:1px dashed var(--line); border-radius:10px; padding:12px; background:#121218; }
+  .mini h3 { margin:0 0 4px; font-size:13px; }
+  .mini p { margin:0; font-size:11px; color:var(--mut); }
+  #choice { margin-top:18px; color:var(--mut); }
+
+  /* Wire Service mini */
+  .ws { background:#f3efe6; color:#16140f; height:100%; font-family:Georgia,serif; display:flex; flex-direction:column; }
+  .ws .mast { display:flex; justify-content:space-between; align-items:flex-end; padding:8px 10px; border-bottom:3px solid #16140f; }
+  .ws .brand { font-weight:800; font-size:16px; letter-spacing:-.03em; }
+  .ws .ed { font:700 8px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; }
+  .ws .wire { background:#16140f; color:#f3efe6; padding:5px 10px; font:700 8px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; display:flex; gap:8px; }
+  .ws .live { color:#ff6b52; }
+  .ws .body { padding:8px 10px; }
+  .ws .k { font:800 8px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase; color:#d63a22; }
+  .ws h3 { margin:3px 0; font-size:18px; letter-spacing:-.03em; }
+  .ws .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:6px; margin-top:8px; }
+  .ws .stat { font-family:var(--sans); border-top:2px solid #16140f; padding-top:4px; }
+  .ws .stat.u { box-shadow:inset 0 0 0 2px #d63a22; padding:4px; border:0; }
+  .ws .stat b { display:block; font-size:16px; }
+  .ws .stat span { font-size:7px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#5c574d; }
+
+  /* Type Specimen */
+  .ts { background:#f7f6f2; color:#111; height:100%; font-family:"Helvetica Neue",Helvetica,Arial,sans-serif; display:flex; flex-direction:column; }
+  .ts .bar { display:flex; justify-content:space-between; align-items:center; padding:6px 10px; border-bottom:1px solid #ddd; font:500 9px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:#666; }
+  .ts .hero {
+    flex:1; display:flex; align-items:flex-end; padding:4px 10px 0;
+    font-weight:900; font-size:72px; line-height:.85; letter-spacing:-.06em;
+  }
+  .ts .hero em { font-style:normal; color:#d63a22; }
+  .ts .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:#ddd; border-top:1px solid #ddd; }
+  .ts .cell { background:#f7f6f2; padding:6px; min-height:42px; }
+  .ts .cell.on { background:#111; color:#f7f6f2; }
+  .ts .cell .n { font:600 8px/1 var(--mono); color:#888; }
+  .ts .cell.on .n { color:#aaa; }
+  .ts .cell b { display:block; font-size:16px; font-weight:800; letter-spacing:-.03em; margin-top:2px; }
+  .ts .cell span { font-size:8px; color:#666; }
+  .ts .cell.on span { color:#bbb; }
+  .ts .axes { display:flex; gap:8px; padding:6px 10px; border-top:1px solid #ddd; font:500 8px/1 var(--mono); color:#666; }
+  .ts .axes i { flex:1; height:3px; background:#111; border-radius:2px; align-self:center; position:relative; }
+  .ts .axes i::after { content:""; position:absolute; right:30%; top:-3px; width:8px; height:8px; background:#d63a22; border-radius:50%; }
+
+  /* Nixie */
+  .nx { background:#12110f; color:#f2e6d4; height:100%; font-family:var(--sans); display:flex; flex-direction:column; }
+  .nx .panel { background:#d8d0c2; color:#1a1814; padding:6px 8px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid #9a9284; }
+  .nx .panel .fac { font:700 9px/1 var(--mono); letter-spacing:.14em; text-transform:uppercase; }
+  .nx .stencil { font:700 8px/1 var(--mono); letter-spacing:.1em; text-transform:uppercase; border:1px solid #1a1814; padding:3px 5px; }
+  .nx .banks { display:grid; grid-template-columns:repeat(4,1fr); gap:6px; padding:10px 8px; flex:1; }
+  .nx .bank { background:#0a0908; border:1px solid #2a2620; border-radius:4px; padding:6px 4px; text-align:center; }
+  .nx .bank.hot { box-shadow:inset 0 0 0 1px #ff6a2a; }
+  .nx .tubes { display:flex; justify-content:center; gap:2px; margin:4px 0; }
+  .nx .tube {
+    width:16px; height:28px; border-radius:8px / 10px; background:#0d0c0a;
+    border:1px solid #333; display:grid; place-items:center;
+    font:700 14px/1 "Courier New", var(--mono); color:#ff6a2a;
+    text-shadow:0 0 8px rgba(255,106,42,.85), 0 0 2px #ffb08a;
+  }
+  .nx .lab { font:600 7px/1.2 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:#8a8074; }
+  .nx .bank.hot .lab { color:#ffb08a; }
+  .nx .nav { display:flex; gap:10px; padding:6px 8px; border-top:1px solid #2a2620; font:600 8px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:#8a8074; }
+  .nx .nav .on { color:#ff6a2a; }
+  .nx .nav .plus { width:16px; height:16px; border-radius:50%; background:#ff6a2a; color:#0a0908; display:grid; place-items:center; font-weight:800; }
+</style>
+</head>
+<body>
+  <p class="meta">Impeccable · re-roll bolder · seed b028dc0e · Wire Service pinned pelo Daniel</p>
+  <h1>Wire Service + 2 ideias novas</h1>
+  <p class="lede">
+    Você pediu manter Wire Service e ver o que a Impeccable escolheria a seguir.
+    Sorteio no registro <strong>bolder</strong> (formas estrangeiras). Starship/phosphor
+    saiu — é primo do Night Desk. Abaixo: sua base + as duas melhores para Operate.
+  </p>
+  <p class="note">Contagens ilustrativas. Sem código no app até você travar.</p>
+
+  <div class="hand">
+    <!-- PINNED -->
+    <article class="card pinned">
+      <div class="kicker">Pinned · sua base</div>
+      <h2>Wire Service</h2>
+      <p class="thesis">Boletim operacional: masthead, fio live, prioridade como manchete. Fica na mesa.</p>
+      <div class="swatches">
+        <span class="swatch" style="background:#f3efe6"></span>
+        <span class="swatch" style="background:#16140f"></span>
+        <span class="swatch" style="background:#d63a22"></span>
+      </div>
+      <div class="frame">
+        <div class="ws">
+          <div class="mast"><div class="brand">trackforge</div><div class="ed">Edição · Resibag</div></div>
+          <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span>+</span><span>Fatos</span></div>
+          <div class="body">
+            <div class="k">Prioridade</div>
+            <h3>3 na fila do CRM</h3>
+            <div class="stats">
+              <div class="stat u"><span>Não enviados</span><b>2</b></div>
+              <div class="stat"><span>Sem fonte</span><b>1</b></div>
+              <div class="stat"><span>Custo</span><b>12</b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="facts">
+        <div><strong>Por que fica:</strong> você já curtiu; tipografia humana; sem glow de dashboard IA.</div>
+        <div class="risk"><strong>Risco conhecido:</strong> familiaridade editorial.</div>
+      </div>
+      <div class="actions">
+        <button class="btn primary" type="button" onclick="pick('Wire Service')">Travar Wire Service</button>
+      </div>
+    </article>
+
+    <!-- IMPECCABLE 1: Type Specimen -->
+    <article class="card roll">
+      <div class="kicker">Impeccable · bolder</div>
+      <h2>Type Specimen Desk</h2>
+      <p class="thesis">Mesa de especime tipográfico vivo: o número urgente é o glifo gigante; KPIs são células de matriz que respiram no mesmo eixo.</p>
+      <div class="swatches">
+        <span class="swatch" style="background:#f7f6f2"></span>
+        <span class="swatch" style="background:#111"></span>
+        <span class="swatch" style="background:#d63a22"></span>
+        <span class="swatch" style="background:#ddd"></span>
+      </div>
+      <div class="frame">
+        <div class="ts">
+          <div class="bar"><span>trackforge · resibag</span><span>situação · wght 850</span></div>
+          <div class="hero">3<em>.</em></div>
+          <div class="grid">
+            <div class="cell on"><div class="n">01</div><b>3</b><span>fila crm</span></div>
+            <div class="cell"><div class="n">02</div><b>2</b><span>não enviados</span></div>
+            <div class="cell"><div class="n">03</div><b>1</b><span>sem fonte</span></div>
+            <div class="cell"><div class="n">04</div><b>12</b><span>custo</span></div>
+          </div>
+          <div class="axes"><span>opsz</span><i></i><span>wght</span></div>
+        </div>
+      </div>
+      <div class="facts">
+        <div><strong>Origem:</strong> variable-font specimen — hierarquia só por escala.</div>
+        <div><strong>Fusão Operate:</strong> glifo = prioridade atual; grade = saltos; eixos = densidade (não decoração).</div>
+        <div><strong>Clareza:</strong> altíssima se cada célula tiver rótulo; reduced-motion = snap, sem morph.</div>
+        <div class="risk"><strong>Risco:</strong> pode parecer foundry site — precisa casca de ferramenta (frente/nav) bem explícita.</div>
+      </div>
+      <div class="actions">
+        <button class="btn accent" type="button" onclick="pick('Type Specimen Desk')">Travar Type Specimen</button>
+      </div>
+    </article>
+
+    <!-- IMPECCABLE 2: Nixie -->
+    <article class="card roll">
+      <div class="kicker">Impeccable · bolder</div>
+      <h2>Nixie Bench</h2>
+      <p class="thesis">Bancada de contador nixie: cada métrica é um banco de tubos; o valor muda como plasma laranja — instrumento, não card de SaaS.</p>
+      <div class="swatches">
+        <span class="swatch" style="background:#12110f"></span>
+        <span class="swatch" style="background:#d8d0c2"></span>
+        <span class="swatch" style="background:#ff6a2a"></span>
+        <span class="swatch" style="background:#0a0908"></span>
+      </div>
+      <div class="frame">
+        <div class="nx">
+          <div class="panel">
+            <span class="fac">trackforge · resibag</span>
+            <span class="stencil">sit-01</span>
+          </div>
+          <div class="banks">
+            <div class="bank hot">
+              <div class="lab">fila crm</div>
+              <div class="tubes"><span class="tube">0</span><span class="tube">3</span></div>
+            </div>
+            <div class="bank">
+              <div class="lab">não env.</div>
+              <div class="tubes"><span class="tube">0</span><span class="tube">2</span></div>
+            </div>
+            <div class="bank">
+              <div class="lab">sem fonte</div>
+              <div class="tubes"><span class="tube">0</span><span class="tube">1</span></div>
+            </div>
+            <div class="bank">
+              <div class="lab">custo</div>
+              <div class="tubes"><span class="tube">1</span><span class="tube">2</span></div>
+            </div>
+          </div>
+          <div class="nav"><span class="on">situação</span><span>peças</span><span class="plus">+</span><span>fatos</span><span>custos</span></div>
+        </div>
+      </div>
+      <div class="facts">
+        <div><strong>Origem:</strong> nixie-tube laboratory counter — quantidade = interface.</div>
+        <div><strong>Fusão Operate:</strong> 4 bancos = 4 KPIs; painel bege = chrome (frente); stencil = rota.</div>
+        <div><strong>Clareza:</strong> números impossíveis de perder; rótulos gravados sob os tubos.</div>
+        <div class="risk"><strong>Risco:</strong> nostalgia geek; empty state precisa evitar “painel morto”.</div>
+      </div>
+      <div class="actions">
+        <button class="btn accent" type="button" onclick="pick('Nixie Bench')">Travar Nixie Bench</button>
+      </div>
+    </article>
+  </div>
+
+  <p class="meta" style="margin-top:28px;">Do mesmo sorteio · não apresentados como finalistas</p>
+  <div class="declined">
+    <div class="mini">
+      <h3>Busytown cutaway</h3>
+      <p>Era o 1º do deal. Perdeu em clareza Operate (demasiado lúdico para fila/CRM).</p>
+    </div>
+    <div class="mini">
+      <h3>Starship terminal</h3>
+      <p>Descartado: phosphor/CRT = primo do Night Desk que você rejeitou.</p>
+    </div>
+    <div class="mini">
+      <h3>Cyclorama / Cape</h3>
+      <p>Fortes em craft; fracos em tarefa diária de orientar → saltar.</p>
+    </div>
+  </div>
+
+  <p id="choice">Nenhuma travada ainda — diga no chat: Wire Service · Type Specimen Desk · Nixie Bench · ou “quero híbrido Wire + X”.</p>
+
+  <script>
+    function pick(name) {
+      document.getElementById('choice').textContent = 'Escolha: ' + name + ' — confirme no chat.';
+      try { navigator.clipboard.writeText(name); } catch (e) {}
+    }
+  </script>
+</body>
+</html>

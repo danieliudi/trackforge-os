@@ -2,7 +2,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { brands } from "@/constants/brands";
+import {brands, brandIdSchema} from "@/constants/brands";
 import { jsonBody } from "@/lib/apiError";
 import { buildBrief } from "@/lib/brief";
 import { buildCarrosselSystem } from "@/lib/prompts";
@@ -29,7 +29,7 @@ const requestSchema = z.object({
   signalIds: z.array(z.string()).optional(),
   /** Conferir a peça depois de gerar. */
   verify: z.boolean().optional().default(true),
-  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
+  brandId: brandIdSchema.nullable().optional(),
   format: z.enum(["carrossel", "apresentacao"]).optional().default("carrossel"),
   /** Só importa para o carrossel — Apresentação é sempre 16:9, tom único. */
   platform: z.enum(["linkedin", "instagram", "facebook", "tiktok"]).optional().default("linkedin"),

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Intent — articulate · include · specify · Fase 1</title>
+<style>
+:root {
+  --bg:#fafafc; --surface:#fff; --fg:#18182b; --mut:#65657a; --border:#d8d8e4; --acc:#4338ca;
+  --sans: system-ui, -apple-system, sans-serif; --mono: ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg:#18182b; --surface:#1f1f36; --fg:#f0f0f8; --mut:#8888a8; --border:#2a2a44; --acc:#7c6ff0; }
+}
+* { box-sizing: border-box; }
+body { margin:0; font:14px/1.5 var(--sans); color:var(--fg); background:var(--bg); padding:32px; }
+h1 { font-size:22px; margin:0 0 8px; }
+h2 { font-size:16px; margin:32px 0 12px; }
+.lede { color:var(--mut); max-width:68ch; margin:0 0 28px; }
+.card { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:20px; margin:0 0 16px; }
+.mono { font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--mut); margin:0 0 12px; }
+table { width:100%; border-collapse:collapse; font-size:13px; }
+th, td { text-align:left; padding:8px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+th { font-family:var(--mono); font-size:10px; letter-spacing:.06em; text-transform:uppercase; color:var(--mut); }
+.do { color:var(--acc); font-weight:600; }
+.dont { color:var(--mut); }
+ul { margin:8px 0; padding-left:18px; }
+code { font-family:var(--mono); font-size:12px; }
+</style>
+</head>
+<body>
+  <p class="mono">Intent · articulate → include → specify · Sep 2026</p>
+  <h1>Casa + casca — palavras, inclusão, handoff</h1>
+  <p class="lede">Estrutura do wireframe aprovada. Isto fecha a Intent antes da Impeccable pintar. Contagens de exemplo nos wireframes continuam placeholder — a copy abaixo não afirma números reais.</p>
+
+  <div class="card">
+    <p class="mono">/articulate · voz</p>
+    <p><strong>Voz:</strong> direta, adulta, sem jargão de marketing interno. Fala como ferramenta de trabalho, não como dashboard corporativo.</p>
+    <ul>
+      <li><span class="do">É:</span> clara, concreta, responsável com o fato.</li>
+      <li><span class="dont">Não é:</span> hiperbólica, “mágica de IA”, nem industrial-por-decoração.</li>
+    </ul>
+    <table>
+      <thead><tr><th>Contexto</th><th>Tom</th><th>Exemplo</th></tr></thead>
+      <tbody>
+        <tr><td>Orientação (casa)</td><td>calmo, decisivo</td><td>O que falta enviar, o que a API cobrou e o que precisa de decisão</td></tr>
+        <tr><td>Urgência (fila)</td><td>sério, sem alarme</td><td>3 na fila do CRM · esperando aprovação</td></tr>
+        <tr><td>Vazio</td><td>honesto + próximo passo</td><td>Nada pedindo decisão · Ir para Peças</td></tr>
+        <tr><td>CRM off</td><td>factual</td><td>CRM não configurado nesta instalação</td></tr>
+        <tr><td>Erro de carga</td><td>recuperável</td><td>Não foi possível carregar a fila. Tente de novo.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <p class="mono">/articulate · matriz de copy (casca + casa)</p>
+    <table>
+      <thead><tr><th>Elemento</th><th>Copy</th></tr></thead>
+      <tbody>
+        <tr><td>Marca no chrome</td><td>trackforge</td></tr>
+        <tr><td>Rótulo frente</td><td>Frente</td></tr>
+        <tr><td>Nav</td><td>Situação · Peças · Fatos · Custos · Instalação</td></tr>
+        <tr><td>(+) aria</td><td>Nova peça</td></tr>
+        <tr><td>Tema</td><td>Tema · {atual} — clique para {próximo}</td></tr>
+        <tr><td>Título casa</td><td>Situação · {frente}</td></tr>
+        <tr><td>Subtítulo</td><td>O que falta enviar, o que a API cobrou e o que precisa de decisão · {mês}</td></tr>
+        <tr><td>KPIs</td><td>Na fila do CRM · Não enviados · Sem fonte · Custo do mês</td></tr>
+        <tr><td>KPI CRM off</td><td>valor “—” · CRM não configurado nesta instalação</td></tr>
+        <tr><td>Empty título</td><td>Nada pedindo decisão</td></tr>
+        <tr><td>Empty corpo</td><td>Quando houver peça paga não enviada, fato sem fonte ou item na fila, eles aparecem aqui. Enquanto isso, o atalho é produzir.</td></tr>
+        <tr><td>Empty CTA</td><td>Ir para Peças</td></tr>
+        <tr><td>Callout CRM</td><td>título: CRM não configurado nesta instalação · texto: A fila de aprovação não aparece até a instalação estar pronta. O resto da casa continua utilizável.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <p class="mono">/include · o que a casca não pode excluir</p>
+    <ul>
+      <li>Ordem de foco: marca → Frente → Tema → nav → conteúdo da casa.</li>
+      <li><code>nav</code> com nome acessível; item ativo anunciado (aria-current).</li>
+      <li>Botão (+) só-ícone: <code>aria-label="Nova peça"</code>.</li>
+      <li>KPI urgente: não só cor — borda + rótulo + peso tipográfico.</li>
+      <li>Gráficos: texto/resumo equivalente (tabela ou lista), não só barras.</li>
+      <li>Contraste AA nos dois temas; foco visível nunca removido.</li>
+      <li>Touch ≥ 44px nos chips de frente e na nav em viewport estreita.</li>
+      <li><code>prefers-reduced-motion</code>: sem transição obrigatória para entender estado.</li>
+    </ul>
+  </div>
+
+  <div class="card">
+    <p class="mono">/specify · handoff Fase 1</p>
+    <p><strong>Job:</strong> redesenhar entrada + casca (chrome, nav, Situação) mantendo rotas e dados existentes.</p>
+    <p><strong>Alvo:</strong> <code>/</code> + shell compartilhado. Fora: miolo de Peças/Fatos/Custos/Instalação.</p>
+    <p><strong>Estados:</strong> com prioridades · vazio · CRM off · loading de fila · erro de fila.</p>
+    <p><strong>Interação:</strong> troca de frente permanece na casa; listas são saltos; (+) → Peças.</p>
+    <p><strong>Aceite:</strong> estrutura do wireframe; copy desta matriz; include acima; direção visual Impeccable que Daniel escolher nesta sessão.</p>
+    <p><strong>Não fazer:</strong> inventar fatos na UI; publicar sem ok da direção visual; abrir PR/<code>main</code> sem pedido.</p>
+  </div>
+</body>
+</html>

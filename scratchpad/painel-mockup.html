@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="claro">
+<head>
+  <meta charset="utf-8" />
+  <title>TrackForge — mockup painel Situação</title>
+  <style>
+    :root, [data-tema="claro"] {
+      --canvas: #f8f8f8; --surface: #ffffff; --surface2: #f1f1ef;
+      --line: #cdcdcb; --line2: #e4e4e2; --ink: #1c1c1b; --ink2: #3f4143;
+      --mut: #5f6367; --faint: #7a7e82; --acc: #e56515; --acc-tint: #fdf0e4;
+      --ok: #15803d; --ok-bg: #eff8f2; --warn: #8a4a10; --warn-bg: #fdf0e4;
+      --danger: #b91c1c; --danger-bg: #fef2f2;
+    }
+    [data-tema="escuro"] {
+      --canvas: #141413; --surface: #1c1c1b; --surface2: #242422;
+      --line: #3a3a38; --line2: #2c2c2a; --ink: #f8f8f8; --ink2: #d4d4d2;
+      --mut: #a8a8a4; --faint: #8a8a86; --acc: #e56515; --acc-tint: #3a2414;
+      --ok: #4ade80; --ok-bg: #14241a; --warn: #fba45c; --warn-bg: #3a2414;
+      --danger: #f87171; --danger-bg: #2a1414;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; background: var(--canvas); color: var(--ink); }
+    .shell { display: flex; flex-direction: column; min-height: 100vh; }
+    header { display: flex; align-items: center; gap: 16px; border-bottom: 1px solid var(--line2); background: var(--surface); padding: 10px 20px; }
+    .brand { font-weight: 600; font-size: 14px; }
+    .frente { display: flex; gap: 2px; border: 1px solid var(--line); background: var(--surface2); border-radius: 8px; padding: 2px; }
+    .frente button { border: 0; background: transparent; padding: 4px 12px; border-radius: 6px; font-size: 12.5px; color: var(--mut); cursor: pointer; }
+    .frente button[aria-pressed="true"] { background: var(--surface); color: var(--ink); font-weight: 600; border: 1px solid var(--line); }
+    nav { display: flex; gap: 2px; margin-left: auto; }
+    nav a { padding: 6px 10px; border-radius: 6px; font-size: 12.5px; color: var(--mut); text-decoration: none; }
+    nav a[aria-current="page"] { background: var(--surface2); color: var(--ink); font-weight: 500; }
+    main { max-width: 1440px; margin: 0 auto; padding: 24px 32px; width: 100%; }
+    .states { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; }
+    .states button { border: 1px solid var(--line); background: var(--surface); color: var(--ink2); border-radius: 999px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
+    .states button.active { background: var(--ink); color: var(--canvas); border-color: var(--ink); }
+    h1 { font-size: 24px; margin: 0; }
+    .sub { color: var(--mut); font-size: 13px; margin-top: 4px; }
+    .kpi { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-top: 24px; }
+    .card { background: var(--surface); border: 1px solid var(--line2); border-radius: 12px; padding: 16px 18px; }
+    .card.urgent { background: var(--acc); color: var(--ink); border-color: var(--acc); }
+    .card.urgent .label, .card.urgent .meta { color: rgba(28,28,27,.75); }
+    .label { font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: .04em; color: var(--mut); }
+    .metric { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; margin-top: 8px; font-variant-numeric: tabular-nums; }
+    .meta { font-size: 12px; color: var(--mut); margin-top: 4px; }
+    .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+    .chart-box { height: 220px; display: flex; align-items: flex-end; gap: 10px; padding-top: 24px; }
+    .bar { flex: 1; background: color-mix(in srgb, var(--ok) 35%, var(--surface2)); border-radius: 6px 6px 0 0; position: relative; min-height: 8px; }
+    .bar.hi { background: var(--acc); }
+    .bar:hover::after { content: attr(data-tip); position: absolute; top: -28px; left: 50%; transform: translateX(-50%); background: var(--ink); color: var(--canvas); font-size: 11px; padding: 4px 8px; border-radius: 999px; white-space: nowrap; }
+    .line { height: 180px; width: 100%; }
+    .widgets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+    .row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line2); font-size: 13px; }
+    .row:last-child { border-bottom: 0; }
+    .empty { border: 1px dashed var(--line); border-radius: 12px; padding: 20px; color: var(--mut); font-size: 13px; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+    .ok { background: var(--ok); } .warn { background: var(--warn); } .acc { background: var(--acc); }
+    @media (max-width: 1100px) {
+      .kpi, .charts, .widgets { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <span class="brand">Esteira</span>
+      <div class="frente">
+        <button type="button" aria-pressed="true">Resibag</button>
+        <button type="button" aria-pressed="false">Sanwey</button>
+      </div>
+      <nav>
+        <a href="#" aria-current="page">Situação</a>
+        <a href="#">Peças</a>
+        <a href="#">Fatos</a>
+        <a href="#">Custos</a>
+        <a href="#">Instalação</a>
+      </nav>
+    </header>
+    <main>
+      <div class="states">
+        <button type="button" class="active" data-state="with_data">com dado</button>
+        <button type="button" data-state="empty">vazio</button>
+        <button type="button" data-state="crm_off">CRM off</button>
+        <button type="button" data-state="dark_theme">tema escuro</button>
+      </div>
+
+      <div>
+        <h1>Situação · Resibag</h1>
+        <p class="sub">O que falta enviar, o que a API cobrou e o que precisa de decisão · setembro/2026</p>
+      </div>
+
+      <section class="kpi" id="kpi">
+        <div class="card urgent" data-kpi="pending">
+          <div class="label">Na fila do CRM</div>
+          <div class="metric">2</div>
+          <div class="meta">esperando aprovação</div>
+        </div>
+        <div class="card">
+          <div class="label">Não enviados</div>
+          <div class="metric">3</div>
+          <div class="meta">pagos, ainda na bancada</div>
+        </div>
+        <div class="card">
+          <div class="label">Sem fonte</div>
+          <div class="metric">1</div>
+          <div class="meta">afirmações marcadas · n=1</div>
+        </div>
+        <div class="card">
+          <div class="label">Custo do mês</div>
+          <div class="metric">R$ 18,40</div>
+          <div class="meta">11 gerações · média R$ 2,10/post</div>
+        </div>
+      </section>
+
+      <section class="charts">
+        <div class="card">
+          <div class="label">Gasto por tipo</div>
+          <div class="chart-box" id="bars">
+            <div class="bar hi" style="height:78%" data-tip="Carrossel · R$ 8,20"></div>
+            <div class="bar" style="height:52%" data-tip="Artigo · R$ 5,40"></div>
+            <div class="bar" style="height:34%" data-tip="Derivação · R$ 3,10"></div>
+            <div class="bar" style="height:18%" data-tip="Avulso · R$ 1,70"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="label">Gerações no mês</div>
+          <svg class="line" viewBox="0 0 400 180" preserveAspectRatio="none" aria-hidden="true">
+            <polyline fill="none" stroke="var(--acc)" stroke-width="2.5"
+              points="20,140 70,120 120,110 170,90 220,100 270,70 320,85 370,60" />
+            <polyline fill="color-mix(in srgb, var(--acc) 12%, transparent)" stroke="none"
+              points="20,140 70,120 120,110 170,90 220,100 270,70 320,85 370,60 370,180 20,180" />
+          </svg>
+        </div>
+      </section>
+
+      <section class="widgets" id="widgets">
+        <div class="card">
+          <div class="label"><span class="dot acc"></span>Produzido e não enviado</div>
+          <div class="row"><span>NBR e retenção em terminal</span><span class="meta">abrir</span></div>
+          <div class="row"><span>Big bag granel · LinkedIn</span><span class="meta">abrir</span></div>
+          <div class="row"><span>Checklist ANTT</span><span class="meta">abrir</span></div>
+        </div>
+        <div class="card">
+          <div class="label"><span class="dot ok"></span>Resumo do mês</div>
+          <div class="row"><span>Busca web</span><span>R$ 0,40 · 4 buscas</span></div>
+          <div class="row"><span>Média por post</span><span>R$ 2,10</span></div>
+          <div class="row"><span>Cobradas sem resultado</span><span>1</span></div>
+        </div>
+        <div class="card" id="third">
+          <div class="label"><span class="dot warn"></span>Fila do CRM · fatos</div>
+          <div class="row"><span>Peça na fila · alta</span><span>hoje</span></div>
+          <div class="row"><span>Fato vencido · antt-6078</span><span>conferir</span></div>
+          <div class="row"><span>Não verificado · nbr-10004</span><span>conferir</span></div>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script>
+    const buttons = document.querySelectorAll('.states button');
+    const kpi = document.getElementById('kpi');
+    const third = document.getElementById('third');
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        buttons.forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const state = btn.dataset.state;
+        document.documentElement.setAttribute('data-tema', state === 'dark_theme' ? 'escuro' : 'claro');
+        if (state === 'empty') {
+          kpi.innerHTML = '<div class="empty" style="grid-column:1/-1">Nada gerado neste navegador ainda. O histórico é local.</div>';
+          document.getElementById('widgets').innerHTML = '<div class="empty" style="grid-column:1/-1">Sem produções nesta frente.</div>';
+        } else if (state === 'crm_off') {
+          location.reload();
+        } else if (state === 'crm_off') {
+          /* handled below */
+        }
+        if (state === 'crm_off') {
+          document.querySelector('[data-kpi="pending"] .metric').textContent = '—';
+          document.querySelector('[data-kpi="pending"] .meta').textContent = 'CRM não configurado nesta instalação';
+          document.querySelector('[data-kpi="pending"]').classList.remove('urgent');
+          third.innerHTML = '<div class="label"><span class="dot warn"></span>Fatos a conferir</div><div class="row"><span>Fato vencido · antt-6078</span><span>conferir</span></div><div class="row"><span>Não verificado · nbr-10004</span><span>conferir</span></div><p class="meta" style="margin-top:8px">Fila do CRM indisponível — instalação sem CRM_AGENT_KEY.</p>';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

@@ -14,7 +14,7 @@ const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
  * percebe até estar no ar. O padrão continua sendo resibag para não quebrar
  * quem já chama sem a frente.
  */
-const BRANDS = new Set(["sanwey", "resibag"]);
+const BRANDS = new Set(["sanwey", "resibag", "meu"]);
 const DEFAULT_BRAND = "resibag";
 
 function brandFrom(request: Request): string {

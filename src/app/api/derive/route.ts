@@ -2,7 +2,7 @@ import { anthropic } from "@ai-sdk/anthropic";
 import { generateObject } from "ai";
 import { z } from "zod";
 
-import { brands } from "@/constants/brands";
+import {brands, brandIdSchema} from "@/constants/brands";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { findForbidden } from "@/knowledge/check";
 import { jsonBody } from "@/lib/apiError";
@@ -43,7 +43,7 @@ import {
 
 const requestSchema = z.object({
   article: articleSchema,
-  brandId: z.enum(["sanwey", "resibag"]).nullable().optional(),
+  brandId: brandIdSchema.nullable().optional(),
   kinds: z.array(outputKindSchema).min(1, "escolha ao menos um formato").max(6),
 });
 

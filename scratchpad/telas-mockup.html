@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="claro">
+<head>
+  <meta charset="utf-8" />
+  <title>TrackForge — mockup Peças / Fatos / Custos</title>
+  <style>
+    :root, [data-tema="claro"] {
+      --canvas:#f8f8f8;--surface:#fff;--surface2:#f1f1ef;--line:#cdcdcb;--line2:#e4e4e2;
+      --ink:#1c1c1b;--ink2:#3f4143;--mut:#5f6367;--faint:#7a7e82;--acc:#e56515;--ok:#15803d;--warn:#8a4a10;
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:ui-sans-serif,system-ui,sans-serif;background:var(--canvas);color:var(--ink)}
+    header{display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--line2);background:var(--surface);padding:10px 20px}
+    .brand{font-weight:600;font-size:14px}
+    nav{display:flex;gap:2px;margin-left:auto}
+    nav a,nav button{padding:6px 10px;border-radius:6px;font-size:12.5px;color:var(--mut);text-decoration:none;border:0;background:transparent;cursor:pointer}
+    nav a[aria-current],nav button.active{background:var(--surface2);color:var(--ink);font-weight:500}
+    main{max-width:1440px;margin:0 auto;padding:24px 32px}
+    .label{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:var(--mut)}
+    h1{font-size:24px;margin:0;font-weight:600;letter-spacing:-.02em}
+    .sub{color:var(--mut);font-size:13px;margin-top:4px}
+    .kpi{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin:24px 0 16px}
+    .card{background:var(--surface);border:1px solid var(--line2);border-radius:12px;padding:16px 18px}
+    .metric{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:8px;font-variant-numeric:tabular-nums}
+    .meta{font-size:12px;color:var(--mut);margin-top:4px}
+    .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border:1px solid var(--line2);border-radius:12px;background:var(--surface);margin-top:8px}
+    .empty{border:1px dashed var(--line);border-radius:12px;padding:16px;color:var(--mut);font-size:12.5px;margin-top:8px}
+    .dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:6px;background:var(--acc)}
+    .screen{display:none}.screen.on{display:block}
+    .btn{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:6px 12px;font-size:12.5px}
+  </style>
+</head>
+<body>
+  <header>
+    <span class="brand">Esteira</span>
+    <nav>
+      <a href="#">Situação</a>
+      <button type="button" class="active" data-go="pecas">Peças</button>
+      <button type="button" data-go="fatos">Fatos</button>
+      <button type="button" data-go="custos">Custos</button>
+      <a href="#">Instalação</a>
+    </nav>
+  </header>
+  <main>
+    <section id="pecas" class="screen on">
+      <div class="label">Peças</div>
+      <h1>O que já foi produzido</h1>
+      <p class="sub">Tudo que sai da bancada é salvo aqui sozinho, neste navegador · Resibag</p>
+      <div class="kpi">
+        <div class="card"><div class="label">Da bancada</div><div class="metric">4</div><div class="meta">produções nesta frente</div></div>
+        <div class="card"><div class="label">Não enviados</div><div class="metric">2</div><div class="meta">pagos, ainda na bancada</div></div>
+        <div class="card"><div class="label">Na fila do CRM</div><div class="metric">1</div><div class="meta">já enviados</div></div>
+        <div class="card"><div class="label">No editor</div><div class="metric">1</div><div class="meta">carrosséis abertos</div></div>
+      </div>
+      <div class="label"><span class="dot"></span>Da bancada</div>
+      <div class="row"><span>NBR e retenção<br><span class="meta">artigo · Carrossel · RB-A1B2 · hoje</span></span><button class="btn">Abrir</button></div>
+      <div class="row"><span>Big bag granel<br><span class="meta">sem artigo · Legenda · ontem</span></span><button class="btn">Abrir</button></div>
+      <div class="label" style="margin-top:20px">Carrosséis no editor</div>
+      <div class="row"><span>Checklist ANTT<br><span class="meta">LinkedIn · 8 slides</span></span><button class="btn">Editor</button></div>
+    </section>
+
+    <section id="fatos" class="screen">
+      <div class="label">Base de fatos</div>
+      <h1>O que a ferramenta pode afirmar</h1>
+      <p class="sub">Só fonte primária vira número numa peça · Resibag</p>
+      <div class="kpi">
+        <div class="card"><div class="label">Publicáveis</div><div class="metric">3</div><div class="meta">de 18 · n=18</div></div>
+        <div class="card"><div class="label">Fila de risco</div><div class="metric">12</div><div class="meta">para conferir</div></div>
+        <div class="card"><div class="label">Vencidos</div><div class="metric">1</div><div class="meta">revalidar já</div></div>
+        <div class="card"><div class="label">Dado duro</div><div class="metric">7</div><div class="meta">na fila</div></div>
+      </div>
+      <div class="label"><span class="dot" style="background:var(--warn)"></span>Para conferir · n=12</div>
+      <div class="row"><span>ANTT 6078…<br><span class="meta">vencido · dado duro</span></span><span class="meta">conferir</span></div>
+      <div class="row"><span>NBR 10.004…<br><span class="meta">não verificado · dado duro</span></span><span class="meta">conferir</span></div>
+    </section>
+
+    <section id="custos" class="screen">
+      <div class="label">Custos</div>
+      <h1>O que a API cobrou</h1>
+      <p class="sub">Histórico local deste navegador · setembro/2026</p>
+      <div class="kpi">
+        <div class="card"><div class="label">Neste mês</div><div class="metric" style="color:var(--ok)">R$ 18,40</div><div class="meta">11 gerações</div></div>
+        <div class="card"><div class="label">Desde o início</div><div class="metric">R$ 42,10</div><div class="meta">medidor local</div></div>
+        <div class="card"><div class="label">Busca web</div><div class="metric">R$ 0,40</div><div class="meta">n=4</div></div>
+        <div class="card"><div class="label">Média/post</div><div class="metric">R$ 2,10</div><div class="meta">só carrossel/apresentação</div></div>
+      </div>
+      <div class="label"><span class="dot" style="background:var(--ok)"></span>Por tipo neste mês</div>
+      <div class="card" style="margin-top:8px">Carrossel n=4 · Artigo n=3 · Derivação n=2</div>
+      <div class="label" style="margin-top:20px">Extrato</div>
+      <div class="row"><span>Carrossel · Checklist ANTT</span><span class="meta">R$ 2,40</span></div>
+    </section>
+  </main>
+  <script>
+    document.querySelectorAll('[data-go]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-go]').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        document.querySelectorAll('.screen').forEach((s) => s.classList.remove('on'));
+        document.getElementById(btn.dataset.go).classList.add('on');
+      });
+    });
+  </script>
+</body>
+</html>

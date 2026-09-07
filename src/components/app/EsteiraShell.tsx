@@ -45,9 +45,11 @@ import { focusRing, labelClass } from "@/lib/ui";
  */
 
 const SECTIONS = [
+  { href: "/", label: "Situação" },
   { href: "/esteira/pecas", label: "Peças" },
-  { href: "/esteira/fatos", label: "Base de fatos" },
+  { href: "/esteira/fatos", label: "Fatos" },
   { href: "/esteira/custos", label: "Custos" },
+  { href: "/esteira/instalacao", label: "Instalação" },
 ];
 
 export function useFront(): [BrandId, (id: BrandId) => void] {
@@ -82,13 +84,13 @@ export function EsteiraShell({
     <div className="flex h-screen flex-col bg-canvas">
       <header className="flex shrink-0 items-center gap-4 border-b border-line2 bg-surface px-5 py-2.5">
         <Link
-          href="/esteira"
+          href="/"
           className={clsx(
             "rounded-md px-1 py-0.5 text-sm font-semibold tracking-tight text-ink",
             focusRing,
           )}
         >
-          Esteira
+          Trackforge OS
         </Link>
 
         <span className="flex items-center gap-2">
@@ -111,17 +113,6 @@ export function EsteiraShell({
                 {label}
               </button>
             ))}
-            {/* Listada e desligada: esconder sugeriria que não é parte do
-                desenho; habilitar deixaria sair peça sem o auditor de fronteira. */}
-            {/* Recuada, mas legível: a 2,2:1 ela sumia, e item invisível não
-                comunica "em breve" — comunica que não existe. */}
-            <span
-              className="flex items-center gap-1.5 px-3 py-1 text-[12.5px] text-faint"
-              title="Em breve — falta o auditor de fronteira para esta frente"
-            >
-              Meu
-              <span className="font-mono text-[9px] uppercase tracking-wide">em breve</span>
-            </span>
           </span>
         </span>
 
@@ -141,7 +132,10 @@ export function EsteiraShell({
 
         <nav className="flex items-center gap-0.5">
           {SECTIONS.map(({ href, label }) => {
-            const active = pathname === href;
+            const active =
+              href === "/"
+                ? pathname === "/"
+                : pathname === href || pathname.startsWith(`${href}/`);
             return (
               <Link
                 key={href}
@@ -165,11 +159,13 @@ export function EsteiraShell({
   );
 }
 
-/** Container das telas de leitura — as que não são a bancada de três colunas. */
+/** Container das telas de leitura — mesma largura do painel Situação. */
 export function ShellPage({ children }: { children: ReactNode }) {
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto flex max-w-5xl flex-col gap-4 px-6 py-6">{children}</div>
+      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-6 py-6 md:px-8">
+        {children}
+      </div>
     </div>
   );
 }

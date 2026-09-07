@@ -24,7 +24,7 @@ function read(): BrandId {
   if (typeof window === "undefined") return DEFAULT;
   try {
     const raw = readLocal(KEY);
-    return raw === "sanwey" || raw === "resibag" ? raw : DEFAULT;
+    return raw === "sanwey" || raw === "resibag" || raw === "meu" ? raw : DEFAULT;
   } catch {
     return DEFAULT;
   }

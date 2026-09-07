@@ -1,3 +1,4 @@
+import { brandIdSchema, isPersonalFront } from "@/constants/brands";
 import { fetchContentCampaigns, campaignsConfigured } from "@/lib/campaigns";
 
 /**
@@ -10,7 +11,12 @@ export async function GET(request: Request) {
   }
 
   const brand = new URL(request.url).searchParams.get("brandId");
-  const brandId = brand === "sanwey" || brand === "resibag" ? brand : null;
+  const parsed = brandIdSchema.safeParse(brand);
+  const brandId = parsed.success ? parsed.data : null;
+
+  if (isPersonalFront(brandId)) {
+    return Response.json({ configured: false, campaigns: [], personal: true });
+  }
 
   try {
     return Response.json({

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import {
   Barlow_Condensed,
   Geist,
@@ -50,8 +51,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Carousel Builder",
-  description: "Gerador de carrosséis B2B",
+  title: "Trackforge OS",
+  description: "Esteira de conteúdo B2B — Resibag, Sanwey e trabalho pessoal",
 };
 
 const fontVariables = [
@@ -83,7 +84,7 @@ const fontVariables = [
  */
 const TEMA_ANTES_DA_PINTURA = `try{var t=localStorage.getItem("trackforge:tema:v1")||localStorage.getItem("carousel-builder:tema:v1");if(t==="claro"||t==="escuro")document.documentElement.setAttribute("data-tema",t)}catch(e){}`;
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="pt-BR"

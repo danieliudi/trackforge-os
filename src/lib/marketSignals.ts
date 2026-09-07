@@ -1,4 +1,4 @@
-import type { BrandId } from "@/constants/brands";
+import { isPersonalFront, type BrandId } from "@/constants/brands";
 
 /**
  * Sinais de mercado curados pelo time, lidos do CRM.
@@ -24,8 +24,11 @@ export type MarketSignal = {
 /**
  * A tabela separa por empresa e o CRM chama a Sanwey de "industria" — a marca
  * ali é a unidade de negócio, não o nome comercial.
+ *
+ * `meu` não tem company_id de propósito: frente pessoal não lê sinal do CRM
+ * nem entra em campanha.
  */
-export const COMPANY_ID: Record<BrandId, string> = {
+export const COMPANY_ID: Partial<Record<BrandId, string>> = {
   resibag: "resibag",
   sanwey: "industria",
 };
@@ -87,12 +90,15 @@ export async function fetchMarketSignals(
   brandId: BrandId | null | undefined,
 ): Promise<MarketSignal[]> {
   const config = readConfig();
-  if (!config || !brandId) return [];
+  if (!config || !brandId || isPersonalFront(brandId)) return [];
+
+  const companyId = COMPANY_ID[brandId];
+  if (!companyId) return [];
 
   const since = new Date(Date.now() - MAX_AGE_DAYS * 86_400_000).toISOString();
   const query = new URLSearchParams({
     select: "id,title,excerpt,source,url,urgency,detected_at,created_at",
-    company_id: `eq.${COMPANY_ID[brandId]}`,
+    company_id: `eq.${companyId}`,
     detected_at: `gte.${since}`,
     order: "detected_at.desc",
     limit: String(MAX_SIGNALS),

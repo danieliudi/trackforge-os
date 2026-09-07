@@ -21,6 +21,7 @@ import {
 } from "@/components/app/OriginPicker";
 import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { Button } from "@/components/ui/Button";
+import { isPersonalFront } from "@/constants/brands";
 import type { GenerationCost } from "@/constants/pricing";
 import type { ForbiddenHit } from "@/knowledge/check";
 import { readError } from "@/lib/apiError";
@@ -28,6 +29,7 @@ import {
   allocateContentId,
   buildQrCodeUrl,
   displayContentId,
+  hasBrandLanding,
 } from "@/lib/attribution";
 import { entryFromCost, pushCostEntry } from "@/lib/costLog";
 import { getProduction, saveProduction, type Production } from "@/lib/produced";
@@ -424,6 +426,10 @@ export default function BancadaPage() {
 
   const send = useCallback(async () => {
     if (!article || !pieces || !brandId) return;
+    if (isPersonalFront(brandId)) {
+      setError("a frente Meu não envia para o CRM — peça pessoal fica só neste navegador");
+      return;
+    }
     setBusy("envio");
     setError(null);
     try {
@@ -431,7 +437,9 @@ export default function BancadaPage() {
       const idForPiece = contentId ?? allocateContentId(brandId);
       if (idForPiece !== contentId) setContentId(idForPiece);
 
-      const qrUrl = buildQrCodeUrl(brandId, idForPiece, campaignName, qrPath || null);
+      const qrUrl = hasBrandLanding(brandId)
+        ? buildQrCodeUrl(brandId, idForPiece, campaignName, qrPath || null)
+        : "";
 
       // Carrossel: QR derivado no slide CTA no momento do envio (não texto livre).
       const piecesForPublish = pieces.map((piece) => {
@@ -444,7 +452,7 @@ export default function BancadaPage() {
         }
         const carousel = piece.data as Carousel;
         const slides = carousel.slides.map((slide) =>
-          slide.type === "cta" ? { ...slide, qrCodeUrl: qrUrl } : slide,
+          slide.type === "cta" && qrUrl ? { ...slide, qrCodeUrl: qrUrl } : slide,
         );
         return {
           kind: piece.kind,
@@ -910,7 +918,7 @@ export default function BancadaPage() {
                     placeholder="rapp"
                     className={fieldClass}
                   />
-                  {contentId && brandId ? (
+                  {contentId && brandId && hasBrandLanding(brandId) ? (
                     <span className="break-all font-mono text-[10px] text-faint">
                       {buildQrCodeUrl(brandId, contentId, campaignName, qrPath || null)}
                     </span>
@@ -926,6 +934,10 @@ export default function BancadaPage() {
                   {busy === "envio" ? "Enviando…" : "Enviar para aprovação"}
                 </Button>
               </div>
+            ) : isPersonalFront(brandId) ? (
+              <p className="rounded-lg border border-dashed border-line px-3 py-2.5 text-[12.5px] text-mut">
+                Frente Meu — peça pessoal. Não vai para o CRM. Copie o texto ou baixe o .md.
+              </p>
             ) : (
               <p className="text-[11.5px] text-faint">
                 CRM não configurado — copie o texto ou baixe o .md.
