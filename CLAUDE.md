@@ -234,14 +234,23 @@ rejeitada explicitamente.
 
 **Contraste é gate, não gosto, e vale nos dois temas.** Texto de corpo ≥ 4,5:1
 sobre o fundo; rótulo pequeno e ornamento ≥ 3:1. Meça sobre o app de verdade,
-não sobre o hex isolado — modelo pronto para copiar em
-`scratchpad/contraste-slot.mjs` (Playwright, lê a cor computada nos dois temas).
-Rode com `colorScheme: "dark"` também, porque um token que passa no claro pode
-reprovar no escuro. Quando uma cor da paleta não passa
-como letra, ela vira preenchimento ou borda — nunca se escurece a cor da marca
-para caber texto branco: troca-se a letra. Foi a decisão do laranja `#E56515`
-(branco em cima dá 3,4:1; quase-preto dá 5,0:1). Percentual na UI sempre com o
-`n` ao lado.
+não sobre o hex isolado: **declare o par em `scripts/qa/contraste.mjs` e rode
+`npm run qa:contraste`**, que já mede nos dois temas. Um token que passa no
+claro pode reprovar no escuro — e a recíproca também, que foi como o sinal da
+faixa reprovou só no claro (3,93:1).
+
+Não escreva medidor novo. O de `scripts/qa/lib/navegador.mjs` já resolve a cor
+pelo canvas (o Tailwind emite `oklab` para alpha) e multiplica o `opacity` dos
+ancestrais; sem as duas coisas o número sai errado e parece certo. Os roteiros
+de `scratchpad/` que mediam contraste ficaram como histórico — o que vale é o
+de `scripts/qa/`.
+
+Quando uma cor da paleta não passa como letra, ela vira preenchimento ou borda —
+nunca se escurece a cor da marca para caber texto branco: troca-se a letra. Foi
+a decisão do laranja `#E56515` (branco em cima dá 3,4:1; quase-preto dá 5,0:1),
+e a mesma regra resolveu o sinal da faixa em 07/09/2026: o vermelho ficou no
+ponto (ornamento) e as palavras foram para `band-ink`. Percentual na UI sempre
+com o `n` ao lado.
 
 ## 5. Custo é visível ou não existe
 

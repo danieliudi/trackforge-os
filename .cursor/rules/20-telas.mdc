@@ -64,16 +64,21 @@ script.
 
 - Texto de corpo **≥ 4,5:1** sobre o fundo.
 - Rótulo pequeno e ornamento **≥ 3:1**.
-- Meça sobre o **app de verdade**, não sobre o hex isolado. Modelo pronto para
-  copiar: `scratchpad/contraste-slot.mjs` (Playwright, lê a cor computada e
-  mede nos dois temas). Também `scratchpad/painel-contraste.mjs` para o painel.
-- **Rode também com `colorScheme: "dark"`** — token que passa no claro pode
-  reprovar no escuro.
+- Meça sobre o **app de verdade**, não sobre o hex isolado: declare o par em
+  `scripts/qa/contraste.mjs` e rode `npm run qa:contraste`, que já mede nos dois
+  temas.
+- **Não escreva medidor novo.** O de `scripts/qa/lib/navegador.mjs` resolve a cor
+  pelo canvas (o Tailwind emite `oklab` para alpha) e multiplica o `opacity` dos
+  ancestrais — sem as duas coisas o número sai errado e parece certo.
+- Token que passa no claro pode reprovar no escuro, **e a recíproca também**:
+  foi assim que o sinal da faixa reprovou só no claro (3,93:1).
 
 Quando uma cor da paleta não passa como letra, ela vira **preenchimento ou
 borda**. Nunca escureça a cor da marca para caber texto branco: troque a letra.
 Foi a decisão do laranja `#E56515` — branco em cima dá 3,4:1 (reprova),
-quase-preto dá 5,0:1 (passa).
+quase-preto dá 5,0:1 (passa). E a mesma regra resolveu o sinal da faixa em
+07/09/2026: o vermelho ficou no ponto (ornamento, 3,93:1) e as palavras foram
+para `band-ink` (16,04:1).
 
 ## Acessibilidade que o repo já cobra
 
