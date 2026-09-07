@@ -13,7 +13,11 @@
     "knowledge:sync": "node scripts/check-knowledge.mjs --sync",
     "knowledge:audit": "node scripts/audit-knowledge.mjs",
     "lint:ruido": "eslint --max-warnings 0 || true",
-    "doc:check": "node scripts/check-docs.mjs"
+    "doc:check": "node scripts/check-docs.mjs",
+    "qa:rotas": "node scripts/qa/rotas.mjs",
+    "qa:contraste": "node scripts/qa/contraste.mjs",
+    "qa:interacao": "node scripts/qa/interacao.mjs",
+    "qa": "npm run qa:rotas && npm run qa:contraste && npm run qa:interacao"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.42",

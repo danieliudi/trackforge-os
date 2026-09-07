@@ -58,19 +58,20 @@ conferência era manual. **Rode depois de mexer em qualquer documento de regra.*
 Fica **fora do `prebuild`** de propósito: documento defasado não deve travar
 deploy. Ele avisa; o gate acima é que bloqueia.
 
-## Varredura em navegador: script, não rascunho
+## Varredura em navegador: `scripts/qa/`
 
 O padrão de teste do repo é bom — as rotas custam dinheiro, então Playwright com
-interceptação de rota roda o app de verdade a custo zero. O problema é onde ele
-mora: os exemplos estão em `scratchpad/`, e pasta com esse nome ninguém trata
-como suíte.
+interceptação de rota roda o app de verdade a custo zero. Desde 07/09/2026 os
+roteiros que valem moram em `scripts/qa/` (antes ficavam em `scratchpad/`, e
+pasta com esse nome ninguém trata como suíte):
 
-**Regra.** Os roteiros que valem viram `scripts/qa/`, com entrada no
-`package.json`: uma passada de rotas (todas as páginas, largura de desktop e de
-celular, reportando exceção não tratada, erro de console, tela em branco e
-rolagem horizontal) e uma passada de interação com dado interceptado. Playwright
-continua fora das dependências do projeto, instalado sob demanda, com o motivo
-escrito no `README` da pasta.
+- `npm run qa:rotas` — as 11 telas, no monitor e no celular;
+- `npm run qa:contraste` — pares declarados, nos dois temas;
+- `npm run qa:interacao` — frente, tema, prioridade e herança de chave;
+- `npm run qa` — os três.
+
+Playwright continua fora das dependências, instalado sob demanda, com o motivo
+escrito em `scripts/qa/README.md`.
 
 **Armadilha específica deste repo.** `src/proxy.ts` protege tudo por senha
 quando `APP_PASSWORD` está definida. Varredura rodando com a variável ligada e
@@ -79,7 +80,17 @@ sem a senha reporta N rotas limpas que são N telas de bloqueio.
 > Varredura que passa sem provar que renderizou a tela certa vale menos que
 > nada, porque dá sensação de cobertura.
 
-O roteiro confere o **texto renderizado** antes de declarar sucesso.
+Cada rota declara uma `marca` — texto que só existe se a tela certa renderizou.
+Medido: com a senha ligada e sem `QA_SENHA`, as 22 combinações reprovaram; com
+ela, passaram.
+
+**Alvo de contraste é declarado, não improvisado.** Três seletores escolhidos na
+hora já casaram com o elemento errado numa sessão só — dois alarmes falsos e um
+que escondeu 1,17:1 real. Alvo declara a contagem esperada, o relatório imprime
+o texto medido, e seletor que não casa é reprovação, não silêncio.
+
+**Roteiro novo se confere plantando o defeito que ele deveria pegar.** Suíte que
+só sabe dizer verde não prova nada.
 
 **Quando rodar:** o gate acima roda sozinho em todo build. A varredura é para
 entrega que mexeu em mais de uma tela, e para rodada de auditoria.

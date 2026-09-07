@@ -381,10 +381,16 @@ de rota roda o app de verdade a custo zero. O problema é onde ele mora. Os
 exemplos estão em `scratchpad/`, e uma pasta com esse nome ninguém trata como
 suíte.
 
-**Regra.** Os roteiros que valem viram `scripts/qa/`, com entrada em
-`package.json`: uma passada de rotas (todas as páginas, largura de desktop e de
-celular, reportando exceção não tratada, erro de console, tela em branco e
-rolagem horizontal) e uma passada de interação com dado interceptado.
+**Existe desde 07/09/2026, em `scripts/qa/`** — três roteiros com entrada em
+`package.json`, detalhados em `scripts/qa/README.md`:
+
+| Comando | O que prova |
+|---|---|
+| `npm run qa:rotas` | as 11 telas renderizam **a tela certa**, no monitor e no celular |
+| `npm run qa:contraste` | os pares declarados passam o piso nos **dois** temas |
+| `npm run qa:interacao` | frente, tema, prioridade e herança de chave respondem |
+| `npm run qa` | os três em sequência |
+
 Playwright continua fora das dependências do projeto, instalado sob demanda, e
 o motivo fica escrito no `README` da pasta.
 
@@ -393,10 +399,28 @@ tudo por senha quando `APP_PASSWORD` está definida. Varredura rodando com a
 variável ligada e sem a senha reporta N rotas limpas que são N telas de
 bloqueio. Vale a mesma frase do irmão: **varredura que passa sem provar que
 renderizou a tela certa vale menos que nada, porque dá sensação de cobertura.**
-O roteiro confere o texto renderizado antes de declarar sucesso.
+
+Por isso cada rota declara uma `marca` — texto que só existe se a tela certa
+renderizou. **Medido, não suposto:** com `APP_PASSWORD` ligada e sem senha, as
+22 combinações reprovaram; com `QA_SENHA` na mesma instância, as 22 passaram.
+`QA_SENHA` existe para varrer a ferramenta publicada, que é onde a variável está
+definida e onde auditar importa mais.
+
+**Alvo de contraste é declarado, não improvisado.** Numa única sessão, três
+seletores escolhidos na hora casaram com o elemento errado — dois alarmes falsos
+e um que escondeu uma reprovação real de 1,17:1. Em `contraste.mjs` cada alvo
+traz a contagem esperada e o relatório imprime o texto que mediu; seletor que
+deixa de casar é reprovação, não silêncio.
+
+**Suíte que só sabe dizer verde não prova nada.** Cada roteiro novo se confere
+plantando o defeito que ele deveria pegar e vendo a reprovação sair. Foi assim
+com os três: a armadilha da senha, a fila fora do ar virando "em dia", e o
+seletor que casa com zero elementos.
 
 Quando rodar: o gate da seção 11 roda sozinho em todo build. A varredura é para
-fim de entrega que mexeu em mais de uma tela, e para rodada de auditoria.
+fim de entrega que mexeu em mais de uma tela, e para rodada de auditoria — fica
+fora do `prebuild` porque depende do app de pé e de um Playwright que o projeto
+de propósito não instala.
 
 ## 13. Segurança como quarta lente, condicional
 

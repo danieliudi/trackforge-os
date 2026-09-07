@@ -212,24 +212,39 @@ export function EsteiraShell({
       <nav className="flex shrink-0 flex-wrap items-center gap-x-3.5 gap-y-1 bg-band px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-band-ink">
         {/* O ponto diz o que espera VOCÊ, com a mesma regra do glifo da home
             (`esperandoDecisao`). Vermelho só quando há algo: cor de urgência sem
-            urgência treina a pessoa a ignorar a cor. */}
+            urgência treina a pessoa a ignorar a cor.
+
+            O VERMELHO FICA NO PONTO, NÃO NA FRASE — que é o que a spec pede
+            ("ponto urgent") e o que o gate de contraste obriga. Pintar as
+            palavras de `urgent` dava 3,93:1 sobre a faixa no tema claro, abaixo
+            do piso de 4,5:1 de corpo, e justamente no texto que existe para
+            avisar que algo espera decisão sua. A regra da seção 4 vale aqui sem
+            adaptação: cor da paleta que não passa como letra vira ornamento —
+            troca-se a letra, não se mexe na cor. Como ornamento o ponto tem
+            3,93:1 no claro e 7,48:1 no escuro, acima do piso de 3:1.
+
+            A urgência continua legível de duas formas somadas: o ponto colorido
+            e a opacidade cheia, contra os 70% do resto da faixa. */}
         <Link
           href="/"
           className={clsx(
-            "uppercase tracking-[0.06em] transition",
+            "flex items-center gap-1 uppercase tracking-[0.06em] transition",
             focusRing,
-            espera
-              ? "text-urgent"
-              : fila.estado === "fora-do-ar"
-                ? "opacity-100"
-                : "opacity-70 hover:opacity-100",
+            espera || fila.estado === "fora-do-ar"
+              ? "opacity-100"
+              : "opacity-70 hover:opacity-100",
           )}
         >
-          {espera
-            ? `• ${espera.total} ${espera.total === 1 ? "espera" : "esperam"} · ${espera.rotulo}`
-            : fila.estado === "fora-do-ar"
-              ? "• fila indisponível"
-              : "• em dia"}
+          <span aria-hidden="true" className={clsx(espera && "text-urgent")}>
+            •
+          </span>
+          <span>
+            {espera
+              ? `${espera.total} ${espera.total === 1 ? "espera" : "esperam"} · ${espera.rotulo}`
+              : fila.estado === "fora-do-ar"
+                ? "fila indisponível"
+                : "em dia"}
+          </span>
         </Link>
 
         {SECTIONS.map(({ href, label }, i) => {

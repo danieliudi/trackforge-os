@@ -49,7 +49,7 @@ const texto = (f) => readFileSync(join(RAIZ, f), "utf8");
  * Se um deles passar a existir, o check FALHA pedindo para tirá-lo daqui — a
  * lista não pode virar o próximo lugar onde a verdade envelhece em silêncio.
  */
-const AINDA_NAO_EXISTEM = ["docs/mapa-funcional.md", "scripts/qa/"];
+const AINDA_NAO_EXISTEM = ["docs/mapa-funcional.md"];
 
 const CITACAO = /`([A-Za-z0-9_@./-]+\/[A-Za-z0-9_@./-]+\.(?:ts|tsx|mjs|css|json|md|mdc))`/g;
 
