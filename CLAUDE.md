@@ -59,13 +59,13 @@ genuinamente novo.
 Este arquivo é **como construir**. Ele não descreve nenhuma funcionalidade, de
 propósito. O efeito colateral disso já apareceu: em 03/09/2026, numa análise
 externa dos dois repositórios, foi preciso varrer o código inteiro para
-responder o que cada tela faz, porque nenhuma das 10 páginas tem comentário de
+responder o que cada tela faz, porque nenhuma das 11 páginas tem comentário de
 propósito e o `README` descreve o produto, não a superfície. No repositório
 irmão, o mesmo buraco foi encontrado antes e resolvido com um mapa separado.
 
 **O mapa ainda não existe completo** — conferido em 03/09/2026. Em 04/09/2026
 entrou `docs/ui-diretrizes.md` (identidade visual Situação) e
-`docs/dashboard-spec.json` (slots do painel). O mapa funcional das 10 páginas
+`docs/dashboard-spec.json` (slots do painel). O mapa funcional das telas
 ainda falta. Esta seção é a especificação dele, não um ponteiro. Enquanto o
 mapa funcional não for escrito, quem precisar da resposta lê o código mesmo;
 não mande ninguém abrir `docs/mapa-funcional.md`.
@@ -76,13 +76,14 @@ todo caminho citado nos documentos de regra, o espelho CLAUDE.md ↔
 
 Quando existir, mora em **`docs/mapa-funcional.md`** e cobre:
 
-- As 10 páginas: `/`, `/esteira`, `/esteira/pecas`, `/esteira/avulso`,
-  `/esteira/custos`, `/esteira/fatos`, `/artigo`, `/editor`, `/biblioteca`,
-  `/slides-preview`. Para cada uma: para que serve, o que precisa estar
-  funcionando para ela render, e o que ela deliberadamente não faz.
-- As 13 rotas de API, separando as que **gastam dinheiro** (`generate/*`,
+- As 11 páginas: `/`, `/esteira`, `/esteira/pecas`, `/esteira/avulso`,
+  `/esteira/custos`, `/esteira/fatos`, `/esteira/instalacao`, `/artigo`,
+  `/editor`, `/biblioteca`, `/slides-preview`. Para cada uma: para que serve, o
+  que precisa estar funcionando para ela render, e o que ela deliberadamente
+  não faz.
+- As 14 rotas de API, separando as que **gastam dinheiro** (`generate/*`,
   `derive`, `suggest-outputs`, `images/search`) das que não gastam
-  (`signals`, `campaigns`, `assets/library`, `publish`,
+  (`signals`, `campaigns`, `assets/library`, `publish`, `instalacao`,
   `images/track-download`).
 - A camada `src/knowledge`: o que é fato curado, qual nível de proveniência
   cada arquivo carrega, e qual skill é a origem de cada um.
@@ -97,9 +98,10 @@ atualize lá e rode `npm run doc:check` — script que recalcula as contagens a
 partir do código e falha apontando a divergência. Fica **fora** do `prebuild` de
 propósito: documento defasado não deve travar deploy.
 
-As contagens desta seção foram conferidas contra o código em 03/09/2026: são
-mesmo 10 `page.tsx` e 13 `route.ts`. Elas envelhecem — é para isso que o
-`doc:check` existe.
+As contagens desta seção são conferidas pelo `npm run doc:check`, que as
+recalcula a partir do código. Em 07/09/2026 ele pegou a primeira deriva sozinho:
+o texto trazia as contagens de 03/09 e o repo já tinha ganhado
+`/esteira/instalacao` e `api/instalacao`.
 
 ---
 
@@ -117,7 +119,8 @@ parecido**.
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 arquivos — `IconButton` exige `label` (nome acessível) |
 | Casca do app: barra, frente ativa, seções | `src/components/app/EsteiraShell.tsx` | 5 telas — toda tela nova dentro da esteira nasce aqui, não com layout próprio |
 | KPI / gráfico / lista do padrão Situação | `src/components/dashboard/*` | painel e telas que reusam a densidade aprovada |
-| Diretrizes visuais (identidade Situação) | `docs/ui-diretrizes.md` | obrigatório antes de tela nova ou redesign |
+| Diretrizes visuais dos INTERIORES | `docs/ui-diretrizes.md` | obrigatório antes de tela nova ou redesign de interior |
+| Direção da casca e da home | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` | híbrido Wire + Specimen, travado 07/09/2026 |
 | Frente ativa como store global | `src/lib/front.ts` | via `useFront()` do shell. É global de propósito: estar no painel da Resibag lendo fato da Sanwey é a classe de bug que isto previne |
 | Renderização de peça por formato + `toPlainText` | `src/components/app/OutputPieces.tsx` | 2 telas — Reels mostra tempo, Stories mostra telas; não renderize formato novo como parágrafo genérico |
 | Recibo de custo | `src/components/app/CostReceipt.tsx` | 3 telas |
@@ -191,21 +194,32 @@ Isto não é preferência de estilo. É o requisito do produto.
 
 ## 4. Mockup antes de código — e a identidade visual é uma só
 
-**A identidade visual da plataforma é a do painel de Situação**, aprovada em
-04/09/2026. Fonte: `docs/ui-diretrizes.md`. Mockup canônico:
-`scratchpad/painel-mockup.html`. Implementação de referência: `/` +
-`src/components/dashboard/`.
+**A identidade visual está em transição desde 07/09/2026, e são DUAS enquanto
+durar a transição — cada uma no seu escopo.** Confundir as duas, ou seguir a
+errada, é como a plataforma ganha um terceiro visual sem ninguém ter decidido.
 
-Tela nova e redesign **seguem essas diretrizes**. Não invente um segundo visual
-(outra paleta, outra densidade de card, outro empty state, outro padrão de
-cabeçalho). Hex de referências externas (Sanwey OS, Worktail) mapeia para token
-Clockwork — não entra no código.
+| Escopo | Direção | Fonte | Estado |
+|---|---|---|---|
+| Casca (`EsteiraShell`) e home Situação (`/`) | **Híbrido Wire Service + Type Specimen Desk** | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` · mock `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html` | implementado (Fase 1) |
+| Interiores: Peças, Fatos, Custos, Instalação, Artigo, Editor | Painel de Situação (Clockwork) | `docs/ui-diretrizes.md` · mock `scratchpad/painel-mockup.html` | vale até a fase deles |
+
+Do híbrido vêm o masthead serif, `EDIÇÃO · frente`, a dateline, a faixa preta com
+a navegação, o glifo da prioridade e a grade de células. Tokens `paper`, `band`,
+`rule`, `cell`, `urgent` em `src/app/globals.css`.
+
+**O `canvas` foi o único token que atravessou a fronteira da fase**: passou do
+cinza `#f8f8f8` para o papel `#f3efe6`, porque interior em cinza frio debaixo de
+masthead em papel parece defeito, não fase.
+
+Tela nova e redesign seguem a direção **do escopo em que estão**. Não invente um
+terceiro visual. Hex de referências externas (Sanwey OS, Worktail) mapeia para
+token — não entra no código.
 
 Regra do Daniel, já em vigor: qualquer coisa que mude **como a plataforma se
 parece ou se organiza** — cor, tema, ícone, layout, componente, ordem de tela,
 como um dado é agrupado — precisa de mockup aprovado **antes** da
 implementação. Vale para pedido dele e para sugestão sua. O mockup se confere
-**contra `docs/ui-diretrizes.md`**, não contra um visual inventado na hora.
+contra a fonte do escopo, não contra um visual inventado na hora.
 
 Na dúvida se conta como mudança visual, mostre o mockup. Não decida sozinho que
 "é pequeno o bastante para pular" — foi assim que a plataforma derivou do mockup

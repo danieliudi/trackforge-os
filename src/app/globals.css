@@ -26,7 +26,7 @@
 @theme {
   /* Clockwork — a paleta que o Daniel mandou. Os seis tons dela estão marcados;
    * o resto é derivado deles para fechar contraste, não cor inventada. */
-  --color-canvas: #f8f8f8;   /* Clockwork */
+  --color-canvas: #f3efe6;   /* papel Wire — ver bloco híbrido abaixo */
   --color-surface: #ffffff;
   --color-surface2: #f1f1ef;
   --color-line: #cdcdcb;     /* Clockwork */
@@ -50,6 +50,21 @@
   --color-acc-tint: #fdf0e4;
   --color-acc-tx: #b8490b;
   --color-acc-ink: #1c1c1b;
+
+  /* ── Wire + Specimen — direção travada 07/09/2026 ──────────────────────
+   * Casca e home Situação (`DESIGN-hibrido-locked.md`). O `canvas` acima passou
+   * do cinza neutro para este papel quente: as telas de dentro ainda têm o
+   * layout Clockwork, mas herdam o mesmo chão — deixá-las em cinza frio embaixo
+   * de um masthead em papel pareceria defeito, não fase. */
+  --color-paper: #f3efe6;
+  --color-band: #16140f;     /* faixa LIVE: preta nos dois temas */
+  --color-band-ink: #f3efe6; /* letra sobre a faixa */
+  --color-rule: #d8d1c3;
+  --color-cell: #f7f4ec;
+  --color-urgent: #d63a22;
+  --color-urgent-bg: #f6e4df;
+  --color-urgent-line: #e2b4a8;
+  --color-note-bg: #efe6d6;
 
   --color-ok: #15803d;
   --color-ok-bg: #eff8f2;
@@ -84,7 +99,16 @@
   :root:not([data-tema="claro"]) {
     color-scheme: dark;
 
-    --color-canvas: #171715;
+    --color-canvas: #12110f;
+    --color-paper: #12110f;
+    --color-band: #000000;
+    --color-band-ink: #f2efe6;
+    --color-rule: #2c2a26;
+    --color-cell: #1a1916;
+    --color-urgent: #ff6b52;
+    --color-urgent-bg: #2a1814;
+    --color-urgent-line: #5a3030;
+    --color-note-bg: #1f1c18;
     --color-surface: #201f1d;
     --color-surface2: #2a2926;
     --color-line: #3a3835;
@@ -117,7 +141,16 @@
 :root[data-tema="escuro"] {
   color-scheme: dark;
 
-  --color-canvas: #171715;
+  --color-canvas: #12110f;
+  --color-paper: #12110f;
+  --color-band: #000000;
+  --color-band-ink: #f2efe6;
+  --color-rule: #2c2a26;
+  --color-cell: #1a1916;
+  --color-urgent: #ff6b52;
+  --color-urgent-bg: #2a1814;
+  --color-urgent-line: #5a3030;
+  --color-note-bg: #1f1c18;
   --color-surface: #201f1d;
   --color-surface2: #2a2926;
   --color-line: #3a3835;

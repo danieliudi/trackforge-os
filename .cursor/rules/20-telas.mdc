@@ -10,9 +10,12 @@ alwaysApply: false
 
 A plataforma inteira segue o visual do painel de Situação.
 
-- **Diretrizes:** `docs/ui-diretrizes.md` — leia antes de qualquer tela nova ou
+- **Diretrizes (interiores):** `docs/ui-diretrizes.md` — leia antes de qualquer tela nova ou
   redesign.
-- **Mockup canônico:** `scratchpad/painel-mockup.html`
+- **Mockup canônico (interiores):** `scratchpad/painel-mockup.html`
+- **Casca e home:** híbrido Wire + Specimen —
+  `scratchpad/intent-fase1/DESIGN-hibrido-locked.md`, mock
+  `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html`
 - **Código de referência:** `src/app/page.tsx` + `src/components/dashboard/`
 
 Não invente segundo visual. Hex de referência externa (Sanwey OS, Worktail)
@@ -26,7 +29,9 @@ laranja). Percentual sempre com `n` ao lado. Gráfico = Recharts +
 
 Mudou **como a plataforma se parece ou se organiza** — cor, tema, ícone, layout,
 componente, ordem de tela, agrupamento de dado? Precisa de mockup aprovado pelo
-Daniel **antes** do código. O mockup se confere **contra `docs/ui-diretrizes.md`**.
+Daniel **antes** do código. O mockup se confere contra a fonte do ESCOPO:
+híbrido (`scratchpad/intent-fase1/DESIGN-hibrido-locked.md`) para casca e home,
+`docs/ui-diretrizes.md` para os interiores.
 
 - **Bug fix puro não precisa** — algo que já deveria funcionar e não funciona, ou
   asset quebrado voltando ao original.

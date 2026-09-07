@@ -64,6 +64,13 @@ const eslintConfig = defineConfig([
     "next-env.d.ts",
     // Roteiros de teste e de medição: rodam fora do app, com estilo próprio.
     "scratchpad/**",
+    // Skill packs instalados de terceiros. Não são código desta aplicação, e a
+    // partir de 07/09/2026 são 33 erros que travavam o build inteiro — gate que
+    // bloqueia por arquivo vendido é gate que todo mundo aprende a contornar,
+    // que é exatamente o que a seção 11 do CLAUDE.md existe para evitar.
+    ".agents/**",
+    ".claude/skills/**",
+    ".cursor/skills/**",
   ]),
 ]);
 

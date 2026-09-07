@@ -2,8 +2,34 @@
 
 **Aprovado em 04/09/2026** (mockup `scratchpad/painel-mockup.html` + painel Situação em `/`).
 
-Esta é a **identidade visual da plataforma inteira**. Tela nova, redesign e
-qualquer mudança de aparência seguem isto. Não invente um segundo visual.
+> ## ⚠ Este documento está em transição desde 07/09/2026
+>
+> O Daniel travou uma direção nova — **híbrido Wire Service + Type Specimen
+> Desk** (`scratchpad/intent-fase1/DESIGN-hibrido-locked.md`, mock
+> `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html`). Ela já está
+> implementada na **casca (`EsteiraShell`) e na home Situação (`/`)**: masthead
+> serif, `EDIÇÃO · frente`, dateline, faixa preta, glifo da prioridade e grade
+> de células. Os tokens `paper` / `band` / `rule` / `cell` / `urgent` vivem em
+> `src/app/globals.css` junto dos Clockwork.
+>
+> **O que ainda vale deste arquivo:** tudo da seção 2 em diante governa os
+> INTERIORES — Peças, Fatos, Custos, Instalação, Artigo, Editor —, que nesta
+> fase só herdam a casca e mantêm o layout Clockwork. A regra de nunca escrever
+> hex em arquivo de tela, os tokens de classe, o botão e a casca única continuam
+> valendo sem exceção.
+>
+> **O que mudou:** o `canvas` deixou de ser o cinza neutro `#f8f8f8` e passou a
+> ser o papel quente `#f3efe6`, para as telas de dentro não ficarem em cinza frio
+> debaixo de um masthead em papel. Foi a única mudança de token que atravessou a
+> fronteira da fase.
+>
+> Quando os interiores forem redesenhados, este documento é reescrito ou some.
+> Até lá, **os dois valem, cada um no seu escopo** — e é isso que evita a
+> plataforma ter dois visuais sem ninguém ter decidido.
+
+Esta era a identidade visual da plataforma inteira até 07/09/2026, e segue sendo
+a dos interiores. Tela nova de leitura, redesign de interior e qualquer mudança
+de aparência fora da casca seguem isto. Não invente um terceiro visual.
 
 A referência canônica de proporção e densidade é o painel de Situação. A
 bancada (`/esteira`) e o editor de slides continuam sendo superfícies de

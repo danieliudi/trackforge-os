@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { useSyncExternalStore, type ReactNode } from "react";
 
-import { IconButton } from "@/components/ui/Button";
 import { brandOptions, type BrandId } from "@/constants/brands";
 import {
   formatCost,
@@ -28,20 +27,23 @@ import {
   subscribeTheme,
   themeLabel,
 } from "@/lib/theme";
-import { focusRing, labelClass } from "@/lib/ui";
+import { focusRing } from "@/lib/ui";
 
 /**
- * A casca do app: uma barra no topo, a janela inteira embaixo.
+ * A casca do app: masthead de jornal em cima, a janela inteira embaixo.
  *
- * A BARRA LATERAL SAIU e virou esta faixa. Ela custava 184px fixos em toda tela
- * para mostrar quatro links que se usam duas vezes por semana, e empurrava o
- * trabalho para uma coluna estreita no meio de um monitor largo — a reclamação
- * que originou o redesenho. Navegação de baixa frequência mora no topo; a
- * largura toda fica para o que se faz todo dia.
+ * DIREÇÃO TRAVADA 07/09/2026 — híbrido Wire Service + Type Specimen Desk
+ * (`scratchpad/intent-fase1/DESIGN-hibrido-locked.md`, mock
+ * `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html`). Da camada
+ * Wire vêm as três faixas: masthead serif, dateline e a faixa preta com a
+ * navegação.
  *
- * A FRENTE CONTINUA SENDO A PRIMEIRA DECISÃO, e por isso fica colada na marca:
- * peça sai com o nome de uma empresa, e trocar de frente sem perceber é como
- * fato de uma marca vai parar no material da outra.
+ * A FRENTE CONTINUA SENDO A PRIMEIRA DECISÃO, e por isso subiu para a linha da
+ * marca como `EDIÇÃO · {frente}`: peça sai com o nome de uma empresa, e trocar
+ * de frente sem perceber é como fato de uma marca vai parar no material da
+ * outra. No mock ela é texto; aqui precisa continuar clicável, então cada
+ * frente é um botão — o que está no ar fica sublinhado, não colorido, porque
+ * cor sobre papel já é o vocabulário da urgência.
  */
 
 const SECTIONS = [
@@ -50,6 +52,11 @@ const SECTIONS = [
   { href: "/esteira/fatos", label: "Fatos" },
   { href: "/esteira/custos", label: "Custos" },
   { href: "/esteira/instalacao", label: "Instalação" },
+];
+
+const MESES = [
+  "jan", "fev", "mar", "abr", "mai", "jun",
+  "jul", "ago", "set", "out", "nov", "dez",
 ];
 
 export function useFront(): [BrandId, (id: BrandId) => void] {
@@ -62,7 +69,7 @@ export function EsteiraShell({
   aside,
 }: {
   children: ReactNode;
-  /** Conteúdo extra no topo à direita, antes das seções. */
+  /** Conteúdo extra na dateline, à direita — antes do custo e do tema. */
   aside?: ReactNode;
 }) {
   const pathname = usePathname();
@@ -73,29 +80,32 @@ export function EsteiraShell({
     getCostLogSnapshot,
     getCostLogServerSnapshot,
   );
+  const agora = new Date();
   const month = entries
-    .filter((entry) => new Date(entry.at).getMonth() === new Date().getMonth())
+    .filter((entry) => new Date(entry.at).getMonth() === agora.getMonth())
     .reduce((total, entry) => total + entry.usd, 0);
 
   const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
   const ThemeIcon = theme === "claro" ? Sun : theme === "escuro" ? Moon : Monitor;
 
   return (
-    <div className="flex h-screen flex-col bg-canvas">
-      <header className="flex shrink-0 items-center gap-4 border-b border-line2 bg-surface px-5 py-2.5">
-        <Link
-          href="/"
-          className={clsx(
-            "rounded-md px-1 py-0.5 text-sm font-semibold tracking-tight text-ink",
-            focusRing,
-          )}
-        >
-          Trackforge OS
-        </Link>
+    <div className="flex h-screen flex-col bg-paper">
+      {/* ══ MASTHEAD ══ marca serif + edição, regra grossa embaixo */}
+      <header className="shrink-0 border-b-[3px] border-ink bg-paper px-5 pb-1.5 pt-2.5">
+        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
+          <Link
+            href="/"
+            className={clsx(
+              "font-serif text-[26px] font-extrabold leading-none tracking-[-0.04em] text-ink",
+              focusRing,
+            )}
+          >
+            trackforge
+          </Link>
 
-        <span className="flex items-center gap-2">
-          <span className={clsx(labelClass, "hidden sm:inline")}>Frente</span>
-          <span className="flex gap-0.5 rounded-lg border border-line bg-surface2 p-0.5">
+          <span className="flex items-baseline gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-ink">
+            <span aria-hidden="true">Edição ·</span>
+            <span className="sr-only">Frente ativa:</span>
             {brandOptions.map(({ id, label }) => (
               <button
                 key={id}
@@ -103,56 +113,91 @@ export function EsteiraShell({
                 aria-pressed={id === front}
                 onClick={() => choose(id)}
                 className={clsx(
-                  "rounded-md px-3 py-1 text-[12.5px] transition",
+                  "px-0.5 uppercase tracking-[0.1em] transition",
                   focusRing,
                   id === front
-                    ? "border border-line bg-surface font-semibold text-ink shadow-sm"
-                    : "border border-transparent text-mut hover:text-ink",
+                    ? "font-bold text-ink underline decoration-[2px] underline-offset-[3px]"
+                    : "font-medium text-mut hover:text-ink",
                 )}
               >
                 {label}
               </button>
             ))}
           </span>
+        </div>
+      </header>
+
+      {/* ══ DATELINE ══ onde/quando, e os controles que não são navegação */}
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-rule bg-paper px-5 py-1">
+        <span className="text-[10px] font-medium text-mut">
+          São Paulo · {MESES[agora.getMonth()]} {agora.getFullYear()}
+        </span>
+        <span className="flex items-center gap-3">
+          {aside}
+          <span className="font-mono text-[10px] text-mut">
+            mês · {formatCost(month).primary}
+          </span>
+          {/* Um botão, três estados. Três botões custariam espaço permanente por
+              uma decisão que se toma uma vez. */}
+          <button
+            type="button"
+            onClick={() => setTheme(nextTheme[theme])}
+            aria-label={`Tema: ${themeLabel[theme]} — clique para ${themeLabel[nextTheme[theme]]}`}
+            className={clsx(
+              "flex items-center gap-1 text-[10px] font-medium text-mut transition hover:text-ink",
+              focusRing,
+            )}
+          >
+            <ThemeIcon size={11} aria-hidden="true" />
+            <span>Tema · {themeLabel[theme]}</span>
+          </button>
+        </span>
+      </div>
+
+      {/* ══ FAIXA ══ preta nos dois temas; LIVE é status, não rota */}
+      <nav className="flex shrink-0 flex-wrap items-center gap-x-3.5 gap-y-1 bg-band px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-band-ink">
+        {/* Marca de edição do wire service, não indicador de conexão: esta casca
+            não observa nada em tempo real, e um ponto que promete isso sem
+            observar seria número inventado em forma de enfeite. */}
+        <span className="text-urgent" aria-hidden="true">
+          • Live
         </span>
 
-        <span className="flex-1" />
-        {aside}
-
-        <span className="font-mono text-[11px] text-faint">mês · {formatCost(month).primary}</span>
-
-        {/* Um botão, três estados. Três botões no topo custariam espaço
-            permanente por uma decisão que se toma uma vez. */}
-        <IconButton
-          icon={ThemeIcon}
-          size="sm"
-          label={`Tema: ${themeLabel[theme]} — clique para ${themeLabel[nextTheme[theme]]}`}
-          onClick={() => setTheme(nextTheme[theme])}
-        />
-
-        <nav className="flex items-center gap-0.5">
-          {SECTIONS.map(({ href, label }) => {
-            const active =
-              href === "/"
-                ? pathname === "/"
-                : pathname === href || pathname.startsWith(`${href}/`);
-            return (
+        {SECTIONS.map(({ href, label }, i) => {
+          const active =
+            href === "/" ? pathname === "/" : pathname === href || pathname.startsWith(`${href}/`);
+          return (
+            <span key={href} className="flex items-center gap-3.5">
               <Link
-                key={href}
                 href={href}
                 aria-current={active ? "page" : undefined}
                 className={clsx(
-                  "rounded-md px-2.5 py-1.5 text-[12.5px] transition",
+                  "uppercase tracking-[0.06em] transition",
                   focusRing,
-                  active ? "bg-surface2 font-medium text-ink" : "text-mut hover:bg-surface2 hover:text-ink",
+                  active ? "underline decoration-[2px] underline-offset-[3px]" : "opacity-70 hover:opacity-100",
                 )}
               >
                 {label}
               </Link>
-            );
-          })}
-        </nav>
-      </header>
+              {/* O (+) fica entre Peças e Fatos, como no mock: produzir é a ação
+                  que interrompe a leitura, então mora no meio da fila e não na
+                  ponta, onde viraria mais um item de navegação. */}
+              {i === 1 ? (
+                <Link
+                  href="/esteira"
+                  aria-label="Produzir peça nova na bancada"
+                  className={clsx(
+                    "grid h-4 w-4 place-items-center rounded-full bg-band-ink text-[11px] font-extrabold leading-none text-band",
+                    focusRing,
+                  )}
+                >
+                  +
+                </Link>
+              ) : null}
+            </span>
+          );
+        })}
+      </nav>
 
       <main className="min-h-0 flex-1">{children}</main>
     </div>

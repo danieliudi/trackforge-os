@@ -65,9 +65,17 @@ tema, ícone, layout, componente, ordem de tela, agrupamento de dado — precisa
 mockup aprovado pelo Daniel **antes** da implementação. Vale para pedido dele e
 para sugestão sua.
 
-**A identidade visual é a do painel de Situação** (`docs/ui-diretrizes.md`,
-mockup `scratchpad/painel-mockup.html`). Mockup novo se confere contra essas
-diretrizes — não contra um visual inventado na hora.
+**A identidade visual está em transição desde 07/09/2026 — são DUAS, cada uma no
+seu escopo.** Seguir a errada é como a plataforma ganha um terceiro visual.
+
+| Escopo | Direção | Fonte |
+|---|---|---|
+| Casca (`EsteiraShell`) e home (`/`) | **Híbrido Wire + Specimen** | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` |
+| Interiores (Peças, Fatos, Custos, Instalação, Artigo, Editor) | Painel de Situação (Clockwork) | `docs/ui-diretrizes.md` |
+
+Do híbrido: masthead serif, `EDIÇÃO · frente`, dateline, faixa preta, glifo da
+prioridade, grade de células. Tokens `paper` `band` `rule` `cell` `urgent`.
+Mockup novo se confere contra a fonte DO ESCOPO em que ele está.
 
 Na dúvida, mostre o mockup. Não decida sozinho que "é pequeno o bastante para
 pular": foi assim que a plataforma derivou do mockup aprovado e teve de ser
