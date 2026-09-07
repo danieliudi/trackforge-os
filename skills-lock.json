@@ -25,6 +25,12 @@
       "skillPath": "skills/fortify/SKILL.md",
       "computedHash": "c9662ffd0e72728c64f8a4bc6063465258758bd30c7bec009569b9d0c39b0a84"
     },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "25d6d08c9de7d9495cb06405310fe517fbd9cc74ee882235bc4ece881dd72411"
+    },
     "include": {
       "source": "ghaida/intent",
       "sourceType": "github",
