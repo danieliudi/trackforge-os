@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Wire Service × Type Specimen — telas aprofundadas</title>
+<style>
+  :root {
+    --page:#0c0c10; --ink:#f3f3f7; --mut:#9a9aa8; --line:#2a2a34; --card:#15151b;
+    --sans: system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin:0; background:var(--page); color:var(--ink); font:14px/1.45 var(--sans); }
+  header.top {
+    position:sticky; top:0; z-index:5; backdrop-filter:blur(12px);
+    background:rgba(12,12,16,.9); border-bottom:1px solid var(--line);
+    padding:14px 22px; display:flex; gap:14px; flex-wrap:wrap; align-items:baseline;
+  }
+  header.top h1 { margin:0; font-size:18px; letter-spacing:-.02em; }
+  .meta { font:600 10px/1.4 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--mut); }
+  header.top nav { margin-left:auto; display:flex; gap:8px; flex-wrap:wrap; }
+  header.top a {
+    color:var(--ink); text-decoration:none; font:600 12px var(--sans);
+    border:1px solid var(--line); padding:8px 10px; border-radius:8px;
+  }
+  .wrap { max-width:1480px; margin:0 auto; padding:24px; }
+  .lede { color:var(--mut); max-width:72ch; margin:0 0 28px; }
+  .world { margin-bottom:64px; }
+  .world-head {
+    display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; align-items:end;
+    margin-bottom:16px; padding-bottom:12px; border-bottom:1px solid var(--line);
+  }
+  .world-head h2 { margin:0; font-size:28px; letter-spacing:-.03em; }
+  .world-head p { margin:6px 0 0; color:var(--mut); max-width:56ch; }
+  .swatches { display:flex; gap:6px; }
+  .swatch { width:24px; height:24px; border-radius:6px; border:1px solid rgba(255,255,255,.14); }
+  .grid-2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+  .grid-3 { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; }
+  @media (max-width:1100px){ .grid-2,.grid-3 { grid-template-columns:1fr; } }
+  .panel { background:var(--card); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  .panel-cap {
+    font:600 10px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--mut);
+    padding:10px 12px; border-bottom:1px solid var(--line);
+  }
+  .frame { aspect-ratio:16/10; overflow:hidden; }
+  .frame.phone { aspect-ratio:9/16; max-width:280px; margin:0 auto; }
+  .blurb { padding:10px 12px; font-size:12px; color:var(--mut); }
+  .blurb strong { color:var(--ink); }
+  .lockrow { display:flex; gap:8px; flex-wrap:wrap; margin-top:14px; }
+  .btn {
+    appearance:none; border:1px solid var(--line); background:#22222c; color:var(--ink);
+    border-radius:8px; padding:11px 14px; font:600 13px var(--sans); cursor:pointer;
+  }
+  .btn.primary { background:#f3f3f7; color:#111; border-color:#f3f3f7; }
+  #choice { margin-top:12px; color:var(--mut); }
+
+  /* ========== WIRE SERVICE ========== */
+  .ws {
+    --paper:#f3efe6; --ink2:#16140f; --muted2:#5c574d; --urgent:#d63a22; --band:#16140f; --rule:#d8d1c3;
+    background:var(--paper); color:var(--ink2); height:100%;
+    font-family:Georgia,"Times New Roman",serif; display:flex; flex-direction:column;
+  }
+  .ws.stark { --paper:#faf8f4; }
+  .ws.ink { --paper:#ebe4d6; --band:#0e0d0b; }
+  .ws .mast { display:flex; justify-content:space-between; align-items:flex-end; padding:9px 11px 7px; border-bottom:3px solid var(--ink2); }
+  .ws .brand { font-weight:800; font-size:18px; letter-spacing:-.04em; line-height:1; }
+  .ws .edition { font:700 9px/1 var(--sans); letter-spacing:.1em; text-transform:uppercase; }
+  .ws .date { font:500 9px/1.3 var(--sans); color:var(--muted2); padding:4px 11px; border-bottom:1px solid var(--rule); display:flex; justify-content:space-between; }
+  .ws .wire {
+    display:flex; gap:9px; flex-wrap:wrap; align-items:center; padding:6px 11px;
+    background:var(--band); color:var(--paper); font:700 9px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase;
+  }
+  .ws .live { color:#ff6b52; }
+  .ws .plus { width:16px; height:16px; border-radius:50%; background:var(--paper); color:var(--band); display:grid; place-items:center; font-size:11px; font-weight:800; }
+  .ws .body { padding:10px 11px; flex:1; display:flex; flex-direction:column; gap:9px; overflow:hidden; }
+  .ws .kicker { font:800 9px/1 var(--sans); letter-spacing:.12em; text-transform:uppercase; color:var(--urgent); }
+  .ws h3 { margin:3px 0; font-size:20px; letter-spacing:-.03em; line-height:1.1; }
+  .ws .deck { margin:0; font:400 11px/1.35 var(--sans); color:var(--muted2); }
+  .ws .stats { display:grid; grid-template-columns:repeat(3,1fr); gap:7px; }
+  .ws .stat { font-family:var(--sans); border-top:2px solid var(--ink2); padding-top:5px; }
+  .ws .stat.u { box-shadow:inset 0 0 0 2px var(--urgent); padding:5px; border-top:0; }
+  .ws .stat b { display:block; font-size:18px; font-weight:800; letter-spacing:-.03em; }
+  .ws .stat span { font-size:8px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:var(--muted2); }
+  .ws .cols { display:grid; grid-template-columns:1.2fr 1fr 1fr; gap:8px; }
+  .ws .col { border-top:1px solid var(--rule); padding-top:5px; }
+  .ws .col h4 { margin:0 0 5px; font:800 9px/1 var(--sans); letter-spacing:.08em; text-transform:uppercase; }
+  .ws .item { font:400 10px/1.3 var(--sans); padding:4px 0; border-bottom:1px dotted #cfc7b8; }
+  .ws .item em { display:block; font-style:normal; color:var(--muted2); font-size:8px; }
+  .ws .empty { border:2px dashed #cfc7b8; padding:14px; text-align:center; }
+  .ws .cta { display:inline-block; margin-top:8px; font:800 11px var(--sans); background:var(--ink2); color:var(--paper); padding:8px 11px; text-decoration:none; }
+  .ws .callout { font:400 11px/1.35 var(--sans); background:#efe6d6; border:1px solid #d8d1c3; padding:8px 10px; }
+  .ws .callout b { display:block; margin-bottom:2px; }
+  .ws .err { font:400 11px/1.35 var(--sans); background:#f6e4df; border:1px solid #e2b4a8; padding:8px 10px; }
+  .ws .err b { display:block; color:#8a2a1a; }
+  .ws .load { font:500 11px var(--sans); color:var(--muted2); }
+  .ws .skel { height:10px; background:#e4ddd0; border-radius:2px; margin:6px 0; }
+  .ws .skel.w60 { width:60%; } .ws .skel.w40 { width:40%; } .ws .skel.w80 { width:80%; }
+  .ws .byline { font:600 9px/1.3 var(--sans); letter-spacing:.04em; text-transform:uppercase; color:var(--muted2); }
+
+  /* ========== TYPE SPECIMEN ========== */
+  .ts {
+    --bg:#f7f6f2; --fg:#111; --soft:#666; --line2:#ddd; --acc:#d63a22;
+    background:var(--bg); color:var(--fg); height:100%;
+    font-family:"Helvetica Neue", Helvetica, Arial, sans-serif;
+    display:flex; flex-direction:column;
+  }
+  .ts.dark { --bg:#121212; --fg:#f2f2f2; --soft:#999; --line2:#2a2a2a; --acc:#ff5a3a; }
+  .ts .bar {
+    display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;
+    padding:7px 10px; border-bottom:1px solid var(--line2);
+    font:500 9px/1 var(--mono); letter-spacing:.08em; text-transform:uppercase; color:var(--soft);
+  }
+  .ts .bar .front { color:var(--fg); }
+  .ts .nav {
+    display:flex; gap:12px; align-items:center; padding:6px 10px; border-bottom:1px solid var(--line2);
+    font:600 9px/1 var(--sans); letter-spacing:.08em; text-transform:uppercase; color:var(--soft);
+  }
+  .ts .nav .on { color:var(--fg); box-shadow:inset 0 -2px 0 var(--fg); padding-bottom:3px; }
+  .ts .nav .plus { width:16px; height:16px; border-radius:50%; background:var(--fg); color:var(--bg); display:grid; place-items:center; font-weight:800; font-size:11px; }
+  .ts .hero {
+    flex:0 0 auto; padding:6px 10px 0; font-weight:900; font-size:78px; line-height:.82;
+    letter-spacing:-.07em; min-height:78px; display:flex; align-items:flex-end;
+  }
+  .ts .hero.sm { font-size:56px; min-height:56px; }
+  .ts .hero em { font-style:normal; color:var(--acc); }
+  .ts .caption { padding:0 10px 6px; font:500 10px/1.3 var(--sans); color:var(--soft); }
+  .ts .grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line2); border-top:1px solid var(--line2); }
+  .ts .grid.two { grid-template-columns:1fr 1fr; }
+  .ts .cell { background:var(--bg); padding:7px; min-height:48px; }
+  .ts .cell.on { background:var(--fg); color:var(--bg); }
+  .ts .cell .n { font:600 8px/1 var(--mono); color:var(--soft); }
+  .ts .cell.on .n { color:#aaa; }
+  .ts .cell b { display:block; font-size:18px; font-weight:800; letter-spacing:-.04em; margin-top:3px; }
+  .ts .cell span { font-size:8px; color:var(--soft); }
+  .ts .cell.on span { color:#bbb; }
+  .ts .axes {
+    display:flex; gap:10px; align-items:center; padding:7px 10px; border-top:1px solid var(--line2);
+    font:500 8px/1 var(--mono); color:var(--soft);
+  }
+  .ts .axes i { flex:1; height:3px; background:var(--fg); border-radius:2px; position:relative; }
+  .ts .axes i::after {
+    content:""; position:absolute; top:-4px; width:9px; height:9px; border-radius:50%;
+    background:var(--acc);
+  }
+  .ts .axes i.a::after { right:28%; }
+  .ts .axes i.b::after { right:55%; }
+  .ts .axes i.c::after { right:12%; }
+  .ts .empty {
+    margin:12px 10px; border:1px dashed var(--line2); padding:16px; text-align:center;
+  }
+  .ts .empty h3 { margin:0 0 4px; font-size:14px; font-weight:800; letter-spacing:-.02em; }
+  .ts .empty p { margin:0; font-size:11px; color:var(--soft); }
+  .ts .empty .cta {
+    display:inline-block; margin-top:10px; background:var(--fg); color:var(--bg);
+    padding:8px 12px; font:700 10px/1 var(--sans); letter-spacing:.06em; text-transform:uppercase; text-decoration:none;
+  }
+  .ts .callout {
+    margin:8px 10px 0; border:1px solid var(--line2); padding:8px 10px; font-size:10px; color:var(--soft);
+  }
+  .ts .callout b { color:var(--fg); display:block; margin-bottom:2px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; font-size:9px; }
+  .ts .list { border-top:1px solid var(--line2); }
+  .ts .row {
+    display:grid; grid-template-columns:36px 1fr auto; gap:8px; align-items:center;
+    padding:7px 10px; border-bottom:1px solid var(--line2); font-size:11px;
+  }
+  .ts .row .idx { font:600 9px/1 var(--mono); color:var(--soft); }
+  .ts .row .lab em { display:block; font-style:normal; color:var(--soft); font-size:9px; }
+  .ts .row .val { font-weight:800; font-size:14px; letter-spacing:-.03em; }
+  .ts .err {
+    margin:8px 10px; border:1px solid #e2b4a8; background:#f8ebe7; color:#5a2a20;
+    padding:8px 10px; font-size:11px;
+  }
+  .ts.dark .err { background:#2a1814; border-color:#5a3030; color:#f0c8bc; }
+</style>
+</head>
+<body>
+  <header class="top">
+    <div>
+      <div class="meta">Impeccable · aprofundamento · Nixie fora desta rodada</div>
+      <h1>Wire Service × Type Specimen Desk</h1>
+    </div>
+    <nav>
+      <a href="#wire">Wire Service</a>
+      <a href="#specimen">Type Specimen</a>
+      <a href="#decide">Decidir</a>
+    </nav>
+  </header>
+
+  <div class="wrap">
+    <p class="lede">
+      Mais estados da casa e da casca nos dois mundos que sobraram. Contagens ilustrativas.
+      Sem código no app até você travar.
+    </p>
+
+    <!-- ================= WIRE ================= -->
+    <section class="world" id="wire">
+      <div class="world-head">
+        <div>
+          <div class="meta">Mundo A</div>
+          <h2>Wire Service</h2>
+          <p>Boletim operacional. Masthead, fio live, prioridade como manchete, colunas de jornal.</p>
+        </div>
+        <div class="swatches">
+          <span class="swatch" style="background:#f3efe6"></span>
+          <span class="swatch" style="background:#16140f"></span>
+          <span class="swatch" style="background:#d63a22"></span>
+          <span class="swatch" style="background:#5c574d"></span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-cap">01 · Casa com prioridades</div>
+          <div class="frame"><div class="ws">
+            <div class="mast"><div class="brand">trackforge</div><div class="edition">Edição · Resibag</div></div>
+            <div class="date"><span>São Paulo · set 2026</span><span>Tema · claro</span></div>
+            <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span><span>Custos</span><span>Instalação</span></div>
+            <div class="body">
+              <div>
+                <div class="kicker">Prioridade</div>
+                <h3>3 na fila do CRM</h3>
+                <p class="deck">Esperando aprovação. O que a API cobrou e o que ainda não saiu da bancada estão abaixo.</p>
+              </div>
+              <div class="stats">
+                <div class="stat u"><span>Não enviados</span><b>2</b></div>
+                <div class="stat"><span>Sem fonte</span><b>1</b></div>
+                <div class="stat"><span>Custo do mês</span><b>12</b></div>
+              </div>
+              <div class="cols">
+                <div class="col"><h4>Não enviados</h4>
+                  <div class="item">ANTT · prazo<em>carrossel · pago, na bancada</em></div>
+                  <div class="item">Embalagem retornável<em>artigo · pago</em></div>
+                </div>
+                <div class="col"><h4>Fila / fatos</h4>
+                  <div class="item">3 na fila do CRM<em>esperando aprovação</em></div>
+                  <div class="item">1 fato sem fonte<em>precisa de decisão</em></div>
+                </div>
+                <div class="col"><h4>Custo</h4>
+                  <div class="item">Total US$ 12,40<em>7 gerações · 1 falha</em></div>
+                </div>
+              </div>
+            </div>
+          </div></div>
+          <div class="blurb"><strong>Lead story</strong> = maior prioridade. Stats com outline só no urgente.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">02 · Vazia + CRM off</div>
+          <div class="frame"><div class="ws">
+            <div class="mast"><div class="brand">trackforge</div><div class="edition">Edição · Resibag</div></div>
+            <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span></div>
+            <div class="body">
+              <div class="callout"><b>CRM não configurado nesta instalação</b>A fila de aprovação não aparece até a instalação estar pronta. O resto da casa continua utilizável.</div>
+              <div class="empty">
+                <div class="kicker">Situação</div>
+                <h3>Nada pedindo decisão</h3>
+                <p class="deck">Quando houver peça paga não enviada, fato sem fonte ou item na fila, eles aparecem aqui.</p>
+                <a class="cta" href="#">Ir para Peças</a>
+              </div>
+            </div>
+          </div></div>
+          <div class="blurb"><strong>Honest empty</strong> — dashed rule tipográfica, CTA sólido preto.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">03 · Loading da fila</div>
+          <div class="frame"><div class="ws">
+            <div class="mast"><div class="brand">trackforge</div><div class="edition">Edição · Sanwey</div></div>
+            <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span class="plus">+</span></div>
+            <div class="body">
+              <div class="load">Carregando a fila do CRM…</div>
+              <div class="skel w80"></div><div class="skel w60"></div><div class="skel w40"></div>
+              <div class="stats">
+                <div class="stat"><span>Não enviados</span><b>2</b></div>
+                <div class="stat"><span>Sem fonte</span><b>0</b></div>
+                <div class="stat"><span>Custo</span><b>4</b></div>
+              </div>
+              <p class="byline">Fila CRM · skeleton · resto da casa já legível</p>
+            </div>
+          </div></div>
+          <div class="blurb">Fila pode atrasar; KPIs locais não esperam.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">04 · Erro ao carregar fila</div>
+          <div class="frame"><div class="ws">
+            <div class="mast"><div class="brand">trackforge</div><div class="edition">Edição · Resibag</div></div>
+            <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span class="plus">+</span></div>
+            <div class="body">
+              <div class="err"><b>Não foi possível carregar a fila</b>Tente de novo. Peças e fatos locais continuam disponíveis.</div>
+              <div class="stats">
+                <div class="stat"><span>Fila CRM</span><b>—</b></div>
+                <div class="stat u"><span>Não enviados</span><b>2</b></div>
+                <div class="stat"><span>Custo</span><b>12</b></div>
+              </div>
+              <a class="cta" href="#">Tentar de novo</a>
+            </div>
+          </div></div>
+          <div class="blurb">Erro recuperável; sem culpa; casa não morre.</div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="panel">
+          <div class="panel-cap">05 · Variante stark</div>
+          <div class="frame"><div class="ws stark">
+            <div class="mast"><div class="brand">trackforge</div><div class="edition">Resibag</div></div>
+            <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span class="plus">+</span></div>
+            <div class="body">
+              <div class="kicker">Prioridade</div>
+              <h3>2 não enviados</h3>
+              <p class="deck">Pagos, ainda na bancada.</p>
+              <div class="stats">
+                <div class="stat"><span>Fila</span><b>—</b></div>
+                <div class="stat u"><span>Bancada</span><b>2</b></div>
+                <div class="stat"><span>Custo</span><b>0</b></div>
+              </div>
+            </div>
+          </div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-cap">06 · Variante ink · frente Sanwey</div>
+          <div class="frame"><div class="ws ink">
+            <div class="mast"><div class="brand">trackforge</div><div class="edition">Edição · Sanwey</div></div>
+            <div class="wire"><span class="live">● live</span><span>Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span></div>
+            <div class="body">
+              <div class="kicker">Frente ativa</div>
+              <h3>Situação · Sanwey</h3>
+              <p class="deck">Troca de frente no masthead — a edição muda, a página permanece.</p>
+              <div class="stats">
+                <div class="stat"><span>Fila</span><b>0</b></div>
+                <div class="stat"><span>Bancada</span><b>1</b></div>
+                <div class="stat"><span>Custo</span><b>3</b></div>
+              </div>
+            </div>
+          </div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-cap">07 · Narrow / phone</div>
+          <div class="frame phone"><div class="ws">
+            <div class="mast"><div class="brand">trackforge</div><div class="edition">Resibag</div></div>
+            <div class="wire"><span class="live">●</span><span>Sit.</span><span>Peças</span><span class="plus">+</span><span>Fatos</span></div>
+            <div class="body">
+              <div class="kicker">Prioridade</div>
+              <h3 style="font-size:22px;">3 na fila</h3>
+              <div class="stat u" style="margin-top:8px;"><span>Não enviados</span><b>2</b></div>
+              <div class="item" style="margin-top:8px;">ANTT · prazo<em>carrossel</em></div>
+              <div class="item">Embalagem<em>artigo</em></div>
+            </div>
+          </div></div>
+          <div class="blurb">Uma coluna; fio compacto; (+) permanece.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SPECIMEN ================= -->
+    <section class="world" id="specimen">
+      <div class="world-head">
+        <div>
+          <div class="meta">Mundo B</div>
+          <h2>Type Specimen Desk</h2>
+          <p>Prioridade = glifo gigante. KPIs = células de matriz. Casca explícita (frente + nav) para não virar site de foundry.</p>
+        </div>
+        <div class="swatches">
+          <span class="swatch" style="background:#f7f6f2"></span>
+          <span class="swatch" style="background:#111"></span>
+          <span class="swatch" style="background:#d63a22"></span>
+          <span class="swatch" style="background:#ddd"></span>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="panel">
+          <div class="panel-cap">01 · Casa · prioridade = 3</div>
+          <div class="frame"><div class="ts">
+            <div class="bar"><span class="front">trackforge · resibag</span><span>situação · wght 900</span></div>
+            <div class="nav"><span class="on">Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span><span>Custos</span></div>
+            <div class="hero">3<em>.</em></div>
+            <div class="caption">na fila do CRM · esperando aprovação</div>
+            <div class="grid">
+              <div class="cell on"><div class="n">01</div><b>3</b><span>fila crm</span></div>
+              <div class="cell"><div class="n">02</div><b>2</b><span>não enviados</span></div>
+              <div class="cell"><div class="n">03</div><b>1</b><span>sem fonte</span></div>
+              <div class="cell"><div class="n">04</div><b>12</b><span>custo</span></div>
+            </div>
+            <div class="axes"><span>opsz</span><i class="a"></i><span>wght</span></div>
+          </div></div>
+          <div class="blurb">Glifo = seleção atual. Célula 01 invertida.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">02 · Prioridade alternativa · bancada</div>
+          <div class="frame"><div class="ts">
+            <div class="bar"><span class="front">trackforge · resibag</span><span>situação · wght 800</span></div>
+            <div class="nav"><span class="on">Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span></div>
+            <div class="hero sm">2<em>.</em></div>
+            <div class="caption">não enviados · pagos, ainda na bancada</div>
+            <div class="grid">
+              <div class="cell"><div class="n">01</div><b>0</b><span>fila crm</span></div>
+              <div class="cell on"><div class="n">02</div><b>2</b><span>não enviados</span></div>
+              <div class="cell"><div class="n">03</div><b>0</b><span>sem fonte</span></div>
+              <div class="cell"><div class="n">04</div><b>4</b><span>custo</span></div>
+            </div>
+            <div class="list">
+              <div class="row"><span class="idx">A</span><span class="lab">ANTT · prazo<em>carrossel</em></span><span class="val">→</span></div>
+              <div class="row"><span class="idx">B</span><span class="lab">Embalagem retornável<em>artigo</em></span><span class="val">→</span></div>
+            </div>
+          </div></div>
+          <div class="blurb">Trocar a prioridade = trocar o glifo + célula ativa + lista.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">03 · Vazia + CRM off</div>
+          <div class="frame"><div class="ts">
+            <div class="bar"><span class="front">trackforge · resibag</span><span>situação · wght 400</span></div>
+            <div class="nav"><span class="on">Situação</span><span>Peças</span><span class="plus">+</span></div>
+            <div class="callout"><b>CRM não configurado</b>A fila não aparece nesta instalação. A casa segue utilizável.</div>
+            <div class="hero sm" style="opacity:.25">0<em>.</em></div>
+            <div class="empty">
+              <h3>Nada pedindo decisão</h3>
+              <p>O atalho é produzir.</p>
+              <a class="cta" href="#">Ir para Peças</a>
+            </div>
+          </div></div>
+          <div class="blurb">Glifo 0 em peso baixo — quieto, não mórbido.</div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-cap">04 · Erro de fila</div>
+          <div class="frame"><div class="ts">
+            <div class="bar"><span class="front">trackforge · meu</span><span>situação</span></div>
+            <div class="nav"><span class="on">Situação</span><span>Peças</span><span class="plus">+</span></div>
+            <div class="err"><b>Não foi possível carregar a fila.</b> Tente de novo. Dados locais continuam.</div>
+            <div class="grid two">
+              <div class="cell on"><div class="n">02</div><b>2</b><span>não enviados</span></div>
+              <div class="cell"><div class="n">04</div><b>12</b><span>custo</span></div>
+            </div>
+            <div class="axes"><span>retry</span><i class="b"></i><span>local</span></div>
+          </div></div>
+          <div class="blurb">Erro tipográfico, sem vermelho de alarme em tela toda.</div>
+        </div>
+      </div>
+
+      <div class="grid-3" style="margin-top:14px;">
+        <div class="panel">
+          <div class="panel-cap">05 · Eixo denso (opsz alto)</div>
+          <div class="frame"><div class="ts">
+            <div class="bar"><span class="front">resibag</span><span>opsz 144 · wght 900</span></div>
+            <div class="nav"><span class="on">Situação</span><span>Peças</span><span class="plus">+</span></div>
+            <div class="hero">12<em>.</em></div>
+            <div class="caption">custo do mês · US$ (ilustrativo)</div>
+            <div class="axes"><span>opsz</span><i class="c"></i><span>wght</span></div>
+          </div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-cap">06 · Tema escuro do specimen</div>
+          <div class="frame"><div class="ts dark">
+            <div class="bar"><span class="front">trackforge · sanwey</span><span>situação · night proof</span></div>
+            <div class="nav"><span class="on">Situação</span><span>Peças</span><span class="plus">+</span><span>Fatos</span></div>
+            <div class="hero sm">1<em>.</em></div>
+            <div class="caption">sem fonte · precisa de decisão</div>
+            <div class="grid">
+              <div class="cell"><div class="n">01</div><b>0</b><span>fila</span></div>
+              <div class="cell"><div class="n">02</div><b>0</b><span>bancada</span></div>
+              <div class="cell on"><div class="n">03</div><b>1</b><span>sem fonte</span></div>
+              <div class="cell"><div class="n">04</div><b>3</b><span>custo</span></div>
+            </div>
+          </div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-cap">07 · Narrow / phone</div>
+          <div class="frame phone"><div class="ts">
+            <div class="bar"><span class="front">resibag</span><span>sit.</span></div>
+            <div class="nav"><span class="on">Sit.</span><span>Peças</span><span class="plus">+</span></div>
+            <div class="hero sm">3<em>.</em></div>
+            <div class="caption">fila crm</div>
+            <div class="grid two">
+              <div class="cell on"><div class="n">01</div><b>3</b><span>fila</span></div>
+              <div class="cell"><div class="n">02</div><b>2</b><span>bancada</span></div>
+            </div>
+          </div></div>
+          <div class="blurb">Glifo cabe; grade 2 colunas.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="world" id="decide">
+      <div class="world-head">
+        <div>
+          <div class="meta">Próximo</div>
+          <h2>Travar um dos dois</h2>
+          <p>Ou pedir híbrido (masthead Wire + glifo Specimen).</p>
+        </div>
+      </div>
+      <div class="lockrow">
+        <button class="btn primary" type="button" onclick="pick('Wire Service')">Travar Wire Service</button>
+        <button class="btn primary" type="button" onclick="pick('Type Specimen Desk')">Travar Type Specimen Desk</button>
+        <button class="btn" type="button" onclick="pick('Híbrido Wire + Specimen')">Quero híbrido</button>
+      </div>
+      <p id="choice">Nenhuma travada ainda — diga no chat.</p>
+    </section>
+  </div>
+  <script>
+    function pick(name) {
+      document.getElementById('choice').textContent = 'Escolha: ' + name + ' — confirme no chat.';
+      try { navigator.clipboard.writeText(name); } catch (e) {}
+    }
+  </script>
+</body>
+</html>
