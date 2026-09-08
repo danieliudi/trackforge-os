@@ -1,0 +1,624 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="claro" data-estado="a">
+<head>
+<meta charset="utf-8">
+<title>Fase 3 — bancada e editor no híbrido</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:wght@400&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   TOKENS — cópia literal de src/app/globals.css. Zero hex novo.
+   Se uma cor não está lá, não entra aqui. (Regra da Fase 2.)
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --canvas:#f3efe6; --surface:#ffffff; --surface2:#f1f1ef;
+  --line:#cdcdcb; --line2:#e4e4e2; --line3:#919599;
+  --ink:#1c1c1b; --ink2:#3f4143; --mut:#5f6367; --faint:#7a7e82;
+  --acc:#e56515; --acc-hi:#c2540f; --acc-soft:#fba45c; --acc-tint:#fdf0e4;
+  --acc-tx:#b8490b; --acc-ink:#1c1c1b;
+  --paper:#f3efe6; --band:#16140f; --band-ink:#f3efe6; --rule:#d8d1c3;
+  --cell:#f7f4ec; --urgent:#d63a22; --urgent-bg:#f6e4df; --urgent-line:#e2b4a8;
+  --note-bg:#efe6d6;
+  --ok:#15803d; --ok-bg:#eff8f2; --ok-line:#a7d8b9;
+  --warn:#8a4a10; --warn-bg:#fdf0e4; --warn-line:#fba45c;
+  --danger:#b91c1c; --danger-bg:#fef2f2; --danger-line:#f0b4b4;
+
+  --sans:"Geist",system-ui,sans-serif;
+  --mono:"Geist Mono",ui-monospace,monospace;
+  --serif:"Instrument Serif",Georgia,serif;
+
+  /* A MEDIDA DE LEITURA — o número desta fase.
+     Fase 2 travou a PÁGINA em 1280px. Numa superfície de trabalho a página é
+     a tela inteira e quem carrega medida é a COLUNA de prosa. */
+  --medida-leitura:680px;
+  --gutter:40px;
+}
+html[data-tema="escuro"]{
+  --canvas:#12110f; --paper:#12110f; --band:#000000; --band-ink:#f2efe6;
+  --rule:#2c2a26; --cell:#1a1916; --urgent:#ff6b52; --urgent-bg:#2a1814;
+  --urgent-line:#5a3030; --note-bg:#1f1c18;
+  --surface:#201f1d; --surface2:#2a2926; --line:#3a3835; --line2:#2a2926;
+  --line3:#55524e;
+  --ink:#f8f8f8; --ink2:#dcdbd8; --mut:#a9a7a2; --faint:#8a8782;
+  --acc-hi:#fba45c; --acc-tint:#2e1f0f; --acc-tx:#fba45c;
+  --ok:#34d399; --ok-bg:#0e2a20; --ok-line:#1e5a44;
+  --warn:#fba45c; --warn-bg:#2e1f0f; --warn-line:#6b4a1e;
+  --danger:#f87171; --danger-bg:#2e1616; --danger-line:#7a2c2c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+     font-size:15px;-webkit-font-smoothing:antialiased}
+
+/* ══ CASCA ═══════════════════════════════════════════════════════════════
+   FULL-BLEED nas superfícies de trabalho. É a mudança estrutural da fase:
+   hoje o masthead vive em 1280px e a bancada renderiza em 1885px, e a faixa
+   preta flutua no meio de uma grade que passa por baixo dela. */
+.tela{min-height:1100px;display:flex;flex-direction:column;background:var(--paper)}
+.mast{display:flex;align-items:flex-end;justify-content:space-between;
+      padding:14px var(--gutter) 10px;border-bottom:2px solid var(--ink)}
+.marca{font-family:var(--serif);font-weight:400;font-size:32px;line-height:1;
+       letter-spacing:-.01em;color:var(--ink)}
+.edicao{font-family:var(--sans);font-size:11.5px;letter-spacing:.09em;
+        text-transform:uppercase;color:var(--mut);display:flex;gap:14px;align-items:baseline}
+.edicao b{color:var(--ink);font-weight:600;border-bottom:2px solid var(--acc);padding-bottom:1px}
+.date{display:flex;justify-content:space-between;padding:7px var(--gutter);
+      font-size:11.5px;color:var(--mut);border-bottom:1px solid var(--rule)}
+.date .mono{font-family:var(--mono)}
+.date .tm{font-weight:400}
+.band{display:flex;align-items:center;gap:26px;background:var(--band);
+      color:var(--band-ink);padding:9px var(--gutter);font-size:11.5px;
+      letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.band .sig{color:var(--band-ink)}
+.band .sig i{color:var(--urgent);font-style:normal;font-size:14px;line-height:1}
+.band a{color:var(--band-ink);text-decoration:none;opacity:.72}
+.band a.on{opacity:1;border-bottom:2px solid var(--acc);padding-bottom:2px}
+.band .dir{margin-left:auto;opacity:.72;letter-spacing:.06em}
+
+/* ══ SUPERFÍCIE DE TRABALHO ═══════════════════════════════════════════════ */
+.obra{flex:1;display:grid;min-height:0;padding:0 var(--gutter);
+      grid-template-columns:340px 1fr 440px}
+.pane{display:flex;flex-direction:column;gap:16px;padding:20px 22px;min-width:0}
+.pane.esq{padding-left:0;border-right:1px solid var(--rule)}
+.pane.dir{padding-right:0;border-left:1px solid var(--rule)}
+.pane.centro{padding:22px 34px}
+
+.rot{font-family:var(--sans);font-size:11px;font-weight:500;letter-spacing:.1em;
+     text-transform:uppercase;color:var(--mut)}
+.rot .n{color:var(--faint);letter-spacing:.04em;margin-left:8px;font-weight:400}
+.bloco{display:flex;align-items:baseline;gap:0;border-bottom:1px solid var(--rule);
+       padding-bottom:6px}
+.bloco .n{margin-left:auto}
+
+/* Abas de origem: regradas, não pílulas. É a linguagem da faixa. */
+.abas{display:flex;border-bottom:1px solid var(--rule)}
+.abas button{flex:1;background:none;border:0;border-bottom:2px solid transparent;
+    font-family:var(--sans);font-size:12.5px;color:var(--mut);padding:7px 0 8px;
+    cursor:pointer;letter-spacing:.02em}
+.abas button.on{color:var(--ink);border-bottom-color:var(--acc);font-weight:600}
+
+.campo{width:100%;background:var(--cell);border:1px solid var(--rule);
+   color:var(--ink);font-family:var(--sans);font-size:14px;padding:9px 11px;
+   resize:none;line-height:1.45}
+.campo::placeholder{color:var(--faint)}
+
+.opt{display:flex;gap:9px;align-items:flex-start;font-size:13.5px;color:var(--ink2);
+     line-height:1.45}
+.opt input{margin-top:3px;accent-color:var(--acc)}
+.opt span span{display:block;color:var(--mut);font-size:12.5px;margin-top:2px}
+
+.btn{width:100%;background:var(--acc);color:var(--acc-ink);border:0;padding:11px;
+  font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;letter-spacing:.01em}
+.aguarda{border:1px dashed var(--rule);background:var(--cell);padding:11px 13px;
+  font-size:13.5px;color:var(--ink2);line-height:1.5}
+.aguarda b{display:block;color:var(--ink);font-weight:600;margin-bottom:3px}
+.btn.ghost{background:none;border:1px solid var(--line);color:var(--ink);font-weight:500}
+
+/* ── O painel de custo ANTES de gastar ─────────────────────────────────────
+   §5 diz "custo é visível ou não existe" e hoje o recibo só aparece DEPOIS.
+   Nada aqui é estimativa: preço de tabela vem de MODEL_PRICING, a faixa vem
+   do costLog. Sem histórico, a faixa some e sobra a tabela. */
+.custo{border:1px solid var(--rule);background:var(--cell)}
+.custo .cab{display:flex;justify-content:space-between;align-items:baseline;
+  padding:8px 12px;border-bottom:1px solid var(--rule)}
+.custo .cab b{font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  font-weight:500;color:var(--mut)}
+.custo .cab em{font-style:normal;font-family:var(--mono);font-size:12px;color:var(--ink)}
+.custo .li{display:flex;justify-content:space-between;padding:6px 12px;font-size:12.5px;
+  color:var(--mut)}
+.custo .li .v{font-family:var(--mono);color:var(--ink2)}
+.custo .rod{padding:7px 12px;border-top:1px solid var(--rule);font-size:12px;
+  color:var(--mut);line-height:1.45}
+.custo .rod b{color:var(--ink);font-family:var(--mono);font-weight:400}
+
+/* ══ COLUNA DE LEITURA ════════════════════════════════════════════════════ */
+.leitura{max-width:var(--medida-leitura);margin:0 auto;width:100%}
+.leitura h1{font-family:var(--serif);font-weight:400;font-size:41px;line-height:1.08;
+  margin:0 0 6px;letter-spacing:0}
+.leitura .sub{font-size:15.5px;color:var(--mut);line-height:1.5;margin:0 0 20px}
+.leitura p{font-size:15.5px;line-height:1.62;color:var(--ink2);margin:0 0 15px}
+.leitura h2{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mut);margin:26px 0 9px;
+  border-bottom:1px solid var(--rule);padding-bottom:5px}
+.leitura .fonte{font-size:12.5px;color:var(--mut);border-left:2px solid var(--ok);
+  padding-left:10px;margin:0 0 15px;line-height:1.5}
+.leitura .fonte b{color:var(--ok);font-weight:500;font-size:11px;letter-spacing:.08em;
+  text-transform:uppercase;display:block;margin-bottom:2px}
+
+/* Estado de espera: o material que chegou, na medida, não duas linhas no vazio */
+.espera{max-width:var(--medida-leitura);margin:0 auto;width:100%;
+  display:flex;flex-direction:column;gap:18px}
+.espera .slug{font-family:var(--sans);font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--mut);border-bottom:1px solid var(--rule);
+  padding-bottom:6px;display:flex;justify-content:space-between}
+.espera .slug em{font-style:normal;font-family:var(--mono);color:var(--faint);letter-spacing:.04em}
+.espera .mat{font-size:14.5px;line-height:1.6;color:var(--ink2);
+  border-left:2px solid var(--rule);padding-left:14px}
+.espera .diz{font-size:14.5px;color:var(--mut);line-height:1.55}
+
+/* ══ CÉLULAS DE FORMATO ═══════════════════════════════════════════════════
+   A grade da home. Marcado = INVERTIDO, que é como o híbrido diz "ativo" —
+   não preenchimento arredondado. */
+.grade{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);
+  border:1px solid var(--rule)}
+.cel{background:var(--cell);padding:11px 12px;display:flex;flex-direction:column;
+  gap:2px;cursor:pointer;min-height:64px;justify-content:center}
+.cel .t{font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.2}
+.cel .p{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.cel.on{background:var(--ink)}
+.cel.on .t{color:var(--paper)}
+.cel.on .p{color:var(--paper);opacity:.72}
+.cel.falhou{background:var(--urgent-bg);border-left:3px solid var(--urgent)}
+.cel.falhou .t{color:var(--ink)}
+.cel.falhou .p{color:var(--urgent)}
+
+/* Peças que saíram */
+.peca{border-bottom:1px solid var(--rule);padding:11px 0;display:flex;gap:12px;align-items:flex-start}
+.peca .idx{font-family:var(--mono);font-size:11.5px;color:var(--faint);width:22px;flex:none;padding-top:2px}
+.peca .co{min-width:0;flex:1}
+.peca .t{display:block;font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.25}
+.peca .m{display:block;font-size:12px;color:var(--mut);margin-top:2px;line-height:1.4}
+.peca .est{font-size:11px;letter-spacing:.08em;text-transform:uppercase;flex:none;padding-top:3px}
+.peca .est.ok{color:var(--ok)}
+.peca .est.mau{color:var(--urgent)}
+
+.recibo{border:1px solid var(--rule);background:var(--cell);font-size:12.5px}
+.recibo .l{display:flex;justify-content:space-between;padding:6px 12px;color:var(--mut)}
+.recibo .l:not(:last-child){border-bottom:1px solid var(--rule)}
+.recibo .l b{font-family:var(--mono);font-weight:400;color:var(--ink)}
+.recibo .l.tot{background:var(--note-bg);color:var(--ink)}
+
+.aud{border:1px solid var(--ok-line);background:var(--ok-bg);padding:9px 12px;
+  font-size:12.5px;color:var(--ink2);line-height:1.5}
+.aud b{color:var(--ok);font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  display:block;margin-bottom:2px;font-weight:500}
+
+/* ══ EDITOR ═══════════════════════════════════════════════════════════════ */
+.obra.ed{grid-template-columns:400px 1fr}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--rule)}
+.tabs button{background:none;border:0;border-bottom:2px solid transparent;padding:7px 14px 8px;
+  font-family:var(--sans);font-size:12.5px;color:var(--mut);cursor:pointer}
+.tabs button.on{color:var(--ink);border-bottom-color:var(--acc);font-weight:600}
+.slide{border:1px solid var(--rule);background:var(--cell);padding:10px 12px;
+  display:flex;gap:11px;align-items:flex-start;cursor:pointer}
+.slide.on{border-color:var(--ink);background:var(--surface)}
+html[data-tema="escuro"] .slide.on{background:var(--surface)}
+.slide .n{font-family:var(--mono);font-size:11.5px;color:var(--faint);width:20px;flex:none}
+.slide .tt{font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.25}
+.slide .tt{display:block}
+.slide .bd{display:block;font-size:12.5px;color:var(--mut);margin-top:3px;line-height:1.45}
+
+/* A prancheta. O QUE ESTÁ DENTRO DELA NÃO É NOSSO — é a identidade do cliente. */
+.mesa{display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:14px;background:var(--surface2);padding:26px}
+.mesa .aviso{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
+.canvas{width:430px;height:430px;background:var(--ink);color:var(--paper);padding:38px;
+  display:flex;flex-direction:column;justify-content:space-between;flex:none}
+.canvas .kk{font-size:12px;letter-spacing:.14em;text-transform:uppercase;opacity:.75}
+.canvas .hh{font-size:33px;line-height:1.14;font-weight:600;letter-spacing:-.02em}
+.canvas .ff{font-size:13px;opacity:.8}
+.mini{display:flex;gap:7px}
+.mini i{width:34px;height:34px;background:var(--ink);display:block;opacity:.4}
+.mini i.on{opacity:1;outline:2px solid var(--acc);outline-offset:2px}
+
+/* ══ CONTROLE DO MOCKUP (não faz parte do desenho) ════════════════════════ */
+.ctrl{position:fixed;right:12px;bottom:12px;z-index:99;background:#111;color:#eee;
+  font-family:var(--mono);font-size:11px;padding:9px 11px;display:flex;gap:7px;
+  align-items:center;flex-wrap:wrap;max-width:560px;box-shadow:0 3px 16px rgba(0,0,0,.35)}
+.ctrl button{background:#2a2a2a;color:#ddd;border:1px solid #444;padding:4px 8px;
+  cursor:pointer;font-family:var(--mono);font-size:11px}
+.ctrl button.on{background:var(--acc);color:#111;border-color:var(--acc);font-weight:600}
+.ctrl s{opacity:.4;text-decoration:none}
+.tela{display:none}
+html[data-estado="a"] #a,html[data-estado="b"] #b,html[data-estado="c"] #c,
+html[data-estado="d"] #d,html[data-estado="e"] #e{display:flex}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ A · BANCADA — origem escolhida, artigo ainda não ══════════ -->
+<div class="tela" id="a">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>Edição ·</span><span>Sanwey</span><b>Resibag</b><span>Meu</span></div>
+  </div>
+  <div class="date"><span>São Paulo · 8 de setembro de 2026</span>
+    <span class="mono">mês · R$ 0,00 · tema <b class="tm">claro</b></span></div>
+  <div class="band">
+    <span class="sig"><i>•</i> 2 esperando aprovação</span>
+    <a href="#">Situação</a><a class="on" href="#">Bancada</a><a href="#">Peças</a>
+    <a href="#">Fatos</a><a href="#">Custos</a><a href="#">Instalação</a>
+    <span class="dir">Origem escolhida · artigo não escrito</span>
+  </div>
+
+  <div class="obra">
+    <div class="pane esq">
+      <div class="bloco"><span class="rot">Origem</span></div>
+      <div class="abas">
+        <button>Sinal</button><button class="on">Texto</button>
+        <button>Tema</button><button>Arquivo</button>
+      </div>
+      <textarea class="campo" rows="7">Resibag Comercial Ltda. — marca do Grupo Sanwey, fundada em 2022, sede em Taboão da Serra/SP. Linha Standard: big bag homologado INMETRO + ANTT 5998 + ANP + ISO 9001:2015.</textarea>
+      <div class="rot" style="text-transform:none;letter-spacing:0;font-size:12px;color:var(--faint)">183 de 40.000 caracteres</div>
+
+      <div class="bloco" style="margin-top:4px"><span class="rot">Ângulo</span></div>
+      <textarea class="campo" rows="2" placeholder="O que o gestor de SSMA precisa ter feito antes do prazo."></textarea>
+
+      <label class="opt"><input type="checkbox" checked>
+        <span>Escrever o artigo antes
+          <span>As peças derivam dele, e tudo que afirmam fica rastreado.</span></span></label>
+
+      <button class="btn">Escrever o artigo</button>
+    </div>
+
+    <div class="pane centro">
+      <div class="espera">
+        <div class="slug"><span>Material recebido</span><em>texto colado · 183 car.</em></div>
+        <div class="mat">Resibag Comercial Ltda. — marca do Grupo Sanwey, fundada em 2022, sede em Taboão da Serra/SP. Linha Standard: big bag homologado INMETRO + ANTT 5998 + ANP + ISO 9001:2015.</div>
+        <div class="diz">O artigo aparece aqui. Ele é a fonte factual de tudo que sair depois — a auditoria confere cada afirmação das peças contra ele.</div>
+
+        <div class="custo">
+          <div class="cab"><b>O que escrever vai custar</b><em>Sonnet 5</em></div>
+          <div class="li"><span>Entrada</span><span class="v">US$ 2,00 / milhão</span></div>
+          <div class="li"><span>Saída</span><span class="v">US$ 10,00 / milhão</span></div>
+          <div class="li"><span>Busca na web, se usada</span><span class="v">US$ 0,01 / busca</span></div>
+          <div class="rod">Os últimos 6 artigos desta frente custaram entre <b>US$ 0,04</b> e <b>US$ 0,09</b>. Preço de tabela; o total real sai no recibo.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="pane dir">
+      <div class="bloco"><span class="rot">Peças</span><span class="rot n">0 de 6 marcadas</span></div>
+      <div class="grade">
+        <div class="cel"><span class="t">Carrossel</span><span class="p">LinkedIn</span></div>
+        <div class="cel"><span class="t">Carrossel</span><span class="p">Instagram</span></div>
+        <div class="cel"><span class="t">Post de texto</span><span class="p">LinkedIn</span></div>
+        <div class="cel"><span class="t">Legenda de post único</span><span class="p">Instagram</span></div>
+        <div class="cel"><span class="t">Roteiro de Reels</span><span class="p">Instagram</span></div>
+        <div class="cel"><span class="t">Sequência de Stories</span><span class="p">Instagram</span></div>
+      </div>
+      <div class="aguarda"><b>Marque ao menos um formato.</b>
+        As peças saem do artigo, não da origem — escrever primeiro dá lastro comum a todas.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ B · BANCADA — artigo escrito ═════════════════════════════ -->
+<div class="tela" id="b">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>Edição ·</span><span>Sanwey</span><b>Resibag</b><span>Meu</span></div>
+  </div>
+  <div class="date"><span>São Paulo · 8 de setembro de 2026</span>
+    <span class="mono">mês · R$ 0,71 · tema <b class="tm">claro</b></span></div>
+  <div class="band">
+    <span class="sig"><i>•</i> 2 esperando aprovação</span>
+    <a href="#">Situação</a><a class="on" href="#">Bancada</a><a href="#">Peças</a>
+    <a href="#">Fatos</a><a href="#">Custos</a><a href="#">Instalação</a>
+    <span class="dir">Artigo escrito · 3 formatos marcados</span>
+  </div>
+
+  <div class="obra">
+    <div class="pane esq">
+      <div class="bloco"><span class="rot">Origem</span></div>
+      <div class="abas">
+        <button>Sinal</button><button class="on">Texto</button>
+        <button>Tema</button><button>Arquivo</button>
+      </div>
+      <textarea class="campo" rows="4">Resibag Comercial Ltda. — marca do Grupo Sanwey, fundada em 2022, sede em Taboão da Serra/SP.</textarea>
+      <div class="bloco" style="margin-top:4px"><span class="rot">Ângulo</span></div>
+      <textarea class="campo" rows="2">O que o gestor de SSMA precisa conferir antes de comprar big bag.</textarea>
+      <label class="opt"><input type="checkbox" checked>
+        <span>Escrever o artigo antes
+          <span>As peças derivam dele, e tudo que afirmam fica rastreado.</span></span></label>
+      <button class="btn ghost">Reescrever o artigo</button>
+      <div class="rot" style="text-transform:none;letter-spacing:0;font-size:12px;color:var(--mut);line-height:1.45">
+        Reescrever descarta o artigo atual e paga outra geração.</div>
+    </div>
+
+    <div class="pane centro" style="overflow:auto">
+      <div class="leitura">
+        <h1>O que a auditoria cobra de um big bag</h1>
+        <p class="sub">O que o gestor de SSMA precisa ter conferido antes de aprovar a compra — e quais documentos o fornecedor tem de entregar junto.</p>
+
+        <h2>O que a homologação cobre</h2>
+        <p>A linha Standard da Resibag é homologada em quatro registros distintos: INMETRO, ANTT 5998, ANP e ISO 9001:2015. Cada um responde por uma pergunta diferente da auditoria, e atribuir a certificação de um produto a outro é erro de compliance — não detalhe de catálogo.</p>
+
+        <div class="fonte"><b>Fonte primária · base curada</b>
+          Registro 1 — homologados: INMETRO + ANTT 5998 + ANP + ISO 9001:2015. Quatro produtos em dois registros.</div>
+
+        <h2>O prazo, dito com precisão</h2>
+        <p>O claim correto é “envio em até 2 dias ou retirada em fábrica”, e ele vale só para a linha Standard. Estendê-lo às demais linhas é a diferença entre uma promessa que a operação sustenta e uma que ela não sustenta.</p>
+
+        <div class="fonte"><b>Fonte primária · base curada</b>
+          “envio em até 2 dias ou retirada em fábrica” — vale só para a linha Standard.</div>
+
+        <h2>Como a marca assina</h2>
+        <p>O endosso correto é “Resibag — Uma marca Sanwey”, com travessão em-dash. A tagline institucional é “Gestão inteligente de resíduos industriais.”</p>
+      </div>
+    </div>
+
+    <div class="pane dir" style="overflow:auto">
+      <div class="bloco"><span class="rot">Peças</span><span class="rot n">3 de 6 marcadas</span></div>
+      <div class="grade">
+        <div class="cel on"><span class="t">Carrossel</span><span class="p">LinkedIn</span></div>
+        <div class="cel"><span class="t">Carrossel</span><span class="p">Instagram</span></div>
+        <div class="cel on"><span class="t">Post de texto</span><span class="p">LinkedIn</span></div>
+        <div class="cel"><span class="t">Legenda de post único</span><span class="p">Instagram</span></div>
+        <div class="cel on"><span class="t">Roteiro de Reels</span><span class="p">Instagram</span></div>
+        <div class="cel"><span class="t">Sequência de Stories</span><span class="p">Instagram</span></div>
+      </div>
+      <button class="btn">Gerar 3 peças</button>
+
+      <div class="bloco" style="margin-top:6px"><span class="rot">Recibo · artigo</span></div>
+      <div class="recibo">
+        <div class="l"><span>Entrada · 4.180 tokens</span><b>US$ 0,0084</b></div>
+        <div class="l"><span>Saída · 1.905 tokens</span><b>US$ 0,0191</b></div>
+        <div class="l"><span>Busca na web · 2</span><b>US$ 0,0200</b></div>
+        <div class="l tot"><span>Total</span><b>US$ 0,0475</b></div>
+      </div>
+
+      <div class="aud"><b>Auditoria · 6 de 6 afirmações com fonte</b>
+        Nenhuma afirmação sem lastro na base curada ou no material recebido.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ C · BANCADA — peças saíram, uma falhou ═══════════════════ -->
+<div class="tela" id="c">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>Edição ·</span><span>Sanwey</span><b>Resibag</b><span>Meu</span></div>
+  </div>
+  <div class="date"><span>São Paulo · 8 de setembro de 2026</span>
+    <span class="mono">mês · R$ 0,94 · tema <b class="tm">claro</b></span></div>
+  <div class="band">
+    <span class="sig"><i>•</i> 2 esperando aprovação</span>
+    <a href="#">Situação</a><a class="on" href="#">Bancada</a><a href="#">Peças</a>
+    <a href="#">Fatos</a><a href="#">Custos</a><a href="#">Instalação</a>
+    <span class="dir">2 de 3 peças saíram</span>
+  </div>
+
+  <div class="obra">
+    <div class="pane esq">
+      <div class="bloco"><span class="rot">Origem</span></div>
+      <div class="abas">
+        <button>Sinal</button><button class="on">Texto</button>
+        <button>Tema</button><button>Arquivo</button>
+      </div>
+      <textarea class="campo" rows="4">Resibag Comercial Ltda. — marca do Grupo Sanwey, fundada em 2022, sede em Taboão da Serra/SP.</textarea>
+      <button class="btn ghost">Reescrever o artigo</button>
+      <div class="bloco" style="margin-top:6px"><span class="rot">Enviar</span></div>
+      <div class="rot" style="text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--mut);line-height:1.5">
+        A aprovação acontece na fila do CRM, não aqui. Esta tela confere e envia.</div>
+      <button class="btn">Enviar 2 peças para aprovação</button>
+    </div>
+
+    <div class="pane centro" style="overflow:auto">
+      <div class="leitura">
+        <h1>O que a auditoria cobra de um big bag</h1>
+        <p class="sub">O que o gestor de SSMA precisa ter conferido antes de aprovar a compra — e quais documentos o fornecedor tem de entregar junto.</p>
+        <h2>O que a homologação cobre</h2>
+        <p>A linha Standard da Resibag é homologada em quatro registros distintos: INMETRO, ANTT 5998, ANP e ISO 9001:2015. Cada um responde por uma pergunta diferente da auditoria, e atribuir a certificação de um produto a outro é erro de compliance — não detalhe de catálogo.</p>
+        <div class="fonte"><b>Fonte primária · base curada</b>
+          Registro 1 — homologados: INMETRO + ANTT 5998 + ANP + ISO 9001:2015.</div>
+        <h2>O prazo, dito com precisão</h2>
+        <p>O claim correto é “envio em até 2 dias ou retirada em fábrica”, e ele vale só para a linha Standard.</p>
+      </div>
+    </div>
+
+    <div class="pane dir" style="overflow:auto">
+      <div class="bloco"><span class="rot">Peças</span><span class="rot n">2 de 3 saíram</span></div>
+
+      <div>
+        <div class="peca">
+          <span class="idx">01</span>
+          <span class="co"><span class="t">Carrossel · LinkedIn</span>
+            <span class="m">8 slides · capa “O que a auditoria cobra de um big bag”</span></span>
+          <span class="est ok">saiu</span>
+        </div>
+        <div class="peca">
+          <span class="idx">02</span>
+          <span class="co"><span class="t">Post de texto · LinkedIn</span>
+            <span class="m">1.240 caracteres · 2 afirmações com fonte primária</span></span>
+          <span class="est ok">saiu</span>
+        </div>
+        <div class="peca">
+          <span class="idx">03</span>
+          <span class="co"><span class="t">Roteiro de Reels · Instagram</span>
+            <span class="m">A resposta veio fora do formato pedido. A geração foi cobrada e está no extrato como falha.</span></span>
+          <span class="est mau">não saiu</span>
+        </div>
+      </div>
+
+      <div class="grade" style="margin-top:2px">
+        <div class="cel on"><span class="t">Carrossel</span><span class="p">LinkedIn</span></div>
+        <div class="cel"><span class="t">Carrossel</span><span class="p">Instagram</span></div>
+        <div class="cel on"><span class="t">Post de texto</span><span class="p">LinkedIn</span></div>
+        <div class="cel"><span class="t">Legenda de post único</span><span class="p">Instagram</span></div>
+        <div class="cel falhou"><span class="t">Roteiro de Reels</span><span class="p">não saiu · refazer</span></div>
+        <div class="cel"><span class="t">Sequência de Stories</span><span class="p">Instagram</span></div>
+      </div>
+
+      <div class="bloco" style="margin-top:6px"><span class="rot">Recibo · peças</span></div>
+      <div class="recibo">
+        <div class="l"><span>Carrossel · LinkedIn</span><b>US$ 0,0212</b></div>
+        <div class="l"><span>Post de texto · LinkedIn</span><b>US$ 0,0104</b></div>
+        <div class="l"><span>Roteiro de Reels · falhou</span><b>US$ 0,0089</b></div>
+        <div class="l tot"><span>Total</span><b>US$ 0,0405</b></div>
+      </div>
+      <div class="rot" style="text-transform:none;letter-spacing:0;font-size:12px;color:var(--mut);line-height:1.45">
+        A geração que falhou entra no extrato mesmo assim — ela foi cobrada.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ D · EDITOR — composer, agora dentro da casca ═════════════ -->
+<div class="tela" id="d">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>Edição ·</span><span>Sanwey</span><b>Resibag</b><span>Meu</span></div>
+  </div>
+  <div class="date"><span>São Paulo · 8 de setembro de 2026</span>
+    <span class="mono">mês · R$ 0,94 · tema <b class="tm">claro</b></span></div>
+  <div class="band">
+    <span class="sig"><i>•</i> 2 esperando aprovação</span>
+    <a href="#">Situação</a><a href="#">Bancada</a><a href="#">Peças</a>
+    <a href="#">Fatos</a><a href="#">Custos</a><a class="on" href="#">Editor</a>
+    <span class="dir">Rascunho novo · nenhum slide</span>
+  </div>
+
+  <div class="obra" style="grid-template-columns:1fr">
+    <div class="pane centro" style="justify-content:flex-start;padding-top:44px">
+      <div class="leitura">
+        <h1>Um carrossel, slide a slide</h1>
+        <p class="sub">Cole a URL de um artigo ou descreva o tema. A ferramenta monta a sequência — capa, conteúdo e chamada — e você edita cada texto antes de exportar.</p>
+
+        <textarea class="campo" rows="4" style="font-size:15px" placeholder="https://… ou: o que conferir antes de comprar big bag homologado"></textarea>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+          <span class="rot" style="text-transform:none;letter-spacing:0;font-size:12.5px">
+            <span style="font-family:var(--mono)">Ctrl ↵</span> para gerar</span>
+          <button class="btn" style="width:auto;padding:10px 20px">Gerar carrossel</button>
+        </div>
+
+        <div class="bloco" style="margin-top:30px"><span class="rot">Formato</span></div>
+        <div class="abas" style="border-bottom:0;margin-top:6px">
+          <button class="on" style="flex:none;padding-right:22px">Carrossel</button>
+          <button style="flex:none;padding-right:22px">Apresentação</button>
+        </div>
+
+        <div class="bloco" style="margin-top:20px"><span class="rot">Plataforma</span></div>
+        <div class="abas" style="border-bottom:0;margin-top:6px">
+          <button class="on" style="flex:none;padding-right:22px">LinkedIn</button>
+          <button style="flex:none;padding-right:22px">Instagram</button>
+          <button style="flex:none;padding-right:22px">Facebook</button>
+          <button style="flex:none;padding-right:22px">TikTok</button>
+        </div>
+        <div class="rot" style="text-transform:none;letter-spacing:0;font-size:12.5px;color:var(--mut);margin-top:7px">
+          Dado concreto, autoridade B2B, copy mais longa.</div>
+
+        <div class="custo" style="margin-top:26px">
+          <div class="cab"><b>O que gerar vai custar</b><em>Sonnet 5</em></div>
+          <div class="li"><span>Entrada</span><span class="v">US$ 2,00 / milhão</span></div>
+          <div class="li"><span>Saída</span><span class="v">US$ 10,00 / milhão</span></div>
+          <div class="rod">Os últimos 6 carrosséis desta frente custaram entre <b>US$ 0,018</b> e <b>US$ 0,043</b>.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ E · EDITOR — slides na prancheta ═════════════════════════ -->
+<div class="tela" id="e">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>Edição ·</span><span>Sanwey</span><b>Resibag</b><span>Meu</span></div>
+  </div>
+  <div class="date"><span>São Paulo · 8 de setembro de 2026</span>
+    <span class="mono">mês · R$ 0,98 · tema <b class="tm">claro</b></span></div>
+  <div class="band">
+    <span class="sig"><i>•</i> 2 esperando aprovação</span>
+    <a href="#">Situação</a><a href="#">Bancada</a><a href="#">Peças</a>
+    <a href="#">Fatos</a><a href="#">Custos</a><a class="on" href="#">Editor</a>
+    <span class="dir">Carrossel · LinkedIn · 8 slides · Resibag</span>
+  </div>
+
+  <div class="obra ed">
+    <div class="pane esq" style="gap:0;padding-top:0">
+      <div class="tabs">
+        <button class="on">Conteúdo</button><button>Estilo</button><button>Contexto</button>
+      </div>
+      <div style="padding:14px 0 12px;border-bottom:1px solid var(--rule);display:flex;flex-direction:column;gap:10px">
+        <textarea class="campo" rows="2">O que conferir antes de comprar big bag homologado</textarea>
+        <div class="recibo">
+          <div class="l"><span>Carrossel · 8 slides</span><b>US$ 0,0212</b></div>
+        </div>
+        <div class="aud"><b>Auditoria · 4 de 4 afirmações com fonte</b>
+          Cada número do carrossel tem origem na base curada.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:7px;padding:12px 0;overflow:auto">
+        <div class="slide on"><span class="n">01</span>
+          <span><span class="tt">O que a auditoria cobra de um big bag</span>
+          <span class="bd">Capa · o que o gestor de SSMA precisa ter conferido</span></span></div>
+        <div class="slide"><span class="n">02</span>
+          <span><span class="tt">Quatro registros, quatro perguntas</span>
+          <span class="bd">INMETRO, ANTT 5998, ANP e ISO 9001:2015</span></span></div>
+        <div class="slide"><span class="n">03</span>
+          <span><span class="tt">Homologado não é sinônimo</span>
+          <span class="bd">Atribuir certificação entre registros é erro de compliance</span></span></div>
+        <div class="slide"><span class="n">04</span>
+          <span><span class="tt">O prazo, dito com precisão</span>
+          <span class="bd">“envio em até 2 dias ou retirada em fábrica” — só a Standard</span></span></div>
+        <div class="slide"><span class="n">05</span>
+          <span><span class="tt">O que pedir ao fornecedor</span>
+          <span class="bd">Os documentos que a auditoria vai cobrar de você</span></span></div>
+      </div>
+    </div>
+
+    <div class="pane mesa" style="padding:0">
+      <div class="mesa" style="width:100%;height:100%">
+        <span class="aviso">Slide 1 de 8 · o tema visual da Resibag renderiza aqui</span>
+        <div class="canvas">
+          <span class="kk">Homologação · Classe I e II</span>
+          <span class="hh">O que a auditoria cobra de um big bag</span>
+          <span class="ff">Resibag — Uma marca Sanwey</span>
+        </div>
+        <div class="mini"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <span class="aviso" style="color:var(--faint);text-transform:none;letter-spacing:0;font-size:12px;max-width:430px;text-align:center;line-height:1.5">
+          Bloco neutro de propósito: a paleta da Resibag mora nas brand guidelines
+          dela, e inventar uma cor de marca é o mesmo erro que inventar um número.
+          A prancheta é o entregável do cliente — a Fase 3 não a toca.</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="ctrl">
+  <s>estado</s>
+  <button data-e="a" class="on">A · bancada vazia</button>
+  <button data-e="b">B · artigo</button>
+  <button data-e="c">C · peças</button>
+  <button data-e="d">D · editor</button>
+  <button data-e="e">E · slides</button>
+  <s>·</s>
+  <button data-t="claro" class="on">claro</button>
+  <button data-t="escuro">escuro</button>
+</div>
+
+<script>
+const H = document.documentElement;
+document.querySelectorAll(".ctrl button").forEach((b) => {
+  b.addEventListener("click", () => {
+    const grupo = b.dataset.e ? "e" : "t";
+    document.querySelectorAll(`.ctrl button[data-${grupo}]`).forEach((o) => o.classList.remove("on"));
+    b.classList.add("on");
+    if (b.dataset.e) { H.dataset.estado = b.dataset.e; }
+    else {
+      H.dataset.tema = b.dataset.t;
+      document.querySelectorAll(".tm").forEach((t) => { t.textContent = b.dataset.t; });
+    }
+  });
+});
+</script>
+</body>
+</html>
