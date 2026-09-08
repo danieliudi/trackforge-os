@@ -57,46 +57,40 @@ genuinamente novo.
 ## 0. Onde está o mapa da ferramenta (este arquivo não é ele)
 
 Este arquivo é **como construir**. Ele não descreve nenhuma funcionalidade, de
-propósito. O efeito colateral disso já apareceu: em 03/09/2026, numa análise
-externa dos dois repositórios, foi preciso varrer o código inteiro para
-responder o que cada tela faz, porque nenhuma das 11 páginas tem comentário de
-propósito e o `README` descreve o produto, não a superfície. No repositório
-irmão, o mesmo buraco foi encontrado antes e resolvido com um mapa separado.
+propósito. **O que existe mora em `docs/mapa-funcional.md`** — escrito em
+08/09/2026, e antes dele o buraco era real: numa análise externa em 03/09 foi
+preciso varrer o código inteiro para responder o que cada tela faz, porque
+nenhuma das 11 páginas tinha comentário de propósito e o `README` descreve o
+produto, não a superfície.
 
-**O mapa ainda não existe completo** — conferido em 03/09/2026. Em 04/09/2026
-entrou `docs/ui-diretrizes.md` (identidade visual Situação) e
-`docs/dashboard-spec.json` (slots do painel). O mapa funcional das telas
-ainda falta. Esta seção é a especificação dele, não um ponteiro. Enquanto o
-mapa funcional não for escrito, quem precisar da resposta lê o código mesmo;
-não mande ninguém abrir `docs/mapa-funcional.md`.
+O mapa cobre, com tudo conferido no código e não lembrado:
 
-O `npm run doc:check` **já existe** e confere o que dá para conferir sem o mapa:
-todo caminho citado nos documentos de regra, o espelho CLAUDE.md ↔
-`.cursor/rules` nos dois sentidos, os globs de cada regra, e as contagens abaixo.
-
-Quando existir, mora em **`docs/mapa-funcional.md`** e cobre:
-
-- As 11 páginas: `/`, `/esteira`, `/esteira/pecas`, `/esteira/avulso`,
-  `/esteira/custos`, `/esteira/fatos`, `/esteira/instalacao`, `/artigo`,
-  `/editor`, `/biblioteca`, `/slides-preview`. Para cada uma: para que serve, o
-  que precisa estar funcionando para ela render, e o que ela deliberadamente
-  não faz.
-- As 14 rotas de API, separando as que **gastam dinheiro** (`generate/*`,
-  `derive`, `suggest-outputs`, `images/search`) das que não gastam
-  (`signals`, `campaigns`, `assets/library`, `publish`, `instalacao`,
-  `images/track-download`).
-- A camada `src/knowledge`: o que é fato curado, qual nível de proveniência
-  cada arquivo carrega, e qual skill é a origem de cada um.
-- A fronteira com o CRM: o que atravessa em `src/lib/crm.ts`, qual parte do pacote
-  o papel `agencia` enxerga, e o que o gateway lê do campo `origem`.
-- As variáveis de ambiente e o que quebra sem cada uma, espelhando
+- **As 11 páginas** — para que cada uma serve, o que precisa estar funcionando
+  para ela render, e o que ela deliberadamente não faz. Duas delas (`/artigo` e
+  `/esteira/avulso`) são redirecionamentos, não telas.
+- **As 14 rotas de API**, separadas em três grupos: as sete que **gastam
+  dinheiro** por chamada, as duas que gastam cota do Unsplash, e as cinco que
+  não gastam nada.
+- **A camada `src/knowledge`** — quantos fatos por frente, quantos em cada
+  nível de proveniência, e o que `checkedAt` diz sobre eles.
+- **A fronteira com o CRM** — o que o papel `agencia` lê, o que fica no
+  `payload` de propósito, e o que atravessa para o entregável.
+- **As variáveis de ambiente** e o que quebra sem cada uma, espelhando o
   `.env.example`.
 
-A regra, quando ele existir: leia de lá, não repita conteúdo aqui. Se mexer em
-página, rota de API, camada de conhecimento ou no pacote que vai ao CRM,
-atualize lá e rode `npm run doc:check` — script que recalcula as contagens a
-partir do código e falha apontando a divergência. Fica **fora** do `prebuild` de
-propósito: documento defasado não deve travar deploy.
+**A regra: leia de lá, não repita conteúdo aqui.** Se mexer em página, rota de
+API, camada de conhecimento ou no pacote que vai ao CRM, atualize o mapa e rode
+`npm run doc:check` — ele recalcula as contagens a partir do código e falha
+apontando a divergência. Fica **fora** do `prebuild` de propósito: documento
+defasado não deve travar deploy.
+
+O `doc:check` confere também todo caminho citado nos documentos de regra, o
+espelho CLAUDE.md ↔ `.cursor/rules` nos dois sentidos, e os globs de cada regra.
+
+**O que o mapa achou ao ser escrito:** o `.env.example` não documentava
+`APP_PASSWORD` nem `UNSPLASH_ACCESS_KEY`, embora o código leia as duas — e a
+primeira é a que separa `localhost` de uma URL pública aberta. Corrigido no
+mesmo commit. Escrever o mapa pagou por si na primeira hora.
 
 As contagens desta seção são conferidas pelo `npm run doc:check`, que as
 recalcula a partir do código. Em 07/09/2026 ele pegou a primeira deriva sozinho:

@@ -49,7 +49,8 @@ const texto = (f) => readFileSync(join(RAIZ, f), "utf8");
  * Se um deles passar a existir, o check FALHA pedindo para tirá-lo daqui — a
  * lista não pode virar o próximo lugar onde a verdade envelhece em silêncio.
  */
-const AINDA_NAO_EXISTEM = ["docs/mapa-funcional.md"];
+/** Vazio desde 08/09/2026: o mapa funcional foi escrito. */
+const AINDA_NAO_EXISTEM = [];
 
 const CITACAO = /`([A-Za-z0-9_@./-]+\/[A-Za-z0-9_@./-]+\.(?:ts|tsx|mjs|css|json|md|mdc))`/g;
 

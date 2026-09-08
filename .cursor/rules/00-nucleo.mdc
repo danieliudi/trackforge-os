@@ -133,9 +133,12 @@ andamento, ou pedido explícito de parar.
 
 ## 8. Este arquivo é "como construir", não "o que a ferramenta faz"
 
-Nenhuma seção descreve funcionalidade, de propósito. O mapa funcional (as 10
-páginas, as 13 rotas de API, a camada de conhecimento, a fronteira com o CRM)
-**ainda não existe** — a especificação dele está na seção 0 do `CLAUDE.md`.
+Nenhuma seção descreve funcionalidade, de propósito. **O que existe mora em
+`docs/mapa-funcional.md`**, escrito em 08/09/2026: as 11 páginas (duas delas
+redirecionamentos), as 14 rotas de API separadas entre as que gastam dinheiro e
+as que não gastam, a camada de conhecimento com a contagem por nível de
+proveniência, a fronteira com o CRM e as variáveis de ambiente.
 
-Enquanto não for escrito, quem precisar da resposta lê o código. Não mande
-ninguém abrir `docs/mapa-funcional.md`: esse arquivo não está lá.
+**Leia de lá, não repita conteúdo aqui.** Mexeu em página, rota, conhecimento
+ou no pacote do CRM: atualize o mapa e rode `npm run doc:check`, que recalcula
+as contagens a partir do código e falha apontando a divergência.
