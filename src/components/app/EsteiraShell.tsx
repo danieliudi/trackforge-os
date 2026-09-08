@@ -150,7 +150,12 @@ export function EsteiraShell({
           <Link
             href="/"
             className={clsx(
-              "font-serif text-[26px] font-extrabold leading-none tracking-[-0.04em] text-ink",
+              // Peso 400 porque é o ÚNICO que o Instrument Serif tem. Pedir
+              // `font-extrabold` aqui fazia o navegador engordar a letra por
+              // deformação — negrito sintético — e a palavra encolhia de 107px
+              // para 87px, borrada. Em display serif o peso vem do tamanho, e
+              // o tracking abre um pouco: -0.04em era aperto de sans pesado.
+              "font-serif text-[30px] font-normal leading-none tracking-[-0.02em] text-ink",
               focusRing,
             )}
           >

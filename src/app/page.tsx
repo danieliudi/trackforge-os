@@ -366,7 +366,10 @@ export default function SituacaoPage() {
             <span className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-urgent">
               Situação
             </span>
-            <h2 className="mt-1.5 font-serif text-[19px] tracking-[-0.03em] text-ink">
+            {/* Mesmo ajuste do masthead: o `-0.03em` foi calibrado quando
+                `font-serif` caía no serif genérico do sistema. O Instrument
+                Serif já é estreito — nesse aperto as palavras se encostam. */}
+            <h2 className="mt-1.5 font-serif text-[22px] tracking-[-0.01em] text-ink">
               Nada pedindo decisão
             </h2>
             <p className="mt-1 text-[11.5px] text-mut">

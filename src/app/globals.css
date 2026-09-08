@@ -182,6 +182,21 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /**
+   * O serif do masthead — LIGADO em 08/09/2026, e antes disso não existia.
+   *
+   * O `layout.tsx` carregava Instrument Serif desde sempre e nunca ligava a
+   * nada. Sem este token, o `font-serif` do masthead caía no `ui-serif` do
+   * Tailwind: o serif genérico do sistema, ou seja uma fonte DIFERENTE EM
+   * CADA COMPUTADOR, que ninguém escolheu. A marca do produto renderizava
+   * diferente para cada pessoa que abria a ferramenta.
+   *
+   * Instrument Serif só existe no peso 400 — pedir mais que isso faz o
+   * navegador engordar a letra por deformação (negrito sintético), e é uma
+   * das coisas que mais fazem uma fonte parecer estranha ao lado das outras.
+   * Quem usa `font-serif` usa em 400; o peso vem do tamanho.
+   */
+  --font-serif: var(--font-instrument-serif);
 }
 
 html {

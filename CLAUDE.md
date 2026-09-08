@@ -276,15 +276,22 @@ qualquer tela nova:
 - **Piso de 11px** para rótulo e meta em tela de trabalho; corpo em 15px. Abaixo
   disso é decisão explícita, não descuido de tradução.
 
-**A pilha de tipos é decisão, não fallback — e hoje ela tem um buraco.**
-Conferido no app rodando em 08/09/2026: `globals.css` define `--font-sans`
-(Geist) e `--font-mono` (Geist Mono) e **não define `--font-serif`**. O
-`font-serif` do masthead cai em `ui-serif`, o serif genérico do sistema — fonte
-diferente em cada computador, que ninguém escolheu. Ao mesmo tempo o
-`layout.tsx` carrega Instrument Serif e nunca o liga a nada. Some a isso que o
-Instrument Serif só existe no peso 400 e o masthead pede `font-extrabold`:
-ligar sem baixar o peso daria negrito sintético. **Fica para a Fase 2 resolver**,
-e nenhuma tela nova deve usar `font-serif` até lá.
+**A pilha de tipos é decisão, não fallback.** São três, e as três estão
+ligadas em `globals.css`: `--font-sans` (Geist), `--font-mono` (Geist Mono) e
+`--font-serif` (**Instrument Serif**).
+
+O serif foi ligado em 08/09/2026 e antes disso não existia: o `font-serif` do
+masthead caía no `ui-serif` do Tailwind — o serif genérico do sistema, ou seja
+**uma fonte diferente em cada computador**, que ninguém escolheu, enquanto o
+`layout.tsx` carregava Instrument Serif sem ligar a nada. A marca do produto
+renderizava diferente para cada pessoa que abria a ferramenta.
+
+**`font-serif` usa peso 400, sempre** — é o único que o Instrument Serif tem.
+Medido: com `font-extrabold` o navegador engorda a letra por deformação
+(negrito sintético) e a palavra encolhe de 107px para 87px, borrada. Em display
+serif o peso vem do tamanho. Pela mesma razão o `tracking` negativo herdado do
+serif genérico teve de abrir nos dois usos: o Instrument Serif já é estreito, e
+a -0,03em as palavras se encostavam.
 
 **Fonte tem papel, e mono é o papel mais fácil de estragar.** Mono significa
 *o que a máquina escreveu ou o que alinha em coluna* — id, nome de variável,
