@@ -98,12 +98,64 @@ linhas numa coluna de 104px.
 Contraste refeito depois de tudo: **136 medições, 5 telas × 2 temas, todas acima
 do piso.**
 
+## Correção de tipografia (08/09/2026) — v3 no mockup
+
+O Daniel: *"melhorou, mas ainda acho que tem fontes que parecem não combinar
+entre elas."* Auditado, e eram **três defeitos somados**:
+
+**1. O mockup mentia sobre as fontes.** Ele usava Georgia + Helvetica Neue. O
+app não carrega nenhuma das duas: roda **Geist** e **Geist Mono**. Comparar um
+mockup nessas contra uma casca que ele conhece em Geist já produz sozinho a
+sensação de que não combinam. O mockup agora carrega as fontes reais.
+
+**2. `--font-serif` NÃO EXISTE — e isso é defeito de código, não de mockup.**
+O `globals.css` define só `--font-sans` e `--font-mono`. O `font-serif` do
+masthead cai em `ui-serif`, o serif genérico do sistema — **fonte diferente em
+cada computador, nunca escolhida por ninguém**. Enquanto isso o `layout.tsx`
+carrega **Instrument Serif** e nunca o liga a nada. Medido no app rodando:
+
+    --font-sans  = "Geist"                      ✓ ligado
+    --font-mono  = "Geist Mono"                 ✓ ligado
+    --font-serif = ui-serif, Georgia, …         ✗ fallback genérico
+    --font-instrument-serif = "Instrument Serif"  carregado, nunca usado
+
+Some disso: **Instrument Serif só existe no peso 400** (o 700 nem responde no
+Google Fonts) e o masthead pede `font-extrabold`. Ligar sem mais nada daria
+negrito sintético — a letra engorda por deformação, não por desenho, que é
+das coisas que mais fazem uma fonte parecer estranha ao lado das outras. Na v3
+o masthead vai a 400 e o peso vem do tamanho, como pede um display serif.
+
+**3. Mono fazia NOVE trabalhos, seis deles com palavras humanas.** Auditado
+papel por papel: linha de prova, rótulo de bloco, nível de proveniência,
+"nunca conferido", tipo do custo e estado da variável — nenhum é código nem
+número. E o mesmo papel visual (rótulo pequeno em caixa alta) saía em mono em
+seis lugares e em sans no rótulo da célula. **Duas fontes fazendo o mesmo
+trabalho na mesma tela** é o que o olho acusa antes de a cabeça saber dizer o
+quê.
+
+A regra da v3, uma só:
+
+| Fonte | Significa | Onde |
+|---|---|---|
+| **Serif** | manchete | masthead, `h1`, manchete de vazio — nada mais |
+| **Mono** | o que a máquina escreveu, ou o que alinha em coluna | id de fato, nome de variável, dinheiro no extrato, índice |
+| **Sans** | todo o resto, **inclusive todo rótulo em caixa alta** | frases, títulos, rótulos, estados |
+
+O número do KPI fica em sans e o dinheiro do extrato em mono **de propósito**:
+um é figura de display, o outro é coluna que alinha dígito com dígito. É a
+mesma regra, não exceção.
+
+Contraste refeito: **136 medições, 5 telas × 2 temas, todas acima do piso.**
+
 ## O que eu NÃO decidi sozinho
 
 - **Manchete em serif.** É a mudança mais visível e a mais discutível. Em sans
   fica mais perto do que está no ar hoje; em serif fica mais perto do masthead.
 - **A coluna "nunca conferido".** Ela expõe que a base quase não foi conferida.
   Isso é verdade e eu acho que precisa aparecer, mas é decisão sua.
+- **O serif.** Instrument Serif a 400 é o que está carregado e é uma escolha
+  editorial defensável, mas nunca foi decidido por ninguém — se você preferir
+  outro, é trocar uma linha. O que NÃO pode continuar é `ui-serif`.
 - **A medida de 1280px.** É o número que resolveu o desconforto aqui, mas é
   ajustável: 1180 aperta mais, 1400 solta. O botão v1/v2 mostra os extremos.
 - **Bancada e editor fora da fase.** Se você quiser tudo de uma vez, o mockup

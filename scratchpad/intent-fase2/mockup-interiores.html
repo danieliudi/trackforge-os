@@ -2,6 +2,9 @@
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&family=Instrument+Serif:wght@400&display=swap" rel="stylesheet">
 <title>Fase 2 — interiores no híbrido Wire + Specimen</title>
 <style>
 /* ══════════════════════════════════════════════════════════════════
@@ -21,9 +24,18 @@
   --urgent-bg:#f6e4df; --urgent-line:#e2b4a8; --note-bg:#efe6d6;
   --ink:#1c1c1b; --mut:#5f6367; --faint:#7a7e82;
   --ok:#15803d; --warn:#8a4a10;
-  --sans:"Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
-  --serif:Georgia,"Times New Roman",serif;
-  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+  /* AS FONTES DO APP, não aproximações. O mockup anterior usava Georgia +
+     Helvetica Neue, que o app não carrega em lugar nenhum — comparar um
+     mockup nessas contra uma casca que roda em Geist já produz sozinho a
+     sensação de "não combinam". */
+  --sans:"Geist","Geist Fallback",system-ui,sans-serif;
+  --mono:"Geist Mono","Geist Mono Fallback",ui-monospace,monospace;
+  /* `--font-serif` NÃO EXISTE no globals.css: hoje `font-serif` cai em
+     `ui-serif`, o serif genérico da máquina — fonte diferente em cada
+     computador, nunca escolhida por ninguém. O Instrument Serif está
+     carregado no layout.tsx e nunca foi ligado, e só existe no peso 400
+     (o masthead pede 800, o que daria negrito sintético). */
+  --serif:"Instrument Serif",Georgia,serif;
 }
 [data-tema="escuro"]{
   --paper:#12110f; --band:#000; --band-ink:#f2efe6;
@@ -38,10 +50,10 @@ body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 var(--sans
 /* ── controle do mockup (não faz parte do app) ─────────────────── */
 .ctrl{position:fixed;right:10px;bottom:10px;z-index:99;background:#111;color:#eee;
   border:1px solid #333;padding:8px 10px;font:600 10px/1 var(--sans);letter-spacing:.06em;
-  text-transform:uppercase;display:flex;gap:6px;flex-wrap:wrap;align-items:center;max-width:640px}
+  text-transform:uppercase;display:flex;gap:6px;flex-wrap:wrap;align-items:center;max-width:none}
 .ctrl span{color:#888;margin-right:4px}
 .ctrl button{appearance:none;background:#222;color:#ddd;border:1px solid #444;
-  padding:6px 8px;font:600 10px var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+  padding:6px 8px;font:600 10px var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer;white-space:nowrap}
 .ctrl button[aria-pressed="true"]{background:#eee;color:#111;border-color:#eee}
 
 /* ── casca já implementada (Fase 1) — reproduzida para conferência ── */
@@ -195,98 +207,153 @@ body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 var(--sans
       não existe em lugar nenhum.
    2. ESCALA — piso de 11px. Nada de 8,5px numa tela de 1900px.
    ══════════════════════════════════════════════════════════════════ */
-[data-conforto="v2"]{ --medida:1280px; }
+[data-versao="v2"],[data-versao="v3"]{ --medida:1280px; }
 
 /* Uma borda esquerda e uma direita para a página inteira, casca inclusive. */
-[data-conforto="v2"] .mast,
-[data-conforto="v2"] .date,
-[data-conforto="v2"] .wire,
-[data-conforto="v2"] .tela > *{
+[data-versao="v2"],[data-versao="v3"] .mast,
+[data-versao="v2"],[data-versao="v3"] .date,
+[data-versao="v2"],[data-versao="v3"] .wire,
+[data-versao="v2"],[data-versao="v3"] .tela > *{
   padding-inline:max(24px, calc((100% - var(--medida)) / 2));
 }
-[data-conforto="v2"] .nota,
-[data-conforto="v2"] .vazio{
+[data-versao="v2"],[data-versao="v3"] .nota,
+[data-versao="v2"],[data-versao="v3"] .vazio{
   margin-inline:max(24px, calc((100% - var(--medida)) / 2));
   padding-inline:20px;
 }
 
 /* ── escala ── piso 11px, corpo 15,5px ─────────────────────────── */
-[data-conforto="v2"] .brand{ font-size:31px }
-[data-conforto="v2"] .edition{ font-size:11px }
-[data-conforto="v2"] .date{ font-size:11.5px; padding-block:6px }
-[data-conforto="v2"] .wire{ font-size:11.5px; padding-block:9px; gap:18px }
-[data-conforto="v2"] .plus{ width:19px; height:19px; font-size:13px }
+[data-versao="v2"],[data-versao="v3"] .brand{ font-size:31px }
+[data-versao="v2"],[data-versao="v3"] .edition{ font-size:11px }
+[data-versao="v2"],[data-versao="v3"] .date{ font-size:11.5px; padding-block:6px }
+[data-versao="v2"],[data-versao="v3"] .wire{ font-size:11.5px; padding-block:9px; gap:18px }
+[data-versao="v2"],[data-versao="v3"] .plus{ width:19px; height:19px; font-size:13px }
 
-[data-conforto="v2"] .proof{ font-size:11px; padding-top:18px }
-[data-conforto="v2"] .head{ padding-block:4px 18px }
-[data-conforto="v2"] .head h1{ font-size:41px }
-[data-conforto="v2"] .head p{ font-size:15.5px; margin-top:8px; max-width:60ch }
+[data-versao="v2"],[data-versao="v3"] .proof{ font-size:11px; padding-top:18px }
+[data-versao="v2"],[data-versao="v3"] .head{ padding-block:4px 18px }
+[data-versao="v2"],[data-versao="v3"] .head h1{ font-size:41px }
+[data-versao="v2"],[data-versao="v3"] .head p{ font-size:15.5px; margin-top:8px; max-width:60ch }
 
 /* A grade pinta `rule` no próprio fundo (é o que faz a linha de 1px entre as
    células). Com padding-inline esse fundo vazava para fora da medida e virava
    uma barra cinza solta nas duas pontas — some o padding, entra a largura. */
-[data-conforto="v2"] .grid{
+[data-versao="v2"],[data-versao="v3"] .grid{
   padding-inline:0; max-width:var(--medida); margin-inline:auto;
   border-inline:1px solid var(--rule);
 }
-[data-conforto="v2"] .cell{ padding:18px 22px; min-height:104px }
-[data-conforto="v2"] .cell .n{ font-size:11px }
-[data-conforto="v2"] .cell b{ font-size:37px; margin-top:7px }
-[data-conforto="v2"] .cell span{ font-size:12px; margin-top:7px }
+[data-versao="v2"],[data-versao="v3"] .cell{ padding:18px 22px; min-height:104px }
+[data-versao="v2"],[data-versao="v3"] .cell .n{ font-size:11px }
+[data-versao="v2"],[data-versao="v3"] .cell b{ font-size:37px; margin-top:7px }
+[data-versao="v2"],[data-versao="v3"] .cell span{ font-size:12px; margin-top:7px }
 
 /* Mesma correção da grade: quem pinta fundo não usa padding para respeitar a
    medida, senão o fundo vaza. A lista ganha largura própria e as linhas
    perdem o padding lateral — assim elas alinham EXATAMENTE com a manchete,
    numa borda esquerda só para a página inteira. */
-[data-conforto="v2"] .list{
+[data-versao="v2"],[data-versao="v3"] .list{
   padding-inline:0; max-width:var(--medida); margin-inline:auto;
 }
-[data-conforto="v2"] .row,
-[data-conforto="v2"] .fato,
-[data-conforto="v2"] .ext,
-[data-conforto="v2"] .var{ padding-inline:20px }
-[data-conforto="v2"] .ext.falhou{ padding-left:17px }
+[data-versao="v2"],[data-versao="v3"] .row,
+[data-versao="v2"],[data-versao="v3"] .fato,
+[data-versao="v2"],[data-versao="v3"] .ext,
+[data-versao="v2"],[data-versao="v3"] .var{ padding-inline:20px }
+[data-versao="v2"],[data-versao="v3"] .ext.falhou{ padding-left:17px }
 
-[data-conforto="v2"] .blk{ font-size:11px; padding-block:24px 10px }
-[data-conforto="v2"] .row{ padding-block:14px; grid-template-columns:40px 1fr auto }
-[data-conforto="v2"] .row .idx{ font-size:11px }
-[data-conforto="v2"] .row .tit{ font-size:15.5px }
-[data-conforto="v2"] .row .meta{ font-size:11.5px; margin-top:4px }
-[data-conforto="v2"] .row .dir{ font-size:11.5px }
-[data-conforto="v2"] .row .seta{ font-size:16px }
+[data-versao="v2"],[data-versao="v3"] .blk{ font-size:11px; padding-block:24px 10px }
+[data-versao="v2"],[data-versao="v3"] .row{ padding-block:14px; grid-template-columns:40px 1fr auto }
+[data-versao="v2"],[data-versao="v3"] .row .idx{ font-size:11px }
+[data-versao="v2"],[data-versao="v3"] .row .tit{ font-size:15.5px }
+[data-versao="v2"],[data-versao="v3"] .row .meta{ font-size:11.5px; margin-top:4px }
+[data-versao="v2"],[data-versao="v3"] .row .dir{ font-size:11.5px }
+[data-versao="v2"],[data-versao="v3"] .row .seta{ font-size:16px }
 
-[data-conforto="v2"] .fato{ padding-block:16px; grid-template-columns:126px 1fr 196px; gap:20px }
-[data-conforto="v2"] .fato .txt{ font-size:15.5px; max-width:64ch }
-[data-conforto="v2"] .fato .orig{ font-size:11.5px; margin-top:6px }
-[data-conforto="v2"] .nivel{ font-size:11.5px; padding-left:11px }
-[data-conforto="v2"] .nivel em{ font-size:10.5px; margin-top:4px }
-[data-conforto="v2"] .quando{ font-size:11.5px }
-[data-conforto="v2"] .quando em{ font-size:10.5px; margin-top:4px }
+[data-versao="v2"],[data-versao="v3"] .fato{ padding-block:16px; grid-template-columns:126px 1fr 196px; gap:20px }
+/* Em sans o rótulo do nível ocupa mais largura que em mono — "não verificado"
+   quebrava em duas linhas a 126px. */
+[data-versao="v3"] .fato{ grid-template-columns:152px 1fr 196px }
+[data-versao="v2"],[data-versao="v3"] .fato .txt{ font-size:15.5px; max-width:64ch }
+[data-versao="v2"],[data-versao="v3"] .fato .orig{ font-size:11.5px; margin-top:6px }
+[data-versao="v2"],[data-versao="v3"] .nivel{ font-size:11.5px; padding-left:11px }
+[data-versao="v2"],[data-versao="v3"] .nivel em{ font-size:10.5px; margin-top:4px }
+[data-versao="v2"],[data-versao="v3"] .quando{ font-size:11.5px }
+[data-versao="v2"],[data-versao="v3"] .quando em{ font-size:10.5px; margin-top:4px }
 
 /* 160px porque "sugestões · não virou peça" quebrava em três linhas a 104px.
    Duas linhas é o padrão da coluna de nível em Fatos — três é acidente. */
-[data-conforto="v2"] .ext{ padding-block:13px; font-size:14.5px; grid-template-columns:40px 160px 1fr auto auto }
-[data-conforto="v2"] .ext .tipo{ font-size:11.5px }
-[data-conforto="v2"] .ext .quando{ font-size:11.5px }
-[data-conforto="v2"] .ext .valor{ font-size:15px }
-[data-conforto="v2"] .ext.falhou{ padding-left:calc(max(24px, (100% - var(--medida)) / 2) - 3px) }
+[data-versao="v2"],[data-versao="v3"] .ext{ padding-block:13px; font-size:14.5px; grid-template-columns:40px 160px 1fr auto auto }
+[data-versao="v2"],[data-versao="v3"] .ext .tipo{ font-size:11.5px }
+[data-versao="v2"],[data-versao="v3"] .ext .quando{ font-size:11.5px }
+[data-versao="v2"],[data-versao="v3"] .ext .valor{ font-size:15px }
+[data-versao="v2"],[data-versao="v3"] .ext.falhou{ padding-left:calc(max(24px, (100% - var(--medida)) / 2) - 3px) }
 
-[data-conforto="v2"] .var{ padding-block:14px; grid-template-columns:40px 1fr 150px }
-[data-conforto="v2"] .var .nome{ font-size:14.5px }
-[data-conforto="v2"] .var .oq{ font-size:13.5px; margin-top:4px }
-[data-conforto="v2"] .var .est{ font-size:11.5px }
+[data-versao="v2"],[data-versao="v3"] .var{ padding-block:14px; grid-template-columns:40px 1fr 150px }
+[data-versao="v2"],[data-versao="v3"] .var .nome{ font-size:14.5px }
+[data-versao="v2"],[data-versao="v3"] .var .oq{ font-size:13.5px; margin-top:4px }
+[data-versao="v2"],[data-versao="v3"] .var .est{ font-size:11.5px }
 
-[data-conforto="v2"] .nota{ font-size:14px; padding-block:13px; margin-top:22px }
-[data-conforto="v2"] .vazio{ padding-block:34px; margin-block:24px }
-[data-conforto="v2"] .vazio .kick{ font-size:11px }
-[data-conforto="v2"] .vazio h3{ font-size:27px }
-[data-conforto="v2"] .vazio p{ font-size:15px }
-[data-conforto="v2"] .cta{ font-size:13.5px; padding:11px 16px; margin-top:16px }
+[data-versao="v2"],[data-versao="v3"] .nota{ font-size:14px; padding-block:13px; margin-top:22px }
+[data-versao="v2"],[data-versao="v3"] .vazio{ padding-block:34px; margin-block:24px }
+[data-versao="v2"],[data-versao="v3"] .vazio .kick{ font-size:11px }
+[data-versao="v2"],[data-versao="v3"] .vazio h3{ font-size:27px }
+[data-versao="v2"],[data-versao="v3"] .vazio p{ font-size:15px }
+[data-versao="v2"],[data-versao="v3"] .cta{ font-size:13.5px; padding:11px 16px; margin-top:16px }
+
+/* ══════════════════════════════════════════════════════════════════
+   v3 — DISCIPLINA DE PAPEL DA TIPOGRAFIA
+
+   O que produzia a sensação de "fontes que não combinam" era mono
+   fazendo NOVE trabalhos diferentes, seis deles com palavras humanas:
+   a linha de prova, o rótulo de bloco, o nível de proveniência, o
+   "nunca conferido", o tipo do custo e o estado da variável. Nenhum
+   deles é código nem número — são palavras, vestidas de código.
+
+   Pior: o MESMO papel visual — rótulo pequeno em caixa alta — saía em
+   mono em seis lugares e em sans no rótulo da célula. Duas fontes
+   fazendo o mesmo trabalho na mesma tela é o que o olho acusa antes
+   de a cabeça saber dizer o quê.
+
+   A regra, uma só:
+
+     SERIF  = manchete. Masthead, h1, manchete de vazio. Nada mais.
+     MONO   = o que a MÁQUINA escreveu ou o que se alinha em coluna:
+              id de fato, nome de variável, dinheiro em extrato, índice.
+     SANS   = todo o resto, inclusive TODO rótulo em caixa alta.
+
+   O número do KPI fica em sans e o dinheiro do extrato em mono de
+   propósito: um é figura de display, o outro é coluna que precisa
+   alinhar dígito com dígito. É a mesma regra, não uma exceção.
+   ══════════════════════════════════════════════════════════════════ */
+
+/* Rótulos que eram mono e são palavras — voltam para sans. */
+[data-versao="v3"] .proof,
+[data-versao="v3"] .blk,
+[data-versao="v3"] .nivel,
+[data-versao="v3"] .fato .quando,
+[data-versao="v3"] .ext .tipo,
+[data-versao="v3"] .var .est{
+  font-family:var(--sans);
+  letter-spacing:.07em;
+}
+[data-versao="v3"] .nivel{ font-weight:700 }
+[data-versao="v3"] .nivel em,
+[data-versao="v3"] .fato .quando em{ font-family:var(--sans); letter-spacing:.02em }
+
+/* A meta da linha é frase com um id no meio — a frase é sans, o id é mono. */
+[data-versao="v3"] .row .meta{ font-family:var(--sans); letter-spacing:.02em; text-transform:none }
+[data-versao="v3"] .row .meta .id{ font-family:var(--mono); text-transform:uppercase; letter-spacing:.04em }
+
+/* O masthead: Instrument Serif só tem 400. Pedir 800 dá negrito
+   sintético — a letra engorda por deformação, não por desenho, e é
+   uma das coisas que mais fazem uma fonte parecer estranha ao lado
+   das outras. Em display serif, o peso vem do tamanho. */
+[data-versao="v3"] .brand{ font-weight:400; font-size:34px; letter-spacing:-.02em }
+[data-versao="v3"] .head h1{ font-weight:400; letter-spacing:-.01em }
+[data-versao="v3"] .vazio h3{ font-weight:400 }
 .tela{display:none}
 .tela.on{display:block}
 </style>
 </head>
-<body data-tema="claro" data-conforto="v2">
+<body data-tema="claro" data-versao="v3">
 
 <div class="app">
   <!-- ══ casca: já no ar desde a Fase 1, aqui só para conferir o encaixe ══ -->
@@ -323,14 +390,14 @@ body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 var(--sans
     </div>
     <div class="blk"><span><span class="pt">•</span> Não enviados · n=2</span><span>pagos, ainda na bancada</span></div>
     <div class="list">
-      <a class="row" href="#"><span class="idx">01</span><span><span class="tit">Revisão da ANTT 5.998 — o que muda no descarte</span><span class="meta">sem artigo · carrossel, post de texto, legenda · resibag-3e9 · 07/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
-      <a class="row" href="#"><span class="idx">02</span><span><span class="tit">Custo real de um lote reprovado na fiscalização</span><span class="meta">sem artigo · post de texto, sequência de stories · resibag-3eb · 05/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
+      <a class="row" href="#"><span class="idx">01</span><span><span class="tit">Revisão da ANTT 5.998 — o que muda no descarte</span><span class="meta">sem artigo · carrossel, post de texto, legenda · <span class="id">resibag-3e9</span> · 07/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
+      <a class="row" href="#"><span class="idx">02</span><span><span class="tit">Custo real de um lote reprovado na fiscalização</span><span class="meta">sem artigo · post de texto, sequência de stories · <span class="id">resibag-3eb</span> · 05/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
     </div>
     <div class="blk"><span>Já na fila do CRM · n=3</span><span>aprovar acontece lá</span></div>
     <div class="list">
-      <a class="row" href="#"><span class="idx">03</span><span><span class="tit">Checklist de conformidade para embarcadores</span><span class="meta">sem artigo · carrossel, roteiro de reels · resibag-3ea · 06/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
-      <a class="row" href="#"><span class="idx">04</span><span><span class="tit">IBC reformado: o que o RAPP exige em 2026</span><span class="meta">sem artigo · carrossel · resibag-3ed · 03/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
-      <a class="row" href="#"><span class="idx">05</span><span><span class="tit">Três perguntas antes de assinar contrato de logística reversa</span><span class="meta">sem artigo · post de texto, legenda, roteiro de reels · resibag-3f0 · 31/08/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
+      <a class="row" href="#"><span class="idx">03</span><span><span class="tit">Checklist de conformidade para embarcadores</span><span class="meta">sem artigo · carrossel, roteiro de reels · <span class="id">resibag-3ea</span> · 06/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
+      <a class="row" href="#"><span class="idx">04</span><span><span class="tit">IBC reformado: o que o RAPP exige em 2026</span><span class="meta">sem artigo · carrossel · <span class="id">resibag-3ed</span> · 03/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
+      <a class="row" href="#"><span class="idx">05</span><span><span class="tit">Três perguntas antes de assinar contrato de logística reversa</span><span class="meta">sem artigo · post de texto, legenda, roteiro de reels · <span class="id">resibag-3f0</span> · 31/08/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
     </div>
   </section>
 
@@ -439,9 +506,10 @@ body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 var(--sans
   <button data-tela="t-fatos" aria-pressed="false">Fatos</button>
   <button data-tela="t-custos" aria-pressed="false">Custos</button>
   <button data-tela="t-instalacao" aria-pressed="false">Instalação</button>
-  <span style="margin-left:8px">conforto</span>
-  <button data-conforto="v1" aria-pressed="false">v1 · como estava</button>
-  <button data-conforto="v2" aria-pressed="true">v2 · medida + escala</button>
+  <span style="margin-left:8px">versão</span>
+  <button data-versao="v1" aria-pressed="false">v1 · original</button>
+  <button data-versao="v2" aria-pressed="false">v2 · medida + escala</button>
+  <button data-versao="v3" aria-pressed="true">v3 · + tipografia</button>
   <span style="margin-left:8px">tema</span>
   <button data-tema="claro" aria-pressed="true">Claro</button>
   <button data-tema="escuro" aria-pressed="false">Escuro</button>
@@ -463,10 +531,10 @@ document.querySelectorAll(".ctrl button[data-tela]").forEach((b) => {
     document.querySelectorAll(".wire a").forEach((a) => a.classList.toggle("on", a.dataset.nav === secao));
   };
 });
-document.querySelectorAll(".ctrl button[data-conforto]").forEach((b) => {
+document.querySelectorAll(".ctrl button[data-versao]").forEach((b) => {
   b.onclick = () => {
-    document.body.dataset.conforto = b.dataset.conforto;
-    marcar("data-conforto", b.dataset.conforto);
+    document.body.dataset.versao = b.dataset.versao;
+    marcar("data-versao", b.dataset.versao);
   };
 });
 document.querySelectorAll(".ctrl button[data-tema]").forEach((b) => {

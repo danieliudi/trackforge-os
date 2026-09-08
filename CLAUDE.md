@@ -276,6 +276,24 @@ qualquer tela nova:
 - **Piso de 11px** para rótulo e meta em tela de trabalho; corpo em 15px. Abaixo
   disso é decisão explícita, não descuido de tradução.
 
+**A pilha de tipos é decisão, não fallback — e hoje ela tem um buraco.**
+Conferido no app rodando em 08/09/2026: `globals.css` define `--font-sans`
+(Geist) e `--font-mono` (Geist Mono) e **não define `--font-serif`**. O
+`font-serif` do masthead cai em `ui-serif`, o serif genérico do sistema — fonte
+diferente em cada computador, que ninguém escolheu. Ao mesmo tempo o
+`layout.tsx` carrega Instrument Serif e nunca o liga a nada. Some a isso que o
+Instrument Serif só existe no peso 400 e o masthead pede `font-extrabold`:
+ligar sem baixar o peso daria negrito sintético. **Fica para a Fase 2 resolver**,
+e nenhuma tela nova deve usar `font-serif` até lá.
+
+**Fonte tem papel, e mono é o papel mais fácil de estragar.** Mono significa
+*o que a máquina escreveu ou o que alinha em coluna* — id, nome de variável,
+dinheiro em extrato, índice. Palavra humana em mono é palavra fantasiada de
+código, e quando o mesmo papel visual (rótulo pequeno em caixa alta) sai em
+mono num lugar e em sans no outro, o olho acusa antes de a cabeça saber dizer o
+quê. Foi o que o Daniel apontou no mockup da Fase 2 — "fontes que parecem não
+combinar" — com mono fazendo nove trabalhos, seis deles com palavras.
+
 **Contraste é gate, não gosto, e vale nos dois temas.** Texto de corpo ≥ 4,5:1
 sobre o fundo; rótulo pequeno e ornamento ≥ 3:1. Meça sobre o app de verdade,
 não sobre o hex isolado: **declare o par em `scripts/qa/contraste.mjs` e rode
