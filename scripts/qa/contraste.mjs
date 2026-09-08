@@ -61,8 +61,8 @@ const casca = ({ secaoAtiva = true } = {}) => [
   { nome: "dateline · botão de tema", piso: MIUDO, onde: (p) => p.locator("header + div button").last() },
   // O sinal é filho DIRETO da faixa; a seção "Situação" mora dentro de um span.
   // Sem o `>` os dois casam e a medição vira loteria — foi um dos três erros.
-  { nome: "faixa · ponto do sinal", piso: MIUDO, onde: (p) => p.locator('nav > a[href="/"] > span[aria-hidden="true"]') },
-  { nome: "faixa · frase do sinal", piso: CORPO, onde: (p) => p.locator('nav > a[href="/"] > span:not([aria-hidden])') },
+  { nome: "faixa · ponto do sinal", piso: MIUDO, onde: (p) => p.locator('nav > div > a[href="/"] > span[aria-hidden="true"]') },
+  { nome: "faixa · frase do sinal", piso: CORPO, onde: (p) => p.locator('nav > div > a[href="/"] > span:not([aria-hidden])') },
   /**
    * `/artigo` e `/esteira` NÃO estão no menu, então nelas nenhuma seção fica
    * marcada e as cinco ficam inativas. A contagem declarada pegou isso na
@@ -85,15 +85,21 @@ const casca = ({ secaoAtiva = true } = {}) => [
  * a tela. A frase é CORPO — ela diz o que a tela faz e o que ela não faz.
  */
 const CABECALHO = (titulo) => [
-  { nome: "cabeçalho · rótulo da seção", piso: MIUDO, onde: (p) => p.locator("main span.uppercase.text-mut").first() },
+  { nome: "cabeçalho · rótulo da seção", piso: MIUDO, onde: (p) => p.locator("main div.font-mono > span").first() },
   { nome: "cabeçalho · título", piso: CORPO, onde: (p) => p.getByRole("heading", { name: titulo }) },
-  { nome: "cabeçalho · frase da tela", piso: CORPO, onde: (p) => p.locator("main p.text-\\[13px\\]").first() },
+  { nome: "cabeçalho · frase da tela", piso: CORPO, onde: (p) => p.locator("main p.max-w-\\[60ch\\]") },
 ];
 
 /** Os quatro cartões de número que Peças, Fatos e Custos compartilham. */
 const KPIS = [
-  { nome: "kpi · valor", piso: CORPO, quantos: 4, onde: (p) => p.locator("main span.text-\\[28px\\]") },
-  { nome: "kpi · legenda", piso: MIUDO, quantos: 4, onde: (p) => p.locator("main span.text-xs") },
+  { nome: "célula · número", piso: MIUDO, quantos: 4, onde: (p) => p.locator("main .grid > div > span.font-mono") },
+  { nome: "célula · valor", piso: CORPO, quantos: 4, onde: (p) => p.locator("main .grid > div > b") },
+  { nome: "célula · rótulo", piso: MIUDO, quantos: 4, onde: (p) => p.locator("main .grid > div > span:last-child") },
+];
+
+/** Só as telas que têm bloco. Custos ainda não foi reorganizada em blocos. */
+const BLOCO = [
+  { nome: "cabeçalho de bloco", piso: MIUDO, onde: (p) => p.locator("main div.font-semibold.uppercase").first() },
 ];
 
 const TELAS = [
@@ -147,8 +153,8 @@ const TELAS = [
       ],
       fila: [
         { nome: "glifo · a manchete", piso: CORPO, onde: (p) => p.locator("main p.leading-\\[0\\.82\\]") },
-        { nome: "legenda · o que o glifo conta", piso: CORPO, onde: (p) => p.locator("main p.max-w-\\[62ch\\] > b") },
-        { nome: "legenda · complemento", piso: CORPO, onde: (p) => p.locator("main p.max-w-\\[62ch\\]") },
+        { nome: "legenda · o que o glifo conta", piso: CORPO, onde: (p) => p.locator("main p.leading-snug > b") },
+        { nome: "legenda · complemento", piso: CORPO, onde: (p) => p.locator("main p.leading-snug").first() },
         { nome: "lista · índice", piso: MIUDO, quantos: 3, onde: (p) => p.locator("main ul li span.font-mono") },
         { nome: "lista · título do item", piso: CORPO, quantos: 3, onde: (p) => p.locator("main ul li .truncate") },
         { nome: "lista · meta do item", piso: MIUDO, quantos: 3, onde: (p) => p.locator("main ul li .truncate + span") },
@@ -160,7 +166,7 @@ const TELAS = [
   {
     rota: "/esteira/pecas",
     nome: "Peças",
-    alvos: [...casca(), ...CABECALHO("O que já foi produzido"), ...KPIS],
+    alvos: [...casca(), ...CABECALHO("O que já foi produzido"), ...KPIS, ...BLOCO],
   },
 
   {
@@ -169,27 +175,23 @@ const TELAS = [
     alvos: [
       ...casca(),
       ...CABECALHO("O que a ferramenta pode afirmar"),
-      { nome: "kpi · valor comum", piso: CORPO, quantos: 3, onde: (p) => p.locator("main div:not(.bg-acc) > span.text-\\[28px\\]") },
+      ...KPIS,
+      ...BLOCO,
       /**
-       * O CARTÃO URGENTE É O ALVO MAIS CARO DESTA SUÍTE.
-       *
-       * Ele carregava `bg-surface` (do `panelClass`) e `bg-acc` na mesma lista
-       * de classes, e quem vence é a ordem do CSS gerado, não a da string:
-       * `bg-surface` ganhava, o cartão nunca ficava laranja. No claro passava
-       * despercebido — quase-preto sobre branco é legível. No escuro era
-       * `#1c1c1b` sobre `#201f1d`: 1,04:1, o número mais importante da tela
-       * apagado. Nenhum alvo declarado cobria essa célula até 07/09/2026.
+       * O CARTÃO URGENTE ERA O ALVO MAIS CARO DESTA SUÍTE, e deixou de existir
+       * na Fase 2: virou célula invertida como a da home. O defeito que ele
+       * escondia — `bg-surface` e `bg-acc` na mesma lista de classes, 1,04:1 no
+       * escuro — não pode voltar, e quem vigia isso agora é o detector de
+       * colisão do `rotas.mjs`.
        */
-      { nome: "kpi urgente · valor", piso: CORPO, onde: (p) => p.locator("main .bg-acc span.text-\\[28px\\]") },
-      { nome: "kpi urgente · rótulo", piso: MIUDO, onde: (p) => p.locator("main .bg-acc span.uppercase") },
-      { nome: "kpi urgente · legenda", piso: MIUDO, onde: (p) => p.locator("main .bg-acc span.text-xs") },
       { nome: "fato · o texto da afirmação", piso: CORPO, onde: (p) => p.locator("main p.leading-relaxed").first() },
-      // Os selos de proveniência decidem se um fato pode virar número numa peça
-      // (seção 2). Ilegível aqui é a pessoa aprovando o que não devia.
-      { nome: "selo · não verificado", piso: MIUDO, onde: (p) => p.getByText("não verificado", { exact: true }).first() },
-      { nome: "selo · primária", piso: MIUDO, onde: (p) => p.getByText("primária", { exact: true }).first() },
-      { nome: "selo · secundária", piso: MIUDO, onde: (p) => p.getByText("secundária", { exact: true }).first() },
-      { nome: "fato · id e origem", piso: MIUDO, onde: (p) => p.locator("main p.leading-relaxed + span, main span.text-faint").first() },
+      { nome: "fato · id e origem", piso: MIUDO, onde: (p) => p.locator("main span.font-mono.text-\\[11\\.5px\\]").first() },
+      // O nível decide se o fato vira número numa peça (seção 2): é lido antes
+      // da afirmação, e cada nível tem cor própria.
+      { nome: "nível · o rótulo", piso: MIUDO, onde: (p) => p.locator("main span.border-l-\\[3px\\]").first() },
+      { nome: "nível · a nota", piso: MIUDO, onde: (p) => p.locator("main span.border-l-\\[3px\\] > em").first() },
+      { nome: "conferência · estado", piso: CORPO, onde: (p) => p.locator("main .grid-cols-\\[152px_1fr_196px\\] > span:last-child").first() },
+      { nome: "conferência · revalidação", piso: MIUDO, onde: (p) => p.locator("main .grid-cols-\\[152px_1fr_196px\\] > span:last-child > em").first() },
     ],
   },
 
@@ -202,7 +204,15 @@ const TELAS = [
   {
     rota: "/esteira/instalacao",
     nome: "Instalação",
-    alvos: [...casca(), ...CABECALHO("O que está ligado aqui")],
+    alvos: [
+      ...casca(),
+      ...CABECALHO("O que está ligado aqui"),
+      ...KPIS,
+      ...BLOCO,
+      { nome: "variável · nome", piso: CORPO, onde: (p) => p.locator("main span.font-mono.text-\\[14\\.5px\\]").first() },
+      { nome: "variável · o que é", piso: CORPO, onde: (p) => p.locator("main span.text-\\[13\\.5px\\]").first() },
+      { nome: "variável · estado", piso: MIUDO, onde: (p) => p.locator('main span[data-status]').first() },
+    ],
   },
 
   {

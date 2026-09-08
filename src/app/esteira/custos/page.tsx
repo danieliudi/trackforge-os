@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { useSyncExternalStore } from "react";
 
 import { EsteiraShell, ShellPage } from "@/components/app/EsteiraShell";
-import { KpiCard } from "@/components/dashboard/KpiCard";
+import { BlockHead, CellGrid, PageHead, Sheet } from "@/components/app/Interior";
 import {
   costKindLabels,
   formatCost,
@@ -14,7 +14,6 @@ import {
   summarizeMonth,
   type CostKind,
 } from "@/lib/costLog";
-import { labelClass, metaClass, panelClass } from "@/lib/ui";
 
 const MONTHS = [
   "janeiro", "fevereiro", "março", "abril", "maio", "junho",
@@ -36,125 +35,113 @@ export default function CustosPage() {
   const allCost = formatCost(totalUsd);
   const search = formatCost(summary.searchUsd);
   const average = formatCost(summary.averagePostUsd);
-  const maxKindUsd = Math.max(...summary.byKind.map((row) => row.usd), 0);
   const monthLabel = `${MONTHS[now.getMonth()]}/${now.getFullYear()}`;
 
   return (
     <EsteiraShell>
       <ShellPage>
-        <div className="flex flex-col gap-0.5">
-          <span className={labelClass}>Custos</span>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">
-            O que a API cobrou
-          </h1>
-          <p className="text-[13px] text-mut">
-            Histórico local deste navegador · {monthLabel}
-          </p>
-        </div>
+        <PageHead secao="Custos" titulo="O que a API cobrou" aoLado={monthLabel}>
+          Histórico local deste navegador. Não sai daqui, e não existe cobrança
+          que não esteja nesta lista.
+        </PageHead>
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <KpiCard
-            title="Neste mês"
-            value={monthCost.primary}
-            subtitle={
-              summary.count === 0
-                ? "nenhuma geração"
-                : `${summary.count} ${summary.count === 1 ? "geração" : "gerações"}`
-            }
-          />
-          <KpiCard
-            title="Desde o início"
-            value={allCost.primary}
-            subtitle="medidor local"
-          />
-          <KpiCard
-            title="Busca web"
-            value={search.primary}
-            subtitle={`n=${summary.searchCount}`}
-          />
-          <KpiCard
-            title="Média/post"
-            value={summary.averagePostUsd > 0 ? average.primary : "—"}
-            subtitle="só carrossel/apresentação"
-          />
-        </section>
+        <CellGrid
+          celulas={[
+            {
+              n: "01",
+              valor: monthCost.primary,
+              rotulo:
+                summary.count === 0
+                  ? "neste mês · nenhuma geração"
+                  : `neste mês · ${summary.count} ${summary.count === 1 ? "geração" : "gerações"}`,
+              // O mês corrente é o que está sendo lido; a inversão espelha isso.
+              destaque: true,
+            },
+            { n: "02", valor: allCost.primary, rotulo: "desde o início" },
+            { n: "03", valor: search.primary, rotulo: `busca web · n=${summary.searchCount}` },
+            {
+              n: "04",
+              valor: summary.averagePostUsd > 0 ? average.primary : "—",
+              rotulo: "média/post",
+            },
+          ]}
+        />
 
         {summary.count > 0 ? (
-          <div className={clsx(panelClass, "flex flex-col gap-3 px-4 py-3.5")}>
-            <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <span className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-ok" aria-hidden />
-                <span className={labelClass}>Por tipo neste mês</span>
-              </span>
-              <span className={metaClass}>
-                busca web {search.primary} · n={summary.searchCount}
-              </span>
-            </div>
-            <div className="flex flex-col gap-2">
-              {summary.byKind.map((row) => (
-                <div key={row.kind} className="flex flex-col gap-1">
-                  <div className="flex items-baseline justify-between gap-2 text-[12.5px]">
-                    <span className="text-ink2">
-                      {costKindLabels[row.kind]}{" "}
-                      <span className="font-mono text-[10px] tabular-nums text-faint">
-                        n={row.count}
-                      </span>
-                    </span>
-                    <span className="font-mono text-[11px] tabular-nums text-ink">
-                      {formatCost(row.usd).primary}
-                    </span>
-                  </div>
-                  <div className="h-1.5 overflow-hidden rounded-full bg-surface2">
-                    <div
-                      className="h-full rounded-full bg-acc"
-                      style={{
-                        width: `${maxKindUsd > 0 ? Math.round((row.usd / maxKindUsd) * 100) : 0}%`,
-                      }}
-                    />
-                  </div>
+          <>
+            <BlockHead nota={`busca web ${search.primary} · n=${summary.searchCount}`}>
+              Por tipo, neste mês
+            </BlockHead>
+            <Sheet>
+              {summary.byKind.map((row, i) => (
+                <div
+                  key={row.kind}
+                  className="grid grid-cols-[40px_160px_1fr_auto] items-baseline gap-3 border-b border-dotted border-rule px-6 py-3 last:border-b-0"
+                >
+                  <span className="font-mono text-[11px] text-mut">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  {/* O TIPO é palavra, então sans. O dinheiro é coluna que
+                      alinha dígito com dígito, então mono (seção 4). */}
+                  <span className="text-[11.5px] font-semibold uppercase tracking-[0.07em] text-mut">
+                    {costKindLabels[row.kind]}
+                  </span>
+                  <span className="text-[14.5px] text-ink">
+                    {row.count} {row.count === 1 ? "geração" : "gerações"}
+                  </span>
+                  <span className="font-mono text-[15px] tabular-nums text-ink">
+                    {formatCost(row.usd).primary}
+                  </span>
                 </div>
               ))}
-            </div>
-          </div>
+            </Sheet>
+          </>
         ) : null}
 
         <div className="flex flex-col gap-2">
-          <span className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-acc" aria-hidden />
-            <span className={labelClass}>Extrato · n={entries.length}</span>
-          </span>
+          <BlockHead nota="o que falhou continua na conta">
+            Extrato · n={entries.length}
+          </BlockHead>
 
           {entries.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-line px-3.5 py-3 text-[12.5px] text-mut">
+            <p className="border-2 border-dashed border-rule px-4 py-6 text-center text-[15px] text-mut">
               Nada gerado ainda neste navegador. O histórico é local — não sai daqui.
             </p>
           ) : (
-            <div className={clsx(panelClass, "overflow-hidden")}>
-              {entries.map((entry) => (
+            <Sheet>
+              {entries.map((entry, i) => (
                 <div
                   key={entry.id}
-                  className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 border-b border-line2 px-4 py-2.5 last:border-b-0"
+                  className={clsx(
+                    "grid grid-cols-[40px_160px_1fr_auto_auto] items-baseline gap-3 border-b border-dotted border-rule py-3 last:border-b-0",
+                    // Geração cobrada que não virou peça: a marca é BARRA, não
+                    // letra. `urgent` sobre a célula dá 4,26:1 — passa como
+                    // ornamento e reprova como corpo (medido no mockup). Mesma
+                    // decisão do sinal da faixa: a cor vira preenchimento.
+                    // `border-l-solid` explícito: sem ele a barra herda o pontilhado da
+                    // borda de baixo da linha e vira tracinho, não marca.
+                    entry.failed
+                      ? "border-l-[3px] border-l-solid border-l-urgent pl-[21px] pr-6"
+                      : "px-6",
+                  )}
                 >
-                  <span className="font-mono text-[10px] uppercase tracking-wide text-faint">
+                  <span className="font-mono text-[11px] text-mut">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="text-[11.5px] font-semibold uppercase leading-[1.35] tracking-[0.07em] text-mut">
                     {costKindLabels[entry.kind as CostKind] ?? entry.kind}
+                    {entry.failed ? " · não virou peça" : ""}
                   </span>
-                  <span className="min-w-0 flex-1 truncate text-[12.5px] text-ink2">
-                    {entry.title}
-                  </span>
-                  {entry.failed ? (
-                    <span className="font-mono text-[9.5px] uppercase text-warn">
-                      cobrada, sem resultado
-                    </span>
-                  ) : null}
-                  <span className="font-mono text-[10px] tabular-nums text-faint">
+                  <span className="min-w-0 truncate text-[14.5px] text-ink">{entry.title}</span>
+                  <span className="font-mono text-[11.5px] tabular-nums text-mut">
                     {new Date(entry.at).toLocaleDateString("pt-BR")}
                   </span>
-                  <span className="w-20 text-right font-mono text-[11px] tabular-nums text-ink2">
+                  <span className="w-24 text-right font-mono text-[15px] tabular-nums text-ink">
                     {formatCost(entry.usd).primary}
                   </span>
                 </div>
               ))}
-            </div>
+            </Sheet>
           )}
         </div>
       </ShellPage>

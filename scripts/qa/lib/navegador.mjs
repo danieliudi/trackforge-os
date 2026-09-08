@@ -110,6 +110,20 @@ export async function novaPagina(navegador, opcoes = {}) {
     front = "resibag",
     producoes = [],
     publish = { configured: false, pending: [] },
+    /**
+     * A tela de Instalação lista o que a rota devolve. Com a resposta genérica
+     * (`integrations: []`) ela renderiza zero linhas e os alvos de contraste
+     * dela não têm o que medir — cobertura que evapora em silêncio. O padrão
+     * traz uma faltando de propósito: é o estado que a tela existe para avisar.
+     */
+    instalacao = {
+      integrations: [
+        { id: "signals", label: "Sinais de mercado", env: ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"], configured: true },
+        { id: "crm_publish", label: "Fila de aprovação (CRM)", env: ["SUPABASE_URL", "CRM_AGENT_KEY"], configured: true },
+        { id: "imagens", label: "Busca de imagem", env: ["UNSPLASH_ACCESS_KEY"], configured: true },
+        { id: "senha", label: "Senha na frente do app", env: ["APP_PASSWORD"], configured: false },
+      ],
+    },
     localStorage: extra = {},
   } = opcoes;
 
@@ -145,6 +159,9 @@ export async function novaPagina(navegador, opcoes = {}) {
   );
   await pagina.route("**/api/publish**", (r) =>
     r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(publish) }),
+  );
+  await pagina.route("**/api/instalacao**", (r) =>
+    r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify(instalacao) }),
   );
 
   /**

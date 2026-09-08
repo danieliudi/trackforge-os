@@ -33,7 +33,7 @@ import {
   subscribeTheme,
   themeLabel,
 } from "@/lib/theme";
-import { focusRing } from "@/lib/ui";
+import { focusRing, medidaClass } from "@/lib/ui";
 
 /**
  * A casca do app: masthead de jornal em cima, a janela inteira embaixo.
@@ -145,8 +145,8 @@ export function EsteiraShell({
   return (
     <div className="flex h-screen flex-col bg-paper">
       {/* ══ MASTHEAD ══ marca serif + edição, regra grossa embaixo */}
-      <header className="shrink-0 border-b-[3px] border-ink bg-paper px-5 pb-1.5 pt-2.5">
-        <div className="flex flex-wrap items-end justify-between gap-x-4 gap-y-1">
+      <header className="shrink-0 border-b-[3px] border-ink bg-paper pb-1.5 pt-2.5">
+        <div className={clsx(medidaClass, "flex flex-wrap items-end justify-between gap-x-4 gap-y-1")}>
           <Link
             href="/"
             className={clsx(
@@ -187,13 +187,14 @@ export function EsteiraShell({
       </header>
 
       {/* ══ DATELINE ══ onde/quando, e os controles que não são navegação */}
-      <div className="flex shrink-0 flex-wrap items-center justify-between gap-x-4 gap-y-1 border-b border-rule bg-paper px-5 py-1">
-        <span className="text-[10px] font-medium text-mut">
+      <div className="shrink-0 border-b border-rule bg-paper py-1">
+       <div className={clsx(medidaClass, "flex flex-wrap items-center justify-between gap-x-4 gap-y-1")}>
+        <span className="text-[11px] font-medium text-mut">
           São Paulo · {MESES[agora.getMonth()]} {agora.getFullYear()}
         </span>
         <span className="flex items-center gap-3">
           {aside}
-          <span className="font-mono text-[10px] text-mut">
+          <span className="font-mono text-[11px] text-mut">
             mês · {formatCost(month).primary}
           </span>
           {/* Um botão, três estados. Três botões custariam espaço permanente por
@@ -203,18 +204,23 @@ export function EsteiraShell({
             onClick={() => setTheme(nextTheme[theme])}
             aria-label={`Tema: ${themeLabel[theme]} — clique para ${themeLabel[nextTheme[theme]]}`}
             className={clsx(
-              "flex items-center gap-1 text-[10px] font-medium text-mut transition hover:text-ink",
+              "flex items-center gap-1 text-[11px] font-medium text-mut transition hover:text-ink",
               focusRing,
             )}
           >
-            <ThemeIcon size={11} aria-hidden="true" />
+            <ThemeIcon size={12} aria-hidden="true" />
             <span>Tema · {themeLabel[theme]}</span>
           </button>
         </span>
+       </div>
       </div>
 
       {/* ══ FAIXA ══ preta nos dois temas; LIVE é status, não rota */}
-      <nav className="flex shrink-0 flex-wrap items-center gap-x-3.5 gap-y-1 bg-band px-5 py-1.5 text-[10px] font-bold uppercase tracking-[0.06em] text-band-ink">
+      {/* O fundo preto SANGRA de ponta a ponta; o conteúdo se alinha à medida.
+          É como a tinta do cabeçalho de um jornal atravessa a folha enquanto a
+          mancha de texto respeita a margem. */}
+      <nav className="shrink-0 bg-band py-2 text-[11.5px] font-bold uppercase tracking-[0.06em] text-band-ink">
+       <div className={clsx(medidaClass, "flex flex-wrap items-center gap-x-4.5 gap-y-1")}>
         {/* O ponto diz o que espera VOCÊ, com a mesma regra do glifo da home
             (`esperandoDecisao`). Vermelho só quando há algo: cor de urgência sem
             urgência treina a pessoa a ignorar a cor.
@@ -276,7 +282,7 @@ export function EsteiraShell({
                   href="/esteira"
                   aria-label="Produzir peça nova na bancada"
                   className={clsx(
-                    "grid h-4 w-4 place-items-center rounded-full bg-band-ink text-[11px] font-extrabold leading-none text-band",
+                    "grid h-[18px] w-[18px] place-items-center rounded-full bg-band-ink text-[13px] font-extrabold leading-none text-band",
                     focusRing,
                   )}
                 >
@@ -286,6 +292,7 @@ export function EsteiraShell({
             </span>
           );
         })}
+       </div>
       </nav>
 
       <main className="min-h-0 flex-1">{children}</main>
@@ -293,13 +300,19 @@ export function EsteiraShell({
   );
 }
 
-/** Container das telas de leitura — mesma largura do painel Situação. */
+/**
+ * Container das telas de leitura.
+ *
+ * Usa a MESMA `medidaClass` da casca: o masthead, a dateline, a faixa e o corpo
+ * compartilham uma borda esquerda e uma direita. Antes daqui eram duas larguras
+ * diferentes — a casca em `px-5` de ponta a ponta e o corpo num `max-w-1440`
+ * centrado —, e o desalinhamento entre as duas era parte do "está muito largo"
+ * que o Daniel apontou em 08/09/2026.
+ */
 export function ShellPage({ children }: { children: ReactNode }) {
   return (
     <div className="h-full overflow-y-auto">
-      <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-4 px-6 py-6 md:px-8">
-        {children}
-      </div>
+      <div className={clsx(medidaClass, "flex flex-col gap-4 py-6")}>{children}</div>
     </div>
   );
 }

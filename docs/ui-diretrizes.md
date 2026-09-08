@@ -2,39 +2,29 @@
 
 **Aprovado em 04/09/2026** (mockup `scratchpad/painel-mockup.html` + painel Situação em `/`).
 
-> ## ⚠ Este documento está em transição desde 07/09/2026
+> ## ⚠ O escopo deste documento encolheu em 08/09/2026
 >
-> O Daniel travou uma direção nova — **híbrido Wire Service + Type Specimen
-> Desk** (`scratchpad/intent-fase1/DESIGN-hibrido-locked.md`, mock
-> `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html`). Ela já está
-> implementada na **casca (`EsteiraShell`) e na home Situação (`/`)**: masthead
-> serif, `EDIÇÃO · frente`, dateline, faixa preta, glifo da prioridade e grade
-> de células. Os tokens `paper` / `band` / `rule` / `cell` / `urgent` vivem em
-> `src/app/globals.css` junto dos Clockwork.
+> A direção da plataforma é o **híbrido Wire Service + Type Specimen Desk**
+> (`scratchpad/intent-fase1/DESIGN-hibrido-locked.md`). Ela já governa:
 >
-> **O que ainda vale deste arquivo:** tudo da seção 2 em diante governa os
-> INTERIORES — Peças, Fatos, Custos, Instalação, Artigo, Editor —, que nesta
-> fase só herdam a casca e mantêm o layout Clockwork. A regra de nunca escrever
-> hex em arquivo de tela, os tokens de classe, o botão e a casca única continuam
-> valendo sem exceção.
+> - a **casca** (`EsteiraShell`) e a **home** — Fase 1, 07/09/2026;
+> - os **interiores de leitura** — Peças, Fatos, Custos, Instalação —, com
+>   medida de página, escala de tipo e papel de fonte definidos em
+>   `scratchpad/intent-fase2/DESIGN-fase2-locked.md`, aprovado em 08/09/2026.
 >
-> **O que mudou:** o `canvas` deixou de ser o cinza neutro `#f8f8f8` e passou a
-> ser o papel quente `#f3efe6`, para as telas de dentro não ficarem em cinza frio
-> debaixo de um masthead em papel. Foi a única mudança de token que atravessou a
-> fronteira da fase.
+> **O que ainda vale deste arquivo:** as superfícies de **trabalho** — a bancada
+> (`/esteira`, `/artigo`) e o editor de slides. São três colunas e canvas, não
+> telas de leitura, e merecem uma fase própria. Até lá seguem o Clockwork.
 >
-> Quando os interiores forem redesenhados, este documento é reescrito ou some.
-> Até lá, **os dois valem, cada um no seu escopo** — e é isso que evita a
-> plataforma ter dois visuais sem ninguém ter decidido.
+> A regra de nunca escrever hex em arquivo de tela, os tokens de classe, o
+> botão e a casca única continuam valendo sem exceção, nos dois escopos.
+>
+> Quando a bancada e o editor forem redesenhados, este documento some.
 
-Esta era a identidade visual da plataforma inteira até 07/09/2026, e segue sendo
-a dos interiores. Tela nova de leitura, redesign de interior e qualquer mudança
-de aparência fora da casca seguem isto. Não invente um terceiro visual.
-
-A referência canônica de proporção e densidade é o painel de Situação. A
-bancada (`/esteira`) e o editor de slides continuam sendo superfícies de
-*trabalho* (três colunas / canvas), mas herdam os mesmos tokens, tipografia,
-casca e estados vazios.
+Esta foi a identidade visual da plataforma inteira até 07/09/2026, e segue
+sendo a das superfícies de trabalho: a bancada de três colunas e o editor de
+slides. Elas herdam os mesmos tokens, tipografia, casca e estados vazios — o
+que muda é o layout interno, que continua Clockwork até a fase delas.
 
 ---
 

@@ -15,6 +15,23 @@ export const focusRing =
   "outline-none focus-visible:ring-2 focus-visible:ring-acc focus-visible:ring-offset-2 focus-visible:ring-offset-canvas";
 
 /**
+ * A MEDIDA da página — a coluna onde a leitura mora.
+ *
+ * POR QUE EXISTE: num monitor de 1900px, conteúdo de ponta a ponta faz o olho
+ * viajar quase dois mil pixels por linha. O Daniel descreveu isso como "está
+ * muito largo, não sei explicar" (08/09/2026), e a causa era o mock da Fase 1
+ * ter sido desenhado num artboard de ~468px e traduzido em pixel em vez de
+ * proporção (CLAUDE.md seção 4).
+ *
+ * A CASCA USA A MESMA MEDIDA. Faixa preta, dateline e masthead continuam
+ * sangrando de ponta a ponta — é o fundo deles que atravessa —, mas o conteúdo
+ * de cada um se alinha a esta coluna. Uma borda esquerda e uma direita para a
+ * página inteira, que é como um jornal se comporta: a mancha tem margem, a
+ * tinta do cabeçalho não.
+ */
+export const medidaClass = "mx-auto w-full max-w-[1280px] px-6";
+
+/**
  * A FORMA do rótulo, sem cor.
  *
  * Existe separada porque `labelClass` embute `text-mut`, e componente com

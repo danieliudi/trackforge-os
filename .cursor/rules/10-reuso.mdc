@@ -21,8 +21,9 @@ aquilo. Quanto maior, mais caro é divergir.
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 — `IconButton` exige `label` |
 | Casca do app (barra, frente ativa, seções) | `src/components/app/EsteiraShell.tsx` | toda tela da esteira |
 | KPI / gráfico / lista do padrão Situação | `src/components/dashboard/*` | painel e telas na densidade aprovada |
-| Diretrizes visuais dos INTERIORES | `docs/ui-diretrizes.md` | leia antes de tela nova ou redesign |
 | Direção da casca e da home | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` | híbrido Wire + Specimen, travado 07/09/2026 |
+| Direção dos interiores de leitura | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` | aprovada 08/09/2026 |
+| Diretrizes das superfícies de TRABALHO | `docs/ui-diretrizes.md` | bancada e editor, até a fase delas |
 | Frente ativa (store global) | `src/lib/front.ts`, via `useFront()` | global de propósito |
 | Renderizar peça por formato + `toPlainText` | `src/components/app/OutputPieces.tsx` | 2 telas |
 | Recibo de custo | `src/components/app/CostReceipt.tsx` | 3 telas |

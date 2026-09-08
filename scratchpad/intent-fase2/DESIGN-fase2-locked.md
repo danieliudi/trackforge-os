@@ -1,6 +1,13 @@
 # Fase 2 — interiores no híbrido Wire + Specimen
 
-<!-- PROPOSTA, não travada. Aguardando o Daniel. -->
+<!-- TRAVADO em 08/09/2026 pelo Daniel: "aprovado mockups". -->
+
+> **Aprovado.** As quatro telas — Peças, Fatos, Custos, Instalação — seguem o
+> que está no mockup na versão **v3** (medida de 1280px, piso de tipo, papel de
+> fonte). As três perguntas abertas abaixo foram aprovadas junto: manchete em
+> serif, coluna "nunca conferido" visível, e a medida de 1280px.
+>
+> A bancada e o editor continuam FORA — o escopo aprovado é o desta página.
 
 Mockup clicável: `scratchpad/intent-fase2/mockup-interiores.html`
 (5 telas × 2 temas, controle no canto inferior direito).
@@ -147,7 +154,7 @@ mesma regra, não exceção.
 
 Contraste refeito: **136 medições, 5 telas × 2 temas, todas acima do piso.**
 
-## O que eu NÃO decidi sozinho
+## O que ficou decidido junto com a aprovação
 
 - **Manchete em serif.** É a mudança mais visível e a mais discutível. Em sans
   fica mais perto do que está no ar hoje; em serif fica mais perto do masthead.

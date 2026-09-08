@@ -24,7 +24,7 @@ import {
   getProductionsSnapshot,
   subscribeProductions,
 } from "@/lib/produced";
-import { focusRing } from "@/lib/ui";
+import { focusRing, medidaClass } from "@/lib/ui";
 
 /**
  * Porta de entrada: a situação deste navegador, como folha de espécime.
@@ -196,12 +196,21 @@ export default function SituacaoPage() {
   const glifo = nadaPedindo ? "0" : (cell?.valor ?? "0");
   // Contagem cabe em corpo 11vw; dinheiro formatado tem 7+ caracteres e precisa
   // encolher, senão vaza a linha.
+  /**
+   * Os tetos caíram quando o corpo ganhou a medida de 1280px (08/09/2026).
+   *
+   * O `11vw` foi calibrado quando o conteúdo sangrava de ponta a ponta: 208px
+   * era 11% de uma tela de 1900. Dentro de uma coluna de 1280 o mesmo 208px
+   * vira 16% e o número atropela a coluna. O que atravessa é a PROPORÇÃO —
+   * 150px é 11,7% de 1280, a mesma presença de antes. Terceira vez que este
+   * repo tropeça em traduzir pixel no lugar de proporção (CLAUDE.md seção 4).
+   */
   const glifoClasse =
     glifo.length <= 2
-      ? "text-[clamp(72px,11vw,208px)]"
+      ? "text-[clamp(72px,11vw,150px)]"
       : glifo.length <= 4
-        ? "text-[clamp(60px,8vw,150px)]"
-        : "text-[clamp(44px,5vw,96px)]";
+        ? "text-[clamp(60px,8vw,108px)]"
+        : "text-[clamp(44px,5vw,72px)]";
 
   /**
    * A lista sob a grade (tela 02 do mock) mostra o que dá para ABRIR da
@@ -256,21 +265,21 @@ export default function SituacaoPage() {
       <div className="flex h-full flex-col overflow-y-auto">
         {/* ══ AVISOS ══ erro de fila em cima; CRM ausente é nota, não erro */}
         {filaForaDoAr ? (
-          <p className="mx-5 mt-2 border border-urgent-line bg-urgent-bg px-3 py-2 text-[11.5px] leading-snug text-ink">
+          <p className={clsx(medidaClass, "mt-2 border border-urgent-line bg-urgent-bg py-2 text-[13px] leading-snug text-ink")}>
             <b className="block font-bold text-urgent">Não foi possível carregar a fila.</b>
             Tente de novo. Os dados desta máquina continuam abaixo.
           </p>
         ) : null}
 
         {!crmConfigured ? (
-          <p className="mx-5 mt-2 border border-rule bg-note-bg px-3 py-2 text-[11.5px] leading-snug text-mut">
+          <p className={clsx(medidaClass, "mt-2 border border-rule bg-note-bg py-2 text-[13px] leading-snug text-mut")}>
             <b className="block font-bold text-ink">CRM não configurado</b>
             A fila não aparece nesta instalação. O resto da casa segue utilizável.
           </p>
         ) : null}
 
         {/* ══ PROVA ══ a linha mono do espécime, com dado real e não eixo de fonte */}
-        <div className="flex items-center justify-between gap-3 px-5 pt-2.5 font-mono text-[9px] uppercase tracking-[0.08em] text-mut">
+        <div className={clsx(medidaClass, "flex items-center justify-between gap-3 pt-4 font-mono text-[11px] uppercase tracking-[0.08em] text-mut")}>
           <span>situação · {frente}</span>
           <span>{MESES[reference.getMonth()]} {reference.getFullYear()}</span>
         </div>
@@ -278,7 +287,8 @@ export default function SituacaoPage() {
         {/* ══ GLIFO ══ o número É a manchete */}
         <p
           className={clsx(
-            "flex items-end px-5 pt-0.5 font-extrabold leading-[0.82] tracking-[-0.07em] text-ink",
+            medidaClass,
+            "flex items-end pt-0.5 font-extrabold leading-[0.82] tracking-[-0.07em] text-ink",
             // O mock é um quadro 16:10 de ~730px com o glifo em 78px — 11% da
             // largura. Fixar 78px numa tela de 1900 deixaria o número perdido;
             // o clamp mantém a PROPORÇÃO, que é o que foi aprovado.
@@ -289,7 +299,7 @@ export default function SituacaoPage() {
           {glifo}
           <span className="text-urgent" aria-hidden="true">.</span>
         </p>
-        <p className="max-w-[62ch] px-5 pb-3 text-[13px] leading-snug text-mut">
+        <p className={clsx(medidaClass, "pb-4 text-[15.5px] leading-snug text-mut")}>
           {nadaPedindo ? (
             <b className="font-bold text-ink">nada pedindo decisão</b>
           ) : (
@@ -300,7 +310,7 @@ export default function SituacaoPage() {
         </p>
 
         {/* ══ GRADE ══ célula invertida = o que o glifo está mostrando */}
-        <div className="grid grid-cols-2 gap-px border-t border-rule bg-rule sm:grid-cols-4">
+        <div className="mx-auto grid w-full max-w-[1280px] grid-cols-2 gap-px border-y border-rule bg-rule sm:grid-cols-4">
           {celulas.map((c) => {
             const on = c.id === ativa;
             return (
@@ -310,20 +320,20 @@ export default function SituacaoPage() {
                 aria-pressed={on}
                 onClick={() => setEscolhida(c.id)}
                 className={clsx(
-                  "min-h-[clamp(76px,13vh,132px)] px-4 py-3 text-left transition",
+                  "min-h-[clamp(96px,14vh,148px)] px-5 py-4 text-left transition",
                   focusRing,
                   on ? "bg-ink text-paper" : "bg-cell text-ink hover:bg-paper",
                 )}
               >
-                <span className={clsx("font-mono text-[9px]", on ? "text-paper" : "text-mut")}>
+                <span className={clsx("font-mono text-[11px]", on ? "text-paper" : "text-mut")}>
                   {c.n}
                 </span>
-                <b className="mt-1 block text-[clamp(22px,2vw,32px)] font-extrabold tracking-[-0.04em]">
+                <b className="mt-1.5 block text-[clamp(26px,2.2vw,37px)] font-extrabold tracking-[-0.04em]">
                   {c.valor}
                 </b>
                 <span
                   className={clsx(
-                    "text-[10px] uppercase tracking-[0.04em]",
+                    "mt-1.5 block text-[12px] uppercase tracking-[0.04em]",
                     on ? "font-medium text-paper" : "text-mut",
                   )}
                 >
@@ -336,24 +346,24 @@ export default function SituacaoPage() {
 
         {/* ══ LISTA ══ só quando a prioridade ativa tem itens para abrir */}
         {mostraLista ? (
-          <ul className="border-t border-rule bg-cell">
+          <ul className="mx-auto w-full max-w-[1280px] border-t border-rule bg-cell">
             {lista.slice(0, 6).map((item, i) => (
               <li key={item.id} className="border-b border-dotted border-rule last:border-b-0">
                 <Link
                   href={item.href}
                   className={clsx(
-                    "grid grid-cols-[28px_1fr_auto] items-center gap-2 px-5 py-2 text-[11.5px] transition hover:bg-paper",
+                    "grid grid-cols-[40px_1fr_auto] items-center gap-3 px-6 py-3.5 text-[13px] transition hover:bg-paper",
                     focusRing,
                   )}
                 >
-                  <span className="font-mono text-[9px] text-mut">
+                  <span className="font-mono text-[11px] text-mut">
                     {String(i + 1).padStart(2, "0")}
                   </span>
                   <span className="min-w-0">
-                    <span className="block truncate font-medium text-ink">{item.titulo}</span>
-                    <span className="block text-[9px] text-mut">{item.meta}</span>
+                    <span className="block truncate text-[15.5px] font-medium text-ink">{item.titulo}</span>
+                    <span className="mt-1 block text-[11.5px] text-mut">{item.meta}</span>
                   </span>
-                  <span aria-hidden="true" className="text-[14px] font-extrabold text-ink">→</span>
+                  <span aria-hidden="true" className="text-[16px] font-extrabold text-ink">→</span>
                 </Link>
               </li>
             ))}
@@ -362,8 +372,8 @@ export default function SituacaoPage() {
 
         {/* ══ VAZIO ══ nada pede decisão: diz isso e aponta a saída */}
         {nadaPedindo ? (
-          <div className="m-5 border-2 border-dashed border-rule px-4 py-5 text-center">
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.12em] text-urgent">
+          <div className={clsx(medidaClass, "my-5 border-2 border-dashed border-rule py-7 text-center")}>
+            <span className="text-[11px] font-extrabold uppercase tracking-[0.12em] text-urgent">
               Situação
             </span>
             {/* Mesmo ajuste do masthead: o `-0.03em` foi calibrado quando
@@ -372,7 +382,7 @@ export default function SituacaoPage() {
             <h2 className="mt-1.5 font-serif text-[22px] tracking-[-0.01em] text-ink">
               Nada pedindo decisão
             </h2>
-            <p className="mt-1 text-[11.5px] text-mut">
+            <p className="mt-1.5 text-[15px] text-mut">
               {facts.length > 0
                 ? `O atalho é produzir — e há ${facts.length} ${facts.length === 1 ? "fato" : "fatos"} para conferir.`
                 : "O atalho é produzir."}
@@ -380,7 +390,7 @@ export default function SituacaoPage() {
             <Link
               href="/esteira/pecas"
               className={clsx(
-                "mt-3 inline-block bg-ink px-3 py-2 text-[11px] font-extrabold text-paper",
+                "mt-4 inline-block bg-ink px-4 py-2.5 text-[13.5px] font-extrabold text-paper",
                 focusRing,
               )}
             >

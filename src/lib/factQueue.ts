@@ -57,17 +57,29 @@ export function factVerificationQueue(
     return due > today && due <= horizon;
   });
 
-  return pending
-    .map((fact) => {
-      const status = statusOf(fact, today);
-      return {
-        ...fact,
-        brandId,
-        status,
-        statusLabel: status === "vencido" ? "vencido" : TIER_LABEL[fact.tier],
-        hasHardData: HARD_DATA.test(fact.claim),
-        risk: riskScore(fact, today),
-      };
-    })
-    .sort((a, b) => b.risk - a.risk);
+  return pending.map((fact) => decorateFact(fact, brandId, today)).sort((a, b) => b.risk - a.risk);
+}
+
+/**
+ * Veste um fato com status, rótulo e risco — a MESMA regra da fila.
+ *
+ * Exportado porque a tela de Fatos mostra duas listas (a fila e a base inteira)
+ * e as duas precisam do mesmo status. Calcular "vencido" ou "não verificado"
+ * uma segunda vez na tela seria uma segunda implementação da regra, e é assim
+ * que uma passa a discordar da outra sem ninguém notar.
+ */
+export function decorateFact(
+  fact: FactRecord,
+  brandId: BrandId,
+  today = new Date(),
+): FactQueueItem {
+  const status = statusOf(fact, today);
+  return {
+    ...fact,
+    brandId,
+    status,
+    statusLabel: status === "vencido" ? "vencido" : TIER_LABEL[fact.tier],
+    hasHardData: HARD_DATA.test(fact.claim),
+    risk: riskScore(fact, today),
+  };
 }

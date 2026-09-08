@@ -124,7 +124,7 @@ const navegador = await abrirNavegador();
 
   confere(
     "a faixa conta a fila semeada",
-    await pagina.locator('nav > a[href="/"]').innerText(),
+    await pagina.locator('nav > div > a[href="/"]').innerText(),
     "• 3 ESPERAM · NA FILA DO CRM",
   );
   confere(
@@ -160,7 +160,7 @@ const navegador = await abrirNavegador();
   // de leitura. Se seguisse, a casca deixaria de avisar o que espera decisão.
   confere(
     "a faixa continua na prioridade real",
-    await pagina.locator('nav > a[href="/"]').innerText(),
+    await pagina.locator('nav > div > a[href="/"]').innerText(),
     "• 3 ESPERAM · NA FILA DO CRM",
   );
   await pagina.close();
@@ -174,7 +174,7 @@ const navegador = await abrirNavegador();
   });
   await pagina.goto(`${BASE}/`, { waitUntil: "networkidle" });
   await pagina.waitForTimeout(600);
-  confere("fila vazia e configurada", await pagina.locator('nav > a[href="/"]').innerText(), "• EM DIA");
+  confere("fila vazia e configurada", await pagina.locator('nav > div > a[href="/"]').innerText(), "• EM DIA");
   await pagina.close();
 
   const { pagina: p2 } = await novaPagina(navegador, {
@@ -184,7 +184,7 @@ const navegador = await abrirNavegador();
   await p2.waitForTimeout(600);
   // "Não sei" NÃO pode virar "em dia": seria uma afirmação falsa no lugar mais
   // visível da casca, e falsa justamente sobre o que exige decisão.
-  confere("fila fora do ar não vira 'em dia'", await p2.locator('nav > a[href="/"]').innerText(), "• FILA INDISPONÍVEL");
+  confere("fila fora do ar não vira 'em dia'", await p2.locator('nav > div > a[href="/"]').innerText(), "• FILA INDISPONÍVEL");
   confere(
     "e a home avisa o erro em cima",
     await p2.getByText("Não foi possível carregar a fila.").isVisible(),

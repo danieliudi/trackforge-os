@@ -119,8 +119,9 @@ parecido**.
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 arquivos — `IconButton` exige `label` (nome acessível) |
 | Casca do app: barra, frente ativa, seções | `src/components/app/EsteiraShell.tsx` | 5 telas — toda tela nova dentro da esteira nasce aqui, não com layout próprio |
 | KPI / gráfico / lista do padrão Situação | `src/components/dashboard/*` | painel e telas que reusam a densidade aprovada |
-| Diretrizes visuais dos INTERIORES | `docs/ui-diretrizes.md` | obrigatório antes de tela nova ou redesign de interior |
 | Direção da casca e da home | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` | híbrido Wire + Specimen, travado 07/09/2026 |
+| Direção dos interiores de leitura | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` | mesma direção, aprovada 08/09/2026 — medida, escala e papel de fonte |
+| Diretrizes visuais das superfícies de TRABALHO | `docs/ui-diretrizes.md` | bancada e editor, até a fase delas |
 | Frente ativa como store global | `src/lib/front.ts` | via `useFront()` do shell. É global de propósito: estar no painel da Resibag lendo fato da Sanwey é a classe de bug que isto previne |
 | Renderização de peça por formato + `toPlainText` | `src/components/app/OutputPieces.tsx` | 2 telas — Reels mostra tempo, Stories mostra telas; não renderize formato novo como parágrafo genérico |
 | Recibo de custo | `src/components/app/CostReceipt.tsx` | 3 telas |
@@ -219,7 +220,8 @@ errada, é como a plataforma ganha um terceiro visual sem ninguém ter decidido.
 | Escopo | Direção | Fonte | Estado |
 |---|---|---|---|
 | Casca (`EsteiraShell`) e home Situação (`/`) | **Híbrido Wire Service + Type Specimen Desk** | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` · mock `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html` | implementado (Fase 1) |
-| Interiores: Peças, Fatos, Custos, Instalação, Artigo, Editor | Painel de Situação (Clockwork) | `docs/ui-diretrizes.md` · mock `scratchpad/painel-mockup.html` | vale até a fase deles |
+| Interiores de leitura: Peças, Fatos, Custos, Instalação | **Híbrido, mesma direção** | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` · mock `scratchpad/intent-fase2/mockup-interiores.html` | aprovado 08/09/2026 (Fase 2) |
+| Superfícies de trabalho: bancada (`/esteira`, `/artigo`) e editor | Painel de Situação (Clockwork) | `docs/ui-diretrizes.md` · mock `scratchpad/painel-mockup.html` | vale até a fase delas |
 
 Do híbrido vêm o masthead serif, `EDIÇÃO · frente`, a dateline, a faixa preta com
 a navegação, o glifo da prioridade e a grade de células. Tokens `paper`, `band`,

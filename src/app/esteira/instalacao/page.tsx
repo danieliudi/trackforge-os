@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { useCallback, useEffect, useState } from "react";
 
 import { EsteiraShell, ShellPage } from "@/components/app/EsteiraShell";
-import { labelClass, metaClass, panelClass } from "@/lib/ui";
+import { BlockHead, CellGrid, PageHead, Sheet } from "@/components/app/Interior";
 
 type Integration = {
   id: string;
@@ -44,52 +44,76 @@ export default function InstalacaoPage() {
   return (
     <EsteiraShell>
       <ShellPage>
-        <div className="flex flex-col gap-0.5">
-          <span className={labelClass}>Instalação</span>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">
-            O que está ligado aqui
-          </h1>
-          <p className="text-[13px] text-mut">
-            Só o nome da variável e se ela está definida. O valor nunca aparece —
-            a service role e a chave de agente não podem vazar para a tela.
-          </p>
-        </div>
+        <PageHead secao="Instalação · esta máquina" titulo="O que está ligado aqui">
+          Só o nome da variável e se ela está definida. O valor nunca aparece —
+          a service role e a chave de agente não podem vazar para a tela.
+        </PageHead>
+
+        {/* A ausência passa a CONTAR. Antes a tela listava as variáveis sem
+            dizer o que a falta custa; sem `APP_PASSWORD`, por exemplo, a
+            diferença é entre localhost e uma URL pública aberta. */}
+        {rows !== null ? (
+          <CellGrid
+            celulas={[
+              { n: "01", valor: String(rows.filter((r) => r.configured).length), rotulo: "ligadas" },
+              {
+                n: "02",
+                valor: String(rows.filter((r) => !r.configured).length),
+                rotulo: "faltando",
+                destaque: rows.some((r) => !r.configured),
+                urgente: true,
+              },
+              { n: "03", valor: String(rows.length), rotulo: "conferidas" },
+              { n: "04", valor: "—", rotulo: "o valor nunca aparece" },
+            ]}
+          />
+        ) : null}
 
         {error ? (
-          <p className="rounded-lg border border-danger-line bg-danger-bg px-3.5 py-3 text-[12.5px] text-danger">
+          <p className="border border-urgent-line bg-urgent-bg px-4 py-3 text-[14px] text-ink">
             {error}
           </p>
         ) : null}
 
         {rows === null ? (
-          <p className="text-[12.5px] text-mut" role="status" aria-live="polite">
+          <p className="text-[15px] text-mut" role="status" aria-live="polite">
             Lendo diagnóstico…
           </p>
         ) : (
-          <div className="flex flex-col gap-2">
-            {rows.map((row) => (
-              <div
-                key={row.id}
-                className={clsx(panelClass, "flex flex-wrap items-center gap-3 px-3.5 py-3")}
-              >
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="text-[13px] font-medium text-ink">{row.label}</span>
-                  <span className={metaClass}>{row.env.join(" · ")}</span>
-                </span>
-                <span
-                  data-status={row.configured ? "on" : "off"}
-                  className={clsx(
-                    "rounded border px-2 py-0.5 font-mono text-[10px] uppercase tracking-wide",
-                    row.configured
-                      ? "border-ok-line bg-ok-bg text-ok"
-                      : "border-line bg-canvas text-mut",
-                  )}
+          <>
+            <BlockHead ponto={rows.some((r) => !r.configured)} nota="o valor nunca é impresso, nem para depurar">
+              Ambiente · n={rows.length}
+            </BlockHead>
+            <Sheet>
+              {rows.map((row, i) => (
+                <div
+                  key={row.id}
+                  className="grid grid-cols-[40px_1fr_auto] items-baseline gap-3 border-b border-dotted border-rule px-6 py-3.5 last:border-b-0"
                 >
-                  {row.configured ? "ligado" : "desligado"}
-                </span>
-              </div>
-            ))}
-          </div>
+                  <span className="font-mono text-[11px] text-mut">
+                    {String(i + 1).padStart(2, "0")}
+                  </span>
+                  <span className="min-w-0">
+                    {/* O NOME da variável é mono: é string do sistema. O que
+                        ela faz é sans, porque é frase. */}
+                    <span className="block font-mono text-[14.5px] text-ink">
+                      {row.env.join(" · ")}
+                    </span>
+                    <span className="mt-1 block text-[13.5px] text-mut">{row.label}</span>
+                  </span>
+                  <span
+                    data-status={row.configured ? "on" : "off"}
+                    className={clsx(
+                      "text-right text-[11.5px] font-semibold uppercase tracking-[0.07em]",
+                      row.configured ? "text-ok" : "text-urgent",
+                    )}
+                  >
+                    {row.configured ? "definida" : "faltando"}
+                  </span>
+                </div>
+              ))}
+            </Sheet>
+          </>
         )}
       </ShellPage>
     </EsteiraShell>

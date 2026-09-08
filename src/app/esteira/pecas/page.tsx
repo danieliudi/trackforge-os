@@ -1,13 +1,12 @@
 "use client";
 
-import clsx from "clsx";
 import { Check, PenLine, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
 
 import { brandLabel } from "@/constants/brands";
 import { EsteiraShell, ShellPage, useFront } from "@/components/app/EsteiraShell";
-import { KpiCard } from "@/components/dashboard/KpiCard";
+import { BlockHead, CellGrid, PageHead, Sheet } from "@/components/app/Interior";
 import { Button, IconButton } from "@/components/ui/Button";
 import { platformOptions } from "@/constants/format";
 import { formatCost } from "@/lib/costLog";
@@ -18,7 +17,6 @@ import {
   subscribeProductions,
 } from "@/lib/produced";
 import { loadState, saveState, type Draft } from "@/lib/storage";
-import { labelClass, metaClass, panelClass } from "@/lib/ui";
 import { OUTPUT_META } from "@/types/outputs";
 
 /**
@@ -64,125 +62,131 @@ export default function PecasPage() {
   return (
     <EsteiraShell>
       <ShellPage>
-        <div className="flex flex-col gap-0.5">
-          <span className={labelClass}>Peças</span>
-          <h1 className="text-2xl font-semibold tracking-tight text-ink">
-            O que já foi produzido
-          </h1>
-          <p className="text-[13px] text-mut">
-            Tudo que sai da bancada é salvo aqui sozinho, neste navegador · {frente}
-          </p>
-        </div>
+        <PageHead secao={`Peças · ${frente}`} titulo="O que já foi produzido">
+          Tudo que sai da bancada é salvo aqui sozinho, neste navegador.
+        </PageHead>
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <KpiCard
-            title="Da bancada"
-            value={String(runs.length)}
-            subtitle="produções nesta frente"
-          />
-          <KpiCard
-            title="Não enviados"
-            value={String(unsent)}
-            subtitle="pagos, ainda na bancada"
-            urgent={unsent > 0}
-          />
-          <KpiCard
-            title="Na fila do CRM"
-            value={String(sent)}
-            subtitle="já enviados"
-          />
-          <KpiCard
-            title="No editor"
-            value={drafts === null ? "—" : String(mine.length)}
-            subtitle="carrosséis abertos"
-          />
-        </section>
+        <CellGrid
+          celulas={[
+            { n: "01", valor: String(runs.length), rotulo: "da bancada" },
+            {
+              n: "02",
+              valor: String(unsent),
+              rotulo: "não enviados",
+              // Invertida quando há o que enviar — é o que pede ação aqui.
+              destaque: unsent > 0,
+            },
+            { n: "03", valor: String(sent), rotulo: "na fila do CRM" },
+            {
+              n: "04",
+              valor: drafts === null ? "—" : String(mine.length),
+              rotulo: "no editor",
+            },
+          ]}
+        />
 
         <div className="flex flex-col gap-2">
-          <span className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-acc" aria-hidden />
-            <span className={labelClass}>Da bancada · n={runs.length}</span>
-          </span>
+          <BlockHead ponto={unsent > 0} nota="pagos, ainda na bancada">
+            Da bancada · n={runs.length}
+          </BlockHead>
 
           {runs.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-line px-3.5 py-3 text-[12.5px] text-mut">
+            <p className="border-2 border-dashed border-rule px-4 py-6 text-center text-[15px] text-mut">
               Nada produzido nesta frente ainda.
             </p>
           ) : (
-            runs.map((run) => (
-              <div
-                key={run.id}
-                className={clsx(panelClass, "flex flex-wrap items-center gap-3 px-4 py-3.5")}
-              >
-                <span className="flex min-w-0 flex-1 flex-col gap-1">
-                  <span className="flex flex-wrap items-baseline gap-2">
-                    <span className="truncate text-[13px] font-medium text-ink">{run.title}</span>
-                    {run.sent ? (
-                      <span className="flex items-center gap-1 rounded border border-ok-line bg-ok-bg px-1.5 py-0.5 text-[10px] text-ok">
-                        <Check size={10} />
-                        na fila do CRM
-                      </span>
-                    ) : null}
+            <Sheet>
+              {runs.map((run, i) => (
+                <div
+                  key={run.id}
+                  className="grid grid-cols-[40px_1fr_auto] items-baseline gap-3 border-b border-dotted border-rule px-6 py-3.5 last:border-b-0"
+                >
+                  <span className="font-mono text-[11px] text-mut">
+                    {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span className={metaClass}>
-                    {run.article ? "artigo" : "sem artigo"}
-                    {run.pieces.length > 0
-                      ? ` · ${run.pieces.map((p) => OUTPUT_META[p.kind].label).join(", ")}`
-                      : " · nenhuma peça ainda"}
-                    {run.images.length > 0 ? ` · ${run.images.length} imagem(ns)` : ""}
-                    {run.contentId ? ` · ${run.contentId.toUpperCase()}` : ""}
-                    {` · ${new Date(run.at).toLocaleDateString("pt-BR")}`}
+                  <span className="min-w-0">
+                    <span className="flex flex-wrap items-baseline gap-2">
+                      <span className="truncate text-[15.5px] font-medium text-ink">{run.title}</span>
+                      {run.sent ? (
+                        <span className="flex items-center gap-1 text-[11.5px] font-semibold uppercase tracking-[0.06em] text-ok">
+                          <Check size={11} />
+                          na fila do CRM
+                        </span>
+                      ) : null}
+                    </span>
+                    {/* A frase é sans; só o `content_id` é mono, porque é o
+                        identificador que a máquina escreveu (seção 4). */}
+                    <span className="mt-1 block text-[11.5px] text-mut">
+                      {run.article ? "artigo" : "sem artigo"}
+                      {run.pieces.length > 0
+                        ? ` · ${run.pieces.map((p) => OUTPUT_META[p.kind].label).join(", ")}`
+                        : " · nenhuma peça ainda"}
+                      {run.images.length > 0 ? ` · ${run.images.length} imagem(ns)` : ""}
+                      {run.contentId ? (
+                        <>
+                          {" · "}
+                          <span className="font-mono uppercase">{run.contentId}</span>
+                        </>
+                      ) : null}
+                      {` · ${new Date(run.at).toLocaleDateString("pt-BR")}`}
+                    </span>
                   </span>
-                </span>
-                <Button size="sm" onClick={() => router.push(`/esteira?abrir=${run.id}`)}>
-                  Abrir na bancada
-                </Button>
-                <IconButton
-                  icon={Trash2}
-                  label={`Apagar "${run.title}"`}
-                  size="sm"
-                  variant="danger"
-                  onClick={() => removeProduction(run.id)}
-                />
-              </div>
-            ))
+                  <span className="flex items-center gap-2">
+                    <Button size="sm" onClick={() => router.push(`/esteira?abrir=${run.id}`)}>
+                      Abrir na bancada
+                    </Button>
+                    <IconButton
+                      icon={Trash2}
+                      label={`Apagar "${run.title}"`}
+                      size="sm"
+                      variant="danger"
+                      onClick={() => removeProduction(run.id)}
+                    />
+                  </span>
+                </div>
+              ))}
+            </Sheet>
           )}
         </div>
 
         <div className="flex flex-col gap-2">
-          <span className="flex items-center gap-2">
-            <span className="h-2 w-2 rounded-full bg-ok" aria-hidden />
-            <span className={labelClass}>
-              Carrosséis no editor · n={drafts === null ? "…" : mine.length}
-            </span>
-          </span>
+          <BlockHead nota="rascunhos abertos, não peças enviadas">
+            Carrosséis no editor · n={drafts === null ? "…" : mine.length}
+          </BlockHead>
 
           {drafts === null ? null : mine.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-line px-3.5 py-3 text-[12.5px] text-mut">
+            <p className="border-2 border-dashed border-rule px-4 py-6 text-center text-[15px] text-mut">
               Nenhum carrossel aberto no editor nesta frente.
             </p>
           ) : (
-            mine.map((draft) => (
-              <div
-                key={draft.id}
-                className={clsx(panelClass, "flex flex-wrap items-center gap-3 px-4 py-3.5")}
-              >
-                <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className="truncate text-[13px] font-medium text-ink">{draft.title}</span>
-                  <span className={metaClass}>
-                    {platformOptions.find((p) => p.id === draft.platform)?.label ?? draft.platform}
-                    {" · "}
-                    {draft.carousel.slides.length} slides
-                    {" · "}
-                    {new Date(draft.updatedAt).toLocaleDateString("pt-BR")}
-                    {draft.costUsd !== undefined ? ` · ${formatCost(draft.costUsd).primary}` : ""}
+            <Sheet>
+              {mine.map((draft, i) => (
+                <div
+                  key={draft.id}
+                  className="grid grid-cols-[40px_1fr_auto] items-baseline gap-3 border-b border-dotted border-rule px-6 py-3.5 last:border-b-0"
+                >
+                  <span className="font-mono text-[11px] text-mut">
+                    {String(i + 1).padStart(2, "0")}
                   </span>
-                </span>
-                <Button icon={PenLine} size="sm" onClick={() => openDraft(draft)}>
-                  Abrir no editor
-                </Button>
-              </div>
-            ))
+                  <span className="min-w-0">
+                    <span className="block truncate text-[15.5px] font-medium text-ink">
+                      {draft.title}
+                    </span>
+                    <span className="mt-1 block text-[11.5px] text-mut">
+                      {platformOptions.find((p) => p.id === draft.platform)?.label ?? draft.platform}
+                      {" · "}
+                      {draft.carousel.slides.length} slides
+                      {" · "}
+                      {new Date(draft.updatedAt).toLocaleDateString("pt-BR")}
+                      {draft.costUsd !== undefined ? ` · ${formatCost(draft.costUsd).primary}` : ""}
+                    </span>
+                  </span>
+                  <Button icon={PenLine} size="sm" onClick={() => openDraft(draft)}>
+                    Abrir no editor
+                  </Button>
+                </div>
+              ))}
+            </Sheet>
           )}
         </div>
       </ShellPage>
