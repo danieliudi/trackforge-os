@@ -65,10 +65,13 @@ interceptação de rota roda o app de verdade a custo zero. Desde 07/09/2026 os
 roteiros que valem moram em `scripts/qa/` (antes ficavam em `scratchpad/`, e
 pasta com esse nome ninguém trata como suíte):
 
-- `npm run qa:rotas` — as 11 telas, no monitor e no celular;
-- `npm run qa:contraste` — pares declarados, nos dois temas;
+- `npm run qa:rotas` — as 11 telas, no monitor e no celular, mais o detector de
+  colisão de cor (dois `bg-`/`text-`/`border-` no mesmo elemento);
+- `npm run qa:contraste` — 436 medições em 7 telas, nos dois temas;
 - `npm run qa:interacao` — frente, tema, prioridade e herança de chave;
-- `npm run qa` — os três.
+- `npm run qa` — os três;
+- `npm run qa:sonda` — **não é gate**: lista o que está abaixo do piso, para
+  você classificar e declarar.
 
 Playwright continua fora das dependências, instalado sob demanda, com o motivo
 escrito em `scripts/qa/README.md`.
@@ -89,8 +92,15 @@ hora já casaram com o elemento errado numa sessão só — dois alarmes falsos 
 que escondeu 1,17:1 real. Alvo declara a contagem esperada, o relatório imprime
 o texto medido, e seletor que não casa é reprovação, não silêncio.
 
+**O gate só vigia o que alguém declarou.** Daí a sonda: o defeito mais caro
+achado até hoje — o KPI urgente a 1,04:1 no escuro — estava onde não havia alvo.
+Fluxo: sonda ACHA → você CLASSIFICA (corpo ou rótulo?) → `contraste.mjs`
+DECLARA. Ela nunca reprova sozinha.
+
 **Roteiro novo se confere plantando o defeito que ele deveria pegar.** Suíte que
-só sabe dizer verde não prova nada.
+só sabe dizer verde não prova nada. Foi feito com todos: a armadilha da senha, a
+fila fora do ar virando "em dia", o seletor que casa com zero elementos, e a
+colisão `bg-surface` × `bg-acc`.
 
 **Quando rodar:** o gate acima roda sozinho em todo build. A varredura é para
 entrega que mexeu em mais de uma tela, e para rodada de auditoria.

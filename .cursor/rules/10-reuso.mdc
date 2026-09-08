@@ -39,7 +39,20 @@ aquilo. Quanto maior, mais caro é divergir.
 | Chave de localStorage com herança da antiga (`readLocal`, `writeLocal`) | `src/lib/localKeys.ts` | os 5 stores — nenhum outro arquivo chama `localStorage` direto |
 | Rascunhos em localStorage | `src/lib/storage.ts` | 5 arquivos |
 
-## Dois pontos que já quebraram este repo
+## Três pontos que já quebraram este repo
+
+**Token que embute cor não se sobrescreve somando outra classe.** `panelClass`
+carrega `bg-surface`; `labelClass` carrega `text-mut`. Escrever
+`clsx(panelClass, urgente && "bg-acc")` deixa DUAS utilidades da mesma
+propriedade na lista, e quem vence é a **ordem do CSS gerado, não a da string**
+— o Tailwind emite por ordem alfabética do token, então `bg-acc` sai antes de
+`bg-surface` e perde. Escolha a cor uma vez, com ternário. Para rótulo há
+`labelShapeClass` (a forma sem cor).
+
+Em 08/09/2026 isso custou o cartão de KPI urgente da tela de Fatos, que **nunca
+tinha ficado laranja**: no claro passava despercebido, no escuro era `#1c1c1b`
+sobre `#201f1d` — 1,04:1, o número mais importante da tela apagado, e o rótulo a
+1,79:1. Não quebra typecheck nem lint. `npm run qa:rotas` detecta a colisão.
 
 **Achatar peça em blocos numerados é `outputBlocks`, sempre.** É o que a
 auditoria consome e o que o pacote do CRM carrega. Um segundo achatamento foi

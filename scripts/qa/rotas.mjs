@@ -15,7 +15,7 @@
  * antes, porque a mesma falha aparece quando ela quebrou de verdade.
  */
 
-import { abrirNavegador, novaPagina, BASE } from "./lib/navegador.mjs";
+import { abrirNavegador, aquecer, novaPagina, BASE, colisoesDeCor, tokensDeCor } from "./lib/navegador.mjs";
 
 const LARGURAS = [
   { nome: "monitor", largura: 1900, altura: 1000 },
@@ -46,7 +46,12 @@ const ROTAS = [
 /** Texto mínimo para não ser tela em branco com casca por cima. */
 const MINIMO_DE_TEXTO = 40;
 
+await aquecer(ROTAS.map((r) => r.rota));
+
 const navegador = await abrirNavegador();
+const TOKENS = tokensDeCor();
+/** Colisões vistas, sem repetir a mesma lista de classes em cada rota. */
+const colisoes = new Map();
 let reprovou = 0;
 
 for (const { nome, largura, altura } of LARGURAS) {
@@ -73,6 +78,15 @@ for (const { nome, largura, altura } of LARGURAS) {
         [marca, MINIMO_DE_TEXTO],
       );
 
+      // Só na primeira largura: a colisão está na lista de classes, não no
+      // viewport, e reportar duas vezes é ruído.
+      if (largura === LARGURAS[0].largura) {
+        for (const c of await pagina.evaluate(colisoesDeCor, TOKENS)) {
+          const chave = `${c.prop}|${c.classe}`;
+          if (!colisoes.has(chave)) colisoes.set(chave, { ...c, rota });
+        }
+      }
+
       if (!visto.temMarca) falhas.push(`não achou "${marca}" — tela errada ou bloqueio?`);
       if (visto.emBranco) falhas.push(`tela em branco (${visto.comprimento} caracteres)`);
       if (visto.rolagemH) falhas.push("rolagem horizontal");
@@ -91,6 +105,24 @@ for (const { nome, largura, altura } of LARGURAS) {
 }
 
 await navegador.close();
+
+/**
+ * Duas cores para a mesma propriedade no mesmo elemento.
+ *
+ * Não é questão de gosto: quem vence é a ordem do CSS gerado, não a da string,
+ * então o que você escreveu por último pode simplesmente não valer. Custou o
+ * cartão urgente que nunca ficou laranja (1,04:1 no escuro) e o rótulo dele
+ * (1,79:1 no claro) — nenhum dos dois quebra typecheck nem lint.
+ */
+if (colisoes.size > 0) {
+  console.log(`\n\x1b[31m✖ ${colisoes.size} colisão(ões) de cor\x1b[0m — duas utilidades para a mesma propriedade:`);
+  for (const c of colisoes.values()) {
+    console.log(`  ${c.rota} <${c.tag}> ${c.prop}: ${c.cores.join(" vs ")}${c.texto ? ` — "${c.texto}"` : ""}`);
+    console.log(`        ${c.classe}`);
+  }
+  console.log("  Escolha a cor UMA vez (ternário), não some uma por cima da outra.");
+  reprovou += colisoes.size;
+}
 
 console.log(
   reprovou === 0

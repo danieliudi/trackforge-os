@@ -17,7 +17,8 @@
     "qa:rotas": "node scripts/qa/rotas.mjs",
     "qa:contraste": "node scripts/qa/contraste.mjs",
     "qa:interacao": "node scripts/qa/interacao.mjs",
-    "qa": "npm run qa:rotas && npm run qa:contraste && npm run qa:interacao"
+    "qa": "npm run qa:rotas && npm run qa:contraste && npm run qa:interacao",
+    "qa:sonda": "node scripts/qa/sonda.mjs"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^4.0.42",

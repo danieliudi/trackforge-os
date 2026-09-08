@@ -137,6 +137,24 @@ parecido**.
 | Erro de API legível na tela (`readError`) e corpo do pedido nas rotas (`jsonBody`) | `src/lib/apiError.ts` | a bancada e as 11 rotas — nunca faça `new Error(data.error)` com o corpo cru, nem `await request.json()` fora de um `try` |
 | Chave de localStorage com herança da chave antiga (`readLocal`, `writeLocal`) | `src/lib/localKeys.ts` | os 5 stores — nenhum outro arquivo chama `localStorage` direto, e o prefixo mora só aqui |
 
+**Token que embute cor não se sobrescreve somando outra classe.** `panelClass`
+carrega `bg-surface` e `labelClass` carrega `text-mut`. Escrever
+`clsx(panelClass, urgente && "bg-acc")` deixa DUAS utilidades da mesma
+propriedade na lista, e quem vence é a **ordem do CSS gerado, não a da string**:
+o Tailwind emite por ordem alfabética do token, então `bg-acc` sai antes de
+`bg-surface` e perde. Escolha a cor uma vez, com ternário —
+`urgente ? "…bg-acc" : panelClass`. Para rótulo existe `labelShapeClass` (a
+forma sem cor).
+
+Descoberto em 08/09/2026, e custou caro: o cartão de KPI urgente da tela de
+Fatos **nunca tinha ficado laranja**. No tema claro passava despercebido
+(quase-preto sobre branco é legível); no escuro era `#1c1c1b` sobre `#201f1d` —
+**1,04:1**, o número mais importante da tela apagado, e o rótulo dele a 1,79:1.
+Nada disso quebra typecheck nem lint. Mesma família do `.stage{display:flex}`
+vencendo o `hidden` (seção 8): regra de CSS que ganha em silêncio, visível só
+quando alguém mede a tela pintada. Hoje `npm run qa:rotas` detecta a colisão e
+falha nomeando as duas cores — conferido plantando a colisão de volta.
+
 **Achatar peça em blocos numerados é `outputBlocks`, sempre.** É o que a
 auditoria consome, o que o pacote do CRM carrega e o que qualquer formato novo
 precisa implementar. Escrever um segundo achatamento é como a rota de publish
@@ -395,10 +413,11 @@ suíte.
 
 | Comando | O que prova |
 |---|---|
-| `npm run qa:rotas` | as 11 telas renderizam **a tela certa**, no monitor e no celular |
-| `npm run qa:contraste` | os pares declarados passam o piso nos **dois** temas |
+| `npm run qa:rotas` | as 11 telas renderizam **a tela certa**, no monitor e no celular — e nenhum elemento declara duas cores para a mesma propriedade |
+| `npm run qa:contraste` | 436 medições em 7 telas passam o piso nos **dois** temas |
 | `npm run qa:interacao` | frente, tema, prioridade e herança de chave respondem |
 | `npm run qa` | os três em sequência |
+| `npm run qa:sonda` | **não é gate** — percorre o DOM e lista o que está abaixo do piso, para você declarar |
 
 Playwright continua fora das dependências do projeto, instalado sob demanda, e
 o motivo fica escrito no `README` da pasta.
@@ -421,10 +440,16 @@ e um que escondeu uma reprovação real de 1,17:1. Em `contraste.mjs` cada alvo
 traz a contagem esperada e o relatório imprime o texto que mediu; seletor que
 deixa de casar é reprovação, não silêncio.
 
+**O gate só vigia o que alguém declarou.** É por isso que existe a sonda: o
+defeito mais caro achado até hoje — o KPI urgente a 1,04:1 — estava exatamente
+onde não havia alvo. O fluxo é sonda ACHA → você CLASSIFICA (corpo ou rótulo?)
+→ `contraste.mjs` DECLARA. Ela nunca reprova sozinha, porque varredura
+automática erra escolhendo alvo.
+
 **Suíte que só sabe dizer verde não prova nada.** Cada roteiro novo se confere
 plantando o defeito que ele deveria pegar e vendo a reprovação sair. Foi assim
-com os três: a armadilha da senha, a fila fora do ar virando "em dia", e o
-seletor que casa com zero elementos.
+com todos: a armadilha da senha, a fila fora do ar virando "em dia", o seletor
+que casa com zero elementos, e a colisão `bg-surface` × `bg-acc`.
 
 Quando rodar: o gate da seção 11 roda sozinho em todo build. A varredura é para
 fim de entrega que mexeu em mais de uma tela, e para rodada de auditoria — fica

@@ -17,7 +17,7 @@
  * dizer verde não distingue teste que rodou de teste que não achou nada.
  */
 
-import { abrirNavegador, novaPagina, BASE } from "./lib/navegador.mjs";
+import { abrirNavegador, aquecer, novaPagina, BASE } from "./lib/navegador.mjs";
 
 const FILA = {
   configured: true,
@@ -45,6 +45,8 @@ function confere(rotulo, obtido, esperado) {
       (ok ? "" : ` — esperava ${JSON.stringify(esperado)}`),
   );
 }
+
+await aquecer(["/", "/esteira/custos", "/esteira/fatos"]);
 
 const navegador = await abrirNavegador();
 

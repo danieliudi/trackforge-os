@@ -3,7 +3,7 @@
 import clsx from "clsx";
 import type { ReactNode } from "react";
 
-import { labelClass, panelClass } from "@/lib/ui";
+import { labelClass, labelShapeClass, panelClass } from "@/lib/ui";
 
 type KpiCardProps = {
   title: string;
@@ -18,13 +18,34 @@ export function KpiCard({ title, value, subtitle, urgent = false, icon }: KpiCar
   return (
     <div
       className={clsx(
-        panelClass,
         "flex flex-col gap-1 px-4 py-3.5",
-        urgent && "border-acc bg-acc",
+        /**
+         * NÃO escreva `clsx(panelClass, urgent && "bg-acc")`.
+         *
+         * As duas utilidades de fundo acabam na mesma lista de classes, e quem
+         * vence é a ordem do CSS GERADO, não a ordem da string: o Tailwind emite
+         * `bg-acc` antes de `bg-surface`, então `bg-surface` ganhava sempre. O
+         * cartão urgente nunca foi laranja em nenhum tema.
+         *
+         * No claro o defeito era invisível — quase-preto sobre branco continua
+         * legível. No escuro virava `#1c1c1b` sobre `#201f1d`: 1,04:1, o número
+         * mais importante da tela apagado. Mesma família do `.stage{display:flex}`
+         * vencendo o `hidden`: passa por typecheck, por lint, e só aparece
+         * quando alguém mede a tela pintada.
+         *
+         * Por isso o fundo é escolhido UMA vez, aqui. O caminho normal continua
+         * no `panelClass` compartilhado; a variante escreve a casca inteira.
+         */
+        urgent ? "rounded-lg border border-acc bg-acc" : panelClass,
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <span className={clsx(labelClass, urgent && "text-acc-ink/70")}>{title}</span>
+        {/* Mesma armadilha do fundo: `clsx(labelClass, "text-acc-ink/70")`
+            deixa `text-mut` e `text-acc-ink/70` na mesma lista, e `text-mut`
+            ganha. A cor é escolhida uma vez. */}
+        <span className={clsx(urgent ? `${labelShapeClass} text-acc-ink/70` : labelClass)}>
+          {title}
+        </span>
         {icon}
       </div>
       <span

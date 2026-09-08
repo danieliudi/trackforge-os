@@ -13,6 +13,8 @@
  * instalar em vez de estourar com "Cannot find module".
  */
 
+import { readFileSync } from "node:fs";
+
 const CAMINHOS = [
   "playwright",
   "playwright-core",
@@ -64,6 +66,34 @@ export const BASE = process.env.QA_BASE ?? "http://localhost:3000";
  */
 const SENHA = process.env.QA_SENHA;
 export const CREDENCIAIS = SENHA ? { username: "trackforge", password: SENHA } : undefined;
+
+/**
+ * Compila cada rota ANTES de medir.
+ *
+ * O `next dev` compila sob demanda: a primeira visita a `/` num servidor recém
+ * subido levou 33s aqui, e o `goto` do roteiro estoura em 25s. O resultado é uma
+ * reprovação que não é do app — e reprovação falsa custa mais que cobertura
+ * faltando, porque é o que faz alguém parar de rodar a suíte.
+ *
+ * Um GET simples por rota basta: o custo de compilação é pago uma vez, e o
+ * corpo é descartado. Erro de rede aqui é ignorado de propósito — quem reporta
+ * rota fora do ar é o roteiro, com a marca dela.
+ */
+export async function aquecer(rotas) {
+  const cabecalhos = SENHA
+    ? { authorization: `Basic ${Buffer.from(`trackforge:${SENHA}`).toString("base64")}` }
+    : {};
+  const comeco = Date.now();
+  for (const rota of rotas) {
+    try {
+      await fetch(`${BASE}${rota}`, { headers: cabecalhos, signal: AbortSignal.timeout(120_000) });
+    } catch {
+      // Silêncio proposital: a varredura é quem julga se a rota responde.
+    }
+  }
+  const s = Math.round((Date.now() - comeco) / 1000);
+  if (s > 3) console.log(`(compilou ${rotas.length} rotas em ${s}s antes de medir)`);
+}
 
 /**
  * Página com a rede presa e o estado semeado.
@@ -218,4 +248,63 @@ export function medirContraste(el) {
     texto: (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 32),
     opacidade: Math.round(opacidade * 100) / 100,
   };
+}
+
+/**
+ * Nomes dos tokens de cor, lidos do `globals.css`.
+ *
+ * Serve ao detector de colisão abaixo. Ler do CSS em vez de manter uma lista
+ * aqui é o que impede o detector de envelhecer em silêncio: token novo entra
+ * na varredura no mesmo commit em que nasce.
+ */
+export function tokensDeCor() {
+  const css = readFileSync(new URL("../../../src/app/globals.css", import.meta.url), "utf8");
+  return [...new Set([...css.matchAll(/--color-([a-z0-9-]+)\s*:/g)].map((m) => m[1]))];
+}
+
+/**
+ * Elementos que declaram DUAS cores para a mesma propriedade.
+ *
+ * POR QUE ISTO EXISTE: `clsx(panelClass, urgent && "bg-acc")` deixa `bg-surface`
+ * e `bg-acc` na mesma lista de classes, e quem vence é a ordem do CSS GERADO,
+ * não a ordem da string. O Tailwind emite os utilitários em ordem alfabética do
+ * token, então `bg-acc` sai antes de `bg-surface` e PERDE — silenciosamente.
+ *
+ * Custou dois defeitos no mesmo componente: o cartão urgente que nunca ficou
+ * laranja (1,04:1 no escuro) e o rótulo dele (1,79:1 no claro). Nenhum dos dois
+ * quebra typecheck ou lint, e no tema claro o primeiro parecia certo.
+ *
+ * É função de verdade porque o Playwright a serializa para dentro da página.
+ */
+export function colisoesDeCor(nomes) {
+  const propriedades = ["bg", "text", "border"];
+  const achados = [];
+
+  for (const el of document.querySelectorAll("*")) {
+    const classes = (el.getAttribute("class") ?? "").split(/\s+/).filter(Boolean);
+    if (classes.length < 2) continue;
+
+    for (const prop of propriedades) {
+      const cores = new Set();
+      for (const c of classes) {
+        // Classe COM modificador não colide: `hover:bg-acc-soft`,
+        // `focus-visible:border-acc` e `placeholder:text-faint` valem em outro
+        // estado ou noutro pseudo-elemento. Considerar só as incondicionais —
+        // ignorar isto encheu a primeira rodada de alarme falso.
+        if (c.includes(":")) continue;
+        const token = c.split("/")[0].slice(prop.length + 1);
+        if (c.startsWith(prop + "-") && nomes.includes(token)) cores.add(token);
+      }
+      if (cores.size > 1) {
+        achados.push({
+          prop,
+          cores: [...cores].sort(),
+          tag: el.tagName.toLowerCase(),
+          classe: classes.join(" ").slice(0, 110),
+          texto: (el.textContent ?? "").replace(/\s+/g, " ").trim().slice(0, 30),
+        });
+      }
+    }
+  }
+  return achados;
 }

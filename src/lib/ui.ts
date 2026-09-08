@@ -14,8 +14,18 @@
 export const focusRing =
   "outline-none focus-visible:ring-2 focus-visible:ring-acc focus-visible:ring-offset-2 focus-visible:ring-offset-canvas";
 
-export const labelClass =
-  "text-[11px] font-medium uppercase tracking-wide text-mut";
+/**
+ * A FORMA do rótulo, sem cor.
+ *
+ * Existe separada porque `labelClass` embute `text-mut`, e componente com
+ * variante de cor acaba com DUAS utilidades de cor na mesma lista de classes —
+ * onde quem vence é a ordem do CSS gerado, não a ordem da string. Foi assim que
+ * o rótulo do KPI urgente ficou `text-mut` sobre `bg-acc`: 1,79:1 no claro e
+ * 1,41:1 no escuro. Variante usa a forma e escolhe a cor uma vez só.
+ */
+export const labelShapeClass = "text-[11px] font-medium uppercase tracking-wide";
+
+export const labelClass = `${labelShapeClass} text-mut`;
 
 export const fieldClass = `w-full rounded-md border border-line bg-canvas px-2.5 py-2 text-sm text-ink transition placeholder:text-faint hover:border-line3 focus:border-acc ${focusRing}`;
 

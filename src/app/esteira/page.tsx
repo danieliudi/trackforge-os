@@ -562,7 +562,11 @@ export default function BancadaPage() {
             />
             <span>
               Escrever o artigo antes
-              <span className="block text-faint">
+              {/* Herda `text-mut` do rótulo em vez de descer para `faint`: a
+                  frase diz o que você vai PAGAR e o que fica rastreado, então é
+                  corpo, não ornamento. Em `faint` dava 3,56:1 sobre este fundo,
+                  abaixo do piso de 4,5:1. */}
+              <span className="block">
                 {withArticle
                   ? "As peças derivam dele, e tudo que afirmam fica rastreado."
                   : "Peça direta, sem artigo por trás — mais barato, sem lastro comum."}
