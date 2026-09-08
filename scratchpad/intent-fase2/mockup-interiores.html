@@ -1,0 +1,365 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Fase 2 — interiores no híbrido Wire + Specimen</title>
+<style>
+/* ══════════════════════════════════════════════════════════════════
+   MOCKUP FASE 2 — interiores traduzidos para a direção travada em
+   07/09/2026 (scratchpad/intent-fase1/DESIGN-hibrido-locked.md).
+
+   Os tokens abaixo são os MESMOS de src/app/globals.css, copiados
+   valor por valor. Nada de hex novo: se uma cor não existe aqui, ela
+   não deve existir na implementação.
+
+   Os números e textos vêm do app rodando com dado semeado — nenhuma
+   contagem ilustrativa. Foi o erro que a Fase 1 quase cometeu.
+   ══════════════════════════════════════════════════════════════════ */
+:root{
+  --paper:#f3efe6; --band:#16140f; --band-ink:#f3efe6;
+  --rule:#d8d1c3; --cell:#f7f4ec; --urgent:#d63a22;
+  --urgent-bg:#f6e4df; --urgent-line:#e2b4a8; --note-bg:#efe6d6;
+  --ink:#1c1c1b; --mut:#5f6367; --faint:#7a7e82;
+  --ok:#15803d; --warn:#8a4a10;
+  --sans:"Helvetica Neue",Helvetica,Arial,system-ui,sans-serif;
+  --serif:Georgia,"Times New Roman",serif;
+  --mono:ui-monospace,"SF Mono",Menlo,monospace;
+}
+[data-tema="escuro"]{
+  --paper:#12110f; --band:#000; --band-ink:#f2efe6;
+  --rule:#2c2a26; --cell:#1a1916; --urgent:#ff6b52;
+  --urgent-bg:#2a1814; --urgent-line:#5a3030; --note-bg:#1f1c18;
+  --ink:#f8f8f8; --mut:#a9a7a2; --faint:#8a8782;
+  --ok:#34d399; --warn:#fba45c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 var(--sans)}
+
+/* ── controle do mockup (não faz parte do app) ─────────────────── */
+.ctrl{position:fixed;right:10px;bottom:10px;z-index:99;background:#111;color:#eee;
+  border:1px solid #333;padding:8px 10px;font:600 10px/1 var(--sans);letter-spacing:.06em;
+  text-transform:uppercase;display:flex;gap:6px;flex-wrap:wrap;align-items:center;max-width:640px}
+.ctrl span{color:#888;margin-right:4px}
+.ctrl button{appearance:none;background:#222;color:#ddd;border:1px solid #444;
+  padding:6px 8px;font:600 10px var(--sans);letter-spacing:.06em;text-transform:uppercase;cursor:pointer}
+.ctrl button[aria-pressed="true"]{background:#eee;color:#111;border-color:#eee}
+
+/* ── casca já implementada (Fase 1) — reproduzida para conferência ── */
+.app{min-height:100vh;display:flex;flex-direction:column;background:var(--paper)}
+.mast{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;
+  gap:4px 16px;padding:10px 20px 6px;border-bottom:3px solid var(--ink)}
+.brand{font-family:var(--serif);font-weight:800;font-size:26px;letter-spacing:-.04em;line-height:1}
+.edition{display:flex;align-items:baseline;gap:6px;font:700 10px/1 var(--sans);
+  letter-spacing:.1em;text-transform:uppercase}
+.edition b{font-weight:700;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:2px}
+.edition i{font-style:normal;font-weight:500;color:var(--mut)}
+.date{display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px 16px;
+  padding:4px 20px;border-bottom:1px solid var(--rule);font:500 10px/1.3 var(--sans);color:var(--mut)}
+.date .dir{display:flex;gap:12px;align-items:center}
+.date .mono{font-family:var(--mono)}
+.wire{display:flex;gap:14px;flex-wrap:wrap;align-items:center;padding:6px 20px;
+  background:var(--band);color:var(--band-ink);font:700 10px/1 var(--sans);
+  letter-spacing:.06em;text-transform:uppercase}
+.wire a{color:inherit;text-decoration:none;opacity:.7}
+.wire a.on{opacity:1;text-decoration:underline;text-underline-offset:3px;text-decoration-thickness:2px}
+.wire .sinal{display:flex;gap:4px;align-items:center;opacity:1}
+.wire .sinal em{font-style:normal;color:var(--urgent)}
+.plus{width:16px;height:16px;border-radius:50%;background:var(--band-ink);color:var(--band);
+  display:grid;place-items:center;font-size:11px;font-weight:800}
+
+/* ══ FASE 2 — o que muda daqui para baixo ═══════════════════════ */
+
+/* Cabeçalho do interior: mesma linha de prova mono da home, e a
+   manchete em SERIF. Hoje é sans 24px; em serif ela passa a ser a
+   manchete da edição, não o título de um cartão de dashboard. */
+.proof{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  padding:10px 20px 0;font:500 9px/1 var(--mono);letter-spacing:.08em;
+  text-transform:uppercase;color:var(--mut)}
+.head{padding:2px 20px 10px}
+.head h1{margin:0;font-family:var(--serif);font-size:34px;line-height:1.05;
+  letter-spacing:-.03em;font-weight:700}
+.head p{margin:5px 0 0;max-width:66ch;font-size:12.5px;line-height:1.4;color:var(--mut)}
+
+/* A grade de 4 células é a MESMA da home: 1px de regra, sem raio,
+   ativa invertida. Some o cartão laranja preenchido — na casca Wire a
+   urgência é o ponto vermelho e a inversão, não o preenchimento. */
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);
+  border-top:1px solid var(--rule);border-bottom:1px solid var(--rule)}
+.cell{background:var(--cell);padding:10px 16px;min-height:78px;text-align:left;
+  border:0;font:inherit;color:inherit;cursor:pointer;display:block}
+.cell.on{background:var(--ink);color:var(--paper)}
+.cell .n{font:600 9px/1 var(--mono);color:var(--mut)}
+.cell.on .n{color:var(--paper)}
+.cell b{display:block;font-size:28px;font-weight:800;letter-spacing:-.04em;margin-top:4px;line-height:1}
+.cell span{display:block;margin-top:4px;font-size:10px;text-transform:uppercase;
+  letter-spacing:.04em;color:var(--mut)}
+.cell.on span{color:var(--paper)}
+.cell .urg{color:var(--urgent)}
+
+/* Cabeçalho de bloco: regra fina + rótulo mono, como a dateline. */
+.blk{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  padding:14px 20px 6px;font:600 9px/1 var(--mono);letter-spacing:.08em;
+  text-transform:uppercase;color:var(--mut)}
+.blk .pt{color:var(--urgent)}
+
+/* Lista: a LINHA INTEIRA é o alvo. Hoje cada linha repete um botão
+   "Abrir na bancada" a 1250px do olho; a casca Wire não repete
+   affordance — a lista da home já funciona assim. */
+.list{border-top:1px solid var(--rule);background:var(--cell)}
+.row{display:grid;grid-template-columns:34px 1fr auto;gap:12px;align-items:baseline;
+  padding:9px 20px;border-bottom:1px dotted var(--rule);text-decoration:none;color:inherit}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--paper)}
+.row .idx{font:600 9px/1.6 var(--mono);color:var(--mut)}
+.row .tit{font-size:13px;font-weight:500;line-height:1.35}
+.row .meta{display:block;margin-top:2px;font:400 9.5px/1.4 var(--mono);color:var(--mut);
+  letter-spacing:.02em;text-transform:uppercase}
+.row .dir{font:600 10px/1.6 var(--sans);color:var(--mut);white-space:nowrap;text-transform:uppercase;letter-spacing:.05em}
+.row .seta{font-weight:800;font-size:14px;color:var(--ink)}
+
+/* FATOS — a mudança de conteúdo, não só de pele.
+   Hoje as 18 linhas são idênticas e o selo de proveniência fica na
+   ponta direita, depois do texto. Ele é o que decide se o fato pode
+   virar número numa peça (seção 2), então passa a ser lido ANTES da
+   afirmação, na coluna da esquerda, e cada nível tem peso próprio. */
+.fato{display:grid;grid-template-columns:104px 1fr 172px;gap:14px;padding:10px 20px;
+  border-bottom:1px dotted var(--rule);background:var(--cell)}
+.fato:hover{background:var(--paper)}
+.nivel{font:700 9px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;
+  padding-top:1px;border-left:3px solid var(--rule);padding-left:8px}
+.nivel.n-primaria{color:var(--ok);border-left-color:var(--ok)}
+.nivel.n-secundaria{color:var(--mut);border-left-color:var(--rule)}
+.nivel.n-nao{color:var(--urgent);border-left-color:var(--urgent)}
+.nivel em{display:block;font-style:normal;font-weight:400;font-size:8.5px;
+  color:var(--mut);letter-spacing:.04em;margin-top:2px}
+.fato .txt{font-size:13px;line-height:1.5;max-width:100ch}
+.fato .orig{display:block;margin-top:3px;font:400 9.5px/1.4 var(--mono);color:var(--mut)}
+/* Quando alguém conferiu contra a fonte. `checkedAt` ausente = NUNCA, e hoje
+   isso vale para 18 dos 19 fatos da Resibag. A coluna não é enfeite para
+   preencher a largura: é o motivo de a linha estar na fila, e a repetição de
+   "nunca conferido" é a informação, não ruído. */
+.quando{text-align:right;font:600 9.5px/1.4 var(--mono);letter-spacing:.04em;
+  text-transform:uppercase;color:var(--mut)}
+.quando.nunca{color:var(--ink)}
+.quando em{display:block;font-style:normal;font-weight:400;font-size:8.5px;
+  color:var(--mut);margin-top:2px;text-transform:none;letter-spacing:0}
+
+/* Extrato de custo: valor alinhado à direita, tabular. */
+.ext{display:grid;grid-template-columns:34px 84px 1fr auto auto;gap:12px;align-items:baseline;
+  padding:8px 20px;border-bottom:1px dotted var(--rule);background:var(--cell);font-size:12.5px}
+.ext .tipo{font:600 9px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.ext .quando{font:400 9.5px/1.5 var(--mono);color:var(--mut)}
+.ext .valor{font:800 13px/1.4 var(--mono);letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+/* Geração cobrada que não virou peça: a marca é BARRA, não letra.
+   `urgent` sobre a célula dá 4,26:1 — passa como ornamento, reprova como
+   corpo. Medido no próprio mockup, antes de virar código. Mesma decisão do
+   sinal da faixa: a cor vira preenchimento e a letra não muda. */
+.ext.falhou{border-left:3px solid var(--urgent);padding-left:17px}
+.ext.falhou .tipo::after{content:" · não virou peça"}
+
+/* Instalação: nome da variável e se está definida. O valor NUNCA. */
+.var{display:grid;grid-template-columns:34px 1fr 120px;gap:12px;align-items:baseline;
+  padding:9px 20px;border-bottom:1px dotted var(--rule);background:var(--cell)}
+.var .nome{font:600 12px/1.4 var(--mono)}
+.var .oq{display:block;margin-top:2px;font-size:11px;color:var(--mut);font-family:var(--sans)}
+.var .est{font:700 9px/1.5 var(--mono);letter-spacing:.06em;text-transform:uppercase;text-align:right}
+.var .est.sim{color:var(--ok)}
+.var .est.nao{color:var(--urgent)}
+
+.nota{margin:12px 20px 0;background:var(--note-bg);border:1px solid var(--rule);
+  padding:9px 12px;font-size:12px;line-height:1.4;color:var(--mut)}
+.nota b{display:block;color:var(--ink)}
+.vazio{margin:14px 20px;border:2px dashed var(--rule);padding:22px;text-align:center}
+.vazio .kick{font:800 9px/1 var(--sans);letter-spacing:.12em;text-transform:uppercase;color:var(--urgent)}
+.vazio h3{margin:8px 0 4px;font-family:var(--serif);font-size:21px;letter-spacing:-.03em;font-weight:700}
+.vazio p{margin:0;font-size:12px;color:var(--mut)}
+.cta{display:inline-block;margin-top:12px;background:var(--ink);color:var(--paper);
+  padding:9px 13px;font:800 11px var(--sans);text-decoration:none}
+.tela{display:none}
+.tela.on{display:block}
+</style>
+</head>
+<body data-tema="claro">
+
+<div class="app">
+  <!-- ══ casca: já no ar desde a Fase 1, aqui só para conferir o encaixe ══ -->
+  <div class="mast">
+    <div class="brand">trackforge</div>
+    <div class="edition"><span>Edição ·</span><i>Sanwey</i><b>Resibag</b><i>Meu</i></div>
+  </div>
+  <div class="date">
+    <span>São Paulo · set 2026</span>
+    <span class="dir"><span class="mono">mês · R$ 14,85</span><span>Tema · claro</span></span>
+  </div>
+  <div class="wire">
+    <span class="sinal"><em>•</em><span>1 espera · na fila do CRM</span></span>
+    <a href="#">Situação</a>
+    <a href="#" class="on" data-nav="pecas">Peças</a>
+    <span class="plus">+</span>
+    <a href="#" data-nav="fatos">Fatos</a>
+    <a href="#" data-nav="custos">Custos</a>
+    <a href="#" data-nav="instalacao">Instalação</a>
+  </div>
+
+  <!-- ══════════ PEÇAS ══════════ -->
+  <section class="tela on" id="t-pecas">
+    <div class="proof"><span>peças · resibag</span><span>setembro 2026</span></div>
+    <div class="head">
+      <h1>O que já foi produzido</h1>
+      <p>Tudo que sai da bancada é salvo aqui sozinho, neste navegador.</p>
+    </div>
+    <div class="grid">
+      <div class="cell"><span class="n">01</span><b>5</b><span>da bancada</span></div>
+      <div class="cell on"><span class="n">02</span><b>2</b><span>não enviados</span></div>
+      <div class="cell"><span class="n">03</span><b>3</b><span>na fila do CRM</span></div>
+      <div class="cell"><span class="n">04</span><b>0</b><span>no editor</span></div>
+    </div>
+    <div class="blk"><span><span class="pt">•</span> Não enviados · n=2</span><span>pagos, ainda na bancada</span></div>
+    <div class="list">
+      <a class="row" href="#"><span class="idx">01</span><span><span class="tit">Revisão da ANTT 5.998 — o que muda no descarte</span><span class="meta">sem artigo · carrossel, post de texto, legenda · resibag-3e9 · 07/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
+      <a class="row" href="#"><span class="idx">02</span><span><span class="tit">Custo real de um lote reprovado na fiscalização</span><span class="meta">sem artigo · post de texto, sequência de stories · resibag-3eb · 05/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
+    </div>
+    <div class="blk"><span>Já na fila do CRM · n=3</span><span>aprovar acontece lá</span></div>
+    <div class="list">
+      <a class="row" href="#"><span class="idx">03</span><span><span class="tit">Checklist de conformidade para embarcadores</span><span class="meta">sem artigo · carrossel, roteiro de reels · resibag-3ea · 06/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
+      <a class="row" href="#"><span class="idx">04</span><span><span class="tit">IBC reformado: o que o RAPP exige em 2026</span><span class="meta">sem artigo · carrossel · resibag-3ed · 03/09/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
+      <a class="row" href="#"><span class="idx">05</span><span><span class="tit">Três perguntas antes de assinar contrato de logística reversa</span><span class="meta">sem artigo · post de texto, legenda, roteiro de reels · resibag-3f0 · 31/08/2026</span></span><span class="dir">abrir <span class="seta">→</span></span></a>
+    </div>
+  </section>
+
+  <!-- ══════════ PEÇAS · vazio ══════════ -->
+  <section class="tela" id="t-pecas-vazio">
+    <div class="proof"><span>peças · resibag</span><span>setembro 2026</span></div>
+    <div class="head">
+      <h1>O que já foi produzido</h1>
+      <p>Tudo que sai da bancada é salvo aqui sozinho, neste navegador.</p>
+    </div>
+    <div class="grid">
+      <div class="cell"><span class="n">01</span><b>0</b><span>da bancada</span></div>
+      <div class="cell"><span class="n">02</span><b>0</b><span>não enviados</span></div>
+      <div class="cell"><span class="n">03</span><b>0</b><span>na fila do CRM</span></div>
+      <div class="cell"><span class="n">04</span><b>0</b><span>no editor</span></div>
+    </div>
+    <div class="vazio">
+      <span class="kick">Peças</span>
+      <h3>Nada produzido nesta frente</h3>
+      <p>A bancada salva sozinha, sem botão. O que sair de lá aparece aqui.</p>
+      <a class="cta" href="#">Ir para a bancada</a>
+    </div>
+  </section>
+
+  <!-- ══════════ FATOS ══════════ -->
+  <section class="tela" id="t-fatos">
+    <div class="proof"><span>base de fatos · resibag</span><span>setembro 2026</span></div>
+    <div class="head">
+      <h1>O que a ferramenta pode afirmar</h1>
+      <p>Só fonte primária vira número numa peça. Secundária e interna dão contexto e nunca entram no slide.</p>
+    </div>
+    <div class="grid">
+      <div class="cell"><span class="n">01</span><b>1</b><span>publicáveis · de 19</span></div>
+      <div class="cell on"><span class="n">02</span><b>18</b><span>para conferir</span></div>
+      <div class="cell"><span class="n">03</span><b>0</b><span>vencidos</span></div>
+      <div class="cell"><span class="n">04</span><b>16</b><span>dado duro</span></div>
+    </div>
+    <div class="blk"><span><span class="pt">•</span> Para conferir, em ordem de risco · n=18</span><span>1 de 19 já foi conferido contra a fonte</span></div>
+    <div>
+      <div class="fato"><span class="nivel n-nao">não verificado<em>dado duro</em></span><span class="txt">A NBR 10.004:2024 (ABNT) classifica resíduo sólido quanto à periculosidade. Classe I é perigoso, Classe II A não inerte, Classe II B inerte. Não é obrigação sobre transportador.<span class="orig">nbr-10004-classificacao · resibag-compliance-kb v3.3, seção 1</span></span><span class="quando nunca">nunca conferido<em>sem data de revalidação</em></span></div>
+      <div class="fato"><span class="nivel n-nao">não verificado<em>dado duro</em></span><span class="txt">A revisão de 2024 da NBR 10.004 mexeu em limites de contaminação por metais pesados, ensaios de lixiviação e solubilização (anexos F e G) e critérios de amostragem.<span class="orig">nbr-10004-revisao-2024 · resibag-compliance-kb v3.3, seção 1</span></span><span class="quando nunca">nunca conferido<em>sem data de revalidação</em></span></div>
+      <div class="fato"><span class="nivel n-nao">não verificado<em>dado duro</em></span><span class="txt">A Resolução ANTT 5998/2022 está vigente desde junho/2023 e revogou a ANTT 420/2004.<span class="orig">antt-5998-vigencia · resibag-compliance-kb v3.3, seção 2</span></span><span class="quando nunca">nunca conferido<em>sem data de revalidação</em></span></div>
+      <div class="fato"><span class="nivel n-secundaria">secundária<em>contexto</em></span><span class="txt">A Portaria INMETRO 320/2021 exige ensaios de queda livre, empilhamento, estanqueidade e pressão interna; certificação por OCP acreditado; marcação ONU com símbolo, código e massa bruta máxima.<span class="orig">inmetro-320-exigencias · resibag-compliance-kb v3.3, seção 3</span></span><span class="quando nunca">nunca conferido<em>sem data de revalidação</em></span></div>
+      <div class="fato"><span class="nivel n-primaria">primária<em>pode citar</em></span><span class="txt">Os códigos INMETRO da Resibag são IBC-0136/22 SAN T025 e IBC-0143/25 SAN T015, pelo OCP ABRACE OCP-0041, aplicáveis às linhas Standard e Estruturado.<span class="orig">codigos-ibc-resibag · resibag-canonical-facts v2.3, seção 05</span></span><span class="quando">conferido 21/08/2026<em>revalidar até 21/02/2027</em></span></div>
+    </div>
+    <div class="nota"><b>Duas mudanças de conteúdo, não só de pele</b>O nível saiu da ponta direita — onde ficava a mais de mil pixels de onde a leitura termina, com as dezoito linhas na mesma cor e no mesmo peso — e passou a ser a primeira coisa lida, porque é ele que decide se o fato vira número numa peça. E entrou a coluna de conferência: <code>checkedAt</code> já existe no dado e a tela nunca mostrou. Hoje ela diria “nunca conferido” em 18 das 19 linhas da Resibag. A repetição é a informação.</div>
+  </section>
+
+  <!-- ══════════ CUSTOS ══════════ -->
+  <section class="tela" id="t-custos">
+    <div class="proof"><span>custos · resibag</span><span>setembro 2026</span></div>
+    <div class="head">
+      <h1>O que a API cobrou</h1>
+      <p>Histórico local deste navegador. Não sai daqui, e não existe cobrança que não esteja nesta lista.</p>
+    </div>
+    <div class="grid">
+      <div class="cell on"><span class="n">01</span><b>R$ 14,85</b><span>neste mês · 4 gerações</span></div>
+      <div class="cell"><span class="n">02</span><b>R$ 27,26</b><span>desde o início</span></div>
+      <div class="cell"><span class="n">03</span><b>R$ 0,11</b><span>busca web · n=2</span></div>
+      <div class="cell"><span class="n">04</span><b>R$ 3,71</b><span>média por geração</span></div>
+    </div>
+    <div class="blk"><span>Por tipo, neste mês</span><span>busca web cobrada à parte</span></div>
+    <div class="list">
+      <div class="ext"><span class="idx">01</span><span class="tipo">artigo</span><span>2 gerações</span><span></span><span class="valor">R$ 7,21</span></div>
+      <div class="ext"><span class="idx">02</span><span class="tipo">carrossel</span><span>1 geração</span><span></span><span class="valor">R$ 6,12</span></div>
+      <div class="ext"><span class="idx">03</span><span class="tipo">peça avulsa</span><span>1 geração</span><span></span><span class="valor">R$ 1,52</span></div>
+    </div>
+    <div class="blk"><span>Extrato · n=7</span><span>o que falhou continua na conta</span></div>
+    <div class="list">
+      <div class="ext"><span class="idx">01</span><span class="tipo">artigo</span><span>Revisão da ANTT 5.998 — o que muda no descarte</span><span class="quando">07/09/2026</span><span class="valor">R$ 2,28</span></div>
+      <div class="ext"><span class="idx">02</span><span class="tipo">carrossel</span><span>Checklist de conformidade para embarcadores</span><span class="quando">06/09/2026</span><span class="valor">R$ 6,12</span></div>
+      <div class="ext"><span class="idx">03</span><span class="tipo">peça avulsa</span><span>Custo real de um lote reprovado na fiscalização</span><span class="quando">05/09/2026</span><span class="valor">R$ 1,52</span></div>
+      <div class="ext falhou"><span class="idx">04</span><span class="tipo">sugestões</span><span>Três perguntas antes de assinar contrato</span><span class="quando">30/08/2026</span><span class="valor">R$ 0,19</span></div>
+    </div>
+  </section>
+
+  <!-- ══════════ INSTALAÇÃO ══════════ -->
+  <section class="tela" id="t-instalacao">
+    <div class="proof"><span>instalação · esta máquina</span><span>setembro 2026</span></div>
+    <div class="head">
+      <h1>O que está ligado aqui</h1>
+      <p>Só o nome da variável e se ela está definida. O valor nunca aparece — a service role e a chave de agente não podem vazar para a tela.</p>
+    </div>
+    <div class="grid">
+      <div class="cell"><span class="n">01</span><b>4</b><span>definidas</span></div>
+      <div class="cell on"><span class="n">02</span><b>1</b><span class="urg">faltando</span></div>
+      <div class="cell"><span class="n">03</span><b>2</b><span>rotas que gastam</span></div>
+      <div class="cell"><span class="n">04</span><b>—</b><span>fila do CRM</span></div>
+    </div>
+    <div class="blk"><span><span class="pt">•</span> Ambiente</span><span>o valor nunca é impresso, nem para depurar</span></div>
+    <div class="list">
+      <div class="var"><span class="idx">01</span><span><span class="nome">SUPABASE_URL</span><span class="oq">Projeto do CRM de onde vêm os sinais.</span></span><span class="est sim">definida</span></div>
+      <div class="var"><span class="idx">02</span><span><span class="nome">SUPABASE_SERVICE_ROLE_KEY</span><span class="oq">Ignora RLS. Só no servidor, nunca com prefixo público.</span></span><span class="est sim">definida</span></div>
+      <div class="var"><span class="idx">03</span><span><span class="nome">CRM_AGENT_KEY</span><span class="oq">Assina a sugestão no CRM — trocar a chave troca a autoria.</span></span><span class="est sim">definida</span></div>
+      <div class="var"><span class="idx">04</span><span><span class="nome">UNSPLASH_ACCESS_KEY</span><span class="oq">Busca de imagem do acervo.</span></span><span class="est sim">definida</span></div>
+      <div class="var"><span class="idx">05</span><span><span class="nome">APP_PASSWORD</span><span class="oq">Sem ela o proxy não pede nada. Certo em localhost, inaceitável numa URL pública.</span></span><span class="est nao">faltando</span></div>
+    </div>
+    <div class="nota"><b>Por que “faltando” aparece em vermelho e conta na grade</b>Hoje esta tela lista as variáveis sem dizer o que a ausência custa. A célula invertida passa a mostrar quantas faltam, e a linha do <code>APP_PASSWORD</code> diz o que acontece sem ela — que é a diferença entre localhost e uma URL pública aberta.</div>
+  </section>
+</div>
+
+<div class="ctrl">
+  <span>Fase 2 · tela</span>
+  <button data-tela="t-pecas" aria-pressed="true">Peças</button>
+  <button data-tela="t-pecas-vazio" aria-pressed="false">Peças · vazio</button>
+  <button data-tela="t-fatos" aria-pressed="false">Fatos</button>
+  <button data-tela="t-custos" aria-pressed="false">Custos</button>
+  <button data-tela="t-instalacao" aria-pressed="false">Instalação</button>
+  <span style="margin-left:8px">tema</span>
+  <button data-tema="claro" aria-pressed="true">Claro</button>
+  <button data-tema="escuro" aria-pressed="false">Escuro</button>
+</div>
+
+<script>
+const marcar = (grupo, ativo) => {
+  document.querySelectorAll(`.ctrl button[${grupo}]`).forEach((b) => {
+    b.setAttribute("aria-pressed", String(b.getAttribute(grupo) === ativo));
+  });
+};
+document.querySelectorAll(".ctrl button[data-tela]").forEach((b) => {
+  b.onclick = () => {
+    const id = b.dataset.tela;
+    document.querySelectorAll(".tela").forEach((s) => s.classList.toggle("on", s.id === id));
+    marcar("data-tela", id);
+    // a faixa marca a seção correspondente, como no app
+    const secao = id.replace("t-", "").split("-")[0];
+    document.querySelectorAll(".wire a").forEach((a) => a.classList.toggle("on", a.dataset.nav === secao));
+  };
+});
+document.querySelectorAll(".ctrl button[data-tema]").forEach((b) => {
+  b.onclick = () => {
+    document.body.dataset.tema = b.dataset.tema;
+    document.querySelector(".date .dir span:last-child").textContent = `Tema · ${b.dataset.tema}`;
+    marcar("data-tema", b.dataset.tema);
+  };
+});
+</script>
+</body>
+</html>
