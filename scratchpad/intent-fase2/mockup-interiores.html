@@ -175,11 +175,118 @@ body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 var(--sans
 .vazio p{margin:0;font-size:12px;color:var(--mut)}
 .cta{display:inline-block;margin-top:12px;background:var(--ink);color:var(--paper);
   padding:9px 13px;font:800 11px var(--sans);text-decoration:none}
+
+/* ══════════════════════════════════════════════════════════════════
+   CONFORTO — a correção do erro de tradução
+
+   O mock aprovado da Fase 1 desenha cada tela num artboard de ~468px
+   (três frames dentro de um wrap de 1480px). Os valores em pixel dele
+   foram copiados literalmente para uma tela de 1900px — QUATRO VEZES
+   maior. Num artboard de 468px, uma linha de ponta a ponta é uma
+   medida confortável e um rótulo de 9px parece normal; a 1900px a
+   mesma linha tem 1900px e o rótulo tem metade do tamanho.
+
+   "Muito largo" e "fontes pequenas" são o MESMO defeito: proporção
+   traduzida como pixel. Já tinha acontecido na Fase 1 com o glifo.
+
+   Duas correções:
+   1. MEDIDA — a página ganha uma coluna de 1280px, e a casca se alinha
+      à mesma borda. Um jornal tem margem; texto até a borda do papel
+      não existe em lugar nenhum.
+   2. ESCALA — piso de 11px. Nada de 8,5px numa tela de 1900px.
+   ══════════════════════════════════════════════════════════════════ */
+[data-conforto="v2"]{ --medida:1280px; }
+
+/* Uma borda esquerda e uma direita para a página inteira, casca inclusive. */
+[data-conforto="v2"] .mast,
+[data-conforto="v2"] .date,
+[data-conforto="v2"] .wire,
+[data-conforto="v2"] .tela > *{
+  padding-inline:max(24px, calc((100% - var(--medida)) / 2));
+}
+[data-conforto="v2"] .nota,
+[data-conforto="v2"] .vazio{
+  margin-inline:max(24px, calc((100% - var(--medida)) / 2));
+  padding-inline:20px;
+}
+
+/* ── escala ── piso 11px, corpo 15,5px ─────────────────────────── */
+[data-conforto="v2"] .brand{ font-size:31px }
+[data-conforto="v2"] .edition{ font-size:11px }
+[data-conforto="v2"] .date{ font-size:11.5px; padding-block:6px }
+[data-conforto="v2"] .wire{ font-size:11.5px; padding-block:9px; gap:18px }
+[data-conforto="v2"] .plus{ width:19px; height:19px; font-size:13px }
+
+[data-conforto="v2"] .proof{ font-size:11px; padding-top:18px }
+[data-conforto="v2"] .head{ padding-block:4px 18px }
+[data-conforto="v2"] .head h1{ font-size:41px }
+[data-conforto="v2"] .head p{ font-size:15.5px; margin-top:8px; max-width:60ch }
+
+/* A grade pinta `rule` no próprio fundo (é o que faz a linha de 1px entre as
+   células). Com padding-inline esse fundo vazava para fora da medida e virava
+   uma barra cinza solta nas duas pontas — some o padding, entra a largura. */
+[data-conforto="v2"] .grid{
+  padding-inline:0; max-width:var(--medida); margin-inline:auto;
+  border-inline:1px solid var(--rule);
+}
+[data-conforto="v2"] .cell{ padding:18px 22px; min-height:104px }
+[data-conforto="v2"] .cell .n{ font-size:11px }
+[data-conforto="v2"] .cell b{ font-size:37px; margin-top:7px }
+[data-conforto="v2"] .cell span{ font-size:12px; margin-top:7px }
+
+/* Mesma correção da grade: quem pinta fundo não usa padding para respeitar a
+   medida, senão o fundo vaza. A lista ganha largura própria e as linhas
+   perdem o padding lateral — assim elas alinham EXATAMENTE com a manchete,
+   numa borda esquerda só para a página inteira. */
+[data-conforto="v2"] .list{
+  padding-inline:0; max-width:var(--medida); margin-inline:auto;
+}
+[data-conforto="v2"] .row,
+[data-conforto="v2"] .fato,
+[data-conforto="v2"] .ext,
+[data-conforto="v2"] .var{ padding-inline:20px }
+[data-conforto="v2"] .ext.falhou{ padding-left:17px }
+
+[data-conforto="v2"] .blk{ font-size:11px; padding-block:24px 10px }
+[data-conforto="v2"] .row{ padding-block:14px; grid-template-columns:40px 1fr auto }
+[data-conforto="v2"] .row .idx{ font-size:11px }
+[data-conforto="v2"] .row .tit{ font-size:15.5px }
+[data-conforto="v2"] .row .meta{ font-size:11.5px; margin-top:4px }
+[data-conforto="v2"] .row .dir{ font-size:11.5px }
+[data-conforto="v2"] .row .seta{ font-size:16px }
+
+[data-conforto="v2"] .fato{ padding-block:16px; grid-template-columns:126px 1fr 196px; gap:20px }
+[data-conforto="v2"] .fato .txt{ font-size:15.5px; max-width:64ch }
+[data-conforto="v2"] .fato .orig{ font-size:11.5px; margin-top:6px }
+[data-conforto="v2"] .nivel{ font-size:11.5px; padding-left:11px }
+[data-conforto="v2"] .nivel em{ font-size:10.5px; margin-top:4px }
+[data-conforto="v2"] .quando{ font-size:11.5px }
+[data-conforto="v2"] .quando em{ font-size:10.5px; margin-top:4px }
+
+/* 160px porque "sugestões · não virou peça" quebrava em três linhas a 104px.
+   Duas linhas é o padrão da coluna de nível em Fatos — três é acidente. */
+[data-conforto="v2"] .ext{ padding-block:13px; font-size:14.5px; grid-template-columns:40px 160px 1fr auto auto }
+[data-conforto="v2"] .ext .tipo{ font-size:11.5px }
+[data-conforto="v2"] .ext .quando{ font-size:11.5px }
+[data-conforto="v2"] .ext .valor{ font-size:15px }
+[data-conforto="v2"] .ext.falhou{ padding-left:calc(max(24px, (100% - var(--medida)) / 2) - 3px) }
+
+[data-conforto="v2"] .var{ padding-block:14px; grid-template-columns:40px 1fr 150px }
+[data-conforto="v2"] .var .nome{ font-size:14.5px }
+[data-conforto="v2"] .var .oq{ font-size:13.5px; margin-top:4px }
+[data-conforto="v2"] .var .est{ font-size:11.5px }
+
+[data-conforto="v2"] .nota{ font-size:14px; padding-block:13px; margin-top:22px }
+[data-conforto="v2"] .vazio{ padding-block:34px; margin-block:24px }
+[data-conforto="v2"] .vazio .kick{ font-size:11px }
+[data-conforto="v2"] .vazio h3{ font-size:27px }
+[data-conforto="v2"] .vazio p{ font-size:15px }
+[data-conforto="v2"] .cta{ font-size:13.5px; padding:11px 16px; margin-top:16px }
 .tela{display:none}
 .tela.on{display:block}
 </style>
 </head>
-<body data-tema="claro">
+<body data-tema="claro" data-conforto="v2">
 
 <div class="app">
   <!-- ══ casca: já no ar desde a Fase 1, aqui só para conferir o encaixe ══ -->
@@ -262,7 +369,7 @@ body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 var(--sans
       <div class="cell"><span class="n">04</span><b>16</b><span>dado duro</span></div>
     </div>
     <div class="blk"><span><span class="pt">•</span> Para conferir, em ordem de risco · n=18</span><span>1 de 19 já foi conferido contra a fonte</span></div>
-    <div>
+    <div class="list">
       <div class="fato"><span class="nivel n-nao">não verificado<em>dado duro</em></span><span class="txt">A NBR 10.004:2024 (ABNT) classifica resíduo sólido quanto à periculosidade. Classe I é perigoso, Classe II A não inerte, Classe II B inerte. Não é obrigação sobre transportador.<span class="orig">nbr-10004-classificacao · resibag-compliance-kb v3.3, seção 1</span></span><span class="quando nunca">nunca conferido<em>sem data de revalidação</em></span></div>
       <div class="fato"><span class="nivel n-nao">não verificado<em>dado duro</em></span><span class="txt">A revisão de 2024 da NBR 10.004 mexeu em limites de contaminação por metais pesados, ensaios de lixiviação e solubilização (anexos F e G) e critérios de amostragem.<span class="orig">nbr-10004-revisao-2024 · resibag-compliance-kb v3.3, seção 1</span></span><span class="quando nunca">nunca conferido<em>sem data de revalidação</em></span></div>
       <div class="fato"><span class="nivel n-nao">não verificado<em>dado duro</em></span><span class="txt">A Resolução ANTT 5998/2022 está vigente desde junho/2023 e revogou a ANTT 420/2004.<span class="orig">antt-5998-vigencia · resibag-compliance-kb v3.3, seção 2</span></span><span class="quando nunca">nunca conferido<em>sem data de revalidação</em></span></div>
@@ -332,6 +439,9 @@ body{margin:0;background:var(--paper);color:var(--ink);font:14px/1.45 var(--sans
   <button data-tela="t-fatos" aria-pressed="false">Fatos</button>
   <button data-tela="t-custos" aria-pressed="false">Custos</button>
   <button data-tela="t-instalacao" aria-pressed="false">Instalação</button>
+  <span style="margin-left:8px">conforto</span>
+  <button data-conforto="v1" aria-pressed="false">v1 · como estava</button>
+  <button data-conforto="v2" aria-pressed="true">v2 · medida + escala</button>
   <span style="margin-left:8px">tema</span>
   <button data-tema="claro" aria-pressed="true">Claro</button>
   <button data-tema="escuro" aria-pressed="false">Escuro</button>
@@ -351,6 +461,12 @@ document.querySelectorAll(".ctrl button[data-tela]").forEach((b) => {
     // a faixa marca a seção correspondente, como no app
     const secao = id.replace("t-", "").split("-")[0];
     document.querySelectorAll(".wire a").forEach((a) => a.classList.toggle("on", a.dataset.nav === secao));
+  };
+});
+document.querySelectorAll(".ctrl button[data-conforto]").forEach((b) => {
+  b.onclick = () => {
+    document.body.dataset.conforto = b.dataset.conforto;
+    marcar("data-conforto", b.dataset.conforto);
   };
 });
 document.querySelectorAll(".ctrl button[data-tema]").forEach((b) => {

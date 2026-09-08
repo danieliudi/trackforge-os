@@ -250,6 +250,32 @@ Formato que funciona com ele: HTML clicável com 3-4 estados, mais screenshots
 na largura real do monitor dele (1900px). Página única longa com scroll foi
 rejeitada explicitamente.
 
+**Mock é PROPORÇÃO, não pixel — e este repo já errou isso duas vezes.** Os
+mocks de referência desenham cada tela num artboard pequeno: o híbrido da Fase 1
+põe três frames dentro de um wrap de 1480px, ou seja **~468px por tela**. Copiar
+os valores em pixel de lá para uma tela de 1900px multiplica o erro por quatro.
+
+- 07/09/2026, Fase 1: o glifo de 78px do mock virou 78px numa tela quatro vezes
+  maior, se perdeu, e sobraram 570px mortos. Corrigido com `clamp()`, que mantém
+  a proporção aprovada.
+- 08/09/2026, Fase 2: a mesma coisa com a tipografia e com a largura. Rótulos de
+  8,5px e 9px foram copiados literais, e as linhas ficaram de ponta a ponta numa
+  tela de 1900px. **O Daniel viu antes de mim** — "está muito largo, não sei
+  explicar, e algumas fontes estão muito pequenas". Eram o MESMO defeito: num
+  artboard de 468px a linha cheia é uma medida confortável e 9px parece um
+  rótulo normal; a 1900px a linha tem 1900px e a letra tem metade do tamanho.
+
+**A regra derivada.** Antes de traduzir um mock, divida: qual a largura do
+artboard dele, e qual a largura real da tela. Se a razão não for 1, nenhum valor
+em pixel atravessa — atravessa a proporção. E duas travas fixas, que valem para
+qualquer tela nova:
+
+- **Medida de página.** Conteúdo de leitura mora numa coluna (hoje 1280px), com
+  a casca alinhada à mesma borda. Texto até a borda do papel não existe em
+  jornal nenhum, e é o que produz a sensação de "largo" sem nome.
+- **Piso de 11px** para rótulo e meta em tela de trabalho; corpo em 15px. Abaixo
+  disso é decisão explícita, não descuido de tradução.
+
 **Contraste é gate, não gosto, e vale nos dois temas.** Texto de corpo ≥ 4,5:1
 sobre o fundo; rótulo pequeno e ornamento ≥ 3:1. Meça sobre o app de verdade,
 não sobre o hex isolado: **declare o par em `scripts/qa/contraste.mjs` e rode

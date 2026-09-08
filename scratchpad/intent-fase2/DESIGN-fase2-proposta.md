@@ -63,12 +63,49 @@ linha do `APP_PASSWORD` diz o que acontece sem ela — que é a diferença entre
 - **Nenhum número inventado.** Tudo veio do app rodando com dado semeado. Foi o
   erro que a Fase 1 quase cometeu com as contagens ilustrativas do mock.
 
+## Correção de conforto (08/09/2026) — v2 no mockup
+
+O Daniel olhou a primeira versão e disse: *"está muito largo, não sei explicar,
+e algumas fontes estão muito pequenas."* Os dois sintomas eram **um defeito só**,
+e meu:
+
+**O mock aprovado da Fase 1 desenha cada tela num artboard de ~468px** (três
+frames dentro de um wrap de 1480px). Copiei os valores em pixel dele — 8,5px,
+9px, 10px, linha de ponta a ponta — direto para uma tela de 1900px. Quatro vezes
+maior. Num artboard de 468px a linha cheia é uma medida confortável e 9px parece
+um rótulo normal; a 1900px a linha tem 1900px e a letra tem metade do tamanho.
+
+É a **segunda vez**: na Fase 1 o glifo de 78px do mock se perdeu pelo mesmo
+motivo. Virou regra no `CLAUDE.md` seção 4 — mock é proporção, nunca pixel.
+
+O mockup tem o botão **v1 / v2** para comparar lado a lado. O que muda no v2:
+
+| | v1 | v2 |
+|---|---|---|
+| Largura do conteúdo | ponta a ponta (1900px) | coluna de **1280px**, casca alinhada à mesma borda |
+| Menor fonte | 8,5px | **10,5px** (piso de 11px para rótulo e meta) |
+| Corpo de leitura | 13px | **15,5px** |
+| Manchete | 34px | **41px** |
+| Valor da célula | 28px | **37px** |
+| Altura da célula | 78px | **104px** |
+| Linha da lista | 9px de respiro | **14px** |
+
+Três defeitos apareceram ao aplicar a medida e foram corrigidos: o fundo da
+grade vazava para fora da coluna (virou largura própria em vez de padding), o
+fundo das listas fazia o mesmo, e `sugestões · não virou peça` quebrava em três
+linhas numa coluna de 104px.
+
+Contraste refeito depois de tudo: **136 medições, 5 telas × 2 temas, todas acima
+do piso.**
+
 ## O que eu NÃO decidi sozinho
 
 - **Manchete em serif.** É a mudança mais visível e a mais discutível. Em sans
   fica mais perto do que está no ar hoje; em serif fica mais perto do masthead.
 - **A coluna "nunca conferido".** Ela expõe que a base quase não foi conferida.
   Isso é verdade e eu acho que precisa aparecer, mas é decisão sua.
+- **A medida de 1280px.** É o número que resolveu o desconforto aqui, mas é
+  ajustável: 1180 aperta mais, 1400 solta. O botão v1/v2 mostra os extremos.
 - **Bancada e editor fora da fase.** Se você quiser tudo de uma vez, o mockup
   precisa de mais duas telas antes de qualquer código.
 

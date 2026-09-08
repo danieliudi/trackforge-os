@@ -60,6 +60,27 @@ que roda **antes da primeira pintura** (`src/app/layout.tsx`). Sem ele a tela
 nasce clara e pisca para escura a cada navegação — não remova nem adie esse
 script.
 
+## Mock é proporção, não pixel
+
+Os mocks de referência desenham cada tela num artboard pequeno — o híbrido da
+Fase 1 põe três frames num wrap de 1480px, **~468px por tela**. Copiar os pixels
+de lá para uma tela de 1900px multiplica o erro por quatro.
+
+Aconteceu duas vezes: o glifo da Fase 1 (78px perdido numa tela 4× maior,
+corrigido com `clamp()`) e a tipografia da Fase 2 (rótulos de 8,5px e linhas de
+ponta a ponta). No segundo caso quem viu foi o Daniel, não a sessão: *"está
+muito largo, não sei explicar, e algumas fontes estão muito pequenas"* — os dois
+sintomas eram o mesmo defeito.
+
+**Antes de traduzir:** divida a largura do artboard pela largura real da tela. Se
+a razão não for 1, atravessa a proporção, nunca o valor em pixel.
+
+**Duas travas fixas:**
+- **Medida de página** — leitura mora numa coluna (1280px), com a casca alinhada
+  à mesma borda. Texto até a borda do papel não existe em jornal nenhum.
+- **Piso de 11px** para rótulo e meta; corpo em 15px. Abaixo disso é decisão
+  explícita, não descuido de tradução.
+
 ## Contraste é gate, não gosto — e vale nos dois temas
 
 - Texto de corpo **≥ 4,5:1** sobre o fundo.
