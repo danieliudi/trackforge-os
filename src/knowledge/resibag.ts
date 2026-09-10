@@ -1,7 +1,7 @@
 import type { BrandKnowledge } from "./types";
 
 /**
- * Fatos Resibag — cópia curada de `resibag-canonical-facts` v2.9 (10/09/2026).
+ * Fatos Resibag — cópia curada de `resibag-canonical-facts` v3.1 (10/09/2026).
  *
  * Ao atualizar aquela fonte, atualizar aqui também: este arquivo é o que o
  * gerador enxerga, e uma divergência silenciosa entre os dois é exatamente o
@@ -27,6 +27,27 @@ import type { BrandKnowledge } from "./types";
  *   · A tagline perdeu "industriais" (09/09/2026) e o slogan antigo foi
  *     suspenso por premissa falsa (08/09/2026): sugeria que o cliente não tem
  *     alternativa homologada, e os três concorrentes mapeados têm INMETRO.
+ *
+ * SEGUNDA REVISÃO DO MESMO DIA, v2.9 → v3.1. A skill andou duas vezes em
+ * 10/09/2026, e de novo com conteúdo de compliance dentro:
+ *
+ *   · A NBR 10.004 é norma de CLASSIFICAÇÃO e NÃO TEM prazo de adequação. O
+ *     "prazo até 31/12/2026" que circulava é erro — apareceu num deck de
+ *     prospecção, e a origem da data virou [FALTA DADO]. Citar sempre :2024.
+ *   · OCP-0041 é o registro do ORGANISMO CERTIFICADOR (ABRACE), nunca o código
+ *     INMETRO do produto. Cita-se separado, como OCP acreditador.
+ *   · O nome do organismo certificador da ISO 9001 saiu da fonte: está em
+ *     CONFLITO ABERTO entre as duas frentes (SGS aqui, DNV na Sanwey), sem
+ *     certificado físico conferido. Em peça Resibag não se cita organismo.
+ *     ESCOPO: a proibição é desta frente. O certificado é da Sanwey, e a fonte
+ *     canônica dela registra DNV com histórico de correção — `sanwey.ts` não
+ *     herda esta regra, porque isso seria o vazamento entre marcas que a
+ *     própria regra de isolamento proíbe.
+ *   · `comercial@resibag.com.br` não é canônico: apareceu no header do site.
+ *
+ * Os certificados INMETRO NÃO mudaram da v2.9 para a v3.1 — conferido antes de
+ * reescrever qualquer coisa, porque `src/knowledge/facts/resibag-normas.json`
+ * tinha acabado de ser preenchido a partir deles.
  *
  * A divergência que este arquivo mantinha de propósito — a ANTT 6.078/2026
  * apresentada como atualização da 5.998 — está RESOLVIDA na fonte: a v2.9
@@ -83,6 +104,17 @@ ISO 9001:2015 do Grupo Sanwey" — nunca "Filtrante é certificado".
 Classe (NBR 10.004, I/II) e Grupo de embalagem (ANTT/ONU, I/II/III) são eixos
 diferentes: Classe classifica o resíduo, Grupo classifica o risco da embalagem no
 transporte. Não misturar os dois em material técnico ou jurídico.
+
+**A NBR 10.004 é norma de classificação e não tem prazo de adequação.** Citar
+sempre a edição :2024. Data de prazo atribuída a ela é erro de fato.
+
+**OCP-0041 é o registro do organismo certificador**, a ABRACE, acreditada pela
+ABNT NBR ISO/IEC 17065. Cita-se separado, como OCP acreditador — os códigos do
+produto são IBC-0136/22 e IBC-0143/25.
+
+**Em peça Resibag não se nomeia o organismo certificador da ISO 9001.** Escreva
+"sistema de gestão da qualidade certificado ISO 9001:2015". O nome está em
+conflito aberto entre as frentes e aguarda certificado físico conferido.
 
 ## Argumentos fixos (verbatim)
 - "1 Resibag substitui 5 tambores" — cinco, nunca outro número.
@@ -165,9 +197,50 @@ certificação de produto — estão na seção PROIBIÇÕES, que é onde elas v
         "essas linhas NÃO têm certificação de produto nenhuma. A ISO 9001:2015 é do sistema de gestão da Sanwey e cobre a fabricação — escreva \"fabricado sob SGQ certificado\", nunca \"linha certificada\". Atribuir homologação a elas é erro de compliance.",
     },
     {
+      term: "prazo de adequação atribuído à NBR 10.004",
+      reason:
+        "a NBR 10.004 é norma de CLASSIFICAÇÃO de resíduo e não tem prazo de adequação. O \"prazo até 31/12/2026\" circulou num deck de prospecção e a origem da data ficou como [FALTA DADO] (10/09/2026). Citar sempre a edição :2024.",
+      // A primeira versão desta regra casava com QUALQUER menção da norma perto
+      // da palavra "prazo" — inclusive com a frase que NEGA o prazo, que é a
+      // formulação correta. Falso alarme em peça certa é tão caro quanto silêncio
+      // em peça errada: os padrões abaixo exigem a AFIRMAÇÃO do prazo (a data
+      // errada, ou "prazo … da NBR"), nunca a menção solta.
+      match: [
+        /nbr 10\.?004[^.]{0,80}(31\/12\/2026|01\/01\/2027)/,
+        /prazo (de )?(transicao|adequacao) da nbr/,
+        /nbr 10\.?004:?\s*2004\b/,
+      ],
+    },
+    {
+      term: "OCP-0041 apresentado como código INMETRO do produto",
+      reason:
+        "OCP-0041 é o registro do organismo certificador (ABRACE), acreditado ABNT NBR ISO/IEC 17065. Os códigos do produto são IBC-0136/22 e IBC-0143/25. Cite o OCP separado, como acreditador.",
+      // "certificado" casava dentro de "certificadOR", marcando o uso CORRETO
+      // ("organismo certificador ABRACE, OCP-0041") como erro. Os padrões abaixo
+      // miram a confusão real: o OCP apresentado como código ou homologação.
+      match: [
+        /codigo[^.]{0,25}ocp.?0041/,
+        /homologacao[^.]{0,25}ocp.?0041/,
+        /ocp.?0041[^.]{0,25}(inmetro|homologa|do produto)/,
+      ],
+    },
+    {
+      term: "nome do organismo certificador da ISO 9001 em peça Resibag",
+      reason:
+        "está em conflito aberto entre as frentes e aguarda certificado físico conferido (10/09/2026). Escreva \"sistema de gestão da qualidade certificado ISO 9001:2015\", sem nomear o organismo. ESCOPO: esta regra é da frente Resibag — o certificado é da Sanwey, cuja fonte canônica registra o organismo com histórico de correção.",
+      match: [/\bsgs\b/, /\bdnv\b/],
+    },
+    {
+      term: '"Ninguém compra big bag. Compra a prova de que o big bag passa na auditoria."',
+      reason:
+        "a mesma premissa falsa do slogan suspenso, em outra roupagem: sugere que o cliente não tem alternativa homologada. Encontrada abrindo um playbook comercial no Drive em 10/09/2026.",
+      match: [/ninguem compra big bag/],
+    },
+    {
       term: "qualquer telefone ou e-mail fora de (11) 99465-9377 e vendas@resibag.com.br",
-      reason: "contatos errados já circularam em material antigo.",
-      match: [/\(?81\)?\s*923.?721.?7839/, /94055.?1389/],
+      reason:
+        "contatos errados já circularam em material antigo. Inclui comercial@resibag.com.br, que apareceu no header do site em auditoria de maio/2026 e não é canônico.",
+      match: [/\(?81\)?\s*923.?721.?7839/, /94055.?1389/, /comercial@resibag/],
     },
     {
       term: '"homologação ANTT" ou a ANTT 5998 apresentada como selo da Resibag',

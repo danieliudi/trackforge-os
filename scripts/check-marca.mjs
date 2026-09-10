@@ -124,6 +124,12 @@ const CASOS = {
       ["ANTT 6.078", ["A ANTT 6.078/2026 atualizou a 5.998."]],
       ["NORMAM", ["Homologacao NORMAM da Marinha."]],
       ["4 tambores", ["1 big bag substitui 4 tambores."]],
+      ["prazo inventado para a NBR", ["O prazo de transicao da NBR 10.004:2024 termina em 31/12/2026."]],
+      ["edicao antiga da NBR", ["Classificacao conforme NBR 10.004:2004."]],
+      ["OCP como codigo do produto", ["Codigo INMETRO OCP-0041."]],
+      ["organismo da ISO em peca Resibag", ["ISO 9001:2015 certificada pela SGS."]],
+      ["premissa falsa em outra roupagem", ["Ninguem compra big bag. Compra a prova de que o big bag passa na auditoria."]],
+      ["e-mail nao canonico", ["Fale com comercial@resibag.com.br."]],
       // Coocorrencia: nenhum lado e proibido sozinho. A capa que a propria
       // sessao montou errado no mockup da Fase 3, em 08/09/2026.
       ["par 01+03, blocos vizinhos", [
@@ -142,6 +148,12 @@ const CASOS = {
       ["ISO como sistema de gestao", ["Fabricado sob sistema de gestao da qualidade certificado ISO 9001:2015 do Grupo Sanwey."]],
       ["tagline nova", ["Gestao inteligente de residuos."]],
       ["capacidades certas", ["Disponivel em 700 kg e 1000 kg."]],
+      // A formulacao CORRETA sobre a NBR nao pode disparar a regra do prazo.
+      ["NBR sem prazo, dito certo", ["A NBR 10.004 e norma de classificacao e nao tem prazo de adequacao."]],
+      ["NBR na edicao certa", ["Classificacao conforme NBR 10.004:2024."]],
+      ["OCP citado como acreditador", ["Organismo certificador ABRACE, OCP-0041, acreditado ABNT NBR ISO/IEC 17065."]],
+      ["ISO sem nomear organismo", ["Fabricado sob sistema de gestao da qualidade certificado ISO 9001:2015."]],
+      ["e-mail canonico", ["Fale com vendas@resibag.com.br."]],
       ["so Nivel 03 — ads", [
         "5 tambores parecem mais baratos. Juntos, pesam e custam mais que 1 Resibag.",
         "Fale com a gente: vendas@resibag.com.br",

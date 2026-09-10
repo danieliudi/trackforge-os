@@ -24,6 +24,20 @@ import type { BrandKnowledge } from "./types";
  *     "embalagem" por "contentor" — "embalagem" convida à precificação por
  *     quilo, que o posicionamento proíbe.
  *
+ * CONFLITO ABERTO, registrado aqui e NÃO resolvido por esta sessão: o organismo
+ * certificador da ISO 9001. Esta base diz DNV, seguindo a `sanwey-canonical-facts`,
+ * que trata "SGS → DNV" como correção de erro desde a v1.3. A
+ * `resibag-canonical-facts` v3.1 retirou o nome da tabela dela e proibiu citá-lo
+ * em peça Resibag até haver certificado físico conferido. É a MESMA certificação,
+ * da mesma pessoa jurídica, com dois organismos registrados.
+ *
+ * Por que a linha de prova aqui continua nomeando DNV: a proibição é de escopo
+ * Resibag, o certificado é da Sanwey, e a linha C3 é copy de marca verbatim —
+ * parafrasear é erro de marca. Herdar a regra da outra frente seria o vazamento
+ * que a própria regra de isolamento proíbe. Esta nota fica no comentário, fora do
+ * bloco `facts`, para informar quem edita sem mudar o que o gerador lê.
+ * Resolver exige o certificado em mão; é decisão do titular.
+ *
  * ISOLAMENTO CONFERIDO. A ANP e a homologação do Ministério da Marinha (1996)
  * são da SANWEY e continuam válidas aqui. A correção que tirou as duas da
  * Resibag em 08/09/2026 é de escopo Resibag — não vaza para cá, e o que existe

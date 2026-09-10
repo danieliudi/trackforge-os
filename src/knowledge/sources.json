@@ -3,8 +3,8 @@
   "sources": [
     {
       "skill": "resibag-canonical-facts",
-      "version": "v2.9",
-      "sha256": "36191ba7e0687caa5b816ba09e481859732b7b160a91ccaf96742ceaa4dd5812",
+      "version": "v3.1",
+      "sha256": "d1cc28b8ad11acc6cac367d2ceb8a8fba690f87982c5dfafc149f8256a5dfd61",
       "curatedInto": "src/knowledge/resibag.ts"
     },
     {

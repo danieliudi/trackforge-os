@@ -5,8 +5,8 @@
       "id": "nbr-10004-classificacao",
       "claim": "A NBR 10.004:2024 (ABNT) classifica resíduo sólido quanto à periculosidade. Classe I é perigoso, Classe II A não inerte, Classe II B inerte. Não é obrigação sobre transportador.",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 1",
-      "notes": "Conferir contra o texto da ABNT. A KB nunca cita a norma diretamente."
+      "source": "resibag-compliance-kb v3.3, seção 1 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "Conferir contra o texto da ABNT. A KB nunca cita a norma diretamente. A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Texto da ABNT NBR 10.004:2024."
     },
     {
       "id": "nbr-10004-transicao",
@@ -14,26 +14,28 @@
       "tier": "secundaria",
       "source": "market_signals do CRM (ABNT / CETESB), 13/08/2026",
       "url": "https://www.novaambiental.com.br/fim-do-prazo-para-a-antiga-nbr-10004-saiba-como-a-nova-decisao-da-cetesb-impacta-a-classificacao-de-residuos-da-sua-industria/",
-      "notes": "A fonte é um portal setorial, não a CETESB. Confirmar na CETESB antes de usar a data numa peça."
+      "notes": "CONTESTADO PELA FONTE CANÔNICA em 10/09/2026: a resibag-canonical-facts v3.1 registra que a NBR 10.004 é norma de CLASSIFICAÇÃO e não tem prazo de adequação — qualquer peça que anuncie um está errada, e a origem da data 31/12/2026 ficou como [FALTA DADO]. O mesmo prazo foi encontrado num deck de prospecção no Drive. O registro fica aqui porque documenta o que o sinal de mercado afirmou; a proibição de emitir está em `forbidden`. A fonte original é um portal setorial, não a CETESB."
     },
     {
       "id": "nbr-10004-revisao-2024",
       "claim": "A revisão de 2024 da NBR 10.004 mexeu em limites de contaminação por metais pesados, ensaios de lixiviação e solubilização (anexos F e G) e critérios de amostragem.",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 1"
+      "source": "resibag-compliance-kb v3.3, seção 1 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Texto da ABNT NBR 10.004:2024."
     },
     {
       "id": "antt-5998-vigencia",
       "claim": "A Resolução ANTT 5998/2022 está vigente desde junho/2023 e revogou a ANTT 420/2004.",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 2",
-      "notes": "Data de vigência e revogação precisam sair do texto da resolução, não da KB."
+      "source": "resibag-compliance-kb v3.3, seção 2 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "Data de vigência e revogação precisam sair do texto da resolução, não da KB. A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Texto da Resolução ANTT 5998/2022, no site da ANTT."
     },
     {
       "id": "antt-5998-exigencias",
       "claim": "A ANTT 5998/2022 exige embalagem certificada INMETRO, Ficha de Emergência e Envelope para Transporte, MOPP do motorista e declaração de responsabilidade do expedidor (o gerador do resíduo).",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 2"
+      "source": "resibag-compliance-kb v3.3, seção 2 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Texto da Resolução ANTT 5998/2022, no site da ANTT."
     },
     {
       "id": "antt-5998-revisao",
@@ -50,20 +52,23 @@
       "id": "inmetro-320-exigencias",
       "claim": "A Portaria INMETRO 320/2021 exige ensaios de queda livre, empilhamento, estanqueidade e pressão interna; certificação por OCP acreditado; marcação ONU com símbolo, código e massa bruta máxima; auditoria anual e recertificação a cada 3 anos.",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 3"
+      "source": "resibag-compliance-kb v3.3, seção 3 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Texto da Portaria INMETRO 320/2021."
     },
     {
       "id": "inmetro-320-marcacao",
-      "claim": "A marcação ONU do big bag segue o formato 1H2/Y/[ano]/BR/[fabricante]/[OCP], onde 1H2 é big bag flexível e Y cobre grupos de embalagem II e III.",
+      "claim": "A marcação ONU dos big bags da Resibag é 13H3/Z/mm aa BR/SAN-T025/1095-08/3780/700 (família SAN T025, 700 kg, Grupo III) e 13H1 ou 13H3/Y/mm aa BR/SAN-T015/1095-08/7200/1000 (família SAN T015, 1000 kg, Grupo II). O campo mm/aa é o mês e ano de fabricação do lote.",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 3"
+      "source": "Certificados INMETRO IBC-0136/22 e IBC-0143/25, via resibag-canonical-facts v2.9 §05",
+      "notes": "CORRIGE UM ERRO DA BASE: a redação anterior dizia formato \"1H2/Y/[ano]/…, onde 1H2 é big bag flexível e Y cobre grupos II e III\", herdada da resibag-compliance-kb v3.3. Os certificados trazem 13H1/13H3, e a letra do grupo varia entre as duas famílias. O tier continua não-verificado porque o PDF do certificado não está neste repositório — quem tem o documento fecha em uma linha."
     },
     {
       "id": "codigos-ibc-resibag",
-      "claim": "Os códigos INMETRO da Resibag são IBC-0136/22 SAN T025 e IBC-0143/25 SAN T015, pelo OCP ABRACE OCP-0041, aplicáveis às linhas Standard e Estruturado.",
+      "claim": "A Resibag tem uma homologação de produto, o INMETRO, em dois certificados por capacidade: IBC-0136/22 (família SAN T025, 700 kg, Grupo de embalagem III, válido até 18/05/2028) e IBC-0143/25 (família SAN T015, 1000 kg, Grupo II, válido até 07/08/2031). Órgão certificador ABRACE, OCP-0041, acreditado ABNT NBR ISO/IEC 17065. Base legal: Portaria INMETRO 320/2021. Aplicáveis às linhas Standard e Estruturado, que compartilham os mesmos certificados.",
       "tier": "nao-verificado",
-      "source": "resibag-canonical-facts v2.3, seção 05",
-      "notes": "Fonte primária aqui é o próprio certificado INMETRO. Anexar o PDF e marcar como primária resolve — é o fato mais citado em peça e o mais fácil de comprovar."
+      "source": "Certificados INMETRO IBC-0136/22 e IBC-0143/25, via resibag-canonical-facts v2.9 §05",
+      "notes": "Fonte primária é o próprio certificado, e o titular o conferiu linha a linha em 09/09/2026 (registrado na canonical-facts v2.9). O tier segue não-verificado porque a conferência aconteceu FORA deste repositório e o PDF não está anexado — a régua daqui é ter visto o documento. Anexar o PDF e marcar tier \"primaria\" resolve, e é o fato mais citado em peça. revalidateBy usa a validade do certificado que vence primeiro.",
+      "revalidateBy": "2028-05-18"
     },
     {
       "id": "iso-9001-resibag",
@@ -76,59 +81,65 @@
       "id": "ibama-rapp",
       "claim": "O RAPP é declaração anual obrigatória ao IBAMA para gerador de resíduo perigoso, com prazo em maio/2026 para o ano-base 2025.",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 5",
+      "source": "resibag-compliance-kb v3.3, seção 5 — SKILL DESCONTINUADA em 10/09/2026",
       "revalidateBy": "2026-12-31",
-      "notes": "Prazo muda todo ano. Não usar em peça sem conferir o ano corrente."
+      "notes": "Prazo muda todo ano. Não usar em peça sem conferir o ano corrente. A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Fonte oficial do órgão que publica a norma."
     },
     {
       "id": "decreto-12688-2025",
       "claim": "O Decreto 12.688/2025 detalha a PNRS em responsabilidade compartilhada, amplia a logística reversa obrigatória e cria critérios de certificação de destinadoras.",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 5"
+      "source": "resibag-compliance-kb v3.3, seção 5 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Fonte oficial do órgão que publica a norma."
     },
     {
       "id": "in-ibama-06-2026",
       "claim": "A IN IBAMA 06/2026 traz novos critérios de declaração no RAPP, integração com o MTR-e e rastreabilidade documental da embalagem.",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 5"
+      "source": "resibag-compliance-kb v3.3, seção 5 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Fonte oficial do órgão que publica a norma."
     },
     {
       "id": "ifrs-s1-s2",
       "claim": "IFRS S1 e S2 (ISSB) chegam ao Brasil pela CVM Res. 193/2023, voluntária desde 2024. Resíduo perigoso entra como Escopo 3, e embalagem certificada e rastreável vira evidência auditável.",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 6"
+      "source": "resibag-compliance-kb v3.3, seção 6 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Fonte oficial do órgão que publica a norma."
     },
     {
       "id": "multa-destinacao-irregular",
       "claim": "Destinação irregular de resíduo perigoso: multa de R$ 5.000 a R$ 50.000.000 (Lei 9.605/98, art. 54).",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 7",
-      "notes": "Valor de multa em peça pública é dos itens de maior risco. Conferir na lei."
+      "source": "resibag-compliance-kb v3.3, seção 7 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "Valor de multa em peça pública é dos itens de maior risco. Conferir na lei. A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Fonte oficial do órgão que publica a norma."
     },
     {
       "id": "multa-transporte-sem-certificado",
       "claim": "Transporte sem embalagem certificada: multa de R$ 5.000 a R$ 10.000 por ocorrência (ANTT 5998/2022). Reincidência dobra o valor e a carga é apreendida.",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seções 2 e 7",
-      "notes": "Conferir na tabela de infrações da ANTT."
+      "source": "resibag-compliance-kb v3.3, seções 2 e 7 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "Conferir na tabela de infrações da ANTT. A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Fonte oficial do órgão que publica a norma."
     },
     {
       "id": "multa-documentacao",
       "claim": "Ausência de documentação no transporte: multa de R$ 2.500 a R$ 5.000 (ANTT 5998/2022).",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 7"
+      "source": "resibag-compliance-kb v3.3, seção 7 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Fonte oficial do órgão que publica a norma."
     },
     {
       "id": "multa-rapp",
       "claim": "Não entrega do RAPP: multa de R$ 5.000 a R$ 10.000.000 (IBAMA).",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 7"
+      "source": "resibag-compliance-kb v3.3, seção 7 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Fonte oficial do órgão que publica a norma."
     },
     {
       "id": "crime-ambiental-dolo",
       "claim": "Crime ambiental com dolo: detenção de 1 a 5 anos mais multa (Lei 9.605/98).",
       "tier": "nao-verificado",
-      "source": "resibag-compliance-kb v3.3, seção 7"
+      "source": "resibag-compliance-kb v3.3, seção 7 — SKILL DESCONTINUADA em 10/09/2026",
+      "notes": "A skill de origem foi descontinuada pelo titular e não pode mais ser reconsultada: este fato ficou sem lastro recuperável. Conferir em: Texto da Lei 9.605/98."
     }
   ]
 }
