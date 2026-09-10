@@ -12,6 +12,7 @@
     "knowledge:check": "node scripts/check-knowledge.mjs",
     "knowledge:sync": "node scripts/check-knowledge.mjs --sync",
     "knowledge:audit": "node scripts/audit-knowledge.mjs",
+    "knowledge:coerencia": "node --experimental-strip-types --no-warnings scripts/check-marca.mjs",
     "lint:ruido": "eslint --max-warnings 0 || true",
     "doc:check": "node scripts/check-docs.mjs",
     "qa:rotas": "node scripts/qa/rotas.mjs",

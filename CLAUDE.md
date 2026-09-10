@@ -177,10 +177,22 @@ Isto não é preferência de estilo. É o requisito do produto.
   afirmação visual feita por um modelo que nunca o viu, e a imagem é a
   afirmação em que o leitor acredita primeiro. A ferramenta sugere termo de
   busca; a foto vem da biblioteca da marca ou do acervo.
-- **Erro conhecido, não reintroduzir:** a Resolução ANTT nº 6.078/2026 **não**
-  substituiu a Resolução nº 5.998/2022 — tratam de assuntos diferentes do setor
-  de transportes. A skill `resibag-compliance-kb` carregou essa troca; se
-  aparecer de novo na base curada, é erro a corrigir, não fato a propagar.
+- **Contagem de certificação se confere na fonte, e já errou duas vezes.** A
+  Resibag tem **uma** homologação de produto: INMETRO, em dois certificados por
+  capacidade. A base dizia "tripla", foi corrigida para "dupla", e o valor real
+  é **um** — a primeira correção trocou o termo sem revalidar o fato (titular,
+  08/09/2026). A ANTT 5998/2022 é a resolução que **obriga o cliente**, citada
+  como documento normativo dentro dos próprios certificados INMETRO; não é selo
+  da marca. A ISO 9001:2015 é do **sistema de gestão** da Sanwey e cobre a
+  fabricação, nunca o produto. ANP saiu por falta de lastro. Trocar termo não é
+  conferir fato.
+- **Erro conhecido, não reintroduzir:** a Resolução ANTT nº 6.078/2026 não se
+  confirma em fonte oficial, mesmo após revalidação completa de compliance
+  (08–09/09/2026) — e também não substituiu a nº 5.998/2022, que trata de outro
+  assunto. Não citar até existir certificado ou publicação que a sustente. A
+  skill que carregava a troca (`resibag-compliance-kb`) foi descontinuada pelo
+  titular em 10/09/2026; a fonte normativa da frente é a seção 05 da
+  `resibag-canonical-facts`.
 
 ## 3. Segredo e fronteira de dado
 
@@ -385,7 +397,28 @@ não é um gate, é um aviso.
 - Curadoria à frente → não faça nada; sincronizar sobrescreveria correção
   deliberada (foi o caso do erro da ANTT 6.078).
 
-Nunca rode `knowledge:sync` "para limpar o aviso".
+Nunca rode `knowledge:sync` "para limpar o aviso" — e note que ele grava
+**todas** as fontes de uma vez. Revisou uma e a outra não? Edite o
+`sources.json` à mão, senão o sync apaga o aviso da que você não leu.
+
+**`npm run knowledge:coerencia` confere a base contra ela mesma.** O prompt sai
+em duas partes com papéis opostos: `facts` se apresenta ao modelo como "a única
+fonte de fatos autorizada", e `forbidden` vira a seção PROIBIÇÕES. Escrever
+"nunca diga X" no meio dos fatos parece cuidado e é o contrário — põe X dentro
+da fonte autorizada, em forma negada. O roteiro roda as proibições de cada
+frente contra o próprio bloco de fatos dela.
+
+Existe por um caso de 10/09/2026: ao trazer a Resibag da v2.3 para a v2.9,
+esta sessão escreveu as proibições dentro do bloco de fatos. Correto para um
+leitor humano, errado para o uso. O roteiro pegou os dois termos — e, rodando
+pela primeira vez, pegou o mesmo defeito na base da Sanwey, que ninguém tinha
+tocado.
+
+**O que a curadoria ficar devendo aparece como aviso, não some.** Em
+10/09/2026 a `resibag-canonical-facts` estava seis versões à frente, e no meio
+disso havia correção de compliance: a lista `forbidden` mandava escrever "dupla
+homologação", que virou erro. Drift de skill de fato não é ruído de
+versionamento — é o gate podendo apontar para o lado errado.
 
 ## 10. Entrega — o que "pronto" significa
 

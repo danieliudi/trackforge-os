@@ -176,10 +176,18 @@ legítima fica visível em vez de invisível.
   hexes crus que eu tinha escrito foram removidos — inclusive um verde de marca
   que eu havia **inventado** para ilustrar a prancheta.
 - **Medida de leitura medida:** 680px = 72 caracteres por linha a 15,5px.
-- **Fatos da Resibag conferidos contra a skill `resibag-canonical-facts`**, que
-  é a fonte única: endosso, tagline, certificações da Standard (INMETRO + ANTT
-  5998 + ANP + ISO 9001:2015) e o claim de prazo restrito à linha Standard.
-  A ANTT citada é a **5998**, nunca a 6.078.
+- **Fatos da Resibag conferidos contra a `resibag-canonical-facts` v2.9**, que é
+  a fonte única. A primeira versão deste mockup afirmava "INMETRO + ANTT 5998 +
+  ANP + ISO 9001:2015" — copiado da base curada do repo, que estava **seis
+  versões atrás de uma correção de compliance**. O correto: a Resibag tem UMA
+  homologação de produto (INMETRO, dois certificados por capacidade), a ANTT
+  5998 é a obrigação do cliente e não selo da marca, a ANP saiu por falta de
+  lastro, e a ISO 9001 é do sistema de gestão da Sanwey. Corrigido aqui e na
+  base (`src/knowledge/resibag.ts`), em 10/09/2026.
+- **O mockup passa no gate da própria ferramenta.** `conformidade.mjs` roda a
+  varredura de termo proibido de `check.ts` sobre o texto visível dos cinco
+  estados. Fecha o ciclo: a peça de design se submete à mesma regra que o
+  produto aplica na peça do cliente.
 
 **O que no mockup é ilustrativo, dito na cara:** as contagens de token
 (4.180 / 1.905) e as faixas históricas de custo. Tudo que deriva delas está

@@ -34,6 +34,25 @@ nº 6.078/2026 não substituiu a nº 5.998/2022** — tratam de assuntos diferen
 setor de transportes. Um sync cego reintroduz o erro numa peça que vai para
 cliente.
 
+Note também que o sync grava **todas** as fontes de uma vez. Revisou uma e a
+outra não? Edite o `sources.json` à mão — senão o sync apaga o aviso da que
+você não leu.
+
+**Drift de fato não é ruído de versionamento.** Em 10/09/2026 a curadoria da
+Resibag estava seis versões atrás, e no meio disso havia correção de compliance:
+a lista `forbidden` mandava escrever "dupla homologação", quando a contagem
+correta é **uma**. O gate estava apontando para o erro.
+
+## A base contra ela mesma
+
+**`npm run knowledge:coerencia`.** O prompt sai em duas partes com papéis
+opostos: `facts` se apresenta ao modelo como "a única fonte de fatos
+autorizada", e `forbidden` vira a seção PROIBIÇÕES. Escrever "nunca diga X" no
+meio dos fatos parece cuidado e é o contrário — põe X dentro da fonte
+autorizada, em forma negada. O roteiro roda as proibições de cada frente contra
+o bloco de fatos dela. Na primeira execução pegou dois termos na Resibag e um
+na Sanwey.
+
 ## Termo proibido
 
 `src/knowledge/check.ts` faz a varredura determinística por marca. Ela **não

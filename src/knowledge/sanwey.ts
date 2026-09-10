@@ -58,7 +58,7 @@ Alça Guia · Lacrado · Quadrado · Retangular · Liner Aluminizado · Standard
 
 ## Argumentos fixos
 - Diferencial central: engenharia aplicada por carga, não catálogo.
-- Tempo: "42 anos de pioneirismo documentado" — nunca "décadas de experiência".
+- Tempo: "42 anos de pioneirismo documentado" — número exato, sempre. A alternativa vaga está na seção PROIBIÇÕES.
 - Exportação: 1º brasileiro a exportar (1984), 1º para os EUA (1989), presença em quase todos os continentes.
 - Modelo: "Enquanto concorrentes vendem catálogo, a Sanwey diagnostica a operação e projeta a embalagem."
 - Precificação por valor — engenharia e conformidade. Nunca por quilo.
