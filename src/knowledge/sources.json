@@ -9,8 +9,8 @@
     },
     {
       "skill": "sanwey-canonical-facts",
-      "version": "v1.5",
-      "sha256": "7114cfabd0f7ac1c3a199ea8f6bf4ec606b974927ba8571a824f22f67b572366",
+      "version": "v1.6",
+      "sha256": "57aaadeaa6155df18c4c88c4103d290488e69ff48cbac6481d2567a133381be6",
       "curatedInto": "src/knowledge/sanwey.ts"
     }
   ]

@@ -414,7 +414,7 @@ mesmo defeito na base da Sanwey, que ninguém tinha tocado.
 
 *As regras pegam o que dizem pegar?* Erro de regex desliga uma regra de
 compliance **em silêncio**: ela continua na lista, continua indo para o prompt,
-e nunca casa. São 24 casos declarados — frase real de um lado, veredito do
+e nunca casa. São 37 casos declarados — frase real de um lado, veredito do
 outro. Caso de coocorrência declara **também qual regra** deve disparar, e isso
 não é zelo: a primeira versão conferia só "algum achado saiu", e o caso do par
 passava por causa de outra regra. Plantar a quebra no par não reprovava.

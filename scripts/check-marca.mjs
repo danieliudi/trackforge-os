@@ -104,6 +104,9 @@ for (const brandId of Object.keys(brands)) {
  */
 const PAR_NIVEIS =
   "tagline institucional (Nível 01/02) na mesma peça que o slogan comercial (Nível 03)";
+const PAR_C1_C2 =
+  "assinatura (C1) empilhada com a linha de posicionamento (C2) na mesma peça";
+const PAR_TAGLINES = "tagline oficial empilhada com a sub-tagline de legado";
 
 const CASOS = {
   resibag: {
@@ -151,8 +154,45 @@ const CASOS = {
     ],
   },
   sanwey: {
-    reprova: [["tempo vago", ["Decadas de experiencia no setor."]]],
-    passa: [["tempo exato", ["42 anos de pioneirismo documentado."]]],
+    reprova: [
+      ["tempo vago", ["Decadas de experiencia no setor."]],
+      ["FSSC como certificacao", ["Certificados FSSC 22000 desde 2018."]],
+      ["frase aposentada — embalagem", ["A embalagem certa para cada carga."]],
+      ["frase aposentada — solucao", ["A solucao em Sanbag."]],
+      ["endosso errado", ["Resibag, uma empresa Sanwey."]],
+      ["preco por quilo", ["Nossa precificacao por quilo e a mais competitiva."]],
+      // Empilhamento: cada linha, sozinha, esta correta. O erro e a peca ter as duas.
+      ["par C1+C2 na mesma peca", [
+        "A marca que valoriza o seu produto.",
+        "A carga define o projeto.",
+      ], PAR_C1_C2],
+      ["par C1+C2 curta, blocos distantes", [
+        "A marca que valoriza o seu produto.",
+        "Fator de seguranca 8:1 para granulado abrasivo.",
+        "Engenharia por carga.",
+      ], PAR_C1_C2],
+      ["par tagline + sub-tagline", [
+        "A marca que valoriza o seu produto.",
+        "Sanwey preserva o presente para o futuro.",
+      ], PAR_TAGLINES],
+    ],
+    passa: [
+      ["tempo exato", ["42 anos de pioneirismo documentado."]],
+      ["frase que substituiu a aposentada", ["O contentor certo para cada carga."]],
+      ["C1 sozinha — rodape", ["A marca que valoriza o seu produto."]],
+      ["C2 + C3 — o unico empilhamento permitido", [
+        "A carga define o projeto.",
+        "Primeiro a homologar contentores flexiveis para perigosos no INMETRO. 2008.",
+      ]],
+      ["sub-tagline sozinha — peca de legado", [
+        "Sanwey preserva o presente para o futuro.",
+        "Sun Way: caminho do sol, caminhos iluminados.",
+      ]],
+      ["ANP e Marinha sao da Sanwey", [
+        "Type-C condutivo com certificacao ANP.",
+        "Primeiro brasileiro homologado pelo Ministerio da Marinha, 1996.",
+      ]],
+    ],
   },
 };
 

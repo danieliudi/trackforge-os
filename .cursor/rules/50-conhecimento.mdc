@@ -54,7 +54,7 @@ X" no meio dos fatos põe X dentro da fonte autorizada, em forma negada. Na
 primeira execução pegou dois termos na Resibag e um na Sanwey.
 
 *As regras pegam o que dizem pegar?* Erro de regex desliga uma regra de
-compliance em silêncio. São 24 casos declarados; o de coocorrência declara
+compliance em silêncio. São 37 casos declarados; o de coocorrência declara
 também qual regra deve disparar, porque conferir só "algum achado saiu" deixava
 o caso do par passar por outra regra.
 
