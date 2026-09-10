@@ -76,6 +76,41 @@ export function findForbidden(
     }
   }
 
+  // Segundo passo: regras de COOCORRÊNCIA. O escopo delas é a PEÇA, não o
+  // bloco — por isso não cabem no laço acima, que olha um bloco de cada vez e
+  // para no primeiro acerto.
+  for (const rule of knowledge.forbidden) {
+    if (!rule.pair) continue;
+
+    const primeiro = (padroes: RegExp[]) => {
+      for (const part of parts) {
+        const haystack = normalize(part.text);
+        for (const pattern of padroes) {
+          const found = pattern.exec(haystack);
+          if (found) return { blockNumber: part.blockNumber, matched: found[0].trim() };
+        }
+      }
+      return null;
+    };
+
+    const a = primeiro(rule.pair.a);
+    if (!a) continue;
+    const b = primeiro(rule.pair.b);
+    if (!b) continue;
+
+    hits.push({
+      // Aponta para o bloco mais adiante dos dois: lendo a peça de cima para
+      // baixo, é onde a violação se completou.
+      blockNumber: Math.max(a.blockNumber, b.blockNumber),
+      // Os dois trechos no mesmo campo de propósito: a tela já sabe renderizar
+      // `matched`, e assim o achado novo aparece sem componente novo — que
+      // exigiria mockup aprovado antes (seção 4).
+      matched: `${a.matched} + ${b.matched}`,
+      term: rule.term,
+      reason: rule.reason,
+    });
+  }
+
   return hits;
 }
 

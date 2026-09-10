@@ -401,18 +401,32 @@ Nunca rode `knowledge:sync` "para limpar o aviso" — e note que ele grava
 **todas** as fontes de uma vez. Revisou uma e a outra não? Edite o
 `sources.json` à mão, senão o sync apaga o aviso da que você não leu.
 
-**`npm run knowledge:coerencia` confere a base contra ela mesma.** O prompt sai
-em duas partes com papéis opostos: `facts` se apresenta ao modelo como "a única
-fonte de fatos autorizada", e `forbidden` vira a seção PROIBIÇÕES. Escrever
-"nunca diga X" no meio dos fatos parece cuidado e é o contrário — põe X dentro
-da fonte autorizada, em forma negada. O roteiro roda as proibições de cada
-frente contra o próprio bloco de fatos dela.
+**`npm run knowledge:coerencia` faz duas perguntas sobre a base.**
 
-Existe por um caso de 10/09/2026: ao trazer a Resibag da v2.3 para a v2.9,
-esta sessão escreveu as proibições dentro do bloco de fatos. Correto para um
-leitor humano, errado para o uso. O roteiro pegou os dois termos — e, rodando
-pela primeira vez, pegou o mesmo defeito na base da Sanwey, que ninguém tinha
-tocado.
+*A fonte autorizada contém um termo que ela mesma proíbe?* O prompt sai em duas
+partes com papéis opostos: `facts` se apresenta ao modelo como "a única fonte de
+fatos autorizada", e `forbidden` vira a seção PROIBIÇÕES. Escrever "nunca diga
+X" no meio dos fatos parece cuidado e é o contrário — põe X dentro da fonte
+autorizada, em forma negada. Existe por um caso de 10/09/2026: ao trazer a
+Resibag da v2.3 para a v2.9, esta sessão escreveu as proibições dentro do bloco
+de fatos. O roteiro pegou os dois termos — e, rodando pela primeira vez, pegou o
+mesmo defeito na base da Sanwey, que ninguém tinha tocado.
+
+*As regras pegam o que dizem pegar?* Erro de regex desliga uma regra de
+compliance **em silêncio**: ela continua na lista, continua indo para o prompt,
+e nunca casa. São 24 casos declarados — frase real de um lado, veredito do
+outro. Caso de coocorrência declara **também qual regra** deve disparar, e isso
+não é zelo: a primeira versão conferia só "algum achado saiu", e o caso do par
+passava por causa de outra regra. Plantar a quebra no par não reprovava.
+
+**Regra de coocorrência existe desde 10/09/2026.** `match` responde "este texto
+contém X?", uma regex por vez, e para no primeiro acerto — não expressa "A e B
+não podem aparecer na mesma peça". O campo `pair` expressa, e o segundo passo de
+`findForbidden` avalia no escopo da **peça**, não do bloco. A regra que motivou:
+a Resibag proíbe misturar tagline institucional (Nível 01/02) com slogan
+comercial (Nível 03), e cada um sozinho está certo. Foi um erro **desta sessão**
+— o mockup da Fase 3 montou uma capa com os dois, lendo as regras de marca na
+hora, e o gate não tinha como pegar.
 
 **O que a curadoria ficar devendo aparece como aviso, não some.** Em
 10/09/2026 a `resibag-canonical-facts` estava seis versões à frente, e no meio
@@ -488,7 +502,7 @@ de rota roda o app de verdade a custo zero. O problema é onde ele mora. Os
 exemplos estão em `scratchpad/`, e uma pasta com esse nome ninguém trata como
 suíte.
 
-**Existe desde 07/09/2026, em `scripts/qa/`** — três roteiros com entrada em
+**Existe desde 07/09/2026, em `scripts/qa/`** — roteiros com entrada em
 `package.json`, detalhados em `scripts/qa/README.md`:
 
 | Comando | O que prova |
@@ -496,7 +510,8 @@ suíte.
 | `npm run qa:rotas` | as 11 telas renderizam **a tela certa**, no monitor e no celular — e nenhum elemento declara duas cores para a mesma propriedade |
 | `npm run qa:contraste` | 436 medições em 7 telas passam o piso nos **dois** temas |
 | `npm run qa:interacao` | frente, tema, prioridade e herança de chave respondem |
-| `npm run qa` | os três em sequência |
+| `npm run qa:avisos` | o achado de **coocorrência** aparece no painel com os dois trechos e o bloco nomeado |
+| `npm run qa` | os quatro em sequência |
 | `npm run qa:sonda` | **não é gate** — percorre o DOM e lista o que está abaixo do piso, para você declarar |
 
 Playwright continua fora das dependências do projeto, instalado sob demanda, e

@@ -69,7 +69,9 @@ pasta com esse nome ninguém trata como suíte):
   colisão de cor (dois `bg-`/`text-`/`border-` no mesmo elemento);
 - `npm run qa:contraste` — 436 medições em 7 telas, nos dois temas;
 - `npm run qa:interacao` — frente, tema, prioridade e herança de chave;
-- `npm run qa` — os três;
+- `npm run qa:avisos` — o achado de **coocorrência** aparece no painel com os
+  dois trechos e o bloco nomeado (a regra em si é `knowledge:coerencia`);
+- `npm run qa` — os quatro;
 - `npm run qa:sonda` — **não é gate**: lista o que está abaixo do piso, para
   você classificar e declarar.
 

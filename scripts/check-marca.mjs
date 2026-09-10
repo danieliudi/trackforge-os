@@ -17,7 +17,15 @@
  * forma negada. Este roteiro pegou os dois.
  *
  * Nao substitui `check-knowledge.mjs`, que compara a curadoria com a skill de
- * origem. Este olha so para dentro: a base e coerente com ela mesma?
+ * origem. Este olha so para dentro, e faz duas perguntas:
+ *
+ *   1. A fonte autorizada contem um TERMO que ela mesma proibe?
+ *   2. As regras pegam o que dizem pegar, e so isso?
+ *
+ * A segunda existe porque erro de regex desliga uma regra de compliance EM
+ * SILENCIO: a regra continua na lista, continua indo para o prompt, e nunca
+ * casa. E a mesma familia do gate apontando para o lado errado — so que sem
+ * nada na tela para denunciar.
  *
  * Uso: npm run knowledge:coerencia
  */
@@ -56,7 +64,17 @@ for (const brandId of Object.keys(brands)) {
   if (!knowledge) continue;
   marcas += 1;
 
-  const hits = findForbidden([{ blockNumber: 0, text: knowledge.facts }], brandId);
+  // Regra de COOCORRENCIA nao se aplica aqui, e a distincao e real: o bloco de
+  // fatos e um documento de REFERENCIA e precisa listar os dois registros de
+  // mensagem — a tagline institucional e o slogan comercial. Quem nao pode ter
+  // os dois e a PECA. A pergunta deste roteiro e mais estreita: a fonte
+  // autorizada contem um TERMO que ela mesma proibe? Coocorrencia nao e termo.
+  const termosDePar = new Set(
+    knowledge.forbidden.filter((r) => r.pair).map((r) => r.term),
+  );
+  const hits = findForbidden([{ blockNumber: 0, text: knowledge.facts }], brandId).filter(
+    (h) => !termosDePar.has(h.term),
+  );
   if (hits.length === 0) continue;
 
   violacoes += hits.length;
@@ -68,9 +86,121 @@ for (const brandId of Object.keys(brands)) {
   }
 }
 
+
+/**
+ * Casos declarados: frase real de um lado, veredito do outro.
+ *
+ * O caso de coocorrencia declara TAMBEM qual regra deve disparar, e isso nao e
+ * zelo: a primeira versao destes casos so conferia "algum achado saiu", e o
+ * caso do par passava por causa de OUTRA regra — o slogan antigo tambem e
+ * proibido sozinho. Plantar a quebra no par nao reprovava. Cobertura que existe
+ * no papel e nao existe no teste e pior que cobertura faltando, porque ninguem
+ * volta para olhar.
+ *
+ * Declarado e nao improvisado, pela mesma razao que os alvos de contraste sao
+ * (secao 12): varredura que so sabe dizer verde nao prova nada. Cada frase aqui
+ * ou ja saiu errada em material real, ou e a formulacao correta que nao pode
+ * disparar falso alarme.
+ */
+const PAR_NIVEIS =
+  "tagline institucional (Nível 01/02) na mesma peça que o slogan comercial (Nível 03)";
+
+const CASOS = {
+  resibag: {
+    reprova: [
+      ["contagem: dupla", ["A Resibag tem dupla homologacao: INMETRO + ANTT 5998."]],
+      ["contagem: tripla", ["Somos tripla homologacao no setor."]],
+      ["ANTT como selo", ["Big bag com homologacao ANTT para perigosos."]],
+      ["ANP", ["Certificacao ANP para Oil & Gas."]],
+      ["Passaporte de Compliance", ["Nosso Passaporte de Compliance cobre tudo."]],
+      ["tagline antiga", ["Gestao inteligente de residuos industriais."]],
+      ["slogan suspenso", ["Nem todo big bag passa na auditoria. O nosso passa."]],
+      ["capacidade fora do certificado", ["Homologado em 500 kg, 1500 kg e 2000 kg."]],
+      ["Decreto 12.688 em Classe I", ["O Decreto 12.688/2025 obriga logistica reversa do seu Classe I."]],
+      ["exclusividade", ["Unico no Brasil com essa cobertura."]],
+      ["ANTT 6.078", ["A ANTT 6.078/2026 atualizou a 5.998."]],
+      ["NORMAM", ["Homologacao NORMAM da Marinha."]],
+      ["4 tambores", ["1 big bag substitui 4 tambores."]],
+      // Coocorrencia: nenhum lado e proibido sozinho. A capa que a propria
+      // sessao montou errado no mockup da Fase 3, em 08/09/2026.
+      ["par 01+03, blocos vizinhos", [
+        "Resibag - Gestao inteligente de residuos.",
+        "Nem todo big bag passa na auditoria.",
+      ], PAR_NIVEIS],
+      ["par 01+03, blocos distantes", [
+        "Gestao inteligente de residuos.",
+        "Homologacao INMETRO para residuo perigoso Classe I.",
+        "5 tambores parecem mais baratos. Juntos, pesam e custam mais que 1 Resibag.",
+      ], PAR_NIVEIS],
+    ],
+    passa: [
+      ["contagem certa", ["A Resibag tem homologacao INMETRO para residuo perigoso Classe I."]],
+      ["ANTT como obrigacao do cliente", ["A ANTT 5998/2022 exige embalagem certificada para o transporte."]],
+      ["ISO como sistema de gestao", ["Fabricado sob sistema de gestao da qualidade certificado ISO 9001:2015 do Grupo Sanwey."]],
+      ["tagline nova", ["Gestao inteligente de residuos."]],
+      ["capacidades certas", ["Disponivel em 700 kg e 1000 kg."]],
+      ["so Nivel 03 — ads", [
+        "5 tambores parecem mais baratos. Juntos, pesam e custam mais que 1 Resibag.",
+        "Fale com a gente: vendas@resibag.com.br",
+      ]],
+      ["so Nivel 01+02 — institucional", [
+        "Gestao inteligente de residuos.",
+        "Transformamos a gestao de residuos em eficiencia, seguranca e vantagem competitiva.",
+        "Resibag - Uma marca Sanwey",
+      ]],
+    ],
+  },
+  sanwey: {
+    reprova: [["tempo vago", ["Decadas de experiencia no setor."]]],
+    passa: [["tempo exato", ["42 anos de pioneirismo documentado."]]],
+  },
+};
+
+let casosRodados = 0;
+const casosErrados = [];
+
+for (const [brandId, grupos] of Object.entries(CASOS)) {
+  for (const [esperado, lista] of [["reprova", grupos.reprova], ["passa", grupos.passa]]) {
+    for (const [nome, blocos, termoEsperado] of lista ?? []) {
+      casosRodados += 1;
+      const partes = blocos.map((text, i) => ({ blockNumber: i + 1, text }));
+      const todos = findForbidden(partes, brandId);
+      // Com termo declarado, o caso so passa se AQUELA regra disparou — outra
+      // regra acertando o mesmo texto nao vale como cobertura.
+      const hits = termoEsperado ? todos.filter((h) => h.term === termoEsperado) : todos;
+      const reprovou = hits.length > 0;
+      if (reprovou !== (esperado === "reprova")) {
+        casosErrados.push(
+          `${brandId}/${nome}: esperava ${esperado}` +
+            (termoEsperado ? ` pela regra de par` : "") +
+            ", " +
+            (reprovou
+              ? `pegou "${hits[0].matched}"`
+              : todos.length
+                ? `so pegou outra regra ("${todos[0].term}")`
+                : "nao pegou nada"),
+        );
+      }
+    }
+  }
+}
+
+if (casosErrados.length > 0) {
+  console.log(`\n  ${bold("regras")}  ${red(`${casosErrados.length} caso(s) fora do esperado`)}`);
+  for (const c of casosErrados) console.log(`    - ${c}`);
+  console.log(
+    `\n  Regra que nao casa continua na lista e continua indo para o prompt.`,
+  );
+  console.log(`  Ela so para de proteger — em silencio.\n`);
+  process.exit(1);
+}
+
 if (violacoes === 0) {
   console.log(
-    `${green("ok")} base de marca coerente com as proprias proibicoes  ${dim(`(${marcas} frente(s))`)}`,
+    `${green("ok")} base coerente com as proprias proibicoes  ${dim(`(${marcas} frente(s))`)}`,
+  );
+  console.log(
+    `${green("ok")} regras pegam o que dizem pegar  ${dim(`(${casosRodados} casos declarados)`)}`,
   );
   process.exit(0);
 }

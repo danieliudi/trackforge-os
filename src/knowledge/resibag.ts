@@ -218,6 +218,24 @@ certificação de produto — estão na seção PROIBIÇÕES, que é onde elas v
       match: [/unico no brasil/, /unica fabricante/, /unico fabricante/, /exclusividade/],
     },
     {
+      term: "tagline institucional (Nível 01/02) na mesma peça que o slogan comercial (Nível 03)",
+      reason:
+        "os três níveis de mensagem não se misturam: 01 (tagline) e 02 (subtítulo) andam juntos em capa, papelaria e institucional; 03 (slogan) entra sozinho em ads, cold e outreach. Cada um está certo isolado — a peça é que não pode ter os dois. Escolha o registro antes de escrever.",
+      // Coocorrência: nenhum lado é proibido sozinho. A tagline antiga entra na
+      // busca porque o par vale igual com ela — e ela ainda circula em material
+      // que não foi varrido (Notion e Drive seguem com a redação anterior).
+      pair: {
+        a: [
+          /gestao inteligente de residuos/,
+          /transformamos a gestao de residuos em eficiencia/,
+        ],
+        b: [
+          /5 tambores parecem mais baratos/,
+          /nem todo big bag passa na auditoria/,
+        ],
+      },
+    },
+    {
       term: "nome, preço ou cobertura de concorrente (EmbTec, Ágilbag, Engebag)",
       reason: "é inteligência interna, não entra em peça pública.",
       match: [/embtec/, /agilbag/, /engebag/],

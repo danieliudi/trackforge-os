@@ -9,7 +9,8 @@ que a seção 12 do `CLAUDE.md` mandou trazê-los para cá.
 | `rotas.mjs` | as 11 telas renderizam **a tela certa**, no monitor e no celular — e nenhum elemento declara duas cores para a mesma propriedade | `npm run qa:rotas` |
 | `contraste.mjs` | 436 medições em 7 telas passam o piso nos **dois** temas | `npm run qa:contraste` |
 | `interacao.mjs` | frente, tema, prioridade e herança de chave **respondem** | `npm run qa:interacao` |
-| todos | os três em sequência, parando no primeiro que reprovar | `npm run qa` |
+| `avisos.mjs` | o achado de **coocorrência** aparece no painel com os dois trechos e o bloco nomeado | `npm run qa:avisos` |
+| todos | os quatro em sequência, parando no primeiro que reprovar | `npm run qa` |
 | `sonda.mjs` | **não é gate** — acha o que ainda não foi declarado | `npm run qa:sonda` |
 
 O app precisa estar de pé (`npm run dev`). Nenhum roteiro gasta a chave da

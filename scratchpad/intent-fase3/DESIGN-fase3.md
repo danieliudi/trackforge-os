@@ -141,11 +141,12 @@ Conferido no código, e é estrutural:
   um bloco e para no primeiro acerto. **Regra de coocorrência — "A e B não podem
   aparecer na mesma peça" — não é expressável ali.**
 
-Isso não se resolve com pele. A proposta é a bancada ganhar, no painel de
-avisos que já existe, um segundo tipo de achado além de "termo proibido":
-**"combinação proibida"**, com o par que colidiu. Precisa de uma mudança em
-`check.ts` para aceitar regra de par. É trabalho de código, não de mockup — e
-por isso está aqui como pergunta, não como desenho fechado.
+**RESOLVIDO em 10/09/2026, fora desta fase.** `check.ts` ganhou o campo `pair`
+e um segundo passo que avalia no escopo da **peça**, não do bloco. O achado
+entra no painel de avisos que já existe, com os dois trechos no mesmo campo —
+sem componente novo, portanto sem depender de mockup aprovado. A regra da
+Resibag está na base, com 24 casos declarados em `npm run knowledge:coerencia`,
+incluindo a capa que este mockup errou.
 
 ### 5. O editor e a casca falam da mesma coisa com dois nomes
 
@@ -214,10 +215,8 @@ reais.
    aqui e o que mais se aproxima do que a seção 5 já promete. Ele ocupa espaço
    numa tela que hoje não usa o espaço.
 
-5. **A regra de combinação proibida (item 4 do conteúdo).** É a única coisa
-   desta fase que muda comportamento de auditoria, não de tela. Posso deixar
-   para depois — mas ela é a que protege contra um erro de compliance de
-   verdade, e eu mesmo o cometi escrevendo o mockup.
+5. ~~A regra de combinação proibida.~~ **Feita em 10/09/2026** — não dependia
+   do desenho, e era a que protegia contra erro de compliance de verdade.
 
 ---
 

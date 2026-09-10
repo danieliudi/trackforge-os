@@ -18,7 +18,8 @@
     "qa:rotas": "node scripts/qa/rotas.mjs",
     "qa:contraste": "node scripts/qa/contraste.mjs",
     "qa:interacao": "node scripts/qa/interacao.mjs",
-    "qa": "npm run qa:rotas && npm run qa:contraste && npm run qa:interacao",
+    "qa:avisos": "node --experimental-strip-types --no-warnings scripts/qa/avisos.mjs",
+    "qa": "npm run qa:rotas && npm run qa:contraste && npm run qa:interacao && npm run qa:avisos",
     "qa:sonda": "node scripts/qa/sonda.mjs"
   },
   "dependencies": {
