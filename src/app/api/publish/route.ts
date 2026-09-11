@@ -20,7 +20,7 @@ const requestSchema = z.object({
       z.object({
         kind: outputKindSchema,
         data: z.unknown(),
-        flagged: z.number().int().min(0).default(0),
+        flagged: z.number().int().min(0).max(30).default(0),
       }),
     )
     .min(1, "não há peça para enviar"),

@@ -59,8 +59,8 @@ Toda chamada de modelo vira uma linha no recibo, com rótulo em português.
 ## Pacote que vai ao CRM (`src/lib/crm.ts`)
 
 O papel `agencia` lê `marketing_deliverables`, **não** `agent_actions.payload`.
-Rascunho, fonte por afirmação e parecer do auditor ficam no `payload` de
-propósito — só o texto aprovado atravessa.
+No payload vão artigo, peças e a contagem `sem_fonte` — o parecer detalhado
+(cada claim) **não** é enviado. Só o texto aprovado atravessa para a agência.
 
 **Ao mexer no que é enviado, diga na entrega o que a agência passa a ver.**
 Exceção já registrada: `custom_fields.sinal` cruza para o entregável.

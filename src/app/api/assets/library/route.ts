@@ -1,6 +1,7 @@
 import { access, mkdir, readdir, unlink, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { jsonBody } from "@/lib/apiError";
+import { enforceRateLimit } from "@/lib/rateLimit";
 
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png"]);
 const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
@@ -82,6 +83,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "assets", { limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
+
   const brand = brandFrom(request);
   const form = await request.formData();
   const file = form.get("file");
@@ -111,6 +115,9 @@ export async function POST(request: Request) {
 }
 
 export async function DELETE(request: Request) {
+  const limited = enforceRateLimit(request, "assets", { limit: 30, windowMs: 60_000 });
+  if (limited) return limited;
+
   const dir = dirOf(brandFrom(request));
   const body = await jsonBody(request);
   if (!body.ok) return body.response;

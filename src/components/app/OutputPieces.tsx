@@ -174,8 +174,13 @@ function PieceBody({ kind, data }: { kind: OutputKind; data: unknown }) {
 function toPlainText(kind: OutputKind, data: unknown): string {
   if (isCarousel(kind)) {
     const carousel = data as Carousel;
+    // Mesmo conteúdo que `outputBlocks`: headline + corpo + bullets. Colar sem
+    // os bullets deixava a peça colada diferente da enviada ao CRM.
     return carousel.slides
-      .map((s) => `${s.slideNumber}. ${s.headline}${s.bodyText ? `\n${s.bodyText}` : ""}`)
+      .map((s) => {
+        const body = [s.bodyText, ...(s.bullets ?? [])].filter(Boolean).join("\n");
+        return `${s.slideNumber}. ${s.headline}${body ? `\n${body}` : ""}`;
+      })
       .join("\n\n");
   }
   if (kind === "post-texto") {

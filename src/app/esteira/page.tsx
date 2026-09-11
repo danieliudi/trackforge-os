@@ -864,8 +864,9 @@ export default function BancadaPage() {
               <div className="flex items-start gap-2 rounded-lg border border-ok-line bg-ok-bg px-3 py-2.5 text-[12.5px] text-ok">
                 <Check size={14} className="mt-px shrink-0" />
                 <span>
-                  Na sua fila de aprovação no CRM. O artigo, as fontes e o parecer foram junto — a
-                  agência não vê nada disso
+                  Na sua fila de aprovação no CRM. O artigo e as peças foram
+                  juntos; a contagem de afirmações sem fonte também. O parecer
+                  detalhado fica só nesta sessão — a agência não vê o payload
                   {contentId ? (
                     <>
                       {" "}

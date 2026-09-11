@@ -235,12 +235,9 @@ O envio usa `agent_actions`, a fila que o CRM já tem para sugestão de agente
 que espera aprovação humana.
 
 **O que o papel `agencia` lê:** `marketing_deliverables` — o texto aprovado.
-**O que ele NÃO lê:** `agent_actions.payload`, onde ficam de propósito o
-rascunho, a fonte por afirmação e o parecer do auditor.
-
-**O que atravessa para o entregável, intencionalmente:** `sinal` (nome do sinal
-de origem), `content_id`, `campaign_id` e `campaign_name` — via
-`custom_fields`. A agência passa a ver o código da peça.
+**O que ele NÃO lê:** `agent_actions.payload`, onde ficam artigo, peças e a
+contagem `sem_fonte`. O parecer detalhado (cada claim) **nem entra** no
+payload — só a contagem.
 
 **Prioridade:** peça com afirmação sem fonte entra como `high`. Não é urgência,
 é pendência — mas precisa saltar na fila, porque é a que exige decisão.
