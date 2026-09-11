@@ -3,6 +3,14 @@ import { generateText } from "ai";
 
 import type { BrandId } from "@/constants/brands";
 import {
+  acharEtapa,
+  acharTrabalho,
+  acharVoz,
+  type EtapaId,
+  type TrabalhoId,
+  type VozId,
+} from "@/constants/editorial";
+import {
   EMPTY_USAGE,
   priceUsage,
   WEB_SEARCH_PRICE,
@@ -151,6 +159,10 @@ export type BriefRequest = {
   piece: string;
   /** Artigo definido da peça, para a frase sair em português: "o" ou "a". */
   pieceArticle: "o" | "a";
+  /** O que o post tem de fazer, quem assina, e a etapa do arco (Fase 4). */
+  trabalho?: TrabalhoId | null;
+  voz?: VozId | null;
+  etapa?: EtapaId | null;
 };
 
 export async function buildBrief({
@@ -162,6 +174,9 @@ export async function buildBrief({
   brandId,
   piece,
   pieceArticle,
+  trabalho,
+  voz,
+  etapa,
 }: BriefRequest): Promise<{ brief: string; costSteps: CostStep[] }> {
   const costSteps: CostStep[] = [];
   const urlInput = isUrl(input);
@@ -176,6 +191,30 @@ export async function buildBrief({
     parts.push(
       `Contexto estratégico da marca (use para alinhar tom e prioridades):\n${context.trim()}`,
     );
+  }
+
+  /**
+   * TRABALHO e VOZ vêm ANTES de tudo que é material (sinal, notícia, URL).
+   *
+   * Não é ordem arbitrária: as duas instruções dizem o que fazer com o material
+   * que vem depois. Depois dele, o modelo já decidiu a forma e lê as duas como
+   * ajuste de tom — que é o que acontecia quando a ferramenta só sabia o
+   * formato.
+   *
+   * A etapa do arco substitui o trabalho quando a origem é evento: evento não
+   * tem trabalho, tem etapa. As duas nunca aparecem juntas.
+   */
+  const oTrabalho = acharTrabalho(brandId, trabalho);
+  const aEtapa = acharEtapa(etapa);
+  if (aEtapa) {
+    parts.push(`O TRABALHO DESTA PEÇA — etapa ${aEtapa.quando} do evento (${aEtapa.label}):\n${aEtapa.instrucao}`);
+  } else if (oTrabalho) {
+    parts.push(`O TRABALHO DESTA PEÇA — ${oTrabalho.label} (${oTrabalho.papel}):\n${oTrabalho.instrucao}`);
+  }
+
+  const aVoz = acharVoz(brandId, voz);
+  if (aVoz) {
+    parts.push(`QUEM ASSINA ESTA PEÇA — ${aVoz.label} (${aVoz.angulo}):\n${aVoz.instrucao}`);
   }
 
   // Sinal do CRM vem antes da busca web de propósito: é curado, tem fonte e é

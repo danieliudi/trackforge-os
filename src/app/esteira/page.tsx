@@ -40,6 +40,15 @@ import type { Verification } from "@/lib/verify";
 import { articleBlocks, articleToMarkdown, type Article, type ChosenImage } from "@/types/article";
 import type { Carousel } from "@/types/carousel";
 import { isCarousel, OUTPUT_META, type OutputKind, type PieceFailure } from "@/types/outputs";
+import { EscolhaCelulas } from "@/components/app/EscolhaCelulas";
+import {
+  acharTrabalho,
+  acharVoz,
+  trabalhosDaFrente,
+  vozesDaFrente,
+  type TrabalhoId,
+  type VozId,
+} from "@/constants/editorial";
 
 type ContentCampaignOption = { id: string; name: string; channel: string };
 
@@ -92,6 +101,11 @@ export default function BancadaPage() {
   const [warnings, setWarnings] = useState<ForbiddenHit[]>([]);
   const [verification, setVerification] = useState<Verification | null>(null);
   const [kinds, setKinds] = useState<OutputKind[]>([]);
+  /** O que o post tem de fazer, e quem assina o lote (Fase 4). */
+  const [trabalho, setTrabalho] = useState<TrabalhoId | null>(null);
+  const [voz, setVoz] = useState<VozId | null>(null);
+  /** Voz de UMA peça, quando ela diverge do lote. Ausente = herda. */
+  const [vozPorPeca, setVozPorPeca] = useState<Partial<Record<OutputKind, VozId>>>({});
   const [pieces, setPieces] = useState<Piece[] | null>(null);
   /** Peças que não saíram. Ficam no slot delas em vez de derrubar o lote. */
   const [failures, setFailures] = useState<PieceFailure[]>([]);
@@ -180,12 +194,10 @@ export default function BancadaPage() {
       // A origem volta inteira quando foi guardada. Produção antiga, gravada
       // antes de o campo existir, cai no rótulo — que é o que havia.
       setOrigin(
-        (run.origin as Origin | undefined) ?? {
-          mode: "tema",
-          input: run.source,
-          signalId: null,
-          fileName: null,
-        },
+        // `emptyOrigin` como base para o caso antigo: produção gravada antes de
+        // um campo existir não precisa conhecê-lo, e campo novo no tipo não
+        // manda ninguém caçar construtor espalhado.
+        (run.origin as Origin | undefined) ?? { ...emptyOrigin, mode: "tema", input: run.source },
       );
     }, 0);
     return () => clearTimeout(timer);
@@ -196,6 +208,18 @@ export default function BancadaPage() {
   const ready = originReady(origin);
   /** A coluna central sem nada para ler: nem material colado, nem preço. */
   const soAFrase = !(material && origin.input) && !(ready && withArticle);
+
+  /**
+   * As listas são POR FRENTE, então trocar de frente pode invalidar a escolha.
+   * Resolvido na leitura e não num efeito: `acharVoz` devolve null quando o id
+   * não pertence à frente, e a tela mostra nada escolhido. `setState` dentro de
+   * efeito encadeia render antes da pintura, que é o padrão que a seção 6
+   * manda evitar — e aqui não é preciso guardar nada para acertar.
+   */
+  const trabalhos = trabalhosDaFrente(brandId);
+  const vozes = vozesDaFrente(brandId);
+  const trabalhoAtivo = acharTrabalho(brandId, trabalho)?.id ?? null;
+  const vozAtiva = acharVoz(brandId, voz)?.id ?? null;
 
   const reset = () => {
     // A produção anterior fica salva; o que se zera é a bancada.
@@ -283,6 +307,12 @@ export default function BancadaPage() {
           brandId,
           verify: true,
           signalIds: origin.signalId ? [origin.signalId] : undefined,
+          // O artigo é a fonte factual das peças; o trabalho e a voz do lote
+          // valem para ele também, senão o artigo sai num registro e as peças
+          // derivadas noutro.
+          trabalho: trabalhoAtivo,
+          voz: vozAtiva,
+          etapa: origin.etapa,
         }),
       });
       // A mensagem sai do clone: o original ainda precisa ser lido como JSON
@@ -311,7 +341,18 @@ export default function BancadaPage() {
     } finally {
       setBusy(null);
     }
-  }, [inputFor, material, angle, brandId, origin.signalId, source, setKinds, keep]);
+  }, [
+    inputFor,
+    material,
+    angle,
+    brandId,
+    origin,
+    source,
+    setKinds,
+    keep,
+    trabalhoAtivo,
+    vozAtiva,
+  ]);
 
   /**
    * Pede os formatos à rota. Serve ao lote inteiro e a uma peça só.
@@ -327,7 +368,17 @@ export default function BancadaPage() {
         ? await fetch("/api/derive", {
             method: "POST",
             headers: { "content-type": "application/json" },
-            body: JSON.stringify({ article, brandId, kinds: alvo }),
+            body: JSON.stringify({
+              article,
+              brandId,
+              kinds: alvo,
+              trabalho: trabalhoAtivo,
+              voz: vozAtiva,
+              // Só as divergências: peça que herda o lote não precisa dizer.
+              vozPorPeca: Object.fromEntries(
+                alvo.map((kind) => [kind, vozPorPeca[kind]]).filter(([, v]) => v),
+              ),
+            }),
           })
         : await fetch("/api/generate/avulso", {
             method: "POST",
@@ -338,6 +389,9 @@ export default function BancadaPage() {
               kinds: alvo,
               brandId,
               signalIds: origin.signalId ? [origin.signalId] : undefined,
+              trabalho: trabalhoAtivo,
+              voz: vozAtiva,
+              etapa: origin.etapa,
             }),
           });
 
@@ -364,7 +418,17 @@ export default function BancadaPage() {
 
       return { saiu, falhas: (data.failures ?? []) as PieceFailure[] };
     },
-    [article, brandId, material, inputFor, origin.signalId, source],
+    [
+      article,
+      brandId,
+      material,
+      inputFor,
+      origin,
+      source,
+      trabalhoAtivo,
+      vozAtiva,
+      vozPorPeca,
+    ],
   );
 
   /** Guarda no localStorage só o que sobreviveu — falha não é rascunho. */
@@ -565,6 +629,28 @@ export default function BancadaPage() {
               className={clsx(fieldClass, "resize-none")}
             />
           </div>
+
+          {/* O TRABALHO fica junto do ângulo e não junto do formato, porque é
+              decisão de PARA QUÊ — anterior a "em que forma". Some quando a
+              origem é evento: lá quem manda é o arco, e as duas grades juntas
+              seriam duas respostas para a mesma pergunta. E some na frente
+              pessoal, que não tem sistema editorial de marca. */}
+          {origin.mode !== "evento" && trabalhos.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              <span className={labelClass}>Trabalho · o que o post tem de fazer</span>
+              <EscolhaCelulas
+                opcoes={trabalhos.map((t) => ({ id: t.id, titulo: t.label, nota: t.papel }))}
+                valor={trabalhoAtivo}
+                onChange={setTrabalho}
+                rotulo="O que o post tem de fazer"
+              />
+              {trabalhoAtivo ? (
+                <p className="text-[11px] leading-relaxed text-mut">
+                  {acharTrabalho(brandId, trabalhoAtivo)?.instrucao}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
 
           <label className="flex cursor-pointer items-start gap-2 text-[12px] leading-snug text-mut">
             <input
@@ -767,6 +853,27 @@ export default function BancadaPage() {
 
         {/* ══ SAÍDAS ══ */}
         <div className={clsx(painel, "border-l border-rule pl-6")}>
+          {/* A VOZ abre a coluna de saídas: ela é o padrão de tudo que for
+              gerado abaixo, e cada peça pode divergir. Some na frente pessoal,
+              que não tem página de empresa nem diretor. */}
+          {vozes.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              <span className={labelClass}>Voz · quem assina o lote</span>
+              <EscolhaCelulas
+                opcoes={vozes.map((v) => ({ id: v.id, titulo: v.label, nota: v.angulo }))}
+                valor={vozAtiva}
+                onChange={setVoz}
+                rotulo="Quem assina as peças"
+                colunas={vozes.length === 3 ? 3 : 4}
+              />
+              {vozAtiva ? (
+                <p className="text-[11px] leading-relaxed text-mut">
+                  {acharVoz(brandId, vozAtiva)?.instrucao}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           <div className="flex items-baseline gap-2">
             <span className={labelClass}>Peças</span>
             <span className={metaClass}>
@@ -790,8 +897,20 @@ export default function BancadaPage() {
               const falhou = failures.some((f) => f.kind === kind);
               const suggested = article?.suggestedOutputs.find((s) => s.kind === kind);
 
+              // Inline de propósito: como função declarada no corpo do render,
+              // isto fazia o React Compiler desistir de preservar a memoização
+              // de QUATRO `useCallback` abaixo — inclusive dois que esta fase
+              // não tocou. Closure no corpo do render é a família de erro da
+              // seção 6, e o compilador reclama longe de onde ela mora.
+              const minha = acharVoz(brandId, vozPorPeca[kind])?.id ?? vozAtiva;
+              const diverge = vozPorPeca[kind] != null && vozPorPeca[kind] !== vozAtiva;
+
               return (
-                <label
+                /* A CÉLULA virou div com o `<label>` dentro, e não é arranjo:
+                   o seletor de voz da peça precisa ser irmão do label, não
+                   filho. Dentro dele, todo clique no seletor também alternaria
+                   a caixa de seleção — é o que um `<label>` faz. */
+                <div
                   key={kind}
                   title={falhou ? "essa peça não saiu" : suggested ? suggested.reason : meta.note}
                   className={clsx(
@@ -799,7 +918,7 @@ export default function BancadaPage() {
                     // token que já carrega fundo deixa duas utilidades da mesma
                     // propriedade na lista, e quem vence é a ordem do CSS
                     // gerado (seção 1).
-                    "flex min-h-[64px] cursor-pointer flex-col justify-center gap-0.5 px-3 py-2.5",
+                    "flex min-h-[64px] flex-col justify-center gap-0.5 px-3 py-2.5",
                     "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-[-2px] has-[:focus-visible]:outline-acc",
                     falhou
                       ? "border-l-[3px] border-urgent bg-urgent-bg"
@@ -808,35 +927,71 @@ export default function BancadaPage() {
                         : "bg-cell",
                   )}
                 >
-                  <input
-                    type="checkbox"
-                    checked={on}
-                    onChange={() =>
-                      setKinds((current) =>
-                        current.includes(kind)
-                          ? current.filter((k) => k !== kind)
-                          : [...current, kind],
-                      )
-                    }
-                    className="sr-only"
-                  />
-                  <span
-                    className={clsx(
-                      "text-[13.5px] font-medium leading-tight",
-                      on && !falhou ? "text-paper" : "text-ink",
-                    )}
-                  >
-                    {meta.label}
-                  </span>
-                  <span
-                    className={clsx(
-                      "text-[11px] uppercase tracking-wide",
-                      falhou ? "text-urgent" : on ? "text-paper/70" : "text-mut",
-                    )}
-                  >
-                    {falhou ? "não saiu · refazer" : meta.platform}
-                  </span>
-                </label>
+                  <label className="flex cursor-pointer flex-col gap-0.5">
+                    <input
+                      type="checkbox"
+                      checked={on}
+                      onChange={() =>
+                        setKinds((current) =>
+                          current.includes(kind)
+                            ? current.filter((k) => k !== kind)
+                            : [...current, kind],
+                        )
+                      }
+                      className="sr-only"
+                    />
+                    <span
+                      className={clsx(
+                        "text-[13.5px] font-medium leading-tight",
+                        on && !falhou ? "text-paper" : "text-ink",
+                      )}
+                    >
+                      {meta.label}
+                    </span>
+                    <span
+                      className={clsx(
+                        "text-[11px] uppercase tracking-wide",
+                        falhou ? "text-urgent" : on ? "text-paper/70" : "text-mut",
+                      )}
+                    >
+                      {falhou ? "não saiu · refazer" : meta.platform}
+                    </span>
+                  </label>
+
+                  {/* A etiqueta só existe em célula MARCADA: voz de peça que
+                      ninguém vai gerar é ruído. E a divergência do lote se diz
+                      em PESO, não em cor — a célula marcada é invertida, então
+                      só tem duas cores disponíveis, e elas trocam de lado entre
+                      os temas. Foi a reprovação que o mockup pegou. */}
+                  {on && !falhou && vozes.length > 0 ? (
+                    <select
+                      aria-label={`Voz de ${meta.label} · ${meta.platform}`}
+                      value={vozPorPeca[kind] ?? ""}
+                      onChange={(event) =>
+                        setVozPorPeca((atual) => {
+                          const proximo = { ...atual };
+                          if (event.target.value) proximo[kind] = event.target.value as VozId;
+                          else delete proximo[kind];
+                          return proximo;
+                        })
+                      }
+                      className={clsx(
+                        "mt-1.5 w-full cursor-pointer appearance-none border-t bg-transparent pt-1 font-mono text-[10.5px] tracking-wide",
+                        focusRing,
+                        diverge ? "border-paper/45 font-medium text-paper" : "border-paper/25 text-paper/70",
+                      )}
+                    >
+                      <option value="">
+                        voz · {minha ? (acharVoz(brandId, minha)?.label ?? "do lote") : "do lote"}
+                      </option>
+                      {vozes.map((v) => (
+                        <option key={v.id} value={v.id}>
+                          voz · {v.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : null}
+                </div>
               );
             })}
           </div>

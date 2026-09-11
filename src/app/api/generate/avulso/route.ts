@@ -3,6 +3,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import {brands, brandIdSchema} from "@/constants/brands";
+import { etapaIdSchema, trabalhoIdSchema, vozIdSchema } from "@/constants/editorial";
 import type { Platform } from "@/constants/format";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { jsonBody } from "@/lib/apiError";
@@ -46,6 +47,11 @@ const requestSchema = z.object({
   input: z.string().min(3, "informe um tema ou cole o texto"),
   kinds: z.array(outputKindSchema).min(1, "escolha ao menos um formato").max(6),
   brandId: brandIdSchema.nullable().optional(),
+  // Os dois eixos editoriais da Fase 4, e a etapa do arco. Opcionais: sem eles
+  // a rota se comporta como antes, que é o comportamento de quem não escolheu.
+  trabalho: trabalhoIdSchema.nullable().optional(),
+  voz: vozIdSchema.nullable().optional(),
+  etapa: etapaIdSchema.nullable().optional(),
   includeNews: z.boolean().optional(),
   useSignals: z.boolean().optional().default(true),
   signalIds: z.array(z.string()).optional(),
@@ -95,6 +101,9 @@ export async function POST(request: Request) {
         brandId,
         piece: "peça",
         pieceArticle: "a",
+        trabalho: parsed.data.trabalho,
+        voz: parsed.data.voz,
+        etapa: parsed.data.etapa,
       });
       costSteps.push(...built.costSteps);
       brief = built.brief;
@@ -187,9 +196,12 @@ export async function POST(request: Request) {
 
     for (const piece of pieces) {
       const blocks = outputBlocks(piece.kind, piece.data);
+      // A voz entra na varredura: a assinatura institucional é da página, e a
+      // regra só sabe disso se souber quem assina (Fase 4).
       piece.warnings = findForbidden(
         blocks.map((block) => ({ blockNumber: block.number, text: block.text })),
         brandId,
+        parsed.data.voz,
       );
 
       try {

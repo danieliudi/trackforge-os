@@ -5,6 +5,15 @@ import { CornerDownLeft, Link2, Loader2, RefreshCw, RotateCw, Sparkles } from "l
 import { useEffect, useState, type KeyboardEvent } from "react";
 
 import { BrandPills } from "@/components/app/BrandPills";
+import { EscolhaCelulas } from "@/components/app/EscolhaCelulas";
+import {
+  acharTrabalho,
+  acharVoz,
+  trabalhosDaFrente,
+  vozesDaFrente,
+  type TrabalhoId,
+  type VozId,
+} from "@/constants/editorial";
 import { FormatSelect } from "@/components/app/FormatSelect";
 import { PlatformPills } from "@/components/app/PlatformPills";
 import { PriceSheet } from "@/components/app/PriceSheet";
@@ -183,6 +192,18 @@ type ComposerProps = {
   /** null = ainda não escolheu; o picker marca tudo no primeiro carregamento. */
   signalIds?: string[] | null;
   onSignalIdsChange?: (ids: string[]) => void;
+  /**
+   * Os dois eixos editoriais, os MESMOS da bancada (Fase 4).
+   *
+   * Uma peça avulsa erra pelas mesmas razões que uma peça da esteira — foi o
+   * pedido do Daniel em 11/09: "poder escolher esses detalhes em criações
+   * avulsas". Opcionais porque a variante compacta, dentro do editor com
+   * carrossel aberto, não os mostra: ali a peça já existe.
+   */
+  trabalho?: TrabalhoId | null;
+  onTrabalhoChange?: (id: TrabalhoId | null) => void;
+  voz?: VozId | null;
+  onVozChange?: (id: VozId | null) => void;
 };
 
 export function Composer({
@@ -203,6 +224,10 @@ export function Composer({
   onSuggestionsCost,
   signalIds,
   onSignalIdsChange,
+  trabalho,
+  onTrabalhoChange,
+  voz,
+  onVozChange,
 }: ComposerProps) {
   const canSubmit = value.trim().length >= MIN_LENGTH && !isGenerating;
   const elapsed = useElapsed(isGenerating);
@@ -380,6 +405,54 @@ export function Composer({
               </p>
             </div>
           ) : null}
+          {/* TRABALHO e VOZ — os mesmos da bancada. Vêm DEPOIS de formato e
+              plataforma e ANTES da frente porque a ordem na tela espelha a
+              ordem da decisão: em que forma, para quê, de quem, e por fim qual
+              marca veste. As listas são por frente, então as duas somem quando
+              a frente ativa não tem sistema editorial. */}
+          {onTrabalhoChange && trabalhosDaFrente(brandId).length > 0 ? (
+            <div className="flex flex-col gap-2">
+              <span className={labelClass}>Trabalho</span>
+              <EscolhaCelulas
+                opcoes={trabalhosDaFrente(brandId).map((x) => ({
+                  id: x.id,
+                  titulo: x.label,
+                  nota: x.papel,
+                }))}
+                valor={acharTrabalho(brandId, trabalho)?.id ?? null}
+                onChange={onTrabalhoChange}
+                rotulo="O que o post tem de fazer"
+              />
+              {acharTrabalho(brandId, trabalho) ? (
+                <p className="text-[11px] leading-relaxed text-mut">
+                  {acharTrabalho(brandId, trabalho)?.instrucao}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
+          {onVozChange && vozesDaFrente(brandId).length > 0 ? (
+            <div className="flex flex-col gap-2">
+              <span className={labelClass}>Voz</span>
+              <EscolhaCelulas
+                opcoes={vozesDaFrente(brandId).map((v) => ({
+                  id: v.id,
+                  titulo: v.label,
+                  nota: v.angulo,
+                }))}
+                valor={acharVoz(brandId, voz)?.id ?? null}
+                onChange={onVozChange}
+                rotulo="Quem assina a peça"
+                colunas={vozesDaFrente(brandId).length === 3 ? 3 : 4}
+              />
+              {acharVoz(brandId, voz) ? (
+                <p className="text-[11px] leading-relaxed text-mut">
+                  {acharVoz(brandId, voz)?.instrucao}
+                </p>
+              ) : null}
+            </div>
+          ) : null}
+
           {/* "Frente", não "Marca": é a palavra que a casca usa quatro linhas
               acima, no `EDIÇÃO · frente`. Dois nomes para a mesma coisa é como a
               frente diverge sem ninguém ver — e aqui ela PODE divergir de

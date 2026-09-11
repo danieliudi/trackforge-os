@@ -230,7 +230,15 @@ const TELAS = [
       ...casca({ secaoAtiva: false }),
       { nome: "bancada · rótulo de seção", piso: MIUDO, onde: (p) => p.locator("main span.uppercase.text-mut").first() },
       { nome: "bancada · origem escolhida", piso: CORPO, onde: (p) => p.locator('[aria-label="Origem do material"] button[aria-pressed="true"]') },
-      { nome: "bancada · origem não escolhida", piso: CORPO, quantos: 3, onde: (p) => p.locator('[aria-label="Origem do material"] button[aria-pressed="false"]') },
+      // QUATRO, não três: a Fase 4 trouxe a quinta origem (Evento). A contagem
+      // declarada pegou sozinha — é exatamente para isso que ela existe.
+      { nome: "bancada · origem não escolhida", piso: CORPO, quantos: 4, onde: (p) => p.locator('[aria-label="Origem do material"] button[aria-pressed="false"]') },
+      // Os controles da Fase 4. O alvo mais frágil é a etiqueta de voz dentro
+      // da célula marcada, onde o fundo inverte e troca de lado entre os temas.
+      { nome: "bancada · trabalho não escolhido", piso: CORPO, quantos: 4, onde: (p) => p.locator('[aria-label="O que o post tem de fazer"] button[aria-pressed="false"] > span:first-child') },
+      { nome: "bancada · papel do trabalho", piso: MIUDO, quantos: 4, onde: (p) => p.locator('[aria-label="O que o post tem de fazer"] button[aria-pressed="false"] > span:last-child') },
+      { nome: "bancada · voz não escolhida", piso: CORPO, quantos: 4, onde: (p) => p.locator('[aria-label="Quem assina as peças"] button[aria-pressed="false"] > span:first-child') },
+      { nome: "bancada · ângulo da voz", piso: MIUDO, quantos: 4, onde: (p) => p.locator('[aria-label="Quem assina as peças"] button[aria-pressed="false"] > span:last-child') },
       { nome: "bancada · nota de CRM ausente", piso: CORPO, onde: (p) => p.locator("main p.border-dashed").first() },
       { nome: "bancada · placeholder do ângulo", piso: CORPO, pseudo: "::placeholder",
         onde: (p) => p.locator("main textarea").first() },

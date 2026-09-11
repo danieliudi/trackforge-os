@@ -3,6 +3,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import {brands, brandIdSchema} from "@/constants/brands";
+import { etapaIdSchema, trabalhoIdSchema, vozIdSchema } from "@/constants/editorial";
 import { jsonBody } from "@/lib/apiError";
 import { buildBrief } from "@/lib/brief";
 import { buildCarrosselSystem } from "@/lib/prompts";
@@ -30,6 +31,11 @@ const requestSchema = z.object({
   /** Conferir a peça depois de gerar. */
   verify: z.boolean().optional().default(true),
   brandId: brandIdSchema.nullable().optional(),
+  // Os dois eixos editoriais da Fase 4, e a etapa do arco. Opcionais: sem eles
+  // a rota se comporta como antes, que é o comportamento de quem não escolheu.
+  trabalho: trabalhoIdSchema.nullable().optional(),
+  voz: vozIdSchema.nullable().optional(),
+  etapa: etapaIdSchema.nullable().optional(),
   format: z.enum(["carrossel", "apresentacao"]).optional().default("carrossel"),
   /** Só importa para o carrossel — Apresentação é sempre 16:9, tom único. */
   platform: z.enum(["linkedin", "instagram", "facebook", "tiktok"]).optional().default("linkedin"),
@@ -95,6 +101,9 @@ export async function POST(request: Request) {
       brandId,
       piece: isApresentacao ? "apresentação" : "carrossel",
       pieceArticle: isApresentacao ? "a" : "o",
+      trabalho: parsed.data.trabalho,
+      voz: parsed.data.voz,
+      etapa: parsed.data.etapa,
     });
     costSteps.push(...briefSteps);
 
@@ -151,7 +160,9 @@ export async function POST(request: Request) {
     // Checagem determinística: o prompt manda não usar termo proibido, isto
     // confere se ele obedeceu. Não bloqueia — quem edita é o usuário; só não
     // deixa a violação passar despercebida até a publicação.
-    const warnings = findForbiddenInSlides(validated.data.slides, brandId);
+    // A voz entra na varredura: a assinatura institucional é da página, e a
+    // regra só sabe disso se souber quem assina (Fase 4).
+    const warnings = findForbiddenInSlides(validated.data.slides, brandId, parsed.data.voz);
 
     // Verificação semântica: pega o que a varredura de string não alcança —
     // número sem lastro, data que a fonte não declara. Falha aqui não invalida a

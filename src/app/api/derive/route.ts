@@ -3,6 +3,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import {brands, brandIdSchema} from "@/constants/brands";
+import { acharTrabalho, acharVoz, trabalhoIdSchema, vozIdSchema } from "@/constants/editorial";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { findForbidden } from "@/knowledge/check";
 import { jsonBody } from "@/lib/apiError";
@@ -45,6 +46,17 @@ const requestSchema = z.object({
   article: articleSchema,
   brandId: brandIdSchema.nullable().optional(),
   kinds: z.array(outputKindSchema).min(1, "escolha ao menos um formato").max(6),
+  trabalho: trabalhoIdSchema.nullable().optional(),
+  /**
+   * A voz do LOTE, e o mapa das peças que divergem dela.
+   *
+   * É aqui que a decisão da Fase 4 ganha sentido: uma rodada deriva N peças do
+   * MESMO artigo, e o mix é exatamente isso — o carrossel sai na página e o post
+   * de texto no diretor, sem pagar um segundo artigo para dizer o que o primeiro
+   * já disse. Se a voz fosse da rodada, seriam duas rodadas.
+   */
+  voz: vozIdSchema.nullable().optional(),
+  vozPorPeca: z.record(outputKindSchema, vozIdSchema).optional(),
 });
 
 const DERIVE_RULES = `
@@ -104,8 +116,15 @@ export async function POST(request: Request) {
     const failures: PieceFailure[] = [];
     let linkedinCarousel: string | null = null;
 
+    /** A voz DESTA peça: a que ela declarou, ou a do lote. */
+    const vozDe = (kind: OutputKind) =>
+      parsed.data.vozPorPeca?.[kind] ?? parsed.data.voz ?? null;
+
+    const oTrabalho = acharTrabalho(brandId, parsed.data.trabalho);
+
     for (const kind of ordered) {
       const meta = OUTPUT_META[kind];
+      const aVoz = acharVoz(brandId, vozDe(kind));
       const derivesFromLinkedin = kind === "carrossel-instagram" && linkedinCarousel !== null;
       const from = derivesFromLinkedin ? "derivado do carrossel do LinkedIn" : "derivado do artigo";
 
@@ -123,7 +142,18 @@ export async function POST(request: Request) {
           system: isCarousel(kind)
             ? `${buildCarrosselSystem(PLATFORM_OF[kind], brandId)}\n${DERIVE_RULES}`
             : `${buildOutputSystem(kind, brandId)}\n${DERIVE_RULES}`,
-          prompt: sourceText,
+          // Trabalho e voz entram ANTES do material, pela mesma razão que no
+          // brief: elas dizem o que fazer com o que vem depois. Depois dele o
+          // modelo já decidiu a forma e as lê como ajuste de tom.
+          prompt: [
+            oTrabalho
+              ? `O TRABALHO DESTA PEÇA — ${oTrabalho.label} (${oTrabalho.papel}):\n${oTrabalho.instrucao}`
+              : null,
+            aVoz ? `QUEM ASSINA ESTA PEÇA — ${aVoz.label} (${aVoz.angulo}):\n${aVoz.instrucao}` : null,
+            sourceText,
+          ]
+            .filter(Boolean)
+            .join("\n\n"),
           providerOptions: { anthropic: { thinking: { type: "adaptive" } } },
         });
 
@@ -196,9 +226,12 @@ export async function POST(request: Request) {
 
     for (const piece of pieces) {
       const blocks = outputBlocks(piece.kind, piece.data);
+      // Cada peça é varrida com a PRÓPRIA voz: no mesmo lote, o carrossel da
+      // página pode carregar a assinatura e o post do diretor não pode.
       piece.warnings = findForbidden(
         blocks.map((block) => ({ blockNumber: block.number, text: block.text })),
         brandId,
+        vozDe(piece.kind),
       );
 
       try {

@@ -3,6 +3,7 @@ import { generateObject } from "ai";
 import { z } from "zod";
 
 import { brandIdSchema } from "@/constants/brands";
+import { etapaIdSchema, trabalhoIdSchema, vozIdSchema } from "@/constants/editorial";
 
 import { buildBrief } from "@/lib/brief";
 import { buildGroundedSystem } from "@/knowledge";
@@ -35,6 +36,11 @@ const requestSchema = z.object({
   signalIds: z.array(z.string()).optional(),
   verify: z.boolean().optional().default(true),
   brandId: brandIdSchema.nullable().optional(),
+  // Os dois eixos editoriais da Fase 4, e a etapa do arco. Opcionais: sem eles
+  // a rota se comporta como antes, que é o comportamento de quem não escolheu.
+  trabalho: trabalhoIdSchema.nullable().optional(),
+  voz: vozIdSchema.nullable().optional(),
+  etapa: etapaIdSchema.nullable().optional(),
 });
 
 const ARTIGO_SYSTEM = `Você escreve o artigo de blog que abre um ciclo editorial B2B.
@@ -101,7 +107,8 @@ export async function POST(request: Request) {
     return Response.json({ error: parsed.error.issues[0].message }, { status: 400 });
   }
 
-  const { input, context, includeNews, useSignals, signalIds, verify, brandId } = parsed.data;
+  const { input, context, includeNews, useSignals, signalIds, verify, brandId, trabalho, voz, etapa } =
+    parsed.data;
 
   // Vive fora do `try` porque o recibo precisa sobreviver ao erro: quando a
   // validação reprova, a leitura da URL, a busca de notícia e a redação inteira
@@ -118,6 +125,9 @@ export async function POST(request: Request) {
       useSignals,
       signalIds,
       brandId,
+      trabalho,
+      voz,
+      etapa,
       piece: "artigo",
       pieceArticle: "o",
     });
@@ -164,9 +174,12 @@ export async function POST(request: Request) {
     // Mesma varredura determinística do carrossel: o prompt manda não usar termo
     // proibido, isto confere se ele obedeceu. Avisa, não bloqueia — quem edita
     // e publica é o usuário.
+    // A voz entra na varredura: a assinatura institucional é da página, e a
+    // regra só sabe disso se souber quem assina (Fase 4).
     const warnings = findForbidden(
       blocks.map((block) => ({ blockNumber: block.number, text: block.text })),
       brandId,
+      voz,
     );
 
     // Falha na auditoria não invalida o artigo: ele já foi pago, e ficar sem o

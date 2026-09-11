@@ -33,6 +33,7 @@ import type { ForbiddenHit } from "@/knowledge/check";
 import type { Verification } from "@/lib/verify";
 import { useHistory } from "@/hooks/useHistory";
 import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
+import type { TrabalhoId, VozId } from "@/constants/editorial";
 import { useSettings } from "@/hooks/useSettings";
 import {
   entryFromCost,
@@ -189,6 +190,9 @@ export default function Home() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [includeNews, setIncludeNews] = useState(true);
+  /** Os dois eixos editoriais no avulso — os mesmos da bancada (Fase 4). */
+  const [trabalho, setTrabalho] = useState<TrabalhoId | null>(null);
+  const [voz, setVoz] = useState<VozId | null>(null);
   const [exporting, setExporting] = useState<"pdf" | "zip" | "pptx" | null>(null);
   const [sharing, setSharing] = useState(false);
   const canShare = typeof navigator !== "undefined" && typeof navigator.share === "function";
@@ -340,6 +344,8 @@ export default function Home() {
           brandId,
           format,
           platform,
+          trabalho,
+          voz,
         }),
       });
       const data = await response.json();
@@ -715,6 +721,10 @@ export default function Home() {
             onSuggestionsCost={(cost) => logCost(cost, "sugestoes", "Sugestões de tema")}
             signalIds={signalIds}
             onSignalIdsChange={setSignalIds}
+            trabalho={trabalho}
+            onTrabalhoChange={setTrabalho}
+            voz={voz}
+            onVozChange={setVoz}
           />
         </div>
       ) : (
