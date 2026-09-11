@@ -53,6 +53,9 @@ const requestSchema = z.object({
  * marcas.
  */
 export async function GET(request: Request) {
+  const limited = enforceRateLimit(request, "crm-read", { limit: 60, windowMs: 60_000 });
+  if (limited) return limited;
+
   if (!crmPublishConfigured()) return Response.json({ configured: false, pending: [] });
 
   const brand = new URL(request.url).searchParams.get("brandId");

@@ -1,5 +1,6 @@
 import { brandIdSchema, isPersonalFront } from "@/constants/brands";
 import { fetchContentCampaigns, campaignsConfigured } from "@/lib/campaigns";
+import { enforceRateLimit } from "@/lib/rateLimit";
 
 /**
  * Lista campanhas de canal Conteúdo/Digital pra seletor da bancada.
@@ -8,6 +9,9 @@ import { fetchContentCampaigns, campaignsConfigured } from "@/lib/campaigns";
  * campanhas de todas as empresas.
  */
 export async function GET(request: Request) {
+  const limited = enforceRateLimit(request, "crm-read", { limit: 60, windowMs: 60_000 });
+  if (limited) return limited;
+
   if (!campaignsConfigured()) {
     return Response.json({ configured: false, campaigns: [] });
   }

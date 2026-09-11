@@ -1,9 +1,12 @@
 /**
- * Freio simples por IP contra laço em rota que gasta dinheiro ou cota.
+ * Freio simples por IP contra laço em rota que gasta dinheiro, cota ou
+ * service role do CRM.
  *
- * Em serverless o mapa vive por instância — não é quota global. Ainda assim
- * corta o `curl` em laço na mesma conexão, que é o abuso mais barato de montar.
- * Sem isto, Basic Auth compartilhada + chave Anthropic = conta aberta.
+ * DÉBITO CONSCIENTE: em serverless o mapa vive por instância — não é quota
+ * global. Duas instâncias frias = dois baldes. Corta o `curl` em laço na
+ * mesma conexão (o abuso mais barato de montar); não substitui Redis/KV se
+ * a ferramenta for exposta a abuso distribuído. Sem isto, Basic Auth
+ * compartilhada + chave Anthropic = conta aberta.
  */
 
 type Bucket = { count: number; resetAt: number };

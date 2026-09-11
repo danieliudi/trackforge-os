@@ -4,6 +4,7 @@ import { brandIdSchema, isPersonalFront } from "@/constants/brands";
 
 import { fetchMarketSignals, signalsConfigured } from "@/lib/marketSignals";
 import { jsonBody } from "@/lib/apiError";
+import { enforceRateLimit } from "@/lib/rateLimit";
 
 const requestSchema = z.object({
   brandId: brandIdSchema.nullable().optional(),
@@ -20,6 +21,9 @@ const requestSchema = z.object({
  * CRM, e a interface só esconde a seção em vez de mostrar falha.
  */
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "crm-read", { limit: 60, windowMs: 60_000 });
+  if (limited) return limited;
+
   const body = await jsonBody(request);
   if (!body.ok) return body.response;
 

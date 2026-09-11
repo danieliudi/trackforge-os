@@ -62,6 +62,10 @@ listas de propósito: produção (bancada) e rascunho (editor de slides).
 é automática, sem botão — um botão transformaria "não perder trabalho pago"
 numa lembrança do usuário, que é exatamente o que falhou antes.
 
+**Depois do envio ao CRM:** o texto bruto da origem (`origin.input` — material
+colado ou arquivo) some do `localStorage`. Artigo e peças ficam; reescrever
+exige colar de novo. Minimização LGPD em `src/lib/produced.ts`.
+
 ### `/esteira/fatos` — Base de fatos
 
 **Para que serve:** o que a ferramenta **pode afirmar**. Fila de risco no topo,

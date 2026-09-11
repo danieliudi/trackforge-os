@@ -72,6 +72,24 @@ const KEY = "producoes:v1";
  */
 const MAX = 40;
 
+/**
+ * Material colado / arquivo pode carregar dado pessoal (e-mail, nome, trecho
+ * de contrato). Enquanto a produção ainda não foi à fila, o texto precisa
+ * ficar no disco — sem ele, "Reescrever o artigo" gasta modelo a partir do
+ * nome do arquivo. Depois do envio, o CRM e o artigo já têm o que importa;
+ * limpar o `input` do `localStorage` é a minimização possível sem banco.
+ *
+ * Modo, sinal e nome do arquivo ficam: a lista de Peças ainda precisa do
+ * rótulo. Reabrir uma produção enviada e tentar reescrever exige colar de novo.
+ */
+function scrubOriginInput(production: Production): Production {
+  if (!production.sent || !production.origin?.input) return production;
+  return {
+    ...production,
+    origin: { ...production.origin, input: "" },
+  };
+}
+
 function isValid(value: unknown): value is Production {
   if (typeof value !== "object" || value === null) return false;
   const data = value as Record<string, unknown>;
@@ -92,7 +110,19 @@ function load(): Production[] {
     const raw = readLocal(KEY);
     if (!raw) return [];
     const parsed: unknown = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed.filter(isValid) : [];
+    const before = Array.isArray(parsed) ? parsed.filter(isValid) : [];
+    const list = before.map(scrubOriginInput);
+    // Produções enviadas antigas ainda tinham o material no disco — regrava
+    // sem o input na primeira leitura, senão o dado fica até a próxima edição.
+    const dirty = before.some((item) => Boolean(item.sent && item.origin?.input));
+    if (dirty) {
+      try {
+        writeLocal(KEY, JSON.stringify(list.slice(0, MAX)));
+      } catch {
+        // Sem cota: segue com a lista limpa em memória.
+      }
+    }
+    return list;
   } catch {
     return [];
   }
@@ -125,7 +155,7 @@ export function getProductionsServerSnapshot(): Production[] {
 }
 
 function persist(next: Production[]) {
-  cache = next.slice(0, MAX);
+  cache = next.slice(0, MAX).map(scrubOriginInput);
   if (typeof window !== "undefined") {
     try {
       writeLocal(KEY, JSON.stringify(cache));
