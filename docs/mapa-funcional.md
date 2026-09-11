@@ -161,30 +161,71 @@ servidor**.
 
 ## 3. `src/knowledge` — a camada de fato curado
 
-Conferido em 08/09/2026:
+Conferido em 11/09/2026, contado a partir do código:
 
-| Arquivo | Fatos | Por nível |
-|---|---|---|
-| `facts/resibag-normas.json` | 19 | 1 primária · 1 secundária · 17 não verificado |
-| `facts/sanwey-normas.json` | 7 | 1 interna · 6 não verificado |
-| `facts/meu-normas.json` | 0 | frente pessoal — número e norma só do material colado |
+| Arquivo | Fatos | Por nível | Fonte órfã |
+|---|---|---|---|
+| `facts/resibag-normas.json` | 19 | 1 primária · 1 secundária · 17 não verificado | **14** |
+| `facts/sanwey-normas.json` | 7 | 1 interna · 6 não verificado | 0 |
+| `facts/meu-normas.json` | 0 | frente pessoal — número e norma só do material colado | — |
 
 **Só primária dentro da validade vira número, data ou artigo de norma numa
 peça.** Secundária e interna dão contexto e nunca entram no slide. Os níveis e
-a regra moram em `src/knowledge/provenance.ts`; `check.ts` faz a varredura de
-termo proibido.
+a regra moram em `src/knowledge/provenance.ts`.
 
 `checkedAt` e `revalidateBy` dizem quando alguém conferiu contra a fonte e até
 quando o fato vale. **Um fato de 19 da Resibag tem `checkedAt`** — é o que a
 coluna de conferência da tela de Fatos mostra, e é o motivo de a fila existir.
+Três fatos têm `revalidateBy`, e **dois vencem em 31/12/2026** — a revisão da
+ANTT 5998 e o RAPP do IBAMA. Depois da data eles param de ser publicáveis até
+alguém reconferir. O terceiro é a validade do certificado INMETRO de 700 kg,
+18/05/2028.
 
-**Erro conhecido, não reintroduzir:** a Resolução ANTT nº 6.078/2026 **não**
-substituiu a nº 5.998/2022. Foi publicada como "atualização da 5.998" por meses
-sem ninguém conferir na ANTT, e é o caso que fez esta camada existir.
+**Quatorze fatos da Resibag citam uma skill que não existe mais.** A
+`resibag-compliance-kb` foi descontinuada pelo titular em 10/09/2026, e o
+`source` de cada um diz isso na cara, com a norma onde conferir de verdade.
+Não foram repontados para a fonte normativa nova: aquelas afirmações
+detalhadas de NBR, ANTT e INMETRO não estão lá, e repontar seria atribuição
+falsa — que é pior que órfã.
+
+### O que a varredura de termo proibido sabe fazer
+
+`check.ts` roda por frente, em dois passos. O primeiro compara uma regex por
+vez contra o texto de cada bloco. O segundo avalia **coocorrência** no escopo
+da PEÇA — o campo `pair`, que expressa "A e B não podem aparecer juntos"
+quando cada um, sozinho, está correto.
+
+| Frente | Regras | De coocorrência |
+|---|---|---|
+| resibag | 24 | 1 — tagline institucional junto do slogan comercial |
+| sanwey | 14 | 2 — assinatura junto do posicionamento; tagline junto da sub-tagline |
+| meu | 2 | 0 |
+
+A regra de par existe desde 10/09/2026, e nasceu de um erro que o próprio gate
+não tinha como pegar: um mockup desta ferramenta montou uma capa misturando os
+dois níveis de mensagem da Resibag.
+
+### Dois roteiros vigiam a base
 
 `scripts/check-knowledge.mjs` compara a curadoria com a skill de origem e
-**sempre sai com 0** — é aviso, não gate. Curadoria à frente da skill é normal:
-sincronizar sobrescreveria correção deliberada.
+**sempre sai com 0** — é aviso, não gate. Grava **todas** as fontes de uma vez:
+revisou uma e a outra não, edite o `sources.json` à mão.
+
+`npm run knowledge:coerencia` olha para dentro e faz duas perguntas: a fonte
+autorizada contém um termo que ela mesma proíbe, e as regras pegam o que dizem
+pegar. São 48 casos declarados, com os dois lados — frase errada que deve
+reprovar, e frase certa que não pode dar falso alarme.
+
+**Erro conhecido, não reintroduzir:** a Resolução ANTT nº 6.078/2026 **não se
+confirma em fonte oficial** e também não substituiu a nº 5.998/2022. Circulou
+como "atualização da 5.998" por meses sem ninguém conferir na ANTT, e é o caso
+que fez esta camada existir.
+
+**Conflito aberto, registrado e não resolvido:** o organismo certificador da
+ISO 9001 do Grupo Sanwey. A fonte da Sanwey registra DNV; a da Resibag retirou
+o nome e proíbe citá-lo até haver certificado físico conferido. A proibição
+vale só na frente Resibag — o certificado é da Sanwey, e herdar a regra da
+outra frente seria o vazamento que a regra de isolamento proíbe.
 
 ---
 
