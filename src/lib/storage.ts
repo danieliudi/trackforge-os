@@ -106,6 +106,46 @@ export function saveState(state: StoredState): boolean {
 }
 
 /**
+ * Store externo dos rascunhos, consumido por `useSyncExternalStore`.
+ *
+ * Ler `loadState()` no inicializador de `useState` fazia o servidor renderizar
+ * lista vazia e o cliente a lista real — mismatch de hidratação. O snapshot de
+ * servidor é sempre vazio; o cliente troca pelo valor real depois da pintura.
+ */
+const EMPTY_STATE: StoredState = { drafts: [], activeId: null };
+let draftCache: StoredState | null = null;
+const draftListeners = new Set<() => void>();
+
+export function subscribeDrafts(listener: () => void) {
+  draftListeners.add(listener);
+  return () => {
+    draftListeners.delete(listener);
+  };
+}
+
+/** Precisa ser referencialmente estável entre chamadas, ou o React entra em loop. */
+export function getDraftsSnapshot(): StoredState {
+  draftCache ??= loadState();
+  return draftCache;
+}
+
+export function getDraftsServerSnapshot(): StoredState {
+  return EMPTY_STATE;
+}
+
+function commitDrafts(next: StoredState): boolean {
+  draftCache = next;
+  const ok = typeof window !== "undefined" ? saveState(next) : true;
+  draftListeners.forEach((listener) => listener());
+  return ok;
+}
+
+/** Substitui o estado inteiro (lista + ativo). */
+export function replaceDrafts(updater: (current: StoredState) => StoredState): boolean {
+  return commitDrafts(updater(getDraftsSnapshot()));
+}
+
+/**
  * Guarda um rascunho novo e deixa ele ativo.
  *
  * Existe para a derivação: a peça nasce na tela do artigo e é editada na tela
@@ -114,11 +154,10 @@ export function saveState(state: StoredState): boolean {
  * avisa em vez de fingir que salvou.
  */
 export function addDraft(draft: Draft): boolean {
-  const state = loadState();
-  return saveState({
+  return replaceDrafts((state) => ({
     drafts: [draft, ...state.drafts.filter((existing) => existing.id !== draft.id)],
     activeId: draft.id,
-  });
+  }));
 }
 
 const CONTEXT_KEY = "brand-context:v1";

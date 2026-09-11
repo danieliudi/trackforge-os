@@ -190,6 +190,14 @@ Em LINHA DE MARCA a categoria é "contentor", não "embalagem". A precificação
     {
       term: "Sanbag posicionado para resíduo perigoso",
       reason: "esse segmento é da Resibag, marca independente do grupo.",
+      // "residuo perigoso" de propósito — "carga perigosa" / "Homologado Perigosos"
+      // são da linha Sanwey (marco 2024, portfólio) e não podem disparar.
+      match: [
+        /sanbag[^.]{0,50}residuo perigoso/,
+        /residuo perigoso[^.]{0,50}sanbag/,
+        /sanbag[^.]{0,40}classe i\b/,
+        /sanbag para (residuo|classe i)/,
+      ],
     },
     {
       term: '"A embalagem certa para cada carga."',
@@ -225,11 +233,17 @@ Em LINHA DE MARCA a categoria é "contentor", não "embalagem". A precificação
       term: "idade da empresa usada como prova em peça comercial",
       reason:
         "número que se reescreve todo ano não acumula memória. Em peça comercial a prova é marco datado — 1984 exportação, 1984 alças, 1990 Amazônia, 1999 ISO, 2008 INMETRO. Os 42 anos ficam para peça institucional.",
+      // Sem match de propósito (types.ts): "42 anos" é frase autorizada em peça
+      // institucional e no bloco de fatos; o erro é o CONTEXTO (comercial vs
+      // institucional), que regex não distingue sem falso positivo.
     },
     {
       term: "página ou peça de segmento Alimentício com argumento fechado",
       reason:
         'a linha da vertical está EM ABERTO desde a saída da FSSC 22000: "BPF e assepsia documentadas" é verdadeiro e fraco demais para carregar a página sozinho. Falta o complemento operacional. Marque [FALTA DADO] em vez de inventar diferencial.',
+      // Sem match de propósito: a frase fraca é verdadeira e aparece nos fatos;
+      // o erro é usá-la sozinha como argumento fechado — semântica de peça, não
+      // de string. Inventar FSSC de volta já cai na regra FSSC acima.
     },
     {
       term: "preço por quilo",

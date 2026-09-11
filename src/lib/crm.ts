@@ -1,4 +1,5 @@
 import { isPersonalFront, type BrandId } from "@/constants/brands";
+import { findForbidden } from "@/knowledge/check";
 import { COMPANY_ID } from "@/lib/marketSignals";
 import { articleToMarkdown, type Article, type ChosenImage } from "@/types/article";
 import { isCarousel, outputBlocks, OUTPUT_META, type OutputKind } from "@/types/outputs";
@@ -12,16 +13,18 @@ import type { Carousel } from "@/types/carousel";
  * Está em produção com histórico real e dois tipos de sugestão rodando. Criar
  * uma segunda fila daria duas caixas de entrada para a mesma decisão.
  *
- * O QUE FICA DE FORA DE PROPÓSITO: rascunho, fontes por afirmação e parecer do
- * auditor vão no `payload`, que o papel `agencia` não lê. Na entrega para a
- * agência entra só o texto aprovado. Foi a decisão de setembro/2026 — em vez de
- * mexer na política de leitura, o material sensível não vai para a tabela que
- * ela enxerga.
+ * O QUE VAI NO `payload` (o papel `agencia` NÃO lê esta tabela): artigo, peças,
+ * imagens e a contagem `sem_fonte`. O parecer detalhado do auditor (cada claim)
+ * NÃO é enviado — só o número. Na entrega para a agência entra só o texto
+ * aprovado. Foi a decisão de setembro/2026.
  *
  * Frente Meu nunca chama isto: peça pessoal fica só no navegador.
  */
 
 const ACTION_TYPE = "sugestao_peca_conteudo";
+
+/** Alinhado ao teto de claims do verificador (`verify.ts`). */
+const MAX_FLAGGED = 30;
 
 type GatewayConfig = { url: string; key: string };
 
@@ -75,8 +78,34 @@ function pieceTitle(piece: PieceForPublish): string {
 
 export type PublishResult = { id: string; status: string };
 
+function sanitizeFlagged(value: number): number {
+  if (!Number.isFinite(value) || value < 0) return 0;
+  return Math.min(MAX_FLAGGED, Math.floor(value));
+}
+
+/**
+ * Contagem efetiva de pendência por peça.
+ *
+ * `flagged` vem do cliente (auditoria na sessão). Quem chama a rota pode zerar.
+ * O piso gratuito é a varredura de termo proibido no servidor: se a peça viola
+ * a marca, a fila salta mesmo com `flagged: 0`. Não substitui a auditoria
+ * semântica — isso custa modelo e já rodou (ou não) no cliente.
+ */
+function effectiveFlagged(
+  piece: PieceForPublish,
+  brandId: BrandId | null | undefined,
+): number {
+  const fromClient = sanitizeFlagged(piece.flagged);
+  const blocos = outputBlocks(piece.kind, piece.data);
+  const forbidden = findForbidden(
+    blocos.map((bloco) => ({ blockNumber: bloco.number, text: bloco.text })),
+    brandId,
+  ).length;
+  return Math.max(fromClient, forbidden);
+}
+
 /** Uma linha por peça, curta o bastante para o pacote caber numa tela. */
-function summarize({ article, pieces }: PublishInput): string {
+function summarize(article: Article, pieces: PieceForPublish[]): string {
   const list = pieces
     .map((piece) => `${OUTPUT_META[piece.kind].platform}: ${OUTPUT_META[piece.kind].label}`)
     .join(" · ");
@@ -105,8 +134,13 @@ export async function publishForApproval(
     throw new Error("o CRM não está configurado nesta instalação");
   }
 
-  const { article, pieces, images, brandId, sourceLabel, contentId, campaignId, campaignName } =
+  const { article, images, brandId, sourceLabel, contentId, campaignId, campaignName } =
     input;
+  // Sanitiza e aplica o piso de termo proibido ANTES do summary/priority.
+  const pieces = input.pieces.map((piece) => ({
+    ...piece,
+    flagged: effectiveFlagged(piece, brandId),
+  }));
   const flagged = pieces.reduce((total, piece) => total + piece.flagged, 0);
   const companyId = brandId ? COMPANY_ID[brandId] ?? null : null;
 
@@ -116,7 +150,7 @@ export async function publishForApproval(
     body: JSON.stringify({
       action_type: ACTION_TYPE,
       title: article.title,
-      summary: summarize(input),
+      summary: summarize(article, pieces),
       // Frente obrigatória por decisão de desenho: peça sem dono de frente é o
       // que faz material de uma marca sair com dado de outra.
       company_id: companyId,
@@ -192,9 +226,11 @@ export async function listPendingPieces(
 
   const config = readConfig();
   if (!config) return [];
+  // Sem frente: não listar a fila cruzada. A rota GET exige brandId.
+  if (!brandId) return [];
 
   const params = new URLSearchParams({ action: "list", status: "pending", limit: "20" });
-  const companyId = brandId ? COMPANY_ID[brandId] : undefined;
+  const companyId = COMPANY_ID[brandId];
   if (companyId) params.set("company_id", companyId);
 
   const response = await fetch(`${config.url}?${params}`, {

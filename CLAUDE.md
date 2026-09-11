@@ -204,18 +204,18 @@ Isto não é preferência de estilo. É o requisito do produto.
 - **Nunca imprima o valor de um segredo**, nem para depurar. Cite o nome da
   variável e se está definida.
 - **Fronteira da agência.** O papel `agencia` no CRM lê `marketing_deliverables`,
-  não `agent_actions.payload`. Rascunho, fonte por afirmação e parecer do auditor
-  ficam no `payload` de propósito — só o texto aprovado atravessa. Ao mexer no
-  pacote enviado (`src/lib/crm.ts`), confira o que passa a ser visível.
-  Exceção conhecida e registrada: `custom_fields.sinal` (nome do sinal de origem)
-  cruza para o entregável.
+  não `agent_actions.payload`. No payload vão artigo, peças e a contagem
+  `sem_fonte` — o parecer detalhado (cada claim) **não** é enviado. Só o texto
+  aprovado atravessa para a agência. Ao mexer no pacote enviado (`src/lib/crm.ts`),
+  confira o que passa a ser visível. Exceção conhecida e registrada:
+  `custom_fields.sinal` (nome do sinal de origem) cruza para o entregável.
 - **Não aplicar migration nem fazer deploy de edge function sem confirmação
   explícita do Daniel.** Vale também para qualquer escrita em produção no CRM.
 - **Publicar exige `APP_PASSWORD`.** As rotas de API gastam a chave da
   Anthropic, leem sinais do CRM, escrevem na fila de aprovação e apagam arquivo
-  da biblioteca. Sem essa variável o `src/proxy.ts` não pede nada — o que
-  é certo em `localhost` e inaceitável numa URL pública. Ao subir a ferramenta
-  para qualquer lugar, definir a variável faz parte de "no ar".
+  da biblioteca. Em `localhost` / `127.0.0.1` a senha continua opcional; **fora
+  disso o `src/proxy.ts` responde 503 sem ela** — fail-closed. Ao subir a
+  ferramenta para qualquer URL pública, definir a variável faz parte de "no ar".
 
 ## 4. Mockup antes de código — e a identidade visual é uma só
 

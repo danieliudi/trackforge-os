@@ -1,9 +1,14 @@
 import { jsonBody } from "@/lib/apiError";
+import { enforceRateLimit } from "@/lib/rateLimit";
+
 /**
  * As diretrizes da API do Unsplash exigem chamar `download_location` sempre
  * que uma foto é efetivamente usada (não só exibida na busca).
  */
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "unsplash", { limit: 60, windowMs: 60_000 });
+  if (limited) return limited;
+
   const key = process.env.UNSPLASH_ACCESS_KEY;
   const body = await jsonBody(request);
   if (!body.ok) return body.response;

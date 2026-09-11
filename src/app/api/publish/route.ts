@@ -5,6 +5,7 @@ import { crmPublishConfigured, listPendingPieces, publishForApproval } from "@/l
 import { articleSchema } from "@/types/article";
 import { outputKindSchema } from "@/types/outputs";
 import { jsonBody } from "@/lib/apiError";
+import { enforceRateLimit } from "@/lib/rateLimit";
 
 /**
  * `data` é `unknown` de propósito: o formato de cada peça já foi validado pelo
@@ -19,7 +20,7 @@ const requestSchema = z.object({
       z.object({
         kind: outputKindSchema,
         data: z.unknown(),
-        flagged: z.number().int().min(0).default(0),
+        flagged: z.number().int().min(0).max(30).default(0),
       }),
     )
     .min(1, "não há peça para enviar"),
@@ -48,13 +49,21 @@ const requestSchema = z.object({
  *
  * `configured: false` é resposta legítima e não erro: quem roda o gerador nem
  * sempre tem acesso ao CRM, e a tela some em vez de mostrar caixa vazia.
+ * `brandId` é obrigatório — sem frente a fila misturaria títulos de todas as
+ * marcas.
  */
 export async function GET(request: Request) {
+  const limited = enforceRateLimit(request, "crm-read", { limit: 60, windowMs: 60_000 });
+  if (limited) return limited;
+
   if (!crmPublishConfigured()) return Response.json({ configured: false, pending: [] });
 
   const brand = new URL(request.url).searchParams.get("brandId");
   const parsed = brandIdSchema.safeParse(brand);
-  const brandId = parsed.success ? parsed.data : null;
+  if (!parsed.success) {
+    return Response.json({ error: "brandId é obrigatório" }, { status: 400 });
+  }
+  const brandId = parsed.data;
 
   // Frente pessoal: CRM pode estar ligado na instalação, mas esta frente não
   // usa a fila — a UI some o botão em vez de mostrar "configured: true" vazio.
@@ -71,6 +80,9 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "publish", { limit: 20, windowMs: 60_000 });
+  if (limited) return limited;
+
   const body = await jsonBody(request);
   if (!body.ok) return body.response;
 

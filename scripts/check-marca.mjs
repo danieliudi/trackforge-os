@@ -130,6 +130,9 @@ const CASOS = {
       ["organismo da ISO em peca Resibag", ["ISO 9001:2015 certificada pela SGS."]],
       ["premissa falsa em outra roupagem", ["Ninguem compra big bag. Compra a prova de que o big bag passa na auditoria."]],
       ["e-mail nao canonico", ["Fale com comercial@resibag.com.br."]],
+      ["Filtrante com certificacao de produto", ["Filtrante certificado INMETRO para desaguamento."]],
+      ["Residuo Verde homologado", ["Residuo Verde com homologacao de produto."]],
+      ["INMETRO atribuido ao Filtrante", ["Homologacao da linha Filtrante para Classe I."]],
       // Coocorrencia: nenhum lado e proibido sozinho. A capa que a propria
       // sessao montou errado no mockup da Fase 3, em 08/09/2026.
       ["par 01+03, blocos vizinhos", [
@@ -173,6 +176,8 @@ const CASOS = {
       ["frase aposentada â€” solucao", ["A solucao em Sanbag."]],
       ["endosso errado", ["Resibag, uma empresa Sanwey."]],
       ["preco por quilo", ["Nossa precificacao por quilo e a mais competitiva."]],
+      ["Sanbag no segmento de residuo perigoso", ["Sanbag para residuo perigoso Classe I."]],
+      ["Sanbag com Classe I", ["Nossa linha Sanbag atende Classe I."]],
       // Empilhamento: cada linha, sozinha, esta correta. O erro e a peca ter as duas.
       ["par C1+C2 na mesma peca", [
         "A marca que valoriza o seu produto.",
@@ -203,6 +208,11 @@ const CASOS = {
       ["ANP e Marinha sao da Sanwey", [
         "Type-C condutivo com certificacao ANP.",
         "Primeiro brasileiro homologado pelo Ministerio da Marinha, 1996.",
+      ]],
+      // Carga perigosa e Homologado Perigosos sao da Sanwey — nao podem
+      // disparar a regra de "residuo perigoso" (territorio Resibag).
+      ["Sanbag com carga perigosa — marco certo", [
+        "Sanbag Alca-Guia com homologacao de carga perigosa. 2024.",
       ]],
     ],
   },

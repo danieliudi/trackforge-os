@@ -62,6 +62,10 @@ listas de propósito: produção (bancada) e rascunho (editor de slides).
 é automática, sem botão — um botão transformaria "não perder trabalho pago"
 numa lembrança do usuário, que é exatamente o que falhou antes.
 
+**Depois do envio ao CRM:** o texto bruto da origem (`origin.input` — material
+colado ou arquivo) some do `localStorage`. Artigo e peças ficam; reescrever
+exige colar de novo. Minimização LGPD em `src/lib/produced.ts`.
+
 ### `/esteira/fatos` — Base de fatos
 
 **Para que serve:** o que a ferramenta **pode afirmar**. Fila de risco no topo,
@@ -235,12 +239,9 @@ O envio usa `agent_actions`, a fila que o CRM já tem para sugestão de agente
 que espera aprovação humana.
 
 **O que o papel `agencia` lê:** `marketing_deliverables` — o texto aprovado.
-**O que ele NÃO lê:** `agent_actions.payload`, onde ficam de propósito o
-rascunho, a fonte por afirmação e o parecer do auditor.
-
-**O que atravessa para o entregável, intencionalmente:** `sinal` (nome do sinal
-de origem), `content_id`, `campaign_id` e `campaign_name` — via
-`custom_fields`. A agência passa a ver o código da peça.
+**O que ele NÃO lê:** `agent_actions.payload`, onde ficam artigo, peças e a
+contagem `sem_fonte`. O parecer detalhado (cada claim) **nem entra** no
+payload — só a contagem.
 
 **Prioridade:** peça com afirmação sem fonte entra como `high`. Não é urgência,
 é pendência — mas precisa saltar na fila, porque é a que exige decisão.
@@ -262,7 +263,7 @@ Espelha o `.env.example`.
 | Variável | Sem ela |
 |---|---|
 | `ANTHROPIC_API_KEY` | **nada é gerado.** É a única verdadeiramente obrigatória para a ferramenta funcionar |
-| `APP_PASSWORD` | o `src/proxy.ts` não pede nada. Certo em `localhost`, **inaceitável numa URL pública** — definir faz parte de "no ar" |
+| `APP_PASSWORD` | em localhost o proxy não pede nada; **fora disso responde 503** — definir faz parte de "no ar" |
 | `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` | sem sinais do CRM, sem campanhas, sem biblioteca de imagens. As outras origens seguem |
 | `CRM_AGENT_KEY` | o botão "Enviar para aprovação" não aparece |
 | `UNSPLASH_ACCESS_KEY` | a busca de imagem some; sobra a biblioteca da frente |

@@ -17,9 +17,9 @@
  *   corpo HTML                                → "Unexpected token '<'…"      idem
  *
  * O QUE ISTO GARANTE: sai sempre uma string; ela carrega o código HTTP quando o
- * corpo não trouxe mensagem aproveitável; e o corpo cru vai para o console.
- * "Falhou" sem número não deixa nem perguntar direito — com o número dá para
- * separar recusa (400) de credencial (401) e do CRM do outro lado (502).
+ * corpo não trouxe mensagem aproveitável. "Falhou" sem número não deixa nem
+ * perguntar direito — com o número dá para separar recusa (400) de credencial
+ * (401) e do CRM do outro lado (502).
  */
 
 /** Frase longa demais vira parede de texto num banner de três linhas. */
@@ -90,10 +90,14 @@ export async function readError(response: Response, fallback: string): Promise<s
     // inútil quanto `[object Object]`.
   }
 
-  // O corpo cru vai para o console, não para a tela: é o que permite
-  // diagnosticar a próxima falha sem depender de print de quem usou.
-  if (!message) console.error(`falha em ${response.url} (HTTP ${response.status})`, raw.slice(0, 2000));
-
+  // Só status + tamanho no console: o corpo pode carregar trecho de payload
+  // (material colado, peça) e ir parar em log de hosting. A mensagem legível
+  // já foi extraída acima para a tela.
+  if (!message) {
+    console.error(
+      `falha em ${response.url} (HTTP ${response.status}, ${raw.length} bytes no corpo)`,
+    );
+  }
   const base = message ?? `${fallback} (HTTP ${response.status})`;
   const text = issues.length > 0 ? `${base} — ${issues.join("; ")}` : base;
   return text.length > MAX ? `${text.slice(0, MAX)}…` : text;

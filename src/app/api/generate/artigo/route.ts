@@ -7,6 +7,8 @@ import { brandIdSchema } from "@/constants/brands";
 import { buildBrief } from "@/lib/brief";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbidden } from "@/knowledge/check";
+import { MAX_CONTEXT_CHARS, MAX_INPUT_CHARS } from "@/lib/limits";
+import { enforceRateLimit } from "@/lib/rateLimit";
 import { verifyBlocks } from "@/lib/verify";
 import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pricing";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
@@ -28,8 +30,11 @@ import { MAX_SUGGESTION_REASON } from "@/types/outputs";
 import { jsonBody } from "@/lib/apiError";
 
 const requestSchema = z.object({
-  input: z.string().min(3, "informe uma URL ou um tema"),
-  context: z.string().optional(),
+  input: z
+    .string()
+    .min(3, "informe uma URL ou um tema")
+    .max(MAX_INPUT_CHARS, `texto acima de ${MAX_INPUT_CHARS} caracteres`),
+  context: z.string().max(MAX_CONTEXT_CHARS).optional(),
   includeNews: z.boolean().optional(),
   useSignals: z.boolean().optional().default(true),
   signalIds: z.array(z.string()).optional(),
@@ -93,6 +98,9 @@ Regras de texto:
   exigência e consequência.`;
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "generate");
+  if (limited) return limited;
+
   const body = await jsonBody(request);
   if (!body.ok) return body.response;
 

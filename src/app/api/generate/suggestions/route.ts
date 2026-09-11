@@ -7,10 +7,15 @@ import { brandIdSchema } from "@/constants/brands";
 import { priceUsage, type GenerationCost } from "@/constants/pricing";
 import { buildProhibitionsBlock } from "@/knowledge";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
+import { MAX_CONTEXT_CHARS } from "@/lib/limits";
+import { enforceRateLimit } from "@/lib/rateLimit";
 import { jsonBody } from "@/lib/apiError";
 
 const requestSchema = z.object({
-  context: z.string().min(1, "informe o contexto da marca"),
+  context: z
+    .string()
+    .min(1, "informe o contexto da marca")
+    .max(MAX_CONTEXT_CHARS, `contexto acima de ${MAX_CONTEXT_CHARS} caracteres`),
   brandId: brandIdSchema.nullable().optional(),
 });
 
@@ -26,6 +31,9 @@ um carrossel denso — nunca genérica ("dicas de logística" é fraco; "3 erros
 atrasam a homologação ANTT de um big bag" é forte). Português do Brasil.`;
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "generate");
+  if (limited) return limited;
+
   const body = await jsonBody(request);
   if (!body.ok) return body.response;
 

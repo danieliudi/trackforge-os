@@ -56,14 +56,16 @@ dois discordarem, o `CLAUDE.md` vence e este é o que está errado.
 - **Nunca imprima o valor de um segredo**, nem para depurar. Cite o nome da
   variável e se está definida.
 - **Fronteira da agência.** O papel `agencia` no CRM lê `marketing_deliverables`,
-  não `agent_actions.payload`. Rascunho, fonte por afirmação e parecer do auditor
-  ficam no `payload` de propósito — só o texto aprovado atravessa. Ao mexer em
-  `src/lib/crm.ts`, diga na entrega o que a agência passa a ver. Exceção
-  registrada: `custom_fields.sinal` cruza para o entregável.
+  não `agent_actions.payload`. No payload vão artigo, peças e a contagem
+  `sem_fonte` — o parecer detalhado (cada claim) **não** é enviado. Só o texto
+  aprovado atravessa. Ao mexer em `src/lib/crm.ts`, diga na entrega o que a
+  agência passa a ver. Exceção registrada: `custom_fields.sinal` cruza para o
+  entregável.
 - **Não aplique migration nem faça deploy de edge function sem confirmação
   explícita do Daniel.** Vale para qualquer escrita em produção no CRM.
-- **Publicar exige `APP_PASSWORD`.** Sem essa variável o `src/proxy.ts` não pede
-  nada — correto em `localhost`, inaceitável numa URL pública.
+- **Publicar exige `APP_PASSWORD`.** Em `localhost` / `127.0.0.1` a senha
+  continua opcional; **fora disso o `src/proxy.ts` responde 503 sem ela** —
+  fail-closed. Definir a variável faz parte de "no ar".
 
 ## 3. Portão de mockup — pare antes de editar aparência
 

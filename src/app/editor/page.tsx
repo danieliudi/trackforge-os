@@ -31,6 +31,7 @@ import {
 import type { GenerationCost } from "@/constants/pricing";
 import { resolveCanvasSize } from "@/constants/themes";
 import type { ForbiddenHit } from "@/knowledge/check";
+import { readError } from "@/lib/apiError";
 import type { Verification } from "@/lib/verify";
 import { useHistory } from "@/hooks/useHistory";
 import { useFront } from "@/components/app/EsteiraShell";
@@ -46,12 +47,13 @@ import {
 import { exportToPDF, exportToPPTX, exportToZip, getPDFFile } from "@/lib/export";
 import { moveSlide, removeBlockedReason, renumber } from "@/lib/slides";
 import {
+  getDraftsServerSnapshot,
+  getDraftsSnapshot,
   loadBrandContext,
-  loadState,
+  replaceDrafts,
   saveBrandContext,
-  saveState,
+  subscribeDrafts,
   type BrandContext,
-  type Draft,
 } from "@/lib/storage";
 import { focusRing } from "@/lib/ui";
 import { MAX_SLIDES, MAX_SLIDES_APRESENTACAO, type Carousel, type Slide } from "@/types/carousel";
@@ -201,8 +203,15 @@ export default function Home() {
   const [mobileView, setMobileView] = useState<"editor" | "preview">("editor");
 
   const [persistFailed, setPersistFailed] = useState(false);
-  const [drafts, setDrafts] = useState<Draft[]>(() => loadState().drafts);
-  const [activeDraftId, setActiveDraftId] = useState<string | null>(() => loadState().activeId);
+  // Store externo: ler localStorage no useState causava mismatch de hidratação
+  // (servidor vazio, cliente com rascunhos) — mesma família do costLog.
+  const draftState = useSyncExternalStore(
+    subscribeDrafts,
+    getDraftsSnapshot,
+    getDraftsServerSnapshot,
+  );
+  const drafts = draftState.drafts;
+  const activeDraftId = draftState.activeId;
   const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
   const [brandContext, setBrandContext] = useState<BrandContext>(() => loadBrandContext());
 
@@ -245,50 +254,52 @@ export default function Home() {
   // A lista pode encolher por remoção ou desfazer; o índice não pode ficar fora.
   const safeIndex = Math.min(activeIndex, Math.max(0, slides.length - 1));
 
-  // drafts/activeDraftId partem de localStorage via inicializador preguiçoso
-  // (abaixo). Aqui só falta aplicar o rascunho ativo ao carrossel e às
-  // configurações — nenhum dos dois é um setState de useState puro, então
-  // não conta como "setState síncrono dentro de efeito".
+  // Aplica o rascunho ativo ao carrossel e às configurações depois da pintura.
+  // O snapshot do store já hidratou; aqui só sincroniza o documento aberto.
   useEffect(() => {
-    const state = loadState();
-    const active = state.drafts.find((draft) => draft.id === state.activeId);
-    if (active) reset(active.carousel);
+    const timer = setTimeout(() => {
+      const state = getDraftsSnapshot();
+      const active = state.drafts.find((draft) => draft.id === state.activeId);
+      if (active) reset(active.carousel);
 
-    // Sem rascunho ativo, o editor nasce na frente do app. Antes nascia em
-    // "Nenhuma" mesmo com a esteira em Sanwey — e carrossel sem marca sai sem
-    // a assinatura canônica e sem o tema visual dela, que é a classe de erro
-    // que o estado global de frente existe para evitar.
-    // Com rascunho, quem manda é o rascunho: ele foi salvo com uma marca.
-    dispatchSettings({ type: "restore", settings: active ?? { brandId: front } });
+      // Sem rascunho ativo, o editor nasce na frente do app. Antes nascia em
+      // "Nenhuma" mesmo com a esteira em Sanwey — e carrossel sem marca sai sem
+      // a assinatura canônica e sem o tema visual dela, que é a classe de erro
+      // que o estado global de frente existe para evitar.
+      // Com rascunho, quem manda é o rascunho: ele foi salvo com uma marca.
+      dispatchSettings({ type: "restore", settings: active ?? { brandId: front } });
+    }, 0);
+    return () => clearTimeout(timer);
   }, [reset, dispatchSettings, front]);
 
   // Digitar atualiza o rascunho ativo com debounce — escrever a cada tecla
-  // travaria a digitação num array de rascunhos inteiro.
+  // travaria a digitação num array de rascunhos inteiro. O store grava sozinho.
   useEffect(() => {
     if (!restored || !activeDraftId || !carousel) return;
 
     const timer = setTimeout(() => {
-      setDrafts((current) =>
-        current.map((draft) =>
+      const ok = replaceDrafts((state) => ({
+        ...state,
+        drafts: state.drafts.map((draft) =>
           draft.id === activeDraftId
-            ? { ...draft, carousel, themeId, brandId, customLogo, format, platform, updatedAt: Date.now() }
+            ? {
+                ...draft,
+                carousel,
+                themeId,
+                brandId,
+                customLogo,
+                format,
+                platform,
+                updatedAt: Date.now(),
+              }
             : draft,
         ),
-      );
+      }));
+      setPersistFailed(!ok);
     }, PERSIST_DELAY);
 
     return () => clearTimeout(timer);
   }, [restored, activeDraftId, carousel, themeId, brandId, customLogo, format, platform]);
-
-  // Persiste sempre que a lista muda — o efeito acima já debounceu a escrita
-  // durante digitação, então aqui não precisa de um segundo delay.
-  useEffect(() => {
-    if (!restored) return;
-    const timer = setTimeout(() => {
-      setPersistFailed(!saveState({ drafts, activeId: activeDraftId }));
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [restored, drafts, activeDraftId]);
 
   // Digitar no contexto de marca também debounça — mesmo motivo do brief.
   useEffect(() => {
@@ -351,7 +362,12 @@ export default function Home() {
           platform,
         }),
       });
-      const data = await response.json();
+      // A mensagem sai do clone: o original ainda precisa ser lido como JSON
+      // para o custo, e um corpo só pode ser consumido uma vez.
+      const failure = response.ok
+        ? null
+        : await readError(response.clone(), "falha ao gerar o carrossel");
+      const data = await response.json().catch(() => ({}));
       const kind = format === "apresentacao" ? "apresentacao" : "carrossel";
 
       if (!response.ok) {
@@ -359,9 +375,7 @@ export default function Home() {
         // lançar evita que a geração mais frustrante seja também a invisível
         // no extrato.
         if (data.cost) logCost(data.cost as GenerationCost, kind, input.slice(0, 60), true);
-        throw new Error(
-          data.issues?.join(" - ") ?? data.error ?? "falha ao gerar o carrossel",
-        );
+        throw new Error(failure ?? "falha ao gerar o carrossel");
       }
 
       const newCarousel = data.carousel as Carousel;
@@ -377,22 +391,25 @@ export default function Home() {
       setMobileView("preview");
 
       const id = crypto.randomUUID();
-      setDrafts((current) => [
-        ...current,
-        {
-          id,
-          title: newCarousel.title,
-          updatedAt: Date.now(),
-          carousel: newCarousel,
-          themeId,
-          brandId,
-          customLogo,
-          format,
-          platform,
-          costUsd,
-        },
-      ]);
-      setActiveDraftId(id);
+      const ok = replaceDrafts((state) => ({
+        drafts: [
+          ...state.drafts,
+          {
+            id,
+            title: newCarousel.title,
+            updatedAt: Date.now(),
+            carousel: newCarousel,
+            themeId,
+            brandId,
+            customLogo,
+            format,
+            platform,
+            costUsd,
+          },
+        ],
+        activeId: id,
+      }));
+      setPersistFailed(!ok);
 
       const warnings = (data.warnings ?? []) as ForbiddenHit[];
       if (warnings.length > 0) setError(forbiddenMessage(warnings, brandId));
@@ -409,7 +426,8 @@ export default function Home() {
     setInput("");
     setActiveIndex(0);
     setError(null);
-    setActiveDraftId(null);
+    const ok = replaceDrafts((state) => ({ ...state, activeId: null }));
+    setPersistFailed(!ok);
     setLastCost(null);
     setVerification(null);
   }
@@ -418,7 +436,8 @@ export default function Home() {
     const draft = drafts.find((current) => current.id === id);
     if (!draft) return;
 
-    setActiveDraftId(id);
+    const ok = replaceDrafts((state) => ({ ...state, activeId: id }));
+    setPersistFailed(!ok);
     reset(draft.carousel);
     dispatchSettings({ type: "restore", settings: draft });
     setActiveIndex(0);
@@ -431,7 +450,11 @@ export default function Home() {
   }
 
   function deleteDraft(id: string) {
-    setDrafts((current) => current.filter((draft) => draft.id !== id));
+    const ok = replaceDrafts((state) => ({
+      drafts: state.drafts.filter((draft) => draft.id !== id),
+      activeId: state.activeId === id ? null : state.activeId,
+    }));
+    setPersistFailed(!ok);
     if (id === activeDraftId) resetCarousel();
   }
 
@@ -465,15 +488,16 @@ export default function Home() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ carousel, slideIndex: index, instruction, brandId }),
       });
-      const data = await response.json();
+      const failure = response.ok
+        ? null
+        : await readError(response.clone(), "falha ao regenerar o slide");
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         if (data.cost) {
           logCost(data.cost as GenerationCost, "slide", `Slide ${index + 1}`, true);
         }
-        throw new Error(
-          data.issues?.join(" - ") ?? data.error ?? "falha ao regenerar o slide",
-        );
+        throw new Error(failure ?? "falha ao regenerar o slide");
       }
 
       const cost = data.cost as GenerationCost;
@@ -481,13 +505,15 @@ export default function Home() {
 
       // Soma no rascunho: o custo de um post inclui o retrabalho depois da
       // primeira geração, senão o número do rascunho só desce com o tempo.
-      setDrafts((current) =>
-        current.map((draft) =>
+      const ok = replaceDrafts((state) => ({
+        ...state,
+        drafts: state.drafts.map((draft) =>
           draft.id === activeDraftId
             ? { ...draft, costUsd: (draft.costUsd ?? 0) + cost.usd }
             : draft,
         ),
-      );
+      }));
+      setPersistFailed(!ok);
 
       updateSlide(index, data.slide as Slide);
 

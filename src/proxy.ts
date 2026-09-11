@@ -1,27 +1,32 @@
 import { NextResponse, type NextRequest } from "next/server";
 
 /**
- * Senha na frente do app — só quando existe uma senha configurada.
+ * Senha na frente do app.
  *
- * POR QUE OPCIONAL: em `localhost` não há de quem se proteger, e exigir login
- * para rodar `npm run dev` seria atrito puro. Mas as doze rotas de API gastam a
- * chave da Anthropic, leem sinais do CRM, escrevem na fila de aprovação e
- * apagam arquivo da biblioteca — no dia em que isto ganhar uma URL pública sem
- * nada na frente, quem souber o endereço faz tudo isso.
- *
- * Então: sem `APP_PASSWORD`, nada muda. Com ela, toda requisição precisa da
- * senha. A hospedagem é o lugar onde a variável é definida, e é lá que o risco
- * existe.
+ * Em `localhost` / `127.0.0.1` a senha continua opcional: exigir login para
+ * `npm run dev` seria atrito puro. Fora disso — URL pública, preview, produção —
+ * `APP_PASSWORD` é obrigatória. Sem ela o proxy responde 503 e nada passa:
+ * as quatorze rotas de API gastam a chave da Anthropic, leem sinais do CRM,
+ * escrevem na fila de aprovação e apagam arquivo da biblioteca.
  *
  * É Basic Auth de propósito: sem tela de login para manter, sem sessão para
  * expirar, e o navegador guarda. Não é controle de acesso por usuário — é uma
- * porta trancada, que é o que falta hoje.
+ * porta trancada.
  *
  * O arquivo se chama `proxy` e não `middleware` porque o Next 16 renomeou a
  * convenção; a versão com o nome antigo funciona e avisa que vai sair.
  */
 
 const REALM = 'Basic realm="Trackforge OS", charset="UTF-8"';
+
+function hostLocal(hostname: string): boolean {
+  return (
+    hostname === "localhost" ||
+    hostname === "127.0.0.1" ||
+    hostname === "[::1]" ||
+    hostname === "::1"
+  );
+}
 
 /** Comparação de tamanho fixo: sai depois de olhar tudo, não no primeiro erro. */
 function mesmaSenha(recebida: string, esperada: string): boolean {
@@ -35,12 +40,25 @@ function mesmaSenha(recebida: string, esperada: string): boolean {
 
 export function proxy(request: NextRequest) {
   const esperada = process.env.APP_PASSWORD;
-  if (!esperada) return NextResponse.next();
+  const local = hostLocal(request.nextUrl.hostname);
+
+  if (!esperada) {
+    // Fail-closed fora de localhost: URL pública sem senha deixa a ferramenta
+    // aberta. Em localhost o atrito de exigir senha no `npm run dev` não paga.
+    if (local) return NextResponse.next();
+    return new NextResponse(
+      "APP_PASSWORD não configurada. Defina a variável antes de expor esta URL.",
+      { status: 503 },
+    );
+  }
 
   const header = request.headers.get("authorization") ?? "";
   if (header.startsWith("Basic ")) {
     try {
-      const [, senha = ""] = atob(header.slice(6)).split(":");
+      const decoded = atob(header.slice(6));
+      // Senha pode conter `:`; tudo depois do primeiro `:` é a senha.
+      const colon = decoded.indexOf(":");
+      const senha = colon === -1 ? decoded : decoded.slice(colon + 1);
       if (mesmaSenha(senha, esperada)) return NextResponse.next();
     } catch {
       // Cabeçalho malformado cai no 401 abaixo.

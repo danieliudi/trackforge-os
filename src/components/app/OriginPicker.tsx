@@ -5,6 +5,7 @@ import { FileText, Paperclip, X } from "lucide-react";
 import { useCallback, useState } from "react";
 
 import { Button } from "@/components/ui/Button";
+import { MAX_INPUT_CHARS } from "@/lib/limits";
 import type { MarketSignal } from "@/lib/marketSignals";
 import { fieldClass, focusRing, labelClass, metaClass, panelClass } from "@/lib/ui";
 
@@ -53,8 +54,10 @@ export const originIsMaterial = (mode: OriginMode) => mode === "texto" || mode =
  * proporcional ao tamanho, e um documento inteiro colado para gerar três telas
  * de story vira conta alta. Recusa em vez de truncar em silêncio: corte
  * invisível deixaria de fora justamente a parte que importava.
+ *
+ * O número mora em `src/lib/limits.ts` — as rotas de API usam o mesmo teto.
  */
-export const MAX_CHARS = 40_000;
+export const MAX_CHARS = MAX_INPUT_CHARS;
 const MIN_MATERIAL = 200;
 const ACCEPTED = /\.(md|markdown|txt|text)$/i;
 
