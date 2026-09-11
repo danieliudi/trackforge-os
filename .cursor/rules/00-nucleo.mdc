@@ -41,6 +41,18 @@ dois discordarem, o `CLAUDE.md` vence e este é o que está errado.
   ANTT 5998/2022 obriga o **cliente** e é citada dentro dos próprios certificados
   INMETRO; não é selo da marca. A ISO 9001:2015 é do **sistema de gestão** da
   Sanwey e cobre a fabricação, nunca o produto. Trocar termo não é conferir fato.
+- **A ISO 9001 tem titular, validade e organismo em disputa.** Certificado
+  BR08/4255.00, titular **Sanwey Indústria de Containers Ltda.**, válido até
+  **16/12/2026**. A Resibag não o detém — é pessoa jurídica independente, e a
+  frase autorizada é "fabricação sob SGQ certificado ISO 9001:2015 do Grupo
+  Sanwey". **Nunca cite o organismo certificador**: SGS numa canônica, DNV na
+  outra, conflito declarado aberto em 10/09/2026. A correção SGS → DNV escolheu
+  o valor mais frequente sem abrir certificado — mesma forma do "tripla → dupla".
+- **Rebaixar o tier não é remover.** "Prazo da NBR 10.004 até 31/12/2026" estava
+  como `secundaria`, nível que a regra deixa virar alegação com atribuição — mas
+  a canônica diz que a norma **não tem prazo**, não que o prazo é incerto.
+  Afirmação que a fonte da marca declara errada sai da lista e vira proibição.
+  Tier mede confiança, não estaciona o que já se sabe falso.
 - **Erro conhecido, não reintroduzir:** a Resolução ANTT nº 6.078/2026 não se
   confirma em fonte oficial (revalidação de 08–09/09/2026) e também não
   substituiu a nº 5.998/2022. Não citar até existir publicação que a sustente.

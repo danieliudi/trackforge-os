@@ -55,6 +55,9 @@ const { brands } = await import(
 const { findForbidden } = await import(
   pathToFileURL(join(ROOT, "src/knowledge/check.ts")).href
 );
+const { getNormativeFacts } = await import(
+  pathToFileURL(join(ROOT, "src/knowledge/provenance.ts")).href
+);
 
 let violacoes = 0;
 let marcas = 0;
@@ -83,6 +86,47 @@ for (const brandId of Object.keys(brands)) {
   );
   for (const hit of hits) {
     console.log(`    - "${hit.matched}"  ${dim(`regra: ${hit.term}`)}`);
+  }
+}
+
+/**
+ * A MESMA pergunta, no OUTRO bloco autorizado.
+ *
+ * `buildGroundedSystem` cola tres coisas no system: o bloco `facts`, as
+ * PROIBICOES, e — por ultimo, de proposito — o bloco NORMATIVO montado de
+ * `src/knowledge/facts/*.json`. Ate 11/09/2026 este roteiro olhava so para o
+ * primeiro, e o buraco era exatamente do tamanho do problema que ele existe
+ * para pegar: a base proibia "prazo de adequacao atribuido a NBR 10.004" em
+ * `forbidden` E afirmava "o prazo termina em 31/12/2026" num fato normativo,
+ * marcado `secundaria`, que a regra de tier deixa virar alegacao com
+ * atribuicao. As duas coisas iam para o mesmo prompt, na mesma execucao.
+ *
+ * Varre exatamente o que CHEGA ao prompt — `claim`, `source` e `url` —, e nao o
+ * registro inteiro: `notes` existe para documentar a contestacao, precisa poder
+ * escrever o termo contestado, e `buildNormativeBlock` nao o inclui.
+ */
+for (const brandId of Object.keys(brands)) {
+  const knowledge = getBrandKnowledge(brandId);
+  if (!knowledge) continue;
+
+  const termosDePar = new Set(
+    knowledge.forbidden.filter((r) => r.pair).map((r) => r.term),
+  );
+
+  for (const fato of getNormativeFacts(brandId)) {
+    const noPrompt = [fato.claim, fato.source, fato.url ?? ""].join(" ");
+    const achados = findForbidden([{ blockNumber: 0, text: noPrompt }], brandId).filter(
+      (h) => !termosDePar.has(h.term),
+    );
+    if (achados.length === 0) continue;
+
+    violacoes += achados.length;
+    console.log(
+      `\n  ${bold(brandId)}/${bold(fato.id)}  ${red(`${achados.length} termo(s) proibido(s) no fato normativo`)}`,
+    );
+    for (const hit of achados) {
+      console.log(`    - "${hit.matched}"  ${dim(`regra: ${hit.term}`)}`);
+    }
   }
 }
 
@@ -258,5 +302,7 @@ if (violacoes === 0) {
 }
 
 console.log(`\n  A proibicao mora em ${bold("forbidden")}, que vira a secao PROIBICOES do prompt.`);
-console.log(`  O bloco ${bold("facts")} e a fonte autorizada e se escreve no positivo.\n`);
+console.log(`  O bloco ${bold("facts")} e os fatos de ${bold("src/knowledge/facts/")} sao a fonte`);
+console.log(`  autorizada, e se escrevem no positivo. Fato que a marca contesta sai da lista —`);
+console.log(`  rebaixar o tier nao resolve, porque ${bold("secundaria")} ainda e publicavel com atribuicao.\n`);
 process.exit(1);

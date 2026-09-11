@@ -53,6 +53,16 @@ fatos autorizada", e `forbidden` vira a seção PROIBIÇÕES. Escrever "nunca di
 X" no meio dos fatos põe X dentro da fonte autorizada, em forma negada. Na
 primeira execução pegou dois termos na Resibag e um na Sanwey.
 
+**Desde 11/09/2026 a varredura cobre os DOIS blocos autorizados.** O system tem
+três partes: `facts`, PROIBIÇÕES e o bloco NORMATIVO de
+`src/knowledge/facts/*.json`. O roteiro olhava só o primeiro, e ao ganhar o
+segundo achou três contradições vivas no mesmo prompt — o prazo da NBR 10.004
+afirmado e proibido, "SGS" escrito com a regra de não citar organismo logo
+abaixo, e o Decreto 12.688/2025 dentro da fonte autorizada depois de o titular
+ter corrigido que ele não se aplica a Classe I. Varre `claim`, `source` e `url`,
+que é o que chega ao prompt; `notes` fica de fora de propósito, porque é lá que
+a contestação se documenta.
+
 *As regras pegam o que dizem pegar?* Erro de regex desliga uma regra de
 compliance em silêncio. São 48 casos declarados; o de coocorrência declara
 também qual regra deve disparar, porque conferir só "algum achado saiu" deixava

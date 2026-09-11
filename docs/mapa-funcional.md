@@ -168,32 +168,44 @@ servidor**.
 
 ## 3. `src/knowledge` — a camada de fato curado
 
-Conferido em 11/09/2026, contado a partir do código:
+Revisada em 11/09/2026 contra as fontes canônicas, e contada a partir do código:
 
 | Arquivo | Fatos | Por nível | Fonte órfã |
 |---|---|---|---|
-| `facts/resibag-normas.json` | 19 | 1 primária · 1 secundária · 17 não verificado | **14** |
+| `facts/resibag-normas.json` | 9 | 1 primária · 8 não verificado | 0 |
 | `facts/sanwey-normas.json` | 7 | 1 interna · 6 não verificado | 0 |
 | `facts/meu-normas.json` | 0 | frente pessoal — número e norma só do material colado | — |
 
 **Só primária dentro da validade vira número, data ou artigo de norma numa
 peça.** Secundária e interna dão contexto e nunca entram no slide. Os níveis e
-a regra moram em `src/knowledge/provenance.ts`.
+a regra moram em `src/knowledge/provenance.ts`. Hoje **15 dos 16 não podem**, e
+é essa a informação útil: a régua mede a dívida de verificação em vez de
+escondê-la.
 
-`checkedAt` e `revalidateBy` dizem quando alguém conferiu contra a fonte e até
-quando o fato vale. **Um fato de 19 da Resibag tem `checkedAt`** — é o que a
-coluna de conferência da tela de Fatos mostra, e é o motivo de a fila existir.
-Três fatos têm `revalidateBy`, e **dois vencem em 31/12/2026** — a revisão da
-ANTT 5998 e o RAPP do IBAMA. Depois da data eles param de ser publicáveis até
-alguém reconferir. O terceiro é a validade do certificado INMETRO de 700 kg,
-18/05/2028.
+`checkedAt` e `revalidateBy` dizem quando alguém conferiu contra a fonte
+declarada e até quando o fato vale. Os 16 têm `checkedAt` depois da revisão de
+11/09 — e isso NÃO quer dizer verificado: quer dizer que alguém abriu a fonte
+que o `source` declara. Onde essa fonte é a skill canônica e não o documento
+oficial, o `tier` continua `nao-verificado`, e é o `tier` que manda. **A fila da
+tela de Fatos é movida por `tier`, nunca por `checkedAt`** (`src/lib/factQueue.ts`)
+— quem confere contra a canônica não esvazia fila nenhuma.
 
-**Quatorze fatos da Resibag citam uma skill que não existe mais.** A
-`resibag-compliance-kb` foi descontinuada pelo titular em 10/09/2026, e o
-`source` de cada um diz isso na cara, com a norma onde conferir de verdade.
-Não foram repontados para a fonte normativa nova: aquelas afirmações
-detalhadas de NBR, ANTT e INMETRO não estão lá, e repontar seria atribuição
-falsa — que é pior que órfã.
+Cinco fatos têm `revalidateBy`. O primeiro vencimento da base é **16/12/2026**,
+a validade do certificado ISO 9001 do Grupo Sanwey, em dois fatos — um por
+frente. Depois vêm **31/12/2026** em outros dois (a revisão da ANTT 5998 e a
+virada dos 42 anos da Sanwey) e 18/05/2028, a validade do certificado INMETRO
+de 700 kg.
+
+**A base encolheu de 26 fatos para 16, e a fonte órfã zerou.** Até 11/09/2026,
+quatorze fatos da Resibag citavam a `resibag-compliance-kb`, descontinuada pelo
+titular em 10/09 e não reconsultável. A leitura anterior era que repontar seria
+atribuição falsa; a revisão mostrou que a escolha não era entre repontar e
+deixar órfão. Fato a fato: **removido** o que a fonte canônica declara errado ou
+manda não citar, **re-ancorado** na canônica o que ela sustenta — com a claim
+encolhendo para o que está escrito lá —, e o que foi retirado ficou em `notes`
+como `[FALTA DADO]`. Onze registros saíram, um entrou. Nenhum número novo. O que
+saiu e por quê está no bloco `revisao` de cada arquivo, não só no histórico do
+git.
 
 ### O que a varredura de termo proibido sabe fazer
 

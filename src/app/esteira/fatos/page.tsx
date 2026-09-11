@@ -139,7 +139,16 @@ export default function FatosPage() {
           ]}
         />
 
-        <BlockHead ponto={queue.length > 0} nota={`${publishable.length} de ${facts.length} já foi conferido contra a fonte`}>
+        {/* A nota contava `publishable` e dizia "conferido contra a fonte" — duas
+            coisas diferentes que coincidiam por acaso enquanto o único fato com
+            `checkedAt` era também o único primária. A revisão da base em
+            11/09/2026 desfez a coincidência: os 9 passaram a ter `checkedAt`, e
+            a tela ficou dizendo "1 de 9 já foi conferido" com "CONFERIDO
+            11/09/2026" em cada um dos nove cartões. Conferir contra a fonte
+            DECLARADA e poder virar número numa peça não são a mesma coisa —
+            quem decide a segunda é o `tier`. O número estava certo; a frase é
+            que media outra coisa. */}
+        <BlockHead ponto={queue.length > 0} nota={`${publishable.length} de ${facts.length} pode virar número numa peça`}>
           Para conferir, em ordem de risco · n={queue.length}
         </BlockHead>
         {queue.length === 0 ? (

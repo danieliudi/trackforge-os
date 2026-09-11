@@ -1,54 +1,75 @@
 {
   "comment": "Afirmações verificáveis da Sanwey — certificação e marco datado. Menos exposta que a Resibag, porque quase tudo aqui é documento próprio da empresa (certificado, registro) e não norma de terceiro em movimento. Ainda assim precisa de procedência: 'INMETRO desde 2008' numa peça é um fato datado, e fato datado precisa de papel.",
+  "revisao": {
+    "data": "2026-09-11",
+    "contra": "sanwey-canonical-facts v1.6",
+    "o_que_mudou": "Nenhum fato removido — nenhum deles vinha da skill órfã, e a canônica da Sanwey está viva. O que mudou: as sete fontes saíram da v1.5 para a v1.6; o organismo certificador da ISO 9001 saiu da claim por conflito aberto entre as duas frentes; e três claims encolheram para o que a fonte sustenta — o pioneirismo do INMETRO 2008 e da Marinha 1996, que certificado não prova, e o qualificador de carga do fator 8:1, que a própria canônica escreve de dois jeitos. O que saiu está em `notes` como [FALTA DADO]. Nenhum número novo entrou."
+  },
   "facts": [
     {
       "id": "iso-9001-sanwey",
-      "claim": "A Sanwey tem ISO 9001:2015 pela DNV desde 1999, aplicável a todas as linhas.",
+      "claim": "A Sanwey tem ISO 9001:2015 desde 1999, sistema de gestão da qualidade aplicável a todas as linhas. ISO 9001 certifica SISTEMA DE GESTÃO, não produto.",
       "tier": "nao-verificado",
-      "source": "sanwey-canonical-facts v1.5, seção 07",
-      "notes": "Fonte primária é o certificado DNV. Tem validade — preencher revalidateBy com o vencimento ao anexar."
+      "source": "sanwey-canonical-facts v1.6 §07 e §10",
+      "checkedAt": "2026-09-11",
+      "checkedBy": "sessão Claude Code — conferido contra sanwey-canonical-facts v1.6",
+      "revalidateBy": "2026-12-16",
+      "notes": "O NOME DO ORGANISMO CERTIFICADOR SAIU DA CLAIM em 11/09/2026. A canônica da Sanwey registra DNV e trata \"SGS → DNV\" (v1.3) como correção de erro; a resibag-canonical-facts v3.1, de 10/09/2026, declara o CONFLITO ABERTO e manda não citar organismo em material externo até haver certificado físico conferido — mesma pessoa jurídica, mesma certificação, dois organismos. A correção da v1.3 resolveu uma contradição interna escolhendo o valor que aparecia mais vezes, não abrindo o certificado: é a mesma forma do erro de \"tripla → dupla homologação\" (CLAUDE.md seção 2), onde trocar o termo passou por conferir o fato. [FALTA DADO: organismo certificador da ISO 9001 do Grupo Sanwey]. ESTE REGISTRO CONTRARIA A CANÔNICA DA SANWEY NUM PONTO, de propósito e por prudência: tirar um nome em disputa é mais seguro que afirmar um dos dois. A canônica da Sanwey ainda autoriza \"ISO 9001:2015 (DNV) ininterrupta desde 1999\" em hero institucional — resolver isso é decisão do titular, não desta base. revalidateBy: o único certificado com código e validade registrados para uma pessoa jurídica Sanwey é o BR08/4255.00, válido até 16/12/2026 pela canônica da Resibag. Se forem dois certificados distintos, este registro precisa ser dividido — o código começa em BR08, que sugere 2008, e a claim afirma 1999."
     },
     {
       "id": "inmetro-sanwey-2008",
-      "claim": "A Sanwey homologou contentor flexível para carga perigosa no INMETRO em 2008, referência Res. ANTT 420 — primeira do setor.",
+      "claim": "A Sanwey homologou contentor flexível para carga perigosa no INMETRO em 2008, referência Res. ANTT 420.",
       "tier": "nao-verificado",
-      "source": "sanwey-canonical-facts v1.5, seções 07 e 10",
-      "notes": "O '1º do setor' é a parte difícil: certificado prova a homologação, não a precedência. Sem documento que sustente o pioneirismo, use só a data."
+      "source": "sanwey-canonical-facts v1.6 §07 e §10",
+      "checkedAt": "2026-09-11",
+      "checkedBy": "sessão Claude Code — conferido contra sanwey-canonical-facts v1.6",
+      "notes": "O '1º do setor' SAIU DA CLAIM em 11/09/2026 e continua disponível como argumento em §07 da canônica: certificado prova a homologação, não a precedência. Sem documento que sustente o pioneirismo, a peça usa só a data."
     },
     {
       "id": "marinha-sanwey-1996",
-      "claim": "A Sanwey é homologada pelo Ministério da Marinha para transporte marítimo de carga perigosa desde 1996 — primeira brasileira.",
+      "claim": "A Sanwey é homologada pelo Ministério da Marinha para transporte marítimo de carga perigosa desde 1996.",
       "tier": "nao-verificado",
-      "source": "sanwey-canonical-facts v1.5, seções 07 e 10",
-      "notes": "Homologação da Sanwey, não da Resibag — a Resibag não tem essa e citá-la lá é proibido."
+      "source": "sanwey-canonical-facts v1.6 §07 e §10",
+      "checkedAt": "2026-09-11",
+      "checkedBy": "sessão Claude Code — conferido contra sanwey-canonical-facts v1.6",
+      "notes": "Homologação da SANWEY, não da Resibag — a Resibag não tem essa, e citá-la em peça Resibag é proibição registrada (NORMAM / Marinha). O 'primeira brasileira' saiu da claim pela mesma razão do INMETRO 2008: a canônica lista o marco entre os pioneirismos brasileiros, mas precedência precisa de documento próprio."
     },
     {
       "id": "anp-sanwey",
-      "claim": "A Sanwey tem certificação ANP para Oil & Gas e petroquímica condutiva, ligada ao Type C Condutivo.",
+      "claim": "A Sanwey tem certificação ANP para Oil & Gas e petroquímica condutiva, sempre ligada ao produto Type C Condutivo.",
       "tier": "nao-verificado",
-      "source": "sanwey-canonical-facts v1.5, seção 07",
-      "notes": "Sem ano na base. Conferir data e escopo no certificado."
+      "source": "sanwey-canonical-facts v1.6 §07 e §09",
+      "checkedAt": "2026-09-11",
+      "checkedBy": "sessão Claude Code — conferido contra sanwey-canonical-facts v1.6",
+      "notes": "A canônica registra a certificação sem referência de documento e sem ano — as duas colunas estão vazias na tabela de §07. Regra de uso da canônica: citar ANP sem ligar ao Type-C perde o argumento competitivo, por isso o vínculo entrou na claim. ANP É DA SANWEY E NUNCA DA RESIBAG: na Resibag a ANP saiu por falta de lastro em 08/09/2026 e virou proibição. [FALTA DADO: número e ano do certificado ANP]. Conferir em: o próprio certificado."
     },
     {
       "id": "nbr-16029-sanwey",
       "claim": "A Sanwey atende a ABNT NBR 16029 para FIBC de carga não perigosa.",
       "tier": "nao-verificado",
-      "source": "sanwey-canonical-facts v1.5, seção 07"
+      "source": "sanwey-canonical-facts v1.6 §07",
+      "checkedAt": "2026-09-11",
+      "checkedBy": "sessão Claude Code — conferido contra sanwey-canonical-facts v1.6",
+      "notes": "A canônica registra a norma sem referência de documento e sem ano. 'Atende a' não é 'é certificada por' — a distinção importa e a claim mantém o verbo mais fraco, que é o que a fonte sustenta."
     },
     {
       "id": "sanwey-42-anos",
       "claim": "42 anos de mercado: registro em dezembro/1983, operação desde 1984. Só passa a 43 depois de dezembro/2026.",
       "tier": "interna",
-      "source": "sanwey-canonical-facts v1.5, seção 01",
+      "source": "sanwey-canonical-facts v1.6 §01",
+      "checkedAt": "2026-09-11",
+      "checkedBy": "sessão Claude Code — conferido contra sanwey-canonical-facts v1.6",
       "revalidateBy": "2026-12-31",
-      "notes": "Aritmética de data, não fato de terceiro. Vence sozinho: revalidar na virada do ano."
+      "notes": "Aritmética de data, não fato de terceiro. Vence sozinho: revalidar na virada do ano. A canônica traz a regra completa em §01 — aniversário institucional em 1º/mai, critério do Presidente Noritaka Yano, e a virada para 43 só depois de dez/2026. A canônica também prefere '42 anos documentados' a 'décadas de experiência', que é proibição registrada."
     },
     {
       "id": "sanwey-fator-seguranca",
-      "claim": "Fator de segurança 8:1 para granulado pesado, na linha de mineração.",
+      "claim": "Fator de segurança 8:1 na linha de mineração.",
       "tier": "nao-verificado",
-      "source": "sanwey-canonical-facts v1.5, seção 09",
-      "notes": "Número técnico usado como argumento de venda. Fonte primária é o laudo de ensaio."
+      "source": "sanwey-canonical-facts v1.6 §09",
+      "checkedAt": "2026-09-11",
+      "checkedBy": "sessão Claude Code — conferido contra sanwey-canonical-facts v1.6",
+      "notes": "Número técnico usado como argumento de venda, e a fonte primária é o laudo de ensaio. O QUALIFICADOR SAIU DA CLAIM em 11/09/2026 porque a canônica diz duas coisas diferentes: §09 fala em 'granulados pesados' e o mapa de aplicação de §04 fala em 'granulado abrasivo'. Pesado e abrasivo não são a mesma propriedade, e a peça que escolher a errada erra na frente de um engenheiro de processo. [FALTA DADO: a carga a que o 8:1 se aplica — pesado, abrasivo, ou os dois]. Conferir em: o laudo de ensaio."
     }
   ]
 }

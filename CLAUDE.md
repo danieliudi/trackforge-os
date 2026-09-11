@@ -187,6 +187,27 @@ Isto não é preferência de estilo. É o requisito do produto.
   da marca. A ISO 9001:2015 é do **sistema de gestão** da Sanwey e cobre a
   fabricação, nunca o produto. ANP saiu por falta de lastro. Trocar termo não é
   conferir fato.
+- **A ISO 9001 tem titular, validade e um organismo certificador em disputa.** O
+  certificado é o BR08/4255.00 (revisão 7), titular **Sanwey Indústria de
+  Containers Ltda.**, válido até **16/12/2026** — o primeiro vencimento da base
+  inteira. A Resibag **não o detém**: é pessoa jurídica independente (Resibag
+  Comercial Ltda.), e a frase autorizada é "fabricação sob sistema de gestão da
+  qualidade certificado ISO 9001:2015 do Grupo Sanwey". **Nunca citar o organismo
+  certificador**: a `resibag-canonical-facts` registrava SGS, a
+  `sanwey-canonical-facts` registra DNV desde 1999, e a v3.1 declarou o conflito
+  aberto em 10/09/2026. É a mesma forma do erro de "tripla → dupla": a correção
+  SGS → DNV (Sanwey v1.3) resolveu uma contradição INTERNA escolhendo o valor que
+  aparecia mais vezes, sem abrir certificado. Um sinal a mais de que o conflito
+  não é só de nome: o código começa em BR08, que sugere 2008, e a claim afirma
+  1999.
+- **Rebaixar o tier não é o mesmo que remover, e a diferença já protegeu a
+  ferramenta.** "O prazo da NBR 10.004 termina em 31/12/2026" estava na base como
+  `secundaria` — nível que a regra de procedência deixa virar alegação, desde que
+  a peça atribua a quem afirmou. Mas a canônica não diz que o prazo é incerto:
+  diz que **não existe prazo**, porque a NBR 10.004 é norma de classificação.
+  Afirmação que a fonte da marca declara ERRADA não tem tier — sai da lista, e a
+  proibição correspondente fica em `forbidden`. Tier serve para medir confiança,
+  não para estacionar o que já se sabe falso.
 - **Erro conhecido, não reintroduzir:** a Resolução ANTT nº 6.078/2026 não se
   confirma em fonte oficial, mesmo após revalidação completa de compliance
   (08–09/09/2026) — e também não substituiu a nº 5.998/2022, que trata de outro
@@ -436,6 +457,20 @@ e nunca casa. São 48 casos declarados — frase real de um lado, veredito do
 outro. Caso de coocorrência declara **também qual regra** deve disparar, e isso
 não é zelo: a primeira versão conferia só "algum achado saiu", e o caso do par
 passava por causa de outra regra. Plantar a quebra no par não reprovava.
+
+**A varredura cobre os DOIS blocos autorizados desde 11/09/2026, e o buraco
+custou três contradições vivas.** `buildGroundedSystem` cola três coisas no
+system: o bloco `facts` (prosa curada de `resibag.ts`/`sanwey.ts`), as PROIBIÇÕES,
+e por último o bloco NORMATIVO, montado de `src/knowledge/facts/*.json`. O
+roteiro olhava só para o primeiro. Na primeira execução sobre o segundo achou,
+no mesmo prompt: o prazo da NBR 10.004 afirmado num fato e proibido em
+`forbidden`; "SGS" escrito num fato com a regra que manda não citar organismo
+certificador logo abaixo; e o Decreto 12.688/2025 dentro da fonte autorizada
+depois de o titular ter corrigido que ele não se aplica a Classe I. **Varre o que
+CHEGA ao prompt** — `claim`, `source`, `url` — e não o registro inteiro: `notes`
+existe para documentar a contestação, precisa poder escrever o termo contestado,
+e `buildNormativeBlock` não o inclui. Conferido plantando nos dois lugares: na
+claim reprova nomeando o fato e a regra, na nota passa.
 
 **Regra de coocorrência existe desde 10/09/2026.** `match` responde "este texto
 contém X?", uma regex por vez, e para no primeiro acerto — não expressa "A e B

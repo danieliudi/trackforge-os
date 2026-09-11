@@ -152,9 +152,91 @@ for (const [rotulo, real, padrao] of [
   }
 }
 
+/* ── 5. a contagem de fatos que o mapa funcional afirma ─────────────────── */
+
+/**
+ * A tabela da seção 3 de `docs/mapa-funcional.md` diz "contada a partir do
+ * código". Até 11/09/2026 ninguém conferia isso, e ela estava errada em todas as
+ * colunas depois da revisão da base — 19 fatos onde havia 9, catorze fontes
+ * órfãs onde havia zero. É a mesma classe de deriva que a contagem de páginas já
+ * pegou em 07/09: número escrito à mão numa frase que se apresenta como medida.
+ *
+ * Confere total, quebra por nível e fonte órfã, por arquivo. Frente sem fato
+ * (a pessoal) declara só o total, e a coluna do meio é prosa.
+ */
+const ROTULO_TIER = {
+  primaria: "primária",
+  secundaria: "secundária",
+  interna: "interna",
+  "nao-verificado": "não verificado",
+};
+
+const FATOS_DIR = join(RAIZ, "src/knowledge/facts");
+const MAPA = "docs/mapa-funcional.md";
+
+if (existsSync(FATOS_DIR) && existsSync(join(RAIZ, MAPA))) {
+  const mapa = texto(MAPA);
+  const linha = /\| `facts\/([a-z-]+\.json)` \| (\d+) \| ([^|]+) \| ([^|]+) \|/g;
+  const vistosNoMapa = new Set();
+
+  for (const [, arquivo, totalDito, niveisDito, orfaDito] of mapa.matchAll(linha)) {
+    vistosNoMapa.add(arquivo);
+    const caminho = join(FATOS_DIR, arquivo);
+    if (!existsSync(caminho)) {
+      erro(MAPA, `a tabela de fatos cita \`facts/${arquivo}\`, que não existe`, "corrija o caminho ou tire a linha");
+      continue;
+    }
+    const fatos = JSON.parse(readFileSync(caminho, "utf8")).facts ?? [];
+
+    if (Number(totalDito) !== fatos.length) {
+      erro(MAPA, `diz ${totalDito} fato(s) em \`${arquivo}\`, mas são ${fatos.length}`, `atualize para ${fatos.length}`);
+    }
+
+    const orfas = fatos.filter((f) => /DESCONTINUADA/i.test(f.source ?? "")).length;
+    const orfaNumero = Number(orfaDito.replace(/[^\d—-]/g, ""));
+    if (orfaDito.includes("—")) {
+      if (fatos.length > 0) erro(MAPA, `marca fonte órfã com "—" em \`${arquivo}\`, que tem fato`, "declare o número");
+    } else if (orfaNumero !== orfas) {
+      erro(MAPA, `diz ${orfaNumero} fonte(s) órfã(s) em \`${arquivo}\`, mas são ${orfas}`, `atualize para ${orfas}`);
+    }
+
+    // Coluna do meio: só é quebra por nível quando o arquivo tem fato.
+    if (fatos.length === 0) continue;
+    const real = new Map();
+    for (const f of fatos) real.set(f.tier, (real.get(f.tier) ?? 0) + 1);
+
+    const dito = new Map();
+    for (const [, n, rotulo] of niveisDito.matchAll(/(\d+)\s+(primária|secundária|interna|não verificado)/g)) {
+      dito.set(rotulo, Number(n));
+    }
+    for (const [tier, n] of real) {
+      const rotulo = ROTULO_TIER[tier] ?? tier;
+      if (dito.get(rotulo) !== n) {
+        erro(MAPA, `diz ${dito.get(rotulo) ?? 0} "${rotulo}" em \`${arquivo}\`, mas são ${n}`, `atualize a quebra por nível`);
+      }
+      dito.delete(rotulo);
+    }
+    for (const [rotulo, n] of dito) {
+      erro(MAPA, `diz ${n} "${rotulo}" em \`${arquivo}\`, e não há nenhum`, "tire da quebra por nível");
+    }
+  }
+
+  for (const arquivo of readdirSync(FATOS_DIR).filter((n) => n.endsWith(".json"))) {
+    if (!vistosNoMapa.has(arquivo)) {
+      erro(MAPA, `\`facts/${arquivo}\` existe e não está na tabela de fatos`, "acrescente a linha na seção 3");
+    }
+  }
+}
+
 /* ── relatório ──────────────────────────────────────────────────────────── */
 
-const conferidos = `${documentos.length} documento(s), ${paginas} páginas, ${rotas} rotas`;
+const totalFatos = existsSync(FATOS_DIR)
+  ? readdirSync(FATOS_DIR)
+      .filter((n) => n.endsWith(".json"))
+      .reduce((soma, n) => soma + (JSON.parse(readFileSync(join(FATOS_DIR, n), "utf8")).facts ?? []).length, 0)
+  : 0;
+
+const conferidos = `${documentos.length} documento(s), ${paginas} páginas, ${rotas} rotas, ${totalFatos} fatos`;
 
 if (problemas.length === 0) {
   console.log(`\x1b[32m✓\x1b[0m documentos de regra batem com o código  \x1b[2m(${conferidos})\x1b[0m`);
