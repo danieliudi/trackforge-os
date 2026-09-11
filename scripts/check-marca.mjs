@@ -58,6 +58,9 @@ const { findForbidden } = await import(
 const { getNormativeFacts } = await import(
   pathToFileURL(join(ROOT, "src/knowledge/provenance.ts")).href
 );
+const { brands: MARCAS } = await import(
+  pathToFileURL(join(ROOT, "src/constants/brands.ts")).href
+);
 
 let violacoes = 0;
 let marcas = 0;
@@ -130,6 +133,47 @@ for (const brandId of Object.keys(brands)) {
   }
 }
 
+
+/**
+ * A TERCEIRA pergunta: a assinatura que a ferramenta CARIMBA passa na propria
+ * lista da marca?
+ *
+ * `brands[].tagline` nao e conteudo gerado — e valor fixo que o servidor
+ * ESCREVE POR CIMA do que o modelo produziu (`normalizeCarousel(object,
+ * tagline)`), porque assinatura institucional e fato de marca e nao
+ * criatividade. Isso a torna a unica string do sistema que entra na peca sem
+ * passar por decisao de ninguem.
+ *
+ * EXISTE POR UM CASO REAL, 11/09/2026. A canonical-facts tirou "industriais" da
+ * tagline da Resibag em 09/09 e mandou a versao antiga para nunca-citar; a
+ * curadoria em `src/knowledge/resibag.ts` ganhou a proibicao no mesmo dia; e o
+ * `brands.ts` ficou para tras. Resultado: toda peca Resibag saia carimbada com
+ * o termo que a varredura acusava tres linhas depois — a ferramenta produzindo
+ * o proprio aviso. Duas listas dizendo coisas opostas sobre a mesma frase, e
+ * nada olhando para as duas ao mesmo tempo.
+ */
+for (const brandId of Object.keys(brands)) {
+  const marca = MARCAS[brandId];
+  if (!marca?.tagline) continue;
+
+  const achados = findForbidden(
+    [{ blockNumber: 0, text: marca.tagline }],
+    brandId,
+  ).filter((h) => !new Set(
+    (getBrandKnowledge(brandId)?.forbidden ?? []).filter((r) => r.pair).map((r) => r.term),
+  ).has(h.term));
+
+  if (achados.length === 0) continue;
+
+  violacoes += achados.length;
+  console.log(
+    `\n  ${bold(brandId)}  ${red("a tagline carimbada pela ferramenta e proibida pela propria marca")}`,
+  );
+  console.log(`    brands.ts carimba: "${marca.tagline}"`);
+  for (const hit of achados) {
+    console.log(`    - "${hit.matched}"  ${dim(`regra: ${hit.term}`)}`);
+  }
+}
 
 /**
  * Casos declarados: frase real de um lado, veredito do outro.
@@ -297,6 +341,9 @@ if (violacoes === 0) {
   );
   console.log(
     `${green("ok")} regras pegam o que dizem pegar  ${dim(`(${casosRodados} casos declarados)`)}`,
+  );
+  console.log(
+    `${green("ok")} a tagline que a ferramenta carimba passa na lista da propria marca`,
   );
   process.exit(0);
 }

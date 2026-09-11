@@ -74,7 +74,21 @@ export const labelShapeClass = "text-[11px] font-medium uppercase tracking-wide"
 
 export const labelClass = `${labelShapeClass} text-mut`;
 
-export const fieldClass = `w-full rounded-md border border-line bg-canvas px-2.5 py-2 text-sm text-ink transition placeholder:text-faint hover:border-line3 focus:border-acc ${focusRing}`;
+/**
+ * O campo.
+ *
+ * `placeholder:text-mut`, não `text-faint`: o placeholder é texto que se LÊ
+ * para saber o que digitar, então o piso dele é 4,5:1 e não 3:1. Em `faint`
+ * sobre `canvas` dá **3,56:1 no tema claro** e 5,27:1 no escuro — medido no app
+ * rodando em 11/09/2026, no composer do editor e no campo de ângulo da bancada.
+ * Reprova no claro e passa no escuro, que é a recíproca do caso do sinal da
+ * faixa (seção 4).
+ *
+ * O gate nunca tinha olhado porque placeholder é PSEUDO-ELEMENTO: a sonda
+ * percorre o DOM e não o vê, e nenhum alvo o declarava. O alvo entrou junto
+ * com esta correção — declarar sem corrigir deixaria o gate vermelho.
+ */
+export const fieldClass = `w-full rounded-md border border-line bg-canvas px-2.5 py-2 text-sm text-ink transition placeholder:text-mut hover:border-line3 focus:border-acc ${focusRing}`;
 
 /** Superfície padrão de bloco agrupado. */
 export const panelClass = "rounded-lg border border-line2 bg-surface";

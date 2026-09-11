@@ -210,8 +210,16 @@ export async function novaPagina(navegador, opcoes = {}) {
  *
  * É função de verdade, não string: o Playwright serializa o código para dentro
  * da página, e por isso ela não pode fechar sobre nada deste módulo.
+ *
+ * 4. NÃO ENXERGAR PSEUDO-ELEMENTO. `placeholder` não está no DOM: a sonda
+ *    percorre nós e não o vê, e nenhum alvo o declarava. Em 11/09/2026 os
+ *    placeholders do composer e do campo de ângulo estavam em **3,56:1 no tema
+ *    claro** — reprovando — e passando no escuro, sem que nada olhasse. Daí o
+ *    segundo parâmetro: `medirContraste(el, "::placeholder")`. É o MESMO
+ *    medidor, e tem de ser: um segundo medidor é como o número sai errado e
+ *    parece certo (seção 4).
  */
-export function medirContraste(el) {
+export function medirContraste(el, pseudo) {
   const cv = document.createElement("canvas").getContext("2d");
   const rgba = (cor) => {
     cv.fillStyle = "#000";
@@ -244,7 +252,7 @@ export function medirContraste(el) {
     opacidade *= Number(getComputedStyle(n).opacity);
   }
 
-  const cor = rgba(getComputedStyle(el).color);
+  const cor = rgba(getComputedStyle(el, pseudo ?? null).color);
   const a = cor[3] * opacidade;
   const frente = [cor[0], cor[1], cor[2]].map((c, i) => c * a + fundo[i] * (1 - a));
 
@@ -262,7 +270,10 @@ export function medirContraste(el) {
     // O texto medido volta junto de propósito: seletor que casa com o elemento
     // errado é a falha mais cara desta suíte, e ela fica invisível se o
     // relatório só imprime números.
-    texto: (el.innerText || el.textContent || "").replace(/\s+/g, " ").trim().slice(0, 32),
+    texto: (pseudo === "::placeholder"
+      ? el.placeholder ?? ""
+      : el.innerText || el.textContent || ""
+    ).replace(/\s+/g, " ").trim().slice(0, 32),
     opacidade: Math.round(opacidade * 100) / 100,
   };
 }

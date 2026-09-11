@@ -232,6 +232,8 @@ const TELAS = [
       { nome: "bancada · origem escolhida", piso: CORPO, onde: (p) => p.locator('[aria-label="Origem do material"] button[aria-pressed="true"]') },
       { nome: "bancada · origem não escolhida", piso: CORPO, quantos: 3, onde: (p) => p.locator('[aria-label="Origem do material"] button[aria-pressed="false"]') },
       { nome: "bancada · nota de CRM ausente", piso: CORPO, onde: (p) => p.locator("main p.border-dashed").first() },
+      { nome: "bancada · placeholder do ângulo", piso: CORPO, pseudo: "::placeholder",
+        onde: (p) => p.locator("main textarea").first() },
       { nome: "bancada · nome do formato", piso: CORPO, onde: (p) => p.locator("main span.leading-tight").first() },
       { nome: "bancada · contador de marcados", piso: MIUDO, onde: (p) => p.locator("main span.text-faint").first() },
       { nome: "bancada · instrução sem formato", piso: CORPO, onde: (p) => p.getByText("Marque ao menos um formato.") },
@@ -259,6 +261,10 @@ const TELAS = [
       { nome: "editor · tecla de atalho", piso: MIUDO, onde: (p) => p.locator("kbd").first() },
       { nome: "editor · opção de notícias", piso: CORPO, onde: (p) => p.getByText("Incluir notícias recentes do setor") },
       { nome: "editor · exemplo de URL", piso: CORPO, onde: (p) => p.locator("span.truncate").first() },
+      // O texto que diz o que digitar. Piso de CORPO, não de rótulo: quem não
+      // consegue lê-lo não sabe o que o campo espera.
+      { nome: "editor · placeholder do composer", piso: CORPO, pseudo: "::placeholder",
+        onde: (p) => p.locator("main textarea").first() },
       { nome: "editor · formato ativo", piso: CORPO, onde: (p) => p.getByRole("button", { name: "Carrossel", exact: true }) },
       { nome: "editor · plataforma", piso: CORPO, onde: (p) => p.getByRole("button", { name: "Instagram", exact: true }).first() },
     ],
@@ -303,7 +309,12 @@ for (const tela of TELAS) {
         }
 
         for (let i = 0; i < achados; i++) {
-          const { razao, texto, opacidade } = await local.nth(i).evaluate(medirContraste);
+          // `pseudo` existe para o placeholder, que NÃO está no DOM: a sonda
+          // não o vê e nenhum alvo o declarava, então ele ficou 3,56:1 no tema
+          // claro até 11/09/2026 sem nada olhar. Mesmo medidor, um argumento.
+          const { razao, texto, opacidade } = await local
+            .nth(i)
+            .evaluate(medirContraste, alvo.pseudo);
           medidos++;
           const passa = razao >= alvo.piso;
           if (!passa && !alvo.isento) reprovou++;

@@ -55,7 +55,13 @@ export const brands: Record<BrandId, Brand> = {
     logoSrcOnDark: "/logos/resibag-branco.svg",
     themeId: "resibag",
     logoPolicy: "all",
-    tagline: "Gestão inteligente de resíduos industriais.",
+    // "industriais" CAIU em 09/09/2026 e a versão antiga foi para nunca-citar
+    // na resibag-canonical-facts. Este campo ficou para trás, e não é detalhe:
+    // o servidor SOBRESCREVE o footerNote gerado por este valor exato, então
+    // toda peça Resibag saía carimbada com o termo que a própria varredura
+    // acusa logo em seguida. Conferido em 11/09/2026 rodando
+    // `findForbiddenInSlides` sobre um slide com este footerNote.
+    tagline: "Gestão inteligente de resíduos.",
   },
   meu: {
     id: "meu",
