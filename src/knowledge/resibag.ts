@@ -99,7 +99,8 @@ resolução obriga o cliente; não é selo que a Resibag detém.
 **ISO 9001:2015 é certificação de sistema de gestão**, titulada pela Sanwey Indústria
 de Containers, e cobre a fabricação de todas as linhas. Nunca soma nem substitui
 homologação. Escreva "fabricado sob sistema de gestão da qualidade certificado
-ISO 9001:2015 do Grupo Sanwey" — nunca "Filtrante é certificado".
+ISO 9001:2015 do Grupo Sanwey". Filtrante e Resíduo Verde ficam de fora de
+qualquer menção a selo, código ou ensaio de produto — essas linhas não têm.
 
 Classe (NBR 10.004, I/II) e Grupo de embalagem (ANTT/ONU, I/II/III) são eixos
 diferentes: Classe classifica o resíduo, Grupo classifica o risco da embalagem no
@@ -195,6 +196,17 @@ certificação de produto — estão na seção PROIBIÇÕES, que é onde elas v
       term: "qualquer certificação de produto associada a Filtrante ou Resíduo Verde",
       reason:
         "essas linhas NÃO têm certificação de produto nenhuma. A ISO 9001:2015 é do sistema de gestão da Sanwey e cobre a fabricação — escreva \"fabricado sob SGQ certificado\", nunca \"linha certificada\". Atribuir homologação a elas é erro de compliance.",
+      // Atribuição afirmativa ("Filtrante certificado", "INMETRO do Filtrante").
+      // Proximidade solta acusa o inventário dos fatos ("SEM certificação de
+      // produto: · Filtrante") — por isso o conector é obrigatório.
+      match: [
+        /filtrante\s+(e\s+|eh\s+|esta\s+|com\s+)?(certificad[oa]?|homologad[oa]?|inmetro)/,
+        /filtrante\s+com\s+(certificacao|homologacao)/,
+        /residuo verde\s+(e\s+|eh\s+|esta\s+|com\s+)?(certificad[oa]?|homologad[oa]?|inmetro)/,
+        /residuo verde\s+com\s+(certificacao|homologacao)/,
+        /(certificacao|homologacao|inmetro)\s+(do|da|no|na|para\s+o|para\s+a)\s+(linha\s+)?filtrante/,
+        /(certificacao|homologacao|inmetro)\s+(do|da|no|na|para\s+o|para\s+a)\s+(linha\s+)?residuo verde/,
+      ],
     },
     {
       term: "prazo de adequação atribuído à NBR 10.004",
