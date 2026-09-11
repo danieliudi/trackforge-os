@@ -2,7 +2,7 @@
 
 import { Check, PenLine, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useMemo, useSyncExternalStore } from "react";
 
 import { brandLabel } from "@/constants/brands";
 import { EsteiraShell, ShellPage, useFront } from "@/components/app/EsteiraShell";
@@ -16,7 +16,13 @@ import {
   removeProduction,
   subscribeProductions,
 } from "@/lib/produced";
-import { loadState, saveState, type Draft } from "@/lib/storage";
+import {
+  getDraftsServerSnapshot,
+  getDraftsSnapshot,
+  replaceDrafts,
+  subscribeDrafts,
+  type Draft,
+} from "@/lib/storage";
 import { OUTPUT_META } from "@/types/outputs";
 
 /**
@@ -28,27 +34,26 @@ import { OUTPUT_META } from "@/types/outputs";
 export default function PecasPage() {
   const router = useRouter();
   const [front] = useFront();
-  const [drafts, setDrafts] = useState<Draft[] | null>(null);
 
   const productions = useSyncExternalStore(
     subscribeProductions,
     getProductionsSnapshot,
     getProductionsServerSnapshot,
   );
-
-  useEffect(() => {
-    const timer = setTimeout(() => setDrafts(loadState().drafts), 0);
-    return () => clearTimeout(timer);
-  }, []);
+  const draftState = useSyncExternalStore(
+    subscribeDrafts,
+    getDraftsSnapshot,
+    getDraftsServerSnapshot,
+  );
+  const drafts = draftState.drafts;
 
   const openDraft = (draft: Draft) => {
-    const state = loadState();
-    saveState({ drafts: state.drafts, activeId: draft.id });
+    replaceDrafts((state) => ({ ...state, activeId: draft.id }));
     router.push("/editor");
   };
 
   const mine = useMemo(
-    () => (drafts ?? []).filter((draft) => draft.brandId === front),
+    () => drafts.filter((draft) => draft.brandId === front),
     [drafts, front],
   );
   const runs = useMemo(
@@ -79,7 +84,7 @@ export default function PecasPage() {
             { n: "03", valor: String(sent), rotulo: "na fila do CRM" },
             {
               n: "04",
-              valor: drafts === null ? "—" : String(mine.length),
+              valor: String(mine.length),
               rotulo: "no editor",
             },
           ]}
@@ -151,10 +156,10 @@ export default function PecasPage() {
 
         <div className="flex flex-col gap-2">
           <BlockHead nota="rascunhos abertos, não peças enviadas">
-            Carrosséis no editor · n={drafts === null ? "…" : mine.length}
+            Carrosséis no editor · n={mine.length}
           </BlockHead>
 
-          {drafts === null ? null : mine.length === 0 ? (
+          {mine.length === 0 ? (
             <p className="border-2 border-dashed border-rule px-4 py-6 text-center text-[15px] text-mut">
               Nenhum carrossel aberto no editor nesta frente.
             </p>

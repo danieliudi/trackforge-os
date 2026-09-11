@@ -12,15 +12,16 @@ const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
  * A biblioteca era só `assets/resibag`, de quando a ferramenta atendia uma
  * marca. Com duas frentes a pasta única deixa a foto de uma aparecer na peça da
  * outra — o erro caro, porque sai publicado com a marca errada e ninguém
- * percebe até estar no ar. O padrão continua sendo resibag para não quebrar
- * quem já chama sem a frente.
+ * percebe até estar no ar.
+ *
+ * Sem `brandId` válido: GET devolve lista vazia; POST/DELETE recusam. Antes o
+ * default era resibag — leitura cruzada silenciosa quando a frente faltava.
  */
 const BRANDS = new Set(["sanwey", "resibag", "meu"]);
-const DEFAULT_BRAND = "resibag";
 
-function brandFrom(request: Request): string {
+function brandFrom(request: Request): string | null {
   const asked = new URL(request.url).searchParams.get("brandId");
-  return asked && BRANDS.has(asked) ? asked : DEFAULT_BRAND;
+  return asked && BRANDS.has(asked) ? asked : null;
 }
 
 const dirOf = (brand: string) => path.join(process.cwd(), "public", "assets", brand);
@@ -57,6 +58,7 @@ async function uniqueName(dir: string, name: string) {
 
 export async function GET(request: Request) {
   const brand = brandFrom(request);
+  if (!brand) return Response.json({ images: [] });
 
   // Frente sem pasta é biblioteca vazia, não erro: a pasta nasce no primeiro
   // upload, e derrubar o painel por isso seria transformar "ainda não subi
@@ -87,6 +89,9 @@ export async function POST(request: Request) {
   if (limited) return limited;
 
   const brand = brandFrom(request);
+  if (!brand) {
+    return Response.json({ error: "brandId é obrigatório" }, { status: 400 });
+  }
   const form = await request.formData();
   const file = form.get("file");
 
@@ -118,7 +123,11 @@ export async function DELETE(request: Request) {
   const limited = enforceRateLimit(request, "assets", { limit: 30, windowMs: 60_000 });
   if (limited) return limited;
 
-  const dir = dirOf(brandFrom(request));
+  const brand = brandFrom(request);
+  if (!brand) {
+    return Response.json({ error: "brandId é obrigatório" }, { status: 400 });
+  }
+  const dir = dirOf(brand);
   const body = await jsonBody(request);
   if (!body.ok) return body.response;
   const { name } = body.value as { name?: string };

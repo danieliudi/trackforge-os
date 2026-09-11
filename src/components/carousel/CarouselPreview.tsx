@@ -137,7 +137,7 @@ export function CarouselPreview({
                 }}
                 title={`Abrir slide ${index + 1}`}
                 className={clsx(
-                  "rounded ring-offset-2 ring-offset-zinc-100 transition",
+                  "rounded ring-offset-2 ring-offset-canvas transition",
                   focusRing,
                   index === activeIndex
                     ? "ring-2 ring-acc"
