@@ -19,11 +19,11 @@ import { countWords, type Article } from "@/types/article";
 export function ArticleReader({ article }: { article: Article }) {
   return (
     <article className="flex flex-col gap-6">
-      <header className="flex flex-col gap-2 border-b border-line pb-5">
-        <h2 className="text-balance text-2xl font-semibold leading-tight tracking-tight text-ink">
+      <header className="flex flex-col gap-2 border-b border-rule pb-5">
+        <h2 className="text-balance font-serif text-[41px] font-normal leading-[1.08] text-ink">
           {article.title}
         </h2>
-        <p className="text-[15px] leading-relaxed text-mut">{article.dek}</p>
+        <p className="text-[15.5px] leading-relaxed text-mut">{article.dek}</p>
         <p className="font-mono text-[10.5px] uppercase tracking-wide text-faint">
           {article.targetAudience} · {countWords(article)} palavras
         </p>
@@ -31,18 +31,18 @@ export function ArticleReader({ article }: { article: Article }) {
 
       {article.sections.map((section, index) => (
         <section key={`${section.heading}-${index}`} className="flex flex-col gap-2.5">
-          <h3 className="text-[15px] font-semibold tracking-tight text-ink">
+          <h3 className="border-b border-rule pb-1.5 text-[12px] font-semibold uppercase tracking-[0.1em] text-mut">
             {section.heading}
           </h3>
           {section.paragraphs.map((paragraph, position) => (
-            <p key={position} className="text-[14.5px] leading-[1.72] text-ink2">
+            <p key={position} className="text-[15.5px] leading-[1.62] text-ink2">
               {paragraph}
             </p>
           ))}
         </section>
       ))}
 
-      <section className="flex flex-col gap-2.5 rounded-lg border border-line bg-canvas px-4 py-4">
+      <section className="flex flex-col gap-2.5 border border-rule bg-cell px-4 py-4">
         <h3 className="text-[13px] font-semibold tracking-tight text-ink">O que fazer</h3>
         <ul className="flex flex-col gap-1.5">
           {article.takeaways.map((takeaway, index) => (

@@ -33,7 +33,7 @@ import {
   subscribeTheme,
   themeLabel,
 } from "@/lib/theme";
-import { focusRing, medidaClass } from "@/lib/ui";
+import { focusRing, folhaClass, medidaClass } from "@/lib/ui";
 
 /**
  * A casca do app: masthead de jornal em cima, a janela inteira embaixo.
@@ -73,10 +73,22 @@ export function useFront(): [BrandId, (id: BrandId) => void] {
 export function EsteiraShell({
   children,
   aside,
+  medida = "pagina",
 }: {
   children: ReactNode;
   /** Conteúdo extra na dateline, à direita — antes do custo e do tema. */
   aside?: ReactNode;
+  /**
+   * Onde o masthead, a dateline e a faixa terminam.
+   *
+   * `pagina` alinha os três à coluna de 1280px — é o certo num interior de
+   * leitura, onde a página É a coluna. `folha` manda os três de ponta a ponta,
+   * com o mesmo gutter dos painéis: é o certo numa superfície de TRABALHO, onde
+   * a folha é inteira e quem carrega medida é a prosa lá dentro.
+   *
+   * O desalinhamento que isto corrige era de 605px, medido com o app rodando.
+   */
+  medida?: "pagina" | "folha";
 }) {
   const pathname = usePathname();
   const [front, choose] = useFront();
@@ -140,13 +152,14 @@ export function EsteiraShell({
   });
 
   const theme = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
+  const borda = medida === "folha" ? folhaClass : medidaClass;
   const ThemeIcon = theme === "claro" ? Sun : theme === "escuro" ? Moon : Monitor;
 
   return (
     <div className="flex h-screen flex-col bg-paper">
       {/* ══ MASTHEAD ══ marca serif + edição, regra grossa embaixo */}
       <header className="shrink-0 border-b-[3px] border-ink bg-paper pb-1.5 pt-2.5">
-        <div className={clsx(medidaClass, "flex flex-wrap items-end justify-between gap-x-4 gap-y-1")}>
+        <div className={clsx(borda, "flex flex-wrap items-end justify-between gap-x-4 gap-y-1")}>
           <Link
             href="/"
             className={clsx(
@@ -188,7 +201,7 @@ export function EsteiraShell({
 
       {/* ══ DATELINE ══ onde/quando, e os controles que não são navegação */}
       <div className="shrink-0 border-b border-rule bg-paper py-1">
-       <div className={clsx(medidaClass, "flex flex-wrap items-center justify-between gap-x-4 gap-y-1")}>
+       <div className={clsx(borda, "flex flex-wrap items-center justify-between gap-x-4 gap-y-1")}>
         <span className="text-[11px] font-medium text-mut">
           São Paulo · {MESES[agora.getMonth()]} {agora.getFullYear()}
         </span>
@@ -220,7 +233,7 @@ export function EsteiraShell({
           É como a tinta do cabeçalho de um jornal atravessa a folha enquanto a
           mancha de texto respeita a margem. */}
       <nav className="shrink-0 bg-band py-2 text-[11.5px] font-bold uppercase tracking-[0.06em] text-band-ink">
-       <div className={clsx(medidaClass, "flex flex-wrap items-center gap-x-4.5 gap-y-1")}>
+       <div className={clsx(borda, "flex flex-wrap items-center gap-x-4.5 gap-y-1")}>
         {/* O ponto diz o que espera VOCÊ, com a mesma regra do glifo da home
             (`esperandoDecisao`). Vermelho só quando há algo: cor de urgência sem
             urgência treina a pessoa a ignorar a cor.

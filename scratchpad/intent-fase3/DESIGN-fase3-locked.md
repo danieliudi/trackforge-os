@@ -1,7 +1,17 @@
 # Fase 3 — bancada e editor no híbrido Wire + Specimen
 
-<!-- PROPOSTO em 08/09/2026. NÃO aprovado — nenhuma linha de código antes do
-     "aprovado" do Daniel, como manda a seção 4 do CLAUDE.md. -->
+<!-- TRAVADO em 11/09/2026 pelo Daniel: "quanto ao mockup da fase 3, ok. Aprovado." -->
+
+> **Aprovado.** A bancada e o editor seguem o que está no mockup. As quatro
+> perguntas abertas foram aprovadas junto, porque as quatro estão encarnadas
+> nele: a casca full-bleed nas superfícies de trabalho, a medida de leitura de
+> 680px, o editor dentro da casca, e o painel de custo antes de gastar.
+>
+> A quinta — a regra de combinação proibida — já tinha sido feita em 10/09, por
+> não depender do desenho.
+>
+> A prancheta de slides continua FORA: é o entregável do cliente, e o tema
+> visual dela sai das brand guidelines da marca.
 
 Mockup clicável: `scratchpad/intent-fase3/mockup-trabalho.html`
 (5 estados × 2 temas, controle no canto inferior direito).

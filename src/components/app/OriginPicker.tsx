@@ -116,8 +116,11 @@ export function OriginPicker({
     <div className="flex flex-col gap-3">
       <span className={labelClass}>Origem</span>
 
+      {/* Abas regradas, não pílulas. É a linguagem da faixa preta, que fica
+          quarenta pixels acima — grupo de pílulas arredondadas ali dentro é o
+          cartão Clockwork sobrevivendo numa casca que já não é. */}
       <div
-        className="flex gap-0.5 rounded-lg border border-line bg-surface2 p-0.5"
+        className="flex border-b border-rule"
         role="group"
         aria-label="Origem do material"
       >
@@ -128,11 +131,11 @@ export function OriginPicker({
             aria-pressed={id === origin.mode}
             onClick={() => onChange({ ...emptyOrigin, mode: id })}
             className={clsx(
-              "flex-1 rounded-md px-2 py-1.5 text-[12.5px] transition",
+              "flex-1 border-b-2 px-2 pb-2 pt-1.5 text-[12.5px] transition",
               focusRing,
               id === origin.mode
-                ? "bg-acc font-semibold text-acc-ink"
-                : "text-mut hover:text-ink",
+                ? "border-acc font-semibold text-ink"
+                : "border-transparent text-mut hover:text-ink",
             )}
           >
             {label}

@@ -79,7 +79,7 @@ seu escopo.** Seguir a errada é como a plataforma ganha um terceiro visual.
 |---|---|---|
 | Casca (`EsteiraShell`) e home (`/`) | **Híbrido Wire + Specimen** | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` |
 | Interiores de leitura (Peças, Fatos, Custos, Instalação) | **Híbrido, mesma direção** | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` |
-| Trabalho (bancada `/esteira` e `/artigo`, editor) | Painel de Situação (Clockwork) | `docs/ui-diretrizes.md` |
+| Trabalho (bancada `/esteira`, editor) | Híbrido, mesma direção | `scratchpad/intent-fase3/DESIGN-fase3-locked.md` |
 
 Do híbrido: masthead serif, `EDIÇÃO · frente`, dateline, faixa preta, glifo da
 prioridade, grade de células. Tokens `paper` `band` `rule` `cell` `urgent`.

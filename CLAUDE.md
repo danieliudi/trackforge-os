@@ -227,7 +227,7 @@ errada, é como a plataforma ganha um terceiro visual sem ninguém ter decidido.
 |---|---|---|---|
 | Casca (`EsteiraShell`) e home Situação (`/`) | **Híbrido Wire Service + Type Specimen Desk** | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` · mock `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html` | implementado (Fase 1) |
 | Interiores de leitura: Peças, Fatos, Custos, Instalação | **Híbrido, mesma direção** | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` · mock `scratchpad/intent-fase2/mockup-interiores.html` | aprovado 08/09/2026 (Fase 2) |
-| Superfícies de trabalho: bancada (`/esteira`, `/artigo`) e editor | Painel de Situação (Clockwork) | `docs/ui-diretrizes.md` · mock `scratchpad/painel-mockup.html` | vale até a fase delas |
+| Superfícies de trabalho: bancada (`/esteira`) e editor | **Híbrido, mesma direção** | `scratchpad/intent-fase3/DESIGN-fase3-locked.md` · mock `scratchpad/intent-fase3/mockup-trabalho.html` | aprovado 11/09/2026 (Fase 3) |
 
 Do híbrido vêm o masthead serif, `EDIÇÃO · frente`, a dateline, a faixa preta com
 a navegação, o glifo da prioridade e a grade de células. Tokens `paper`, `band`,
@@ -281,6 +281,13 @@ qualquer tela nova:
 - **Medida de página.** Conteúdo de leitura mora numa coluna (hoje 1280px), com
   a casca alinhada à mesma borda. Texto até a borda do papel não existe em
   jornal nenhum, e é o que produz a sensação de "largo" sem nome.
+- **Mas a medida é da COLUNA DE LEITURA, não da página** — e a Fase 3 obrigou a
+  separar as duas. Num interior a página *é* a coluna, e por isso 1280px
+  funcionou lá e escondeu a distinção. Numa superfície de trabalho a folha é
+  inteira e quem carrega medida é a prosa: a casca vai **full-bleed** e o artigo
+  mora numa coluna de **680px**, que a 15,5px dá 72 caracteres por linha —
+  medido, não escolhido. Espremer três painéis em 1280px deixaria a coluna do
+  artigo com ~530px e pioraria a ferramenta.
 - **Piso de 11px** para rótulo e meta em tela de trabalho; corpo em 15px. Abaixo
   disso é decisão explícita, não descuido de tradução.
 

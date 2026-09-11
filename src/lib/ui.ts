@@ -32,6 +32,36 @@ export const focusRing =
 export const medidaClass = "mx-auto w-full max-w-[1280px] px-6";
 
 /**
+ * A folha inteira — a medida das SUPERFÍCIES DE TRABALHO (Fase 3).
+ *
+ * A `medidaClass` acima trava a PÁGINA em 1280px, e isso resolveu o desconforto
+ * dos interiores de leitura. Aqui não transfere: espremer os três painéis da
+ * bancada em 1280px deixaria a coluna do artigo com ~530px e pioraria a
+ * ferramenta.
+ *
+ * A regra que vale nas duas fases é mais estreita do que parecia: **a medida é
+ * da COLUNA DE LEITURA, não da página.** Num interior a página *é* a coluna, e
+ * por isso 1280px funcionou lá e escondeu a distinção. Numa superfície de
+ * trabalho a folha é inteira e quem carrega medida é a prosa — ver
+ * `leituraClass` logo abaixo.
+ *
+ * Antes disso a casca renderizava em 1280px sobre um corpo de 1885px: a faixa
+ * preta flutuava no meio de uma grade que passava por baixo dela, e a borda
+ * esquerda dela caía a 8px do divisor da primeira coluna. Perto o bastante para
+ * parecer erro de alinhamento, longe o bastante para não ser alinhamento.
+ */
+export const folhaClass = "w-full px-10";
+
+/**
+ * A coluna de leitura dentro de um painel de trabalho.
+ *
+ * 680px NÃO foi escolhido, foi medido: com Geist a 15,5px dá **72 caracteres
+ * por linha**, dentro da faixa confortável de 60 a 75. O roteiro que gera as
+ * capturas do mockup imprime essa conta a cada rodada.
+ */
+export const leituraClass = "mx-auto w-full max-w-[680px]";
+
+/**
  * A FORMA do rótulo, sem cor.
  *
  * Existe separada porque `labelClass` embute `text-mut`, e componente com

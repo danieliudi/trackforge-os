@@ -8,6 +8,7 @@ import { ArticleImages } from "@/components/app/ArticleImages";
 import { Working } from "@/components/app/Working";
 import { ArticleReader } from "@/components/app/ArticleReader";
 import { CostReceipt } from "@/components/app/CostReceipt";
+import { PriceSheet } from "@/components/app/PriceSheet";
 import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
 import { OutputPieces, type Piece } from "@/components/app/OutputPieces";
 import {
@@ -22,7 +23,7 @@ import {
 import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { Button } from "@/components/ui/Button";
 import { isPersonalFront } from "@/constants/brands";
-import type { GenerationCost } from "@/constants/pricing";
+import { GENERATION_MODEL, type GenerationCost } from "@/constants/pricing";
 import type { ForbiddenHit } from "@/knowledge/check";
 import { readError } from "@/lib/apiError";
 import {
@@ -34,7 +35,7 @@ import {
 import { entryFromCost, pushCostEntry } from "@/lib/costLog";
 import { getProduction, saveProduction, type Production } from "@/lib/produced";
 import type { MarketSignal } from "@/lib/marketSignals";
-import { fieldClass, focusRing, labelClass, metaClass, panelClass } from "@/lib/ui";
+import { fieldClass, focusRing, labelClass, leituraClass, metaClass, panelClass } from "@/lib/ui";
 import type { Verification } from "@/lib/verify";
 import { articleBlocks, articleToMarkdown, type Article, type ChosenImage } from "@/types/article";
 import type { Carousel } from "@/types/carousel";
@@ -63,7 +64,14 @@ type ContentCampaignOption = { id: string; name: string; channel: string };
 
 type PendingPiece = { id: string; title: string; summary: string | null; priority: string };
 
-const column = "thin-scroll flex h-full min-h-0 flex-col gap-3 overflow-y-auto p-4";
+/**
+ * Um painel da bancada.
+ *
+ * O primeiro e o último perdem o padding da borda externa de propósito: o
+ * gutter já vem da grade, e assim o conteúdo deles nasce e morre na MESMA borda
+ * do masthead, da dateline e da faixa. Era o desalinhamento de 605px da Fase 3.
+ */
+const painel = "thin-scroll flex h-full min-h-0 flex-col gap-4 overflow-y-auto py-5";
 
 export default function BancadaPage() {
   const [brandId] = useFront();
@@ -517,6 +525,9 @@ export default function BancadaPage() {
 
   return (
     <EsteiraShell
+      // Superfície de TRABALHO: a casca atravessa a folha, alinhada à mesma
+      // borda dos painéis. Ver `folhaClass` em src/lib/ui.ts.
+      medida="folha"
       aside={
         crmReady && pending.length > 0 ? (
           <span className="flex items-center gap-1.5 rounded-md border border-warn-line bg-warn-bg px-2.5 py-1 text-[11.5px] text-warn">
@@ -526,9 +537,9 @@ export default function BancadaPage() {
         ) : null
       }
     >
-      <div className="grid h-full grid-cols-1 lg:grid-cols-[320px_minmax(0,1fr)_430px]">
+      <div className="grid h-full grid-cols-1 px-10 lg:grid-cols-[340px_minmax(0,1fr)_440px]">
         {/* ══ ORIGEM ══ */}
-        <div className={clsx(column, "border-r border-line")}>
+        <div className={clsx(painel, "border-r border-rule pr-6")}>
           <OriginPicker
             origin={origin}
             onChange={(next) => {
@@ -647,7 +658,7 @@ export default function BancadaPage() {
         </div>
 
         {/* ══ ARTIGO ══ */}
-        <div className={clsx(column, "bg-surface px-6")}>
+        <div className={clsx(painel, "px-8")}>
           {error ? (
             <div className="flex items-start gap-2 rounded-lg border border-danger-line bg-danger-bg px-3.5 py-3 text-[12.5px] text-danger">
               <AlertCircle size={14} className="mt-px shrink-0" />
@@ -665,7 +676,7 @@ export default function BancadaPage() {
             </div>
           ) : article ? (
             <>
-              <div className="flex flex-wrap items-center gap-2">
+              <div className={clsx(leituraClass, "flex flex-wrap items-center gap-2")}>
                 <span className={labelClass}>Artigo</span>
                 <span className="flex-1" />
                 <Button
@@ -699,46 +710,49 @@ export default function BancadaPage() {
                 </Button>
               </div>
 
-              {cost ? <CostReceipt cost={cost} summary="Artigo" /> : null}
-              {verification ? (
-                <VerificationPanel verification={verification} labels={blockLabels} />
-              ) : null}
-              {warnings.length > 0 ? (
-                <div className="flex flex-col gap-0.5 rounded-lg border border-warn-line bg-warn-bg px-3.5 py-3 text-[12px] text-warn">
-                  <span className="font-semibold">Termo proibido pela marca</span>
-                  {warnings.map((hit, index) => (
-                    <span key={index}>
-                      “{hit.matched}” em {blockLabels?.[hit.blockNumber] ?? "—"} — {hit.reason}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-
-              <div className="pb-6 pt-1">
+              <div className={clsx(leituraClass, "pb-8 pt-1")}>
                 <ArticleReader article={article} />
               </div>
             </>
           ) : (
-            <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
-              <p className="max-w-sm text-[13px] leading-relaxed text-mut">
+            <div className={clsx(leituraClass, "flex flex-col gap-5 pt-1")}>
+              {material && origin.input ? (
+                <>
+                  <div className="flex items-baseline justify-between gap-3 border-b border-rule pb-1.5">
+                    <span className={labelClass}>Material recebido</span>
+                    <span className="font-mono text-[11px] uppercase tracking-wide text-faint">
+                      {originLabel(origin, signals)} · {origin.input.length.toLocaleString("pt-BR")} car.
+                    </span>
+                  </div>
+                  <p className="break-words border-l-2 border-rule pl-3.5 text-[14.5px] leading-relaxed text-ink2">
+                    {origin.input.slice(0, 400)}
+                    {origin.input.length > 400 ? "…" : ""}
+                  </p>
+                </>
+              ) : null}
+
+              <p className="text-[14.5px] leading-relaxed text-mut">
                 {ready
                   ? withArticle
-                    ? "O artigo aparece aqui. Ele é a fonte factual de tudo que sair depois."
+                    ? "O artigo aparece aqui. Ele é a fonte factual de tudo que sair depois — a auditoria confere cada afirmação das peças contra ele."
                     : "Sem artigo, as peças saem direto da origem. Escolha os formatos à direita."
                   : "Escolha uma origem à esquerda: um sinal do setor, um tema, um texto colado ou um arquivo seu."}
               </p>
-              {material && origin.input ? (
-                <p className="max-w-lg rounded-lg border border-line2 bg-surface p-4 text-left font-mono text-[11.5px] leading-relaxed text-faint">
-                  {origin.input.slice(0, 400)}
-                  {origin.input.length > 400 ? "…" : ""}
-                </p>
+
+              {ready && withArticle ? (
+                <PriceSheet
+                  kind="artigo"
+                  model={GENERATION_MODEL}
+                  titulo="O que escrever vai custar"
+                  comBusca
+                />
               ) : null}
             </div>
           )}
         </div>
 
         {/* ══ SAÍDAS ══ */}
-        <div className={clsx(column, "border-l border-line")}>
+        <div className={clsx(painel, "border-l border-rule pl-6")}>
           <div className="flex items-baseline gap-2">
             <span className={labelClass}>Peças</span>
             <span className={metaClass}>
@@ -750,7 +764,12 @@ export default function BancadaPage() {
             </span>
           </div>
 
-          <div className="grid grid-cols-2 gap-1.5">
+          {/* A grade de formatos: célula regrada, e MARCADO É INVERTIDO.
+              No híbrido "ativo" é inversão, não preenchimento arredondado — é o
+              mesmo vocabulário da grade da home. A caixa de seleção continua
+              existindo de verdade, só sai do fluxo visual: quem marca o estado é
+              a inversão, e o foco de teclado aparece na célula inteira. */}
+          <div className="grid grid-cols-2 gap-px border border-rule bg-rule">
             {(Object.keys(OUTPUT_META) as OutputKind[]).map((kind) => {
               const meta = OUTPUT_META[kind];
               const on = kinds.includes(kind);
@@ -762,12 +781,17 @@ export default function BancadaPage() {
                   key={kind}
                   title={falhou ? "essa peça não saiu" : suggested ? suggested.reason : meta.note}
                   className={clsx(
-                    "flex cursor-pointer items-start gap-2 rounded-lg border px-2.5 py-2 transition",
+                    // Cor escolhida UMA vez, com ternário: somar `bg-` a um
+                    // token que já carrega fundo deixa duas utilidades da mesma
+                    // propriedade na lista, e quem vence é a ordem do CSS
+                    // gerado (seção 1).
+                    "flex min-h-[64px] cursor-pointer flex-col justify-center gap-0.5 px-3 py-2.5",
+                    "has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-[-2px] has-[:focus-visible]:outline-acc",
                     falhou
-                      ? "border-danger-line bg-danger-bg"
+                      ? "border-l-[3px] border-urgent bg-urgent-bg"
                       : on
-                        ? "border-acc bg-surface"
-                        : "border-line2 bg-surface hover:border-line3",
+                        ? "bg-ink"
+                        : "bg-cell",
                   )}
                 >
                   <input
@@ -780,24 +804,41 @@ export default function BancadaPage() {
                           : [...current, kind],
                       )
                     }
-                    className={clsx("mt-0.5 h-3.5 w-3.5 rounded border-line bg-canvas", focusRing)}
+                    className="sr-only"
                   />
-                  <span className="flex min-w-0 flex-col">
-                    <span
-                      className={clsx(
-                        "text-[12px] font-medium leading-tight",
-                        falhou ? "text-danger" : "text-ink",
-                      )}
-                    >
-                      {meta.label}
-                    </span>
-                    <span className={metaClass}>{meta.platform}</span>
+                  <span
+                    className={clsx(
+                      "text-[13.5px] font-medium leading-tight",
+                      on && !falhou ? "text-paper" : "text-ink",
+                    )}
+                  >
+                    {meta.label}
+                  </span>
+                  <span
+                    className={clsx(
+                      "text-[11px] uppercase tracking-wide",
+                      falhou ? "text-urgent" : on ? "text-paper/70" : "text-mut",
+                    )}
+                  >
+                    {falhou ? "não saiu · refazer" : meta.platform}
                   </span>
                 </label>
               );
             })}
           </div>
 
+          {/* Nenhum formato marcado: o que existia aqui era um botão
+              DESABILITADO dizendo "Gerar 0 peças". Um controle que não se pode
+              apertar carregando uma instrução é copy fantasiada de controle —
+              e, medido no mockup, a versão desabilitada dava 3,72:1 e reprovava
+              no piso de contraste. Vira a instrução que já era, e o botão
+              aparece quando houver o que apertar. */}
+          {kinds.length === 0 ? (
+            <p className="border border-dashed border-rule bg-cell px-3 py-2.5 text-[13.5px] leading-relaxed text-ink2">
+              <b className="mb-0.5 block font-semibold text-ink">Marque ao menos um formato.</b>
+              As peças saem do artigo, não da origem — escrever primeiro dá lastro comum a todas.
+            </p>
+          ) : (
           <div className="flex items-center gap-2">
             {failures.length > 0 ? (
               <span className={metaClass}>cada tentativa entra no recibo</span>
@@ -821,6 +862,22 @@ export default function BancadaPage() {
                   : `Gerar ${kinds.length} ${kinds.length === 1 ? "peça" : "peças"}`}
             </Button>
           </div>
+          )}
+
+          {cost ? <CostReceipt cost={cost} summary="Artigo" /> : null}
+          {verification ? (
+            <VerificationPanel verification={verification} labels={blockLabels} />
+          ) : null}
+          {warnings.length > 0 ? (
+            <div className="flex flex-col gap-0.5 border border-warn-line bg-warn-bg px-3.5 py-3 text-[12px] text-warn">
+              <span className="font-semibold">Termo proibido pela marca</span>
+              {warnings.map((hit, index) => (
+                <span key={index}>
+                  “{hit.matched}” em {blockLabels?.[hit.blockNumber] ?? "—"} — {hit.reason}
+                </span>
+              ))}
+            </div>
+          ) : null}
 
           {busy === "pecas" ? (
             <>
