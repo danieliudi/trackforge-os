@@ -1,0 +1,773 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="claro" data-estado="a">
+<head>
+<meta charset="utf-8">
+<title>Fase 4 — voz, trabalho e o arco de evento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:wght@400&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   TOKENS — cópia literal de src/app/globals.css. Zero hex novo.
+   Se uma cor não está lá, não entra aqui. (Regra da Fase 2, mantida.)
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --canvas:#f3efe6; --surface:#ffffff; --surface2:#f1f1ef;
+  --line:#cdcdcb; --line2:#e4e4e2; --line3:#919599;
+  --ink:#1c1c1b; --ink2:#3f4143; --mut:#5f6367; --faint:#7a7e82;
+  --acc:#e56515; --acc-hi:#c2540f; --acc-soft:#fba45c; --acc-tint:#fdf0e4;
+  --acc-tx:#b8490b; --acc-ink:#1c1c1b;
+  --paper:#f3efe6; --band:#16140f; --band-ink:#f3efe6; --rule:#d8d1c3;
+  --cell:#f7f4ec; --urgent:#d63a22; --urgent-bg:#f6e4df; --urgent-line:#e2b4a8;
+  --note-bg:#efe6d6;
+  --ok:#15803d; --ok-bg:#eff8f2; --ok-line:#a7d8b9;
+  --warn:#8a4a10; --warn-bg:#fdf0e4; --warn-line:#fba45c;
+  --danger:#b91c1c; --danger-bg:#fef2f2; --danger-line:#f0b4b4;
+
+  --sans:"Geist",system-ui,sans-serif;
+  --mono:"Geist Mono",ui-monospace,monospace;
+  --serif:"Instrument Serif",Georgia,serif;
+
+  --medida-leitura:680px;
+  --gutter:40px;
+}
+html[data-tema="escuro"]{
+  --canvas:#12110f; --paper:#12110f; --band:#000000; --band-ink:#f2efe6;
+  --rule:#2c2a26; --cell:#1a1916; --urgent:#ff6b52; --urgent-bg:#2a1814;
+  --urgent-line:#5a3030; --note-bg:#1f1c18;
+  --surface:#201f1d; --surface2:#2a2926; --line:#3a3835; --line2:#2a2926;
+  --line3:#55524e;
+  --ink:#f8f8f8; --ink2:#dcdbd8; --mut:#a9a7a2; --faint:#8a8782;
+  --acc-hi:#fba45c; --acc-tint:#2e1f0f; --acc-tx:#fba45c;
+  --ok:#34d399; --ok-bg:#0e2a20; --ok-line:#1e5a44;
+  --warn:#fba45c; --warn-bg:#2e1f0f; --warn-line:#6b4a1e;
+  --danger:#f87171; --danger-bg:#2e1616; --danger-line:#7a2c2c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+     font-size:15px;-webkit-font-smoothing:antialiased}
+
+/* ══ CASCA — full-bleed, como a Fase 3 implementou ═══════════════════════ */
+.tela{min-height:1100px;display:flex;flex-direction:column;background:var(--paper)}
+.mast{display:flex;align-items:flex-end;justify-content:space-between;
+      padding:14px var(--gutter) 10px;border-bottom:2px solid var(--ink)}
+.marca{font-family:var(--serif);font-weight:400;font-size:32px;line-height:1;
+       letter-spacing:-.01em;color:var(--ink)}
+.edicao{font-family:var(--sans);font-size:11.5px;letter-spacing:.09em;
+        text-transform:uppercase;color:var(--mut);display:flex;gap:14px;align-items:baseline}
+.edicao b{color:var(--ink);font-weight:600;border-bottom:2px solid var(--acc);padding-bottom:1px}
+.date{display:flex;justify-content:space-between;padding:7px var(--gutter);
+      font-size:11.5px;color:var(--mut);border-bottom:1px solid var(--rule)}
+.date .mono{font-family:var(--mono)}
+.band{display:flex;align-items:center;gap:26px;background:var(--band);
+      color:var(--band-ink);padding:9px var(--gutter);font-size:11.5px;
+      letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.band .sig{color:var(--band-ink)}
+.band .sig i{color:var(--urgent);font-style:normal;font-size:14px;line-height:1}
+.band a{color:var(--band-ink);text-decoration:none;opacity:.72}
+.band a.on{opacity:1;border-bottom:2px solid var(--acc);padding-bottom:2px}
+.band .mais{border:1px solid var(--band-ink);border-radius:50%;width:17px;height:17px;
+  display:inline-grid;place-items:center;font-size:12px;opacity:.72;margin-left:-18px}
+.band .dir{margin-left:auto;opacity:.72;letter-spacing:.06em}
+
+/* ══ SUPERFÍCIE DE TRABALHO ═══════════════════════════════════════════════ */
+.obra{flex:1;display:grid;min-height:0;padding:0 var(--gutter);
+      grid-template-columns:340px 1fr 440px}
+.pan{display:flex;flex-direction:column;gap:16px;padding:20px 0}
+.pan.orig{border-right:1px solid var(--rule);padding-right:24px}
+.pan.meio{padding-left:32px;padding-right:32px}
+.pan.said{border-left:1px solid var(--rule);padding-left:24px}
+.rot{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);
+  font-weight:500}
+.bloco{display:flex;flex-direction:column;gap:9px}
+
+/* Abas regradas — a linguagem da faixa, não pílula (decidido na Fase 3) */
+.abas{display:flex;border-bottom:1px solid var(--rule)}
+.abas button{flex:1;background:none;border:0;border-bottom:2px solid transparent;
+  padding:6px 4px 8px;font-family:var(--sans);font-size:12.5px;color:var(--mut);
+  cursor:pointer}
+.abas button.on{color:var(--ink);border-bottom-color:var(--acc);font-weight:600}
+
+.campo{border:1px solid var(--line);background:var(--canvas);padding:9px 11px;
+  font-size:13.5px;color:var(--mut);line-height:1.4}
+.campo.preenchido{color:var(--ink)}
+.sinal{border:1px solid var(--line2);background:var(--surface);padding:9px 11px;
+  display:flex;flex-direction:column;gap:3px}
+.sinal.on{border-color:var(--acc)}
+.sinal .t{font-size:12.5px;font-weight:500;color:var(--ink2);line-height:1.3}
+.sinal .m{font-family:var(--mono);font-size:11px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--faint)}
+
+/* ══ NOVO · GRADE DE TRABALHO ═════════════════════════════════════════════
+   O QUE O POST TEM DE FAZER, escolhido antes do formato. Mesma célula da
+   grade de formatos e da grade da home — marcado é INVERTIDO. É por frente:
+   a Resibag trabalha calendário de compliance, a Sanwey trabalha arquivo de
+   engenharia, e as duas listas não se parecem. */
+.trab{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);
+  border:1px solid var(--rule)}
+.trab .cl{background:var(--cell);padding:9px 11px;display:flex;flex-direction:column;
+  gap:2px;cursor:pointer;min-height:56px;justify-content:center}
+.trab .cl .t{font-size:13px;font-weight:500;color:var(--ink);line-height:1.2}
+.trab .cl .p{font-size:10.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+.trab .cl.on{background:var(--ink)}
+.trab .cl.on .t{color:var(--paper)}
+.trab .cl.on .p{color:var(--paper);opacity:.72}
+
+/* ══ NOVO · ARCO DE EVENTO ════════════════════════════════════════════════
+   Quando a origem é EVENTO, a lista de trabalhos não se aplica: evento tem
+   ARCO, e o arco é o que decide o que o post faz. Cinco etapas, uma linha. */
+.arco{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--rule);
+  border:1px solid var(--rule)}
+.arco .et{background:var(--cell);padding:9px 7px;display:flex;flex-direction:column;
+  gap:3px;cursor:pointer;align-items:center;text-align:center;min-height:62px;
+  justify-content:center}
+.arco .et .q{font-family:var(--mono);font-size:12px;color:var(--ink);font-weight:500}
+.arco .et .l{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);
+  line-height:1.25}
+.arco .et.on{background:var(--ink)}
+.arco .et.on .q,.arco .et.on .l{color:var(--paper)}
+.arco .et.on .l{opacity:.72}
+
+/* ══ NOVO · VOZ ═══════════════════════════════════════════════════════════
+   Voz é DIMENSÃO, não formato. Se fosse formato, 6 × 4 vozes = 24 kinds, cada
+   um com schema, renderização e linha de preço. Como dimensão, são dois campos
+   e todo o resto continua funcionando.
+   A lista é por frente: "Responsável Resibag" não existe na Sanwey. */
+.vozes{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--rule);
+  border:1px solid var(--rule)}
+.vozes .vz{background:var(--cell);padding:8px 8px;display:flex;flex-direction:column;
+  gap:2px;cursor:pointer;min-height:50px;justify-content:center}
+.vozes .vz .t{font-size:12.5px;font-weight:500;color:var(--ink);line-height:1.2}
+.vozes .vz .p{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+.vozes .vz.on{background:var(--ink)}
+.vozes .vz.on .t{color:var(--paper)}
+.vozes .vz.on .p{color:var(--paper);opacity:.72}
+
+/* ══ CÉLULAS DE FORMATO — com a etiqueta de voz ═══════════════════════════ */
+.grade{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--rule);
+  border:1px solid var(--rule)}
+.cel{background:var(--cell);padding:10px 11px;display:flex;flex-direction:column;
+  gap:2px;cursor:pointer;min-height:70px;justify-content:center;position:relative}
+.cel .t{font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.2}
+.cel .p{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.cel.on{background:var(--ink)}
+.cel.on .t{color:var(--paper)}
+.cel.on .p{color:var(--paper);opacity:.72}
+/* A etiqueta de voz da PEÇA. Só aparece em célula marcada — voz de peça que
+   ninguém vai gerar é ruído. Herda a voz do topo e pode divergir. */
+.cel .vq{display:none}
+.cel.on .vq{display:flex;align-items:center;gap:4px;margin-top:5px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.04em;color:var(--paper);
+  opacity:.62;border-top:1px solid var(--paper);padding-top:4px}
+/* A DIVERGÊNCIA NÃO É COR, e não pode ser: a célula marcada é INVERTIDA, então
+   ela só tem duas cores disponíveis — ink e paper —, e as duas trocam de lado
+   entre os temas. `--acc-soft` sobre a célula invertida dá ~11:1 no claro e
+   ~1,8:1 no escuro, porque o tema escuro não redefine o token e o fundo vira
+   quase-branco. É a mesma família do KPI urgente a 1,04:1 (CLAUDE.md seção 1).
+   Aqui a divergência é PESO e GLIFO, que funcionam nos dois temas. */
+.cel.on .vq.mudou{opacity:1;font-weight:500}
+.cel.on .vq s{text-decoration:none;opacity:.7}
+
+/* O seletor inline: trocar a voz de UMA peça sem mexer no padrão do lote. */
+/* Borda de 2px porque o menu SE SOBREPÕE à célula de baixo: numa linguagem
+   plana, sem sombra, a espessura é o que diz "está por cima". */
+.troca{position:absolute;left:-1px;right:-1px;top:calc(100% + 1px);z-index:5;
+  background:var(--surface);border:2px solid var(--ink);display:none;
+  flex-direction:column}
+.cel.abrindo .troca{display:flex}
+.troca b{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);
+  font-weight:500;padding:7px 10px 5px;border-bottom:1px solid var(--rule)}
+.troca button{background:none;border:0;border-bottom:1px solid var(--line2);
+  padding:7px 10px;text-align:left;font-family:var(--sans);font-size:12.5px;
+  color:var(--ink2);cursor:pointer;display:flex;justify-content:space-between;gap:8px}
+.troca button:last-child{border-bottom:0}
+.troca button.on{background:var(--ink);color:var(--paper);font-weight:500}
+.troca button i{font-style:normal;font-family:var(--mono);font-size:10.5px;color:var(--faint)}
+.troca button.on i{color:var(--paper);opacity:.7}
+
+/* ══ NOTA DE REGRA — o que o registro permite, dito na tela ═══════════════
+   Não é decoração: é o sistema de mensagem dos dois manuais virando gate.
+   Página carrega tagline; pessoa carregando tagline vira anúncio. */
+.regra{border-left:2px solid var(--acc);background:var(--acc-tint);padding:8px 11px;
+  font-size:12px;line-height:1.45;color:var(--ink2)}
+.regra b{color:var(--acc-tx);font-weight:600}
+html[data-tema="escuro"] .regra b{color:var(--acc-tx)}
+
+.aviso{border:1px dashed var(--rule);background:var(--cell);padding:10px 12px;
+  font-size:12px;line-height:1.45;color:var(--mut)}
+.aviso b{display:block;color:var(--ink);font-weight:600;margin-bottom:2px;font-size:12.5px}
+
+/* ══ COLUNA DE LEITURA ════════════════════════════════════════════════════ */
+.leitura{max-width:var(--medida-leitura);margin:0 auto;width:100%}
+.leitura h2{font-family:var(--serif);font-weight:400;font-size:41px;line-height:1.08;
+  margin:6px 0 14px;color:var(--ink)}
+.leitura h3{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--mut);
+  border-bottom:1px solid var(--rule);padding-bottom:6px;margin:22px 0 10px;font-weight:600}
+.leitura p{font-size:15.5px;line-height:1.62;color:var(--ink2);margin:0 0 12px}
+.espera{display:flex;flex-direction:column;gap:14px;margin:auto 0;text-align:center}
+.espera .diz{font-size:15px;color:var(--mut);line-height:1.55}
+
+.peca{border-bottom:1px solid var(--rule);padding:11px 0;display:flex;gap:12px;align-items:flex-start}
+.peca .idx{font-family:var(--mono);font-size:11.5px;color:var(--faint);width:22px;flex:none;padding-top:2px}
+.peca .co{min-width:0;flex:1}
+.peca .t{display:block;font-size:13.5px;font-weight:500;color:var(--ink);line-height:1.25}
+.peca .m{display:block;font-family:var(--mono);font-size:11px;color:var(--mut);
+  margin-top:3px;line-height:1.4;letter-spacing:.03em}
+.peca .est{font-size:11px;letter-spacing:.08em;text-transform:uppercase;flex:none;padding-top:3px}
+.peca .est.ok{color:var(--ok)}
+
+.preco{border:1px solid var(--rule);background:var(--cell);font-size:12.5px}
+.preco .l{display:flex;justify-content:space-between;padding:6px 12px;color:var(--mut)}
+.preco .l:not(:last-child){border-bottom:1px solid var(--rule)}
+.preco .l b{font-family:var(--mono);font-weight:400;color:var(--ink)}
+.preco .l.tot{background:var(--note-bg);color:var(--ink)}
+
+.btn{background:var(--acc);color:var(--acc-ink);border:0;padding:11px 14px;
+  font-family:var(--sans);font-size:13.5px;font-weight:600;cursor:pointer;width:100%}
+.btn.fraco{background:none;border:1px solid var(--line);color:var(--ink2);font-weight:500}
+
+/* ══ AVULSO / COMPOSER ════════════════════════════════════════════════════ */
+.obra.av{grid-template-columns:1fr}
+.avulso{max-width:760px;margin:0 auto;width:100%;padding:34px 0;
+  display:flex;flex-direction:column;gap:18px}
+.avulso h2{font-family:var(--serif);font-weight:400;font-size:41px;line-height:1.08;
+  margin:0;color:var(--ink)}
+.avulso .sub{font-size:15.5px;line-height:1.6;color:var(--ink2);margin:0}
+/* `--mut`, não `--faint`: o placeholder do composer é texto que se LÊ para
+   saber o que digitar, então o piso dele é 4,5:1 e não 3:1. Em `--faint` sobre
+   `--canvas` dá 3,56:1 — medido, e foi a única reprovação desta fase. */
+.avulso .ta{border:1px solid var(--acc);background:var(--canvas);padding:12px 13px;
+  min-height:78px;font-size:14px;color:var(--mut)}
+.linhadupla{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+
+/* ══ CONTROLE DO MOCKUP (não faz parte do desenho) ════════════════════════ */
+.ctrl{position:fixed;right:12px;bottom:12px;z-index:99;background:#111;color:#eee;
+  font-family:var(--mono);font-size:11px;padding:9px 11px;display:flex;gap:7px;
+  align-items:center;flex-wrap:wrap;max-width:620px;box-shadow:0 3px 16px rgba(0,0,0,.35)}
+.ctrl button{background:#2a2a2a;color:#ddd;border:1px solid #444;padding:4px 8px;
+  cursor:pointer;font-family:var(--mono);font-size:11px}
+.ctrl button.on{background:var(--acc);color:#111;border-color:var(--acc);font-weight:600}
+.ctrl s{opacity:.4;text-decoration:none}
+
+.tela{display:none}
+html[data-estado="a"] #a,html[data-estado="b"] #b,html[data-estado="c"] #c,
+html[data-estado="d"] #d,html[data-estado="e"] #e{display:flex}
+</style>
+</head>
+<body>
+
+<!-- ═══════════ A · BANCADA · RESIBAG — trabalho escolhido, voz do lote ══════ -->
+<div class="tela" id="a">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>Edição ·</span><span>Sanwey</span><b>Resibag</b><span>Meu</span></div>
+  </div>
+  <div class="date"><span>São Paulo · set 2026</span>
+    <span class="mono">mês · R$ 0,94 · tema <b class="tm">claro</b></span></div>
+  <div class="band">
+    <span class="sig"><i>•</i> 2 esperando aprovação</span>
+    <a href="#">Situação</a><a href="#">Peças</a><span class="mais">+</span>
+    <a href="#">Fatos</a><a href="#">Custos</a><a href="#">Instalação</a><a href="#">Editor</a>
+    <span class="dir">Bancada</span>
+  </div>
+  <div class="obra">
+
+    <div class="pan orig">
+      <div class="bloco">
+        <span class="rot">Origem</span>
+        <div class="abas">
+          <button class="on">Sinal</button><button>Tema</button><button>Texto</button>
+          <button>Arquivo</button><button>Evento</button>
+        </div>
+        <div class="sinal on">
+          <span class="t">Revisão da ANTT 5.998 — o que muda no descarte</span>
+          <span class="m">CRM · alta</span>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <span class="rot">Ângulo</span>
+        <div class="campo preenchido">O que o gestor de SSMA precisa ter conferido antes do prazo.</div>
+      </div>
+
+      <!-- ══ NOVO ══ -->
+      <div class="bloco">
+        <span class="rot">Trabalho · o que o post tem de fazer</span>
+        <div class="trab">
+          <div class="cl on"><span class="t">Norma em movimento</span><span class="p">autoridade</span></div>
+          <div class="cl"><span class="t">Como se confere</span><span class="p">autoridade</span></div>
+          <div class="cl"><span class="t">A conta</span><span class="p">comercial</span></div>
+          <div class="cl"><span class="t">A operação</span><span class="p">prova</span></div>
+        </div>
+        <div class="aviso">
+          <b>A lista é da frente.</b> A Resibag trabalha calendário de compliance.
+          Na Sanwey estas quatro células são outras quatro.
+        </div>
+      </div>
+
+      <button class="btn">Escrever o artigo</button>
+    </div>
+
+    <div class="pan meio">
+      <div class="leitura">
+        <h2>A revisão da ANTT 5.998 está em curso</h2>
+        <p>A Agência Nacional de Transportes Terrestres abriu a Audiência Pública nº 007/2026 para
+          revisar a Resolução 5.998/2022, com contribuições recebidas entre 15 de maio e 28 de junho
+          de 2026. O texto vigente é o que obriga o embarcador a usar embalagem certificada no
+          transporte rodoviário de produtos perigosos.</p>
+        <h3>O que já dá para afirmar</h3>
+        <p>A audiência existe e está documentada em notícia oficial da própria agência. O resultado,
+          não — e é por isso que a peça fala do processo, não do que vai mudar. Enquanto a revisão
+          não fecha, a obrigação em vigor continua sendo a 5.998/2022.</p>
+        <h3>O que isso muda para quem gera resíduo</h3>
+        <p>Nada, hoje. O valor da pauta é de antecipação: quem acompanha a revisão chega à mudança
+          com o parque de embalagem já conferido, e quem não acompanha descobre pelo auto de
+          infração.</p>
+      </div>
+    </div>
+
+    <div class="pan said">
+      <!-- ══ NOVO ══ -->
+      <div class="bloco">
+        <span class="rot">Voz · quem assina o lote</span>
+        <div class="vozes">
+          <div class="vz"><span class="t">Página</span><span class="p">registro</span></div>
+          <div class="vz on"><span class="t">Diretor</span><span class="p">mercado</span></div>
+          <div class="vz"><span class="t">Responsável</span><span class="p">operação</span></div>
+          <div class="vz"><span class="t">Daniel</span><span class="p">tese</span></div>
+        </div>
+        <div class="regra">
+          <b>Diretor · Nível 03 liberado, tagline bloqueada.</b>
+          A tagline institucional é da página. Pessoa carregando a mesma frase vira anúncio — e a
+          varredura recusa a peça antes de ela sair.
+        </div>
+      </div>
+
+      <div class="bloco">
+        <div class="rot">Peças <span style="color:var(--faint);font-family:var(--mono);letter-spacing:.06em">2 de 6 marcadas</span></div>
+        <div class="grade">
+          <div class="cel on"><span class="t">Carrossel</span><span class="p">LinkedIn</span>
+            <span class="vq"><s>voz</s> Diretor</span></div>
+          <div class="cel"><span class="t">Carrossel</span><span class="p">Instagram</span></div>
+          <div class="cel on"><span class="t">Post de texto</span><span class="p">LinkedIn</span>
+            <span class="vq"><s>voz</s> Diretor</span></div>
+          <div class="cel"><span class="t">Legenda de post único</span><span class="p">Instagram</span></div>
+          <div class="cel"><span class="t">Roteiro de Reels</span><span class="p">Instagram</span></div>
+          <div class="cel"><span class="t">Sequência de Stories</span><span class="p">Instagram</span></div>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <span class="rot">O que gerar vai custar</span>
+        <div class="preco">
+          <div class="l"><span>Entrada · Sonnet 5</span><b>US$ 2,00 / milhão</b></div>
+          <div class="l"><span>Saída · Sonnet 5</span><b>US$ 10,00 / milhão</b></div>
+          <div class="l tot"><span>Os últimos 6 carrosséis custaram entre</span><b>US$ 0,018 – 0,043</b></div>
+        </div>
+      </div>
+
+      <button class="btn">Gerar 2 peças</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ B · A VOZ DE UMA PEÇA, TROCADA ═════════════════════════════ -->
+<div class="tela" id="b">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>Edição ·</span><span>Sanwey</span><b>Resibag</b><span>Meu</span></div>
+  </div>
+  <div class="date"><span>São Paulo · set 2026</span>
+    <span class="mono">mês · R$ 0,94 · tema <b class="tm">claro</b></span></div>
+  <div class="band">
+    <span class="sig"><i>•</i> 2 esperando aprovação</span>
+    <a href="#">Situação</a><a href="#">Peças</a><span class="mais">+</span>
+    <a href="#">Fatos</a><a href="#">Custos</a><a href="#">Instalação</a><a href="#">Editor</a>
+    <span class="dir">Bancada</span>
+  </div>
+  <div class="obra">
+
+    <div class="pan orig">
+      <div class="bloco">
+        <span class="rot">Origem</span>
+        <div class="abas">
+          <button class="on">Sinal</button><button>Tema</button><button>Texto</button>
+          <button>Arquivo</button><button>Evento</button>
+        </div>
+        <div class="sinal on">
+          <span class="t">Revisão da ANTT 5.998 — o que muda no descarte</span>
+          <span class="m">CRM · alta</span>
+        </div>
+      </div>
+      <div class="bloco">
+        <span class="rot">Ângulo</span>
+        <div class="campo preenchido">O que o gestor de SSMA precisa ter conferido antes do prazo.</div>
+      </div>
+      <div class="bloco">
+        <span class="rot">Trabalho · o que o post tem de fazer</span>
+        <div class="trab">
+          <div class="cl on"><span class="t">Norma em movimento</span><span class="p">autoridade</span></div>
+          <div class="cl"><span class="t">Como se confere</span><span class="p">autoridade</span></div>
+          <div class="cl"><span class="t">A conta</span><span class="p">comercial</span></div>
+          <div class="cl"><span class="t">A operação</span><span class="p">prova</span></div>
+        </div>
+      </div>
+      <button class="btn">Escrever o artigo</button>
+    </div>
+
+    <div class="pan meio">
+      <div class="leitura">
+        <h2>A revisão da ANTT 5.998 está em curso</h2>
+        <p>A Agência Nacional de Transportes Terrestres abriu a Audiência Pública nº 007/2026 para
+          revisar a Resolução 5.998/2022, com contribuições recebidas entre 15 de maio e 28 de junho
+          de 2026.</p>
+        <h3>A mesma notícia, dois enquadramentos</h3>
+        <p>O carrossel vai para a página e fica sendo o registro: o que a norma exige hoje, com o
+          número do certificado ao lado. O post de texto vai para o diretor e fica sendo a leitura
+          de mercado: o que custa descobrir a mudança tarde. Mesma origem, mesmo artigo, duas peças
+          que ninguém confunde uma com a outra.</p>
+      </div>
+    </div>
+
+    <div class="pan said">
+      <div class="bloco">
+        <span class="rot">Voz · quem assina o lote</span>
+        <div class="vozes">
+          <div class="vz"><span class="t">Página</span><span class="p">registro</span></div>
+          <div class="vz on"><span class="t">Diretor</span><span class="p">mercado</span></div>
+          <div class="vz"><span class="t">Responsável</span><span class="p">operação</span></div>
+          <div class="vz"><span class="t">Daniel</span><span class="p">tese</span></div>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <div class="rot">Peças <span style="color:var(--faint);font-family:var(--mono);letter-spacing:.06em">2 de 6 marcadas</span></div>
+        <div class="grade">
+          <div class="cel on abrindo"><span class="t">Carrossel</span><span class="p">LinkedIn</span>
+            <span class="vq mudou"><s>voz</s> Página ✎</span>
+            <div class="troca">
+              <b>Voz desta peça</b>
+              <button class="on">Página <i>Nível 01/02</i></button>
+              <button>Diretor <i>do lote</i></button>
+              <button>Responsável <i>Nível 03</i></button>
+              <button>Daniel <i>institucional</i></button>
+            </div>
+          </div>
+          <div class="cel"><span class="t">Carrossel</span><span class="p">Instagram</span></div>
+          <div class="cel on"><span class="t">Post de texto</span><span class="p">LinkedIn</span>
+            <span class="vq"><s>voz</s> Diretor</span></div>
+          <div class="cel"><span class="t">Legenda de post único</span><span class="p">Instagram</span></div>
+          <div class="cel"><span class="t">Roteiro de Reels</span><span class="p">Instagram</span></div>
+          <div class="cel"><span class="t">Sequência de Stories</span><span class="p">Instagram</span></div>
+        </div>
+        <div class="regra">
+          <b>Uma peça pode divergir do lote.</b> O carrossel sai na página e o post de texto no
+          diretor — que é exatamente o mix, e é por isso que a voz é da PEÇA e não da rodada.
+        </div>
+      </div>
+
+      <button class="btn">Gerar 2 peças</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ C · SANWEY — outra frente, outra lista ═════════════════════ -->
+<div class="tela" id="c">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>Edição ·</span><b>Sanwey</b><span>Resibag</span><span>Meu</span></div>
+  </div>
+  <div class="date"><span>São Paulo · set 2026</span>
+    <span class="mono">mês · R$ 1,12 · tema <b class="tm">claro</b></span></div>
+  <div class="band">
+    <span class="sig"><i>•</i> em dia</span>
+    <a href="#">Situação</a><a href="#">Peças</a><span class="mais">+</span>
+    <a href="#">Fatos</a><a href="#">Custos</a><a href="#">Instalação</a><a href="#">Editor</a>
+    <span class="dir">Bancada</span>
+  </div>
+  <div class="obra">
+
+    <div class="pan orig">
+      <div class="bloco">
+        <span class="rot">Origem</span>
+        <div class="abas">
+          <button>Sinal</button><button class="on">Tema</button><button>Texto</button>
+          <button>Arquivo</button><button>Evento</button>
+        </div>
+        <div class="campo preenchido">1984 — as alças no mesmo tecido do contentor</div>
+      </div>
+      <div class="bloco">
+        <span class="rot">Ângulo</span>
+        <div class="campo">Por que essa decisão de engenharia ainda importa hoje</div>
+      </div>
+
+      <div class="bloco">
+        <span class="rot">Trabalho · o que o post tem de fazer</span>
+        <div class="trab">
+          <div class="cl on"><span class="t">Marco datado</span><span class="p">autoridade</span></div>
+          <div class="cl"><span class="t">Engenharia por carga</span><span class="p">diferencial</span></div>
+          <div class="cl"><span class="t">Vertical</span><span class="p">alcance</span></div>
+          <div class="cl"><span class="t">Certificação com escopo</span><span class="p">barreira</span></div>
+        </div>
+        <div class="aviso">
+          <b>Outra frente, outra lista.</b> São os quatro trabalhos da Sanwey — e a voz
+          "Responsável Resibag" não aparece aqui, porque não existe nesta frente.
+        </div>
+      </div>
+
+      <button class="btn">Escrever o artigo</button>
+    </div>
+
+    <div class="pan meio">
+      <div class="leitura">
+        <h2>1984: as alças no mesmo tecido do contentor</h2>
+        <p>Primeiro fabricante mundial a produzir alças com o mesmo tecido do contentor. Não foi
+          escolha de custo: alça costurada em material diferente concentra esforço na emenda, e a
+          emenda é onde o contentor falha primeiro.</p>
+        <h3>O que o marco prova</h3>
+        <p>Que a engenharia vem antes do catálogo. É a mesma decisão que hoje sustenta o portfólio
+          inteiro — cada modelo existe porque uma carga fez uma pergunta diferente.</p>
+        <h3>Por que um marco datado e não a idade</h3>
+        <p>Número que se reescreve todo ano não acumula memória. O ano de um pioneirismo, sim: ele
+          fica onde está e vai ficando mais raro.</p>
+      </div>
+    </div>
+
+    <div class="pan said">
+      <div class="bloco">
+        <span class="rot">Voz · quem assina o lote</span>
+        <div class="vozes" style="grid-template-columns:repeat(3,1fr)">
+          <div class="vz"><span class="t">Página</span><span class="p">registro</span></div>
+          <div class="vz"><span class="t">Diretor</span><span class="p">mercado</span></div>
+          <div class="vz on"><span class="t">Daniel</span><span class="p">tese</span></div>
+        </div>
+        <div class="regra">
+          <b>Daniel · C2 + C3, a única combinação permitida.</b>
+          A assinatura da marca não abre post — ela vive em lockup e rodapé. Quem abre é o
+          posicionamento, e a prova é o marco datado.
+        </div>
+      </div>
+
+      <div class="bloco">
+        <div class="rot">Peças <span style="color:var(--faint);font-family:var(--mono);letter-spacing:.06em">1 de 6 marcadas</span></div>
+        <div class="grade">
+          <div class="cel"><span class="t">Carrossel</span><span class="p">LinkedIn</span></div>
+          <div class="cel"><span class="t">Carrossel</span><span class="p">Instagram</span></div>
+          <div class="cel on"><span class="t">Post de texto</span><span class="p">LinkedIn</span>
+            <span class="vq"><s>voz</s> Daniel</span></div>
+          <div class="cel"><span class="t">Legenda de post único</span><span class="p">Instagram</span></div>
+          <div class="cel"><span class="t">Roteiro de Reels</span><span class="p">Instagram</span></div>
+          <div class="cel"><span class="t">Sequência de Stories</span><span class="p">Instagram</span></div>
+        </div>
+      </div>
+
+      <button class="btn">Gerar 1 peça</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ D · ORIGEM EVENTO — o arco substitui a lista ═══════════════ -->
+<div class="tela" id="d">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>Edição ·</span><span>Sanwey</span><b>Resibag</b><span>Meu</span></div>
+  </div>
+  <div class="date"><span>São Paulo · set 2026</span>
+    <span class="mono">mês · R$ 0,94 · tema <b class="tm">claro</b></span></div>
+  <div class="band">
+    <span class="sig"><i>•</i> 2 esperando aprovação</span>
+    <a href="#">Situação</a><a href="#">Peças</a><span class="mais">+</span>
+    <a href="#">Fatos</a><a href="#">Custos</a><a href="#">Instalação</a><a href="#">Editor</a>
+    <span class="dir">Bancada</span>
+  </div>
+  <div class="obra">
+
+    <div class="pan orig">
+      <div class="bloco">
+        <span class="rot">Origem</span>
+        <div class="abas">
+          <button>Sinal</button><button>Tema</button><button>Texto</button>
+          <button>Arquivo</button><button class="on">Evento</button>
+        </div>
+        <div class="campo preenchido">Feira · nome do evento</div>
+        <div class="linhadupla" style="gap:9px">
+          <div class="campo preenchido">14–16 out 2026</div>
+          <div class="campo preenchido">Estande</div>
+        </div>
+      </div>
+
+      <!-- ══ NOVO ══ -->
+      <div class="bloco">
+        <span class="rot">Arco · onde no evento este post entra</span>
+        <div class="arco">
+          <div class="et"><span class="q">T−14</span><span class="l">convite</span></div>
+          <div class="et"><span class="q">T−3</span><span class="l">pauta</span></div>
+          <div class="et"><span class="q">Dia</span><span class="l">bastidor</span></div>
+          <div class="et on"><span class="q">D+2</span><span class="l">o que ouvimos</span></div>
+          <div class="et"><span class="q">D+7</span><span class="l">material</span></div>
+        </div>
+        <div class="aviso">
+          <b>Evento não tem trabalho, tem arco.</b> Por isso a grade de trabalhos some quando esta
+          origem está ativa — a etapa é que decide o que o post faz. <b style="display:inline;font-weight:600">D+2</b>
+          é o de maior valor e o menos publicado: só existe porque alguém estava lá.
+        </div>
+      </div>
+
+      <button class="btn">Escrever a síntese</button>
+    </div>
+
+    <div class="pan meio">
+      <div class="leitura">
+        <h2>O que ouvimos em três dias de feira</h2>
+        <p>A síntese do que o mercado perguntou no estande. É a única pauta do ano que não sai de
+          norma nem de base de fatos: sai de conversa, e por isso é a mais difícil de um concorrente
+          copiar.</p>
+        <h3>A regra não afrouxa aqui</h3>
+        <p>Feira é o momento em que mais se improvisa alegação no corredor. O que entrar nesta peça
+          passa pela mesma régua das outras: número só se vier da base, e o que foi ouvido entra
+          como o que foi ouvido — nunca como dado da marca.</p>
+        <h3>Foto é o ativo do arco</h3>
+        <p>São os três dias do ano em que foto real é abundante. A restrição que vale o ano inteiro
+          continua valendo: nenhuma imagem gerada por IA, nem aqui.</p>
+      </div>
+    </div>
+
+    <div class="pan said">
+      <div class="bloco">
+        <span class="rot">Voz · quem assina o lote</span>
+        <div class="vozes">
+          <div class="vz"><span class="t">Página</span><span class="p">registro</span></div>
+          <div class="vz on"><span class="t">Diretor</span><span class="p">mercado</span></div>
+          <div class="vz"><span class="t">Responsável</span><span class="p">operação</span></div>
+          <div class="vz"><span class="t">Daniel</span><span class="p">tese</span></div>
+        </div>
+        <div class="regra">
+          <b>O arco já sugere a voz.</b> Convite e material são da página; bastidor é de quem estava
+          lá; a síntese é do diretor. Sugere, não trava — quem decide continua sendo você.
+        </div>
+      </div>
+
+      <div class="bloco">
+        <div class="rot">Peças <span style="color:var(--faint);font-family:var(--mono);letter-spacing:.06em">1 de 6 marcadas</span></div>
+        <div class="grade">
+          <div class="cel"><span class="t">Carrossel</span><span class="p">LinkedIn</span></div>
+          <div class="cel"><span class="t">Carrossel</span><span class="p">Instagram</span></div>
+          <div class="cel on"><span class="t">Post de texto</span><span class="p">LinkedIn</span>
+            <span class="vq"><s>voz</s> Diretor</span></div>
+          <div class="cel"><span class="t">Legenda de post único</span><span class="p">Instagram</span></div>
+          <div class="cel"><span class="t">Roteiro de Reels</span><span class="p">Instagram</span></div>
+          <div class="cel"><span class="t">Sequência de Stories</span><span class="p">Instagram</span></div>
+        </div>
+      </div>
+
+      <button class="btn">Gerar 1 peça</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ E · CRIAÇÃO AVULSA — os mesmos três controles ══════════════ -->
+<div class="tela" id="e">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>Edição ·</span><span>Sanwey</span><b>Resibag</b><span>Meu</span></div>
+  </div>
+  <div class="date"><span>São Paulo · set 2026</span>
+    <span class="mono">mês · R$ 0,94 · tema <b class="tm">claro</b></span></div>
+  <div class="band">
+    <span class="sig"><i>•</i> 2 esperando aprovação</span>
+    <a href="#">Situação</a><a href="#">Peças</a><span class="mais">+</span>
+    <a href="#">Fatos</a><a href="#">Custos</a><a href="#">Instalação</a><a class="on" href="#">Editor</a>
+  </div>
+  <div class="obra av">
+    <div class="avulso">
+      <h2>Uma peça, sem passar pela esteira</h2>
+      <p class="sub">Cole a URL de um artigo ou descreva o tema. Os mesmos três controles da bancada
+        vêm junto — porque uma peça avulsa erra pelas mesmas razões que uma peça da esteira.</p>
+
+      <div class="ta">https://… ou: o que confere antes de comprar big bag homologado</div>
+
+      <div class="linhadupla">
+        <div class="bloco">
+          <span class="rot">Trabalho</span>
+          <div class="trab">
+            <div class="cl"><span class="t">Norma em movimento</span><span class="p">autoridade</span></div>
+            <div class="cl on"><span class="t">Como se confere</span><span class="p">autoridade</span></div>
+            <div class="cl"><span class="t">A conta</span><span class="p">comercial</span></div>
+            <div class="cl"><span class="t">A operação</span><span class="p">prova</span></div>
+          </div>
+        </div>
+
+        <div class="bloco">
+          <span class="rot">Voz</span>
+          <div class="vozes" style="grid-template-columns:1fr 1fr">
+            <div class="vz on"><span class="t">Página</span><span class="p">registro</span></div>
+            <div class="vz"><span class="t">Diretor</span><span class="p">mercado</span></div>
+            <div class="vz"><span class="t">Responsável</span><span class="p">operação</span></div>
+            <div class="vz"><span class="t">Daniel</span><span class="p">tese</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="bloco">
+        <span class="rot">Formato</span>
+        <div class="grade" style="grid-template-columns:repeat(3,1fr)">
+          <div class="cel on"><span class="t">Carrossel</span><span class="p">LinkedIn</span>
+            <span class="vq"><s>voz</s> Página</span></div>
+          <div class="cel"><span class="t">Post de texto</span><span class="p">LinkedIn</span></div>
+          <div class="cel"><span class="t">Carrossel</span><span class="p">Instagram</span></div>
+        </div>
+      </div>
+
+      <div class="regra">
+        <b>Página · Nível 01/02 liberado.</b> É a única voz que pode carregar a tagline
+        institucional. Marcado o trabalho "Como se confere", a peça sai com o número do certificado
+        e sem chamada comercial — os dois registros não dividem a mesma peça.
+      </div>
+
+      <div class="preco">
+        <div class="l"><span>Entrada · Sonnet 5</span><b>US$ 2,00 / milhão</b></div>
+        <div class="l"><span>Saída · Sonnet 5</span><b>US$ 10,00 / milhão</b></div>
+        <div class="l tot"><span>Os últimos 6 carrosséis custaram entre</span><b>US$ 0,018 – 0,043</b></div>
+      </div>
+
+      <button class="btn">Gerar carrossel</button>
+    </div>
+  </div>
+</div>
+
+<div class="ctrl">
+  <s>estado</s>
+  <button data-e="a" class="on">A · trabalho + voz</button>
+  <button data-e="b">B · voz da peça</button>
+  <button data-e="c">C · Sanwey</button>
+  <button data-e="d">D · evento</button>
+  <button data-e="e">E · avulso</button>
+  <s>·</s>
+  <button data-t="claro" class="on">claro</button>
+  <button data-t="escuro">escuro</button>
+</div>
+
+<script>
+(function(){
+  var H = document.documentElement;
+  document.querySelectorAll('.ctrl button').forEach(function(b){
+    b.addEventListener('click', function(){
+      if (b.dataset.e) {
+        H.dataset.estado = b.dataset.e;
+        document.querySelectorAll('.ctrl button[data-e]').forEach(function(o){
+          o.classList.toggle('on', o === b);
+        });
+      }
+      if (b.dataset.t) {
+        H.dataset.tema = b.dataset.t;
+        document.querySelectorAll('.tm').forEach(function(n){ n.textContent = b.dataset.t; });
+        document.querySelectorAll('.ctrl button[data-t]').forEach(function(o){
+          o.classList.toggle('on', o === b);
+        });
+      }
+    });
+  });
+})();
+</script>
+</body>
+</html>
