@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 
 import type { BrandId } from "@/constants/brands";
+import { readError } from "@/lib/apiError";
 import { fieldClass, focusRing } from "@/lib/ui";
 
 type UnsplashResult = {
@@ -118,9 +119,12 @@ function UnsplashTab({
       setLoading(true);
       try {
         const response = await fetch(`/api/images/search?q=${encodeURIComponent(trimmed)}`);
+        if (id !== requestId.current) return;
+        if (!response.ok) {
+          throw new Error(await readError(response, "falha ao buscar imagens"));
+        }
         const data = await response.json();
         if (id !== requestId.current) return;
-        if (!response.ok) throw new Error(data.error ?? "falha ao buscar imagens");
         setResults(data.results);
         setError(null);
       } catch (cause) {

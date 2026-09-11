@@ -31,6 +31,7 @@ import {
 import type { GenerationCost } from "@/constants/pricing";
 import { resolveCanvasSize } from "@/constants/themes";
 import type { ForbiddenHit } from "@/knowledge/check";
+import { readError } from "@/lib/apiError";
 import type { Verification } from "@/lib/verify";
 import { useHistory } from "@/hooks/useHistory";
 import { useFront } from "@/components/app/EsteiraShell";
@@ -351,7 +352,12 @@ export default function Home() {
           platform,
         }),
       });
-      const data = await response.json();
+      // A mensagem sai do clone: o original ainda precisa ser lido como JSON
+      // para o custo, e um corpo só pode ser consumido uma vez.
+      const failure = response.ok
+        ? null
+        : await readError(response.clone(), "falha ao gerar o carrossel");
+      const data = await response.json().catch(() => ({}));
       const kind = format === "apresentacao" ? "apresentacao" : "carrossel";
 
       if (!response.ok) {
@@ -359,9 +365,7 @@ export default function Home() {
         // lançar evita que a geração mais frustrante seja também a invisível
         // no extrato.
         if (data.cost) logCost(data.cost as GenerationCost, kind, input.slice(0, 60), true);
-        throw new Error(
-          data.issues?.join(" - ") ?? data.error ?? "falha ao gerar o carrossel",
-        );
+        throw new Error(failure ?? "falha ao gerar o carrossel");
       }
 
       const newCarousel = data.carousel as Carousel;
@@ -465,15 +469,16 @@ export default function Home() {
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ carousel, slideIndex: index, instruction, brandId }),
       });
-      const data = await response.json();
+      const failure = response.ok
+        ? null
+        : await readError(response.clone(), "falha ao regenerar o slide");
+      const data = await response.json().catch(() => ({}));
 
       if (!response.ok) {
         if (data.cost) {
           logCost(data.cost as GenerationCost, "slide", `Slide ${index + 1}`, true);
         }
-        throw new Error(
-          data.issues?.join(" - ") ?? data.error ?? "falha ao regenerar o slide",
-        );
+        throw new Error(failure ?? "falha ao regenerar o slide");
       }
 
       const cost = data.cost as GenerationCost;

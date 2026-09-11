@@ -16,8 +16,8 @@ type DraftsMenuProps = {
   onDelete: (id: string) => void;
 };
 
-function relativeTime(updatedAt: number) {
-  const minutes = Math.round((Date.now() - updatedAt) / 60_000);
+function relativeTime(updatedAt: number, now: number) {
+  const minutes = Math.round((now - updatedAt) / 60_000);
   if (minutes < 1) return "agora mesmo";
   if (minutes < 60) return `há ${minutes} min`;
   const hours = Math.round(minutes / 60);
@@ -27,6 +27,9 @@ function relativeTime(updatedAt: number) {
 
 export function DraftsMenu({ drafts, activeId, onSelect, onDelete }: DraftsMenuProps) {
   const [open, setOpen] = useState(false);
+  // `Date.now` no render viola react-hooks/purity. O relógio só importa com o
+  // menu aberto — agenda na abertura, no padrão do repo (setTimeout 0).
+  const [now, setNow] = useState<number | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -45,6 +48,15 @@ export function DraftsMenu({ drafts, activeId, onSelect, onDelete }: DraftsMenuP
       document.removeEventListener("pointerdown", handlePointerDown);
       document.removeEventListener("keydown", handleKeyDown);
     };
+  }, [open]);
+
+  useEffect(() => {
+    if (!open) {
+      const clear = setTimeout(() => setNow(null), 0);
+      return () => clearTimeout(clear);
+    }
+    const t = setTimeout(() => setNow(Date.now()), 0);
+    return () => clearTimeout(t);
   }, [open]);
 
   const sorted = [...drafts].sort((a, b) => b.updatedAt - a.updatedAt);
@@ -95,7 +107,13 @@ export function DraftsMenu({ drafts, activeId, onSelect, onDelete }: DraftsMenuP
                       {draft.title}
                     </span>
                     <span className="flex w-full items-baseline gap-1.5 text-[10.5px] text-faint">
-                      <span>{isActive ? "editando agora" : relativeTime(draft.updatedAt)}</span>
+                      <span>
+                        {isActive
+                          ? "editando agora"
+                          : now == null
+                            ? "…"
+                            : relativeTime(draft.updatedAt, now)}
+                      </span>
                       {draft.costUsd !== undefined ? (
                         <>
                           <span aria-hidden>·</span>
