@@ -4,6 +4,8 @@ import { fetchContentCampaigns, campaignsConfigured } from "@/lib/campaigns";
 /**
  * Lista campanhas de canal Conteúdo/Digital pra seletor da bancada.
  * `configured: false` é resposta legítima — mesma lógica de `/api/publish`.
+ * `brandId` é obrigatório: sem frente, a leitura via service role devolveria
+ * campanhas de todas as empresas.
  */
 export async function GET(request: Request) {
   if (!campaignsConfigured()) {
@@ -12,7 +14,10 @@ export async function GET(request: Request) {
 
   const brand = new URL(request.url).searchParams.get("brandId");
   const parsed = brandIdSchema.safeParse(brand);
-  const brandId = parsed.success ? parsed.data : null;
+  if (!parsed.success) {
+    return Response.json({ error: "brandId é obrigatório" }, { status: 400 });
+  }
+  const brandId = parsed.data;
 
   if (isPersonalFront(brandId)) {
     return Response.json({ configured: false, campaigns: [], personal: true });

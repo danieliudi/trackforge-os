@@ -192,9 +192,11 @@ export async function listPendingPieces(
 
   const config = readConfig();
   if (!config) return [];
+  // Sem frente: não listar a fila cruzada. A rota GET exige brandId.
+  if (!brandId) return [];
 
   const params = new URLSearchParams({ action: "list", status: "pending", limit: "20" });
-  const companyId = brandId ? COMPANY_ID[brandId] : undefined;
+  const companyId = COMPANY_ID[brandId];
   if (companyId) params.set("company_id", companyId);
 
   const response = await fetch(`${config.url}?${params}`, {

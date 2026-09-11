@@ -6,6 +6,8 @@ import { brandIdSchema } from "@/constants/brands";
 
 import { priceUsage, SUGGESTION_MODEL, type GenerationCost } from "@/constants/pricing";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
+import { MAX_INPUT_CHARS } from "@/lib/limits";
+import { enforceRateLimit } from "@/lib/rateLimit";
 import { OUTPUT_META, outputSuggestionSchema, type OutputKind } from "@/types/outputs";
 import { jsonBody } from "@/lib/apiError";
 
@@ -21,7 +23,10 @@ import { jsonBody } from "@/lib/apiError";
  */
 
 const requestSchema = z.object({
-  material: z.string().min(200, "material curto demais para sugerir formato"),
+  material: z
+    .string()
+    .min(200, "material curto demais para sugerir formato")
+    .max(MAX_INPUT_CHARS, `texto acima de ${MAX_INPUT_CHARS} caracteres`),
   brandId: brandIdSchema.nullable().optional(),
 });
 
@@ -53,6 +58,9 @@ Regras:
 Português do Brasil.`;
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "generate");
+  if (limited) return limited;
+
   const body = await jsonBody(request);
   if (!body.ok) return body.response;
 

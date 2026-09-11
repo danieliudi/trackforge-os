@@ -1,3 +1,6 @@
+import { MAX_SEARCH_QUERY_CHARS } from "@/lib/limits";
+import { enforceRateLimit } from "@/lib/rateLimit";
+
 const UNSPLASH_API = "https://api.unsplash.com";
 
 type UnsplashPhoto = {
@@ -9,6 +12,9 @@ type UnsplashPhoto = {
 };
 
 export async function GET(request: Request) {
+  const limited = enforceRateLimit(request, "unsplash", { limit: 60, windowMs: 60_000 });
+  if (limited) return limited;
+
   const key = process.env.UNSPLASH_ACCESS_KEY;
   if (!key) {
     return Response.json({ error: "busca de imagens não configurada" }, { status: 500 });
@@ -17,6 +23,12 @@ export async function GET(request: Request) {
   const query = new URL(request.url).searchParams.get("q")?.trim();
   if (!query) {
     return Response.json({ error: "informe um termo de busca" }, { status: 400 });
+  }
+  if (query.length > MAX_SEARCH_QUERY_CHARS) {
+    return Response.json(
+      { error: `termo acima de ${MAX_SEARCH_QUERY_CHARS} caracteres` },
+      { status: 400 },
+    );
   }
 
   const response = await fetch(

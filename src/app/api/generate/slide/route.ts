@@ -8,6 +8,8 @@ import { priceUsage, type GenerationCost } from "@/constants/pricing";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbiddenInSlides } from "@/knowledge/check";
 import { jsonBody } from "@/lib/apiError";
+import { MAX_CONTEXT_CHARS } from "@/lib/limits";
+import { enforceRateLimit } from "@/lib/rateLimit";
 import { failedGenerationStep, generationErrorMessage, toTokenUsage } from "@/lib/usage";
 import {
   apresentacaoSchema,
@@ -25,7 +27,7 @@ const requestSchema = z.object({
   // de uma apresentação com mais de 12 slides era rejeitado como payload inválido.
   carousel: apresentacaoSchema,
   slideIndex: z.number().int().nonnegative(),
-  instruction: z.string().optional(),
+  instruction: z.string().max(MAX_CONTEXT_CHARS).optional(),
   brandId: brandIdSchema.nullable().optional(),
 });
 
@@ -61,6 +63,9 @@ Mantenha o mesmo "type" do slide e a coerência com o título, o público-alvo e
 outros slides do documento. Escreva em português do Brasil.`;
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "generate");
+  if (limited) return limited;
+
   const body = await jsonBody(request);
   if (!body.ok) return body.response;
 

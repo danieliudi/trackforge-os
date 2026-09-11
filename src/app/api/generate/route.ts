@@ -5,7 +5,9 @@ import { z } from "zod";
 import {brands, brandIdSchema} from "@/constants/brands";
 import { jsonBody } from "@/lib/apiError";
 import { buildBrief } from "@/lib/brief";
+import { MAX_CONTEXT_CHARS, MAX_INPUT_CHARS } from "@/lib/limits";
 import { buildCarrosselSystem } from "@/lib/prompts";
+import { enforceRateLimit } from "@/lib/rateLimit";
 import { buildGroundedSystem } from "@/knowledge";
 import { findForbiddenInSlides } from "@/knowledge/check";
 import { verifySlides } from "@/lib/verify";
@@ -19,9 +21,12 @@ import {
 } from "@/types/carousel";
 
 const requestSchema = z.object({
-  input: z.string().min(3, "informe uma URL ou um tema"),
+  input: z
+    .string()
+    .min(3, "informe uma URL ou um tema")
+    .max(MAX_INPUT_CHARS, `texto acima de ${MAX_INPUT_CHARS} caracteres`),
   /** Estratégia/posicionamento da marca ativa, colado na aba Contexto. */
-  context: z.string().optional(),
+  context: z.string().max(MAX_CONTEXT_CHARS).optional(),
   includeNews: z.boolean().optional(),
   /** Sinais curados do CRM. Grátis e verificados — o default ligado. */
   useSignals: z.boolean().optional().default(true),
@@ -66,6 +71,9 @@ Regras obrigatórias de texto (o layout quebra quem violar):
 Escreva em português do Brasil. Tom claro e objetivo, para leitura rápida de liderança.`;
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "generate");
+  if (limited) return limited;
+
   const body = await jsonBody(request);
   if (!body.ok) return body.response;
 

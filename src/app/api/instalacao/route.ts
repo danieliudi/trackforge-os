@@ -13,6 +13,14 @@ export async function GET() {
   return Response.json({
     integrations: [
       {
+        id: "senha",
+        label: "Senha na frente do app",
+        env: ["APP_PASSWORD"],
+        // Fora de localhost o proxy falha fechado sem ela — a tela precisa
+        // mostrar essa ausência com o mesmo peso das outras integrações.
+        configured: Boolean((process.env.APP_PASSWORD || "").trim()),
+      },
+      {
         id: "signals",
         label: "Sinais de mercado",
         env: ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"],

@@ -7,6 +7,7 @@ import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pric
 import { findForbidden } from "@/knowledge/check";
 import { jsonBody } from "@/lib/apiError";
 import { buildCarrosselSystem, buildOutputSystem } from "@/lib/prompts";
+import { enforceRateLimit } from "@/lib/rateLimit";
 import {
   failedGenerationStep,
   generationErrorMessage,
@@ -80,6 +81,9 @@ type Piece = {
 };
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "generate");
+  if (limited) return limited;
+
   const body = await jsonBody(request);
   if (!body.ok) return body.response;
 

@@ -52,6 +52,9 @@ export async function fetchContentCampaigns(
 ): Promise<ContentCampaign[]> {
   const config = readConfig();
   if (!config || isPersonalFront(brandId)) return [];
+  // Sem frente: não devolver a lista cruzada. A rota exige brandId; isto é a
+  // segunda trava se alguém chamar o helper direto.
+  if (!brandId) return [];
 
   // PostgREST: `in` nos canais do circuito de conteúdo; filtro de frente no JS
   // porque `company_ids` é array e campanha sem empresa ainda deve aparecer.
@@ -74,7 +77,6 @@ export async function fetchContentCampaigns(
 
     if (!response.ok) return [];
     const rows = parseRows(await response.json());
-    if (!brandId) return rows;
 
     const companyId = COMPANY_ID[brandId];
     if (!companyId) return [];

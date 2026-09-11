@@ -262,7 +262,7 @@ Espelha o `.env.example`.
 | Variável | Sem ela |
 |---|---|
 | `ANTHROPIC_API_KEY` | **nada é gerado.** É a única verdadeiramente obrigatória para a ferramenta funcionar |
-| `APP_PASSWORD` | o `src/proxy.ts` não pede nada. Certo em `localhost`, **inaceitável numa URL pública** — definir faz parte de "no ar" |
+| `APP_PASSWORD` | em localhost o proxy não pede nada; **fora disso responde 503** — definir faz parte de "no ar" |
 | `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY` | sem sinais do CRM, sem campanhas, sem biblioteca de imagens. As outras origens seguem |
 | `CRM_AGENT_KEY` | o botão "Enviar para aprovação" não aparece |
 | `UNSPLASH_ACCESS_KEY` | a busca de imagem some; sobra a biblioteca da frente |

@@ -1,3 +1,6 @@
+import { lookup } from "node:dns/promises";
+import { isIP } from "node:net";
+
 import { anthropic } from "@ai-sdk/anthropic";
 import { generateText } from "ai";
 
@@ -34,36 +37,92 @@ em vez de inventar. Português do Brasil.`;
 export const isUrl = (value: string) => /^https?:\/\//i.test(value.trim());
 
 /**
- * Hosts que o servidor nunca vai buscar a pedido do usuário.
+ * Hosts / IPs que o servidor nunca vai buscar a pedido do usuário.
  *
  * QUEM COLA A URL É O USUÁRIO, MAS QUEM BUSCA É O SERVIDOR — e o servidor
  * alcança coisas que o navegador de quem colou não alcança: o próprio
  * localhost, a rede interna, e o endereço de metadados da instância
- * (169.254.169.254), que em nuvem devolve credencial. Sem esta guarda, colar
- * esse endereço no campo de tema faz o conteúdo dele virar texto dentro do
- * artigo. Hoje a ferramenta roda na máquina do Daniel, onde o alcance é o
- * mesmo; a guarda existe para o dia em que ela subir para algum lugar.
+ * (169.254.169.254), que em nuvem devolve credencial.
+ *
+ * A guarda olha o hostname literal E o IP resolvido (DNS rebinding). IPv4
+ * mapeado em IPv6 (`::ffff:127.0.0.1`) e link-local (`fe80::`) também entram.
  */
-const BLOQUEADOS = [
-  /^localhost$/i,
-  /^127\./,
-  /^0\./,
-  /^10\./,
-  /^192\.168\./,
-  /^172\.(1[6-9]|2\d|3[01])\./,
-  /^169\.254\./,
-  /^\[?::1\]?$/,
-  /^\[?f[cd][0-9a-f]{2}:/i,
-  /\.local$/i,
-  /\.internal$/i,
-];
 
 /** Teto do que se lê de uma página. O corte final é 8.000 caracteres; ler 200MB
  * para jogar fora 99,9% é só uma forma cara de travar o servidor. */
 const MAX_BYTES = 2_000_000;
 const TIMEOUT_MS = 10_000;
 
-function assertUrlPermitida(raw: string): URL {
+function hostnameLiteral(hostname: string): string {
+  return hostname.startsWith("[") && hostname.endsWith("]")
+    ? hostname.slice(1, -1)
+    : hostname;
+}
+
+/** IPv4 privado / loopback / link-local / metadata. */
+function ipv4Privado(ip: string): boolean {
+  const parts = ip.split(".").map(Number);
+  if (parts.length !== 4 || parts.some((n) => Number.isNaN(n) || n < 0 || n > 255)) {
+    return true; // malformado = recusar
+  }
+  const [a, b] = parts;
+  if (a === 0 || a === 10 || a === 127) return true;
+  if (a === 169 && b === 254) return true;
+  if (a === 172 && b >= 16 && b <= 31) return true;
+  if (a === 192 && b === 168) return true;
+  if (a >= 224) return true; // multicast / reserved
+  return false;
+}
+
+/**
+ * IPv6 privado / loopback / link-local / ULA / IPv4-mapeado para range privado.
+ * Compara a forma expandida lowercase sem colchetes.
+ */
+function ipv6Privado(ip: string): boolean {
+  const raw = ip.toLowerCase();
+  if (raw === "::1" || raw === "::") return true;
+  if (raw.startsWith("fe80:") || raw.startsWith("ff")) return true; // link-local / multicast
+  if (raw.startsWith("fc") || raw.startsWith("fd")) return true; // ULA
+
+  // ::ffff:0:0/96 — IPv4 mapeado. Aceita forma expandida e encurtada.
+  const mapped = raw.match(/^::ffff:(\d{1,3}(?:\.\d{1,3}){3})$/i)
+    ?? raw.match(/^::ffff:([0-9a-f]{1,4}):([0-9a-f]{1,4})$/i);
+  if (mapped) {
+    if (mapped[1].includes(".")) return ipv4Privado(mapped[1]);
+    const hi = Number.parseInt(mapped[1], 16);
+    const lo = Number.parseInt(mapped[2], 16);
+    const a = (hi >> 8) & 0xff;
+    const b = hi & 0xff;
+    const c = (lo >> 8) & 0xff;
+    const d = lo & 0xff;
+    return ipv4Privado(`${a}.${b}.${c}.${d}`);
+  }
+  return false;
+}
+
+export function ipPrivado(ip: string): boolean {
+  const kind = isIP(ip);
+  if (kind === 4) return ipv4Privado(ip);
+  if (kind === 6) return ipv6Privado(ip);
+  return true;
+}
+
+function hostnameBloqueado(hostname: string): boolean {
+  const host = hostnameLiteral(hostname).toLowerCase();
+  if (
+    host === "localhost" ||
+    host.endsWith(".localhost") ||
+    host.endsWith(".local") ||
+    host.endsWith(".internal")
+  ) {
+    return true;
+  }
+  // Hostname que já é um IP literal (com ou sem colchetes na URL).
+  if (isIP(host)) return ipPrivado(host);
+  return false;
+}
+
+export async function assertUrlPermitida(raw: string): Promise<URL> {
   let url: URL;
   try {
     url = new URL(raw);
@@ -73,14 +132,30 @@ function assertUrlPermitida(raw: string): URL {
   if (url.protocol !== "http:" && url.protocol !== "https:") {
     throw new Error("só http e https");
   }
-  if (BLOQUEADOS.some((padrao) => padrao.test(url.hostname))) {
+  if (hostnameBloqueado(url.hostname)) {
     throw new Error("essa URL aponta para a rede interna, não para uma página pública");
   }
+
+  // Resolve o DNS e confere o IP final — hostname público que aponta para
+  // 169.254.169.254 / 10.x passaria só na guarda de string.
+  const host = hostnameLiteral(url.hostname);
+  if (!isIP(host)) {
+    let addresses: { address: string }[];
+    try {
+      addresses = await lookup(host, { all: true, verbatim: true });
+    } catch {
+      throw new Error("não foi possível resolver essa URL");
+    }
+    if (addresses.length === 0 || addresses.some((row) => ipPrivado(row.address))) {
+      throw new Error("essa URL aponta para a rede interna, não para uma página pública");
+    }
+  }
+
   return url;
 }
 
 export async function fetchUrlText(url: string) {
-  const alvo = assertUrlPermitida(url);
+  const alvo = await assertUrlPermitida(url);
 
   const response = await fetch(alvo, {
     headers: { "user-agent": "carousel-builder" },

@@ -62,8 +62,9 @@ dois discordarem, o `CLAUDE.md` vence e este é o que está errado.
   registrada: `custom_fields.sinal` cruza para o entregável.
 - **Não aplique migration nem faça deploy de edge function sem confirmação
   explícita do Daniel.** Vale para qualquer escrita em produção no CRM.
-- **Publicar exige `APP_PASSWORD`.** Sem essa variável o `src/proxy.ts` não pede
-  nada — correto em `localhost`, inaceitável numa URL pública.
+- **Publicar exige `APP_PASSWORD`.** Em `localhost` / `127.0.0.1` a senha
+  continua opcional; **fora disso o `src/proxy.ts` responde 503 sem ela** —
+  fail-closed. Definir a variável faz parte de "no ar".
 
 ## 3. Portão de mockup — pare antes de editar aparência
 

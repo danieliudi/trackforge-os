@@ -8,7 +8,9 @@ import { priceUsage, type CostStep, type GenerationCost } from "@/constants/pric
 import { jsonBody } from "@/lib/apiError";
 import { buildBrief } from "@/lib/brief";
 import { findForbidden } from "@/knowledge/check";
+import { MAX_INPUT_CHARS } from "@/lib/limits";
 import { buildCarrosselSystem, buildOutputSystem } from "@/lib/prompts";
+import { enforceRateLimit } from "@/lib/rateLimit";
 import {
   failedGenerationStep,
   generationErrorMessage,
@@ -43,7 +45,10 @@ import {
 const requestSchema = z.object({
   mode: z.enum(["tema", "texto"]),
   /** No modo tema: o assunto ou uma URL. No modo texto: o material inteiro. */
-  input: z.string().min(3, "informe um tema ou cole o texto"),
+  input: z
+    .string()
+    .min(3, "informe um tema ou cole o texto")
+    .max(MAX_INPUT_CHARS, `texto acima de ${MAX_INPUT_CHARS} caracteres`),
   kinds: z.array(outputKindSchema).min(1, "escolha ao menos um formato").max(6),
   brandId: brandIdSchema.nullable().optional(),
   includeNews: z.boolean().optional(),
@@ -69,6 +74,9 @@ const PLATFORM_OF: Record<OutputKind, Platform> = {
 };
 
 export async function POST(request: Request) {
+  const limited = enforceRateLimit(request, "generate");
+  if (limited) return limited;
+
   const body = await jsonBody(request);
   if (!body.ok) return body.response;
 
