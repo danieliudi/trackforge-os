@@ -45,7 +45,7 @@ correta é **uma**. O gate estava apontando para o erro.
 
 ## A base contra ela mesma
 
-**`npm run knowledge:coerencia`** faz duas perguntas.
+**`npm run knowledge:coerencia`** faz três perguntas.
 
 *A fonte autorizada contém um termo que ela mesma proíbe?* O prompt sai em duas
 partes com papéis opostos: `facts` se apresenta ao modelo como "a única fonte de
@@ -67,6 +67,11 @@ a contestação se documenta.
 compliance em silêncio. São 48 casos declarados; o de coocorrência declara
 também qual regra deve disparar, porque conferir só "algum achado saiu" deixava
 o caso do par passar por outra regra.
+
+*A frase que a ferramenta carimba passa na lista da própria marca?* Terceira
+pergunta, desde 11/09/2026. `brands[].tagline` sobrescreve o `footerNote` gerado
+e é a única string que entra na peça sem decisão de ninguém — havia duas listas
+dizendo coisas opostas sobre a mesma frase da Resibag, e nada olhando as duas.
 
 **Proibição de coocorrência: o campo `pair`.** `match` não expressa "A e B não
 podem aparecer na mesma peça" — roda uma regex por vez e para no primeiro

@@ -48,6 +48,12 @@ dois discordarem, o `CLAUDE.md` vence e este é o que está errado.
   Sanwey". **Nunca cite o organismo certificador**: SGS numa canônica, DNV na
   outra, conflito declarado aberto em 10/09/2026. A correção SGS → DNV escolheu
   o valor mais frequente sem abrir certificado — mesma forma do "tripla → dupla".
+- **A frase que a ferramenta CARIMBA já esteve errada.** `brands[].tagline`
+  sobrescreve o `footerNote` gerado — é a única string que entra na peça sem
+  decisão de ninguém. A canônica tirou "industriais" da tagline da Resibag em
+  09/09/2026 e o `brands.ts` ficou para trás: até 11/09 toda peça saía com o
+  termo que a varredura acusava três linhas depois. `knowledge:coerencia` agora
+  faz essa terceira pergunta.
 - **Rebaixar o tier não é remover.** "Prazo da NBR 10.004 até 31/12/2026" estava
   como `secundaria`, nível que a regra deixa virar alegação com atribuição — mas
   a canônica diz que a norma **não tem prazo**, não que o prazo é incerto.

@@ -113,10 +113,13 @@ parecido**.
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 arquivos — `IconButton` exige `label` (nome acessível) |
 | Casca do app: barra, frente ativa, seções | `src/components/app/EsteiraShell.tsx` | 6 telas — toda tela nova dentro da esteira nasce aqui, não com layout próprio. `medida="folha"` é a variante de superfície de trabalho (seção 4) |
 | Peças do interior de leitura: `PageHead`, grade de células | `src/components/app/Interior.tsx` | 4 telas — cabeçalho de tela é rótulo → manchete serif → frase, não `h1` solto |
+| Escolha de UMA opção em células regradas | `src/components/app/EscolhaCelulas.tsx` | trabalho, voz e arco — extraído na 4ª ocorrência. A grade de FORMATOS ficou de fora de propósito: é múltipla escolha, tem estado de falha e carrega a etiqueta de voz |
+| Eixos editoriais: vozes, trabalhos e o arco de evento, por frente | `src/constants/editorial.ts` | bancada, composer e 4 rotas — as listas são POR FRENTE, e a frente pessoal tem lista vazia de propósito |
 | Medida: página, folha e coluna de leitura (`medidaClass`, `folhaClass`, `leituraClass`) | `src/lib/ui.ts` | a medida é da COLUNA, não da página — por isso o interior trava em 1280px e a bancada não |
 | Direção da casca e da home | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` | híbrido Wire + Specimen, travado 07/09/2026 |
 | Direção dos interiores de leitura | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` | mesma direção, aprovada 08/09/2026 — medida, escala e papel de fonte |
 | Direção das superfícies de trabalho | `scratchpad/intent-fase3/DESIGN-fase3-locked.md` | mesma direção, aprovada 11/09/2026 — bancada, editor e o painel de preço |
+| Direção dos eixos editoriais | `scratchpad/intent-fase4/DESIGN-fase4-locked.md` | trabalho, voz e arco de evento, aprovados 11/09/2026 — e por que voz é dimensão e não formato |
 | Frente ativa como store global | `src/lib/front.ts` | via `useFront()` do shell. É global de propósito: estar no painel da Resibag lendo fato da Sanwey é a classe de bug que isto previne |
 | Renderização de peça por formato + `toPlainText` | `src/components/app/OutputPieces.tsx` | 2 telas — Reels mostra tempo, Stories mostra telas; não renderize formato novo como parágrafo genérico |
 | Recibo de custo | `src/components/app/CostReceipt.tsx` | 3 telas |
@@ -200,6 +203,15 @@ Isto não é preferência de estilo. É o requisito do produto.
   aparecia mais vezes, sem abrir certificado. Um sinal a mais de que o conflito
   não é só de nome: o código começa em BR08, que sugere 2008, e a claim afirma
   1999.
+- **A frase que a ferramenta CARIMBA é a única que entra na peça sem decisão de
+  ninguém — e ela já esteve errada.** `brands[].tagline` sobrescreve o
+  `footerNote` que o modelo gerou, porque assinatura institucional é fato de
+  marca e não criatividade. Em 09/09/2026 a canônica tirou "industriais" da
+  tagline da Resibag e mandou a versão antiga para nunca-citar; a curadoria
+  ganhou a proibição no mesmo dia; o `brands.ts` ficou para trás. Resultado, até
+  11/09: toda peça Resibag saía carimbada com o termo que a varredura acusava
+  três linhas depois — a ferramenta produzindo o próprio aviso. Hoje
+  `npm run knowledge:coerencia` faz essa terceira pergunta, e reprova.
 - **Rebaixar o tier não é o mesmo que remover, e a diferença já protegeu a
   ferramenta.** "O prazo da NBR 10.004 termina em 31/12/2026" estava na base como
   `secundaria` — nível que a regra de procedência deixa virar alegação, desde que
@@ -260,6 +272,7 @@ forem redesenhados, este documento some"*. O que nele valia para todo escopo
 | Casca (`EsteiraShell`) e home Situação (`/`) | **Híbrido Wire Service + Type Specimen Desk** | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` · mock `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html` | implementado (Fase 1) |
 | Interiores de leitura: Peças, Fatos, Custos, Instalação | **Híbrido, mesma direção** | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` · mock `scratchpad/intent-fase2/mockup-interiores.html` | aprovado 08/09/2026 (Fase 2) |
 | Superfícies de trabalho: bancada (`/esteira`) e editor | **Híbrido, mesma direção** | `scratchpad/intent-fase3/DESIGN-fase3-locked.md` · mock `scratchpad/intent-fase3/mockup-trabalho.html` | aprovado 11/09/2026 (Fase 3) |
+| Eixos editoriais: trabalho, voz e o arco de evento | **Híbrido, mesma direção** | `scratchpad/intent-fase4/DESIGN-fase4-locked.md` · mock `scratchpad/intent-fase4/mockup-vozes.html` | aprovado 11/09/2026 (Fase 4) |
 
 Do híbrido vêm o masthead serif, `EDIÇÃO · frente`, a dateline, a faixa preta com
 a navegação, o glifo da prioridade e a grade de células. Tokens `paper`, `band`,
@@ -440,7 +453,7 @@ Nunca rode `knowledge:sync` "para limpar o aviso" — e note que ele grava
 **todas** as fontes de uma vez. Revisou uma e a outra não? Edite o
 `sources.json` à mão, senão o sync apaga o aviso da que você não leu.
 
-**`npm run knowledge:coerencia` faz duas perguntas sobre a base.**
+**`npm run knowledge:coerencia` faz três perguntas sobre a base.**
 
 *A fonte autorizada contém um termo que ela mesma proíbe?* O prompt sai em duas
 partes com papéis opostos: `facts` se apresenta ao modelo como "a única fonte de
@@ -457,6 +470,13 @@ e nunca casa. São 48 casos declarados — frase real de um lado, veredito do
 outro. Caso de coocorrência declara **também qual regra** deve disparar, e isso
 não é zelo: a primeira versão conferia só "algum achado saiu", e o caso do par
 passava por causa de outra regra. Plantar a quebra no par não reprovava.
+
+*A frase que a ferramenta carimba passa na lista da própria marca?* É a
+terceira, e existe desde 11/09/2026. `brands[].tagline` é a única string do
+sistema que entra na peça sem passar por decisão de ninguém — o servidor a
+escreve por cima do `footerNote` gerado. Havia duas listas dizendo coisas
+opostas sobre a mesma frase (seção 2), e nada olhando para as duas ao mesmo
+tempo.
 
 **A varredura cobre os DOIS blocos autorizados desde 11/09/2026, e o buraco
 custou três contradições vivas.** `buildGroundedSystem` cola três coisas no
@@ -561,7 +581,7 @@ suíte.
 | Comando | O que prova |
 |---|---|
 | `npm run qa:rotas` | as 11 telas renderizam **a tela certa**, no monitor e no celular — e nenhum elemento declara duas cores para a mesma propriedade |
-| `npm run qa:contraste` | 552 medições em 7 telas passam o piso nos **dois** temas |
+| `npm run qa:contraste` | 590 medições em 7 telas passam o piso nos **dois** temas |
 | `npm run qa:interacao` | frente, tema, prioridade e herança de chave respondem |
 | `npm run qa:avisos` | o achado de **coocorrência** aparece no painel com os dois trechos e o bloco nomeado |
 | `npm run qa` | os quatro em sequência |
@@ -587,6 +607,14 @@ seletores escolhidos na hora casaram com o elemento errado — dois alarmes fals
 e um que escondeu uma reprovação real de 1,17:1. Em `contraste.mjs` cada alvo
 traz a contagem esperada e o relatório imprime o texto que mediu; seletor que
 deixa de casar é reprovação, não silêncio.
+
+**Nem a sonda vê tudo: pseudo-elemento não está no DOM.** O `placeholder` do
+composer e o do campo de ângulo ficaram em **3,56:1 no tema claro** — reprovando
+— e passando a 5,27:1 no escuro, sem nada olhar, porque a sonda percorre nós e
+não enxerga `::placeholder`. Achado em 11/09/2026 ao medir o mockup da Fase 4, e
+corrigido junto com os dois alvos declarados. `medirContraste` ganhou um segundo
+argumento para isso — o MESMO medidor, nunca um segundo: medidor novo é como o
+número sai errado e parece certo.
 
 **O gate só vigia o que alguém declarou.** É por isso que existe a sonda: o
 defeito mais caro achado até hoje — o KPI urgente a 1,04:1 — estava exatamente

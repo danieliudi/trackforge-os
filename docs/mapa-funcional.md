@@ -43,8 +43,18 @@ zero em tudo, que é o estado verdadeiro dela.
 saídas à direita — porque o trabalho real é ler o artigo e decidir o que sai
 dele, e em telas separadas essas duas coisas nunca ficavam juntas.
 
-**As quatro origens entram pela mesma porta:** sinal do CRM, tema, texto colado
-e arquivo. O que muda entre elas é a regra factual, não a tela.
+**As CINCO origens entram pela mesma porta:** sinal do CRM, tema, texto colado,
+arquivo e evento. O que muda entre elas é a regra factual, não a tela.
+
+**Dois eixos editoriais, escolhidos antes do formato** (Fase 4, 11/09/2026):
+o **trabalho** — o que o post tem de fazer — fica junto do ângulo, porque é
+decisão de *para quê*; e a **voz** — quem assina — abre a coluna de saídas e vale
+como padrão do lote, com cada peça podendo divergir. As duas listas são **por
+frente**: a Resibag trabalha calendário de compliance com quatro vozes, a Sanwey
+trabalha arquivo de engenharia com três (não há "Responsável" lá), e a frente
+pessoal não tem nenhuma das duas. Quando a origem é **evento**, a grade de
+trabalhos some e entra o **arco** — T−14, T−3, Dia, D+2, D+7 —, porque evento não
+tem trabalho, tem etapa.
 
 **Mostra o preço antes de gastar** (`PriceSheet`): preço de tabela do modelo e a
 faixa que as gerações anteriores do mesmo tipo custaram de verdade. Nada ali é
@@ -105,6 +115,10 @@ do zero pelo composer, então não era só destino de uma peça pronta.
 
 **Precisa estar funcionando:** `ANTHROPIC_API_KEY` para gerar ou reescrever
 slide. Abrir e exportar rascunho já salvo não gasta nada.
+
+**Os mesmos trabalho e voz da bancada**, no composer da tela de entrada: uma peça
+avulsa erra pelas mesmas razões que uma peça da esteira. A variante compacta,
+dentro do editor com carrossel aberto, não os mostra — ali a peça já existe.
 
 ### `/biblioteca` — Biblioteca de imagens
 

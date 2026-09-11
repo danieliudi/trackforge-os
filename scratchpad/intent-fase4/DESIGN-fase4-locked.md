@@ -1,8 +1,24 @@
 # Fase 4 — voz, trabalho e o arco de evento
 
-> **Aguardando aprovação.** Mockup: `scratchpad/intent-fase4/mockup-vozes.html`,
-> cinco estados, capturas em `capturas/` a 1900px nos dois temas.
+> **Aprovado em 11/09/2026** — "Ok aprovado", Daniel, aos quatro pontos abaixo.
+> Mockup: `scratchpad/intent-fase4/mockup-vozes.html`, cinco estados, capturas em
+> `capturas/` a 1900px nos dois temas; a implementação em `implementado/`.
 > Direção: híbrido Wire + Specimen, a mesma desde 07/09/2026. Zero hex novo.
+>
+> **O que a implementação encontrou e o mockup não podia mostrar**, tudo
+> registrado no commit correspondente:
+>
+> - O React Compiler reprovou QUATRO `useCallback` — dois fora desta fase — por
+>   causa de uma função declarada no corpo do render. Família da seção 6, e ele
+>   reclama longe de onde o erro mora.
+> - O `tsc` apontou todos os literais de `Origin` montados à mão quando o tipo
+>   ganhou dois campos. Passaram a partir de `emptyOrigin`.
+> - A contagem declarada do contraste reprovou sozinha ao ver 4 abas de origem
+>   onde esperava 3 — a quinta origem chegando ao gate antes de chegar a mim.
+> - O resolvedor de TS não sabia o alias `@/`, e ninguém sabia: todo import por
+>   ele era `import type`, que o strip-types apaga antes de resolver.
+> - E, fora do escopo, dois defeitos que a ferramenta já carregava: a tagline
+>   proibida carimbada em toda peça Resibag, e o placeholder a 3,56:1 no claro.
 
 ---
 

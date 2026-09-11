@@ -67,7 +67,7 @@ pasta com esse nome ninguém trata como suíte):
 
 - `npm run qa:rotas` — as 11 telas, no monitor e no celular, mais o detector de
   colisão de cor (dois `bg-`/`text-`/`border-` no mesmo elemento);
-- `npm run qa:contraste` — 552 medições em 7 telas, nos dois temas;
+- `npm run qa:contraste` — 590 medições em 7 telas, nos dois temas;
 - `npm run qa:interacao` — frente, tema, prioridade e herança de chave;
 - `npm run qa:avisos` — o achado de **coocorrência** aparece no painel com os
   dois trechos e o bloco nomeado (a regra em si é `knowledge:coerencia`);

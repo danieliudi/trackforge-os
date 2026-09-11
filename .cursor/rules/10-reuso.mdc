@@ -21,6 +21,8 @@ aquilo. Quanto maior, mais caro é divergir.
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 — `IconButton` exige `label` |
 | Casca do app (barra, frente ativa, seções) | `src/components/app/EsteiraShell.tsx` | toda tela da esteira — `medida="folha"` nas de trabalho |
 | Peças do interior (`PageHead`, grade de células) | `src/components/app/Interior.tsx` | 4 telas |
+| Escolha de UMA opção em células regradas | `src/components/app/EscolhaCelulas.tsx` | trabalho, voz, arco — a grade de FORMATOS não usa, de propósito |
+| Vozes, trabalhos e arco de evento, por frente | `src/constants/editorial.ts` | bancada, composer e 4 rotas |
 | Medida (`medidaClass`, `folhaClass`, `leituraClass`) | `src/lib/ui.ts` | a medida é da COLUNA, não da página |
 | Direção da casca e da home | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` | híbrido Wire + Specimen, travado 07/09/2026 |
 | Direção dos interiores de leitura | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` | aprovada 08/09/2026 |
