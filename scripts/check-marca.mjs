@@ -190,6 +190,7 @@ for (const brandId of Object.keys(brands)) {
  * ou ja saiu errada em material real, ou e a formulacao correta que nao pode
  * disparar falso alarme.
  */
+const REGRA_VOZ = "assinatura institucional em peça assinada por pessoa";
 const PAR_NIVEIS =
   "tagline institucional (Nível 01/02) na mesma peça que o slogan comercial (Nível 03)";
 const PAR_C1_C2 =
@@ -261,6 +262,18 @@ const CASOS = {
       ["frase aposentada — solucao", ["A solucao em Sanbag."]],
       ["endosso errado", ["Resibag, uma empresa Sanwey."]],
       ["preco por quilo", ["Nossa precificacao por quilo e a mais competitiva."]],
+      // VOZ (Fase 4): a assinatura institucional e da PAGINA. A mesma frase,
+      // na mesma peca, muda de veredito conforme quem assina.
+      // Primeiro bloco NEUTRO de proposito: com C2 ali, o caso tambem casaria a
+      // regra de par C1+C2 e deixaria de provar a regra de voz.
+      ["assinatura numa peca do diretor", [
+        "Quem descobre a mudanca pelo auto de infracao paga duas vezes.",
+        "A marca que valoriza o seu produto.",
+      ], REGRA_VOZ, "diretor"],
+      ["assinatura numa peca do Daniel", [
+        "Primeiro a produzir alcas no mesmo tecido do contentor. 1984.",
+        "A marca que valoriza o seu produto.",
+      ], REGRA_VOZ, "daniel"],
       // Empilhamento: cada linha, sozinha, esta correta. O erro e a peca ter as duas.
       ["par C1+C2 na mesma peca", [
         "A marca que valoriza o seu produto.",
@@ -288,6 +301,15 @@ const CASOS = {
         "Sanwey preserva o presente para o futuro.",
         "Sun Way: caminho do sol, caminhos iluminados.",
       ]],
+      // A MESMA frase dos casos de reprova acima, agora na voz da pagina.
+      ["assinatura na peca da PAGINA", [
+        "Quem descobre a mudanca pelo auto de infracao paga duas vezes.",
+        "A marca que valoriza o seu produto.",
+      ], undefined, "pagina"],
+      ["peca do diretor SEM a assinatura", [
+        "A carga define o projeto.",
+        "Fator de seguranca 8:1 na linha de mineracao.",
+      ], undefined, "diretor"],
       ["ANP e Marinha sao da Sanwey", [
         "Type-C condutivo com certificacao ANP.",
         "Primeiro brasileiro homologado pelo Ministerio da Marinha, 1996.",
@@ -301,10 +323,12 @@ const casosErrados = [];
 
 for (const [brandId, grupos] of Object.entries(CASOS)) {
   for (const [esperado, lista] of [["reprova", grupos.reprova], ["passa", grupos.passa]]) {
-    for (const [nome, blocos, termoEsperado] of lista ?? []) {
+    for (const [nome, blocos, termoEsperado, voz] of lista ?? []) {
       casosRodados += 1;
       const partes = blocos.map((text, i) => ({ blockNumber: i + 1, text }));
-      const todos = findForbidden(partes, brandId);
+      // A voz e o quarto campo, e so os casos da Fase 4 a declaram: sem ela a
+      // varredura e a de sempre, que e o comportamento de quem nao escolheu voz.
+      const todos = findForbidden(partes, brandId, voz ?? null);
       // Com termo declarado, o caso so passa se AQUELA regra disparou — outra
       // regra acertando o mesmo texto nao vale como cobertura.
       const hits = termoEsperado ? todos.filter((h) => h.term === termoEsperado) : todos;

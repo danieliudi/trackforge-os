@@ -1,4 +1,5 @@
-import type { BrandId } from "@/constants/brands";
+import { brands, type BrandId } from "@/constants/brands";
+import { vozCarregaTagline, type VozId } from "@/constants/editorial";
 import type { Slide } from "@/types/carousel";
 
 import { getBrandKnowledge } from "./index";
@@ -51,11 +52,40 @@ export function slideText(slide: Slide): string {
 export function findForbidden(
   parts: { blockNumber: number; text: string }[],
   brandId: BrandId | null | undefined,
+  /**
+   * Quem assina a peça. Opcional: sem voz, a varredura é a de sempre.
+   *
+   * Com voz, entra a regra que a Fase 4 trouxe — a assinatura institucional é
+   * da PÁGINA, e pessoa carregando a mesma frase vira anúncio. Ela não é uma
+   * entrada escrita à mão em `forbidden`: é DERIVADA de `brands[].tagline`, o
+   * mesmo valor que o servidor carimba no `footerNote`. Uma fonte só, então a
+   * regra não pode divergir da frase — que foi exatamente como a tagline antiga
+   * da Resibag sobreviveu dois dias em `brands.ts` depois de virar proibida.
+   */
+  voz?: VozId | null,
 ): ForbiddenHit[] {
   const knowledge = getBrandKnowledge(brandId);
   if (!knowledge) return [];
 
   const hits: ForbiddenHit[] = [];
+
+  // Regra de VOZ, antes das outras: é a única que depende de quem assina.
+  if (brandId && voz && !vozCarregaTagline(brandId, voz)) {
+    const assinatura = normalize(brands[brandId].tagline).replace(/[.!?]+\s*$/, "").trim();
+    if (assinatura) {
+      for (const part of parts) {
+        if (!normalize(part.text).includes(assinatura)) continue;
+        hits.push({
+          blockNumber: part.blockNumber,
+          matched: brands[brandId].tagline,
+          term: "assinatura institucional em peça assinada por pessoa",
+          reason:
+            "a assinatura da marca é da PÁGINA da empresa. Numa peça que sai no perfil de uma pessoa ela vira anúncio, e é a primeira coisa que o leitor desconta. Quem assina aqui é a pessoa — o argumento fecha com o que ela tem a dizer, não com a frase da marca.",
+        });
+        break; // um acerto basta: a regra é da peça, não do bloco
+      }
+    }
+  }
 
   for (const part of parts) {
     const haystack = normalize(part.text);
@@ -117,9 +147,11 @@ export function findForbidden(
 export function findForbiddenInSlides(
   slides: Slide[],
   brandId: BrandId | null | undefined,
+  voz?: VozId | null,
 ): ForbiddenHit[] {
   return findForbidden(
     slides.map((slide) => ({ blockNumber: slide.slideNumber, text: slideText(slide) })),
     brandId,
+    voz,
   );
 }
