@@ -194,6 +194,8 @@ export default function BancadaPage() {
   const source = originLabel(origin, signals);
   const material = originIsMaterial(origin.mode);
   const ready = originReady(origin);
+  /** A coluna central sem nada para ler: nem material colado, nem preço. */
+  const soAFrase = !(material && origin.input) && !(ready && withArticle);
 
   const reset = () => {
     // A produção anterior fica salva; o que se zera é a bancada.
@@ -715,7 +717,19 @@ export default function BancadaPage() {
               </div>
             </>
           ) : (
-            <div className={clsx(leituraClass, "flex flex-col gap-5 pt-1")}>
+            /* Quando só há a frase, ela se centra na coluna — era assim antes da
+               Fase 3, e a tradução do mockup tinha perdido isso: o mockup nunca
+               desenhou o estado vazio, e uma frase cinza no alto de uma coluna
+               de 950px vira legenda solta debaixo da faixa. Com material ou
+               preço a mostrar, o painel volta a ler de cima para baixo, como
+               documento. */
+            <div
+              className={clsx(
+                leituraClass,
+                "flex flex-col gap-5",
+                soAFrase ? "my-auto text-center" : "pt-1",
+              )}
+            >
               {material && origin.input ? (
                 <>
                   <div className="flex items-baseline justify-between gap-3 border-b border-rule pb-1.5">

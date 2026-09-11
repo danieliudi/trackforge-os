@@ -13,7 +13,7 @@ type FormatSelectProps = {
 /** Segmentado igual às abas Conteúdo/Estilo/Contexto — Formato é modo, não filtro. */
 export function FormatSelect({ value, onChange }: FormatSelectProps) {
   return (
-    <div className="flex gap-0.5 rounded-lg bg-surface2 p-1">
+    <div className="flex border-b border-rule">
       {formatOptions.map(({ id, label }) => {
         const isActive = id === value;
         return (
@@ -23,9 +23,11 @@ export function FormatSelect({ value, onChange }: FormatSelectProps) {
             onClick={() => onChange(id)}
             aria-pressed={isActive}
             className={clsx(
-              "rounded-md px-3 py-1.5 text-xs font-medium transition",
+              "border-b-2 px-3 pb-2 pt-1.5 text-[12.5px] transition",
               focusRing,
-              isActive ? "bg-acc text-acc-ink" : "text-mut hover:text-ink",
+              isActive
+                ? "border-acc font-semibold text-ink"
+                : "border-transparent text-mut hover:text-ink",
             )}
           >
             {label}

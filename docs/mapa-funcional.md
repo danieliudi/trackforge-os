@@ -46,6 +46,11 @@ dele, e em telas separadas essas duas coisas nunca ficavam juntas.
 **As quatro origens entram pela mesma porta:** sinal do CRM, tema, texto colado
 e arquivo. O que muda entre elas é a regra factual, não a tela.
 
+**Mostra o preço antes de gastar** (`PriceSheet`): preço de tabela do modelo e a
+faixa que as gerações anteriores do mesmo tipo custaram de verdade. Nada ali é
+estimativa — é preço de tabela e histórico medido, e quando não há histórico a
+tela diz que não há.
+
 **Precisa estar funcionando:** `ANTHROPIC_API_KEY` para gerar. Sinais exigem
 `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`; sem elas a seção de sinais não
 aparece e as outras três origens seguem.
@@ -94,7 +99,9 @@ CRM — nenhuma das duas pode chegar à tela.
 ### `/editor` — Editor de slides
 
 **Para que serve:** o canvas do carrossel — editar slide a slide, trocar tema,
-imagem e logo, e exportar. Casca própria, não a da esteira.
+imagem e logo, e exportar. Desde a Fase 3 mora dentro da casca da esteira, na
+variante de folha inteira, e tem item de navegação próprio: ele gera carrossel
+do zero pelo composer, então não era só destino de uma peça pronta.
 
 **Precisa estar funcionando:** `ANTHROPIC_API_KEY` para gerar ou reescrever
 slide. Abrir e exportar rascunho já salvo não gasta nada.

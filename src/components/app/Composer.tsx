@@ -7,11 +7,12 @@ import { useEffect, useState, type KeyboardEvent } from "react";
 import { BrandPills } from "@/components/app/BrandPills";
 import { FormatSelect } from "@/components/app/FormatSelect";
 import { PlatformPills } from "@/components/app/PlatformPills";
+import { PriceSheet } from "@/components/app/PriceSheet";
 import { SignalPicker } from "@/components/app/SignalPicker";
 import { Button, IconButton } from "@/components/ui/Button";
 import type { BrandId } from "@/constants/brands";
 import { getPlatformToneNote, type Format, type Platform } from "@/constants/format";
-import type { GenerationCost } from "@/constants/pricing";
+import { GENERATION_MODEL, type GenerationCost } from "@/constants/pricing";
 import { fieldClass, focusRing, kbdClass, labelClass } from "@/lib/ui";
 
 /**
@@ -126,7 +127,7 @@ function SuggestionsSection({
               type="button"
               onClick={() => onPick(text)}
               className={clsx(
-                "flex items-center gap-2.5 rounded-lg border border-line bg-surface px-3 py-2.5 text-left text-sm text-ink2 transition hover:border-line3 hover:text-ink",
+                "flex items-center gap-2.5 border border-rule bg-cell px-3 py-2.5 text-left text-sm text-ink2 transition hover:border-line3 hover:text-ink",
                 focusRing,
               )}
             >
@@ -254,15 +255,17 @@ export function Composer({
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-2xl flex-col gap-7 px-6 py-12">
+    <div className="mx-auto flex w-full max-w-[680px] flex-col gap-7 px-6 py-12">
       <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-ink">
-          Gere um carrossel B2B
+        {/* Manchete em serif peso 400, como a manchete de seção dos interiores
+            e a do artigo na bancada. É o único peso que o Instrument Serif tem. */}
+        <h1 className="font-serif text-[41px] font-normal leading-[1.08] text-ink">
+          Um carrossel, slide a slide
         </h1>
-        <p className="text-sm leading-relaxed text-mut">
-          Cole a URL de um artigo ou descreva o tema. A IA monta a sequência
-          completa — capa, slides de conteúdo e CTA — e você edita cada texto
-          antes de exportar em PDF ou PNG.
+        <p className="text-[15.5px] leading-relaxed text-mut">
+          Cole a URL de um artigo ou descreva o tema. A ferramenta monta a
+          sequência — capa, conteúdo e chamada — e você edita cada texto antes de
+          exportar.
         </p>
       </div>
 
@@ -346,7 +349,7 @@ export function Composer({
                 key={text}
                 type="button"
                 onClick={() => onChange(text)}
-                className="flex items-center gap-2.5 rounded-lg border border-line bg-surface px-3 py-2.5 text-left text-sm text-ink2 transition hover:border-line3 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acc"
+                className="flex items-center gap-2.5 border border-rule bg-cell px-3 py-2.5 text-left text-sm text-ink2 transition hover:border-line3 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-acc"
               >
                 <Icon size={14} className="shrink-0 text-faint" />
                 <span className="truncate">{text}</span>
@@ -377,10 +380,31 @@ export function Composer({
               </p>
             </div>
           ) : null}
+          {/* "Frente", não "Marca": é a palavra que a casca usa quatro linhas
+              acima, no `EDIÇÃO · frente`. Dois nomes para a mesma coisa é como a
+              frente diverge sem ninguém ver — e aqui ela PODE divergir de
+              propósito, porque rascunho salvo não troca de marca quando a
+              esteira troca. Com os dois visíveis na mesma tela, a divergência
+              legítima aparece em vez de ficar escondida atrás de um sinônimo. */}
           <div className="flex flex-col gap-2">
-            <span className={labelClass}>Marca (define o tema visual)</span>
+            <span className={labelClass}>Frente desta peça</span>
             <BrandPills value={brandId ?? null} onChange={onBrandChange} />
+            <p className="text-[11px] leading-relaxed text-mut">
+              Define o tema visual e a política de logo. Começa na frente ativa da
+              esteira e depois pertence a esta peça — trocar a frente lá em cima não
+              troca a de um rascunho já salvo.
+            </p>
           </div>
+
+          {/* O custo entra ANTES de gastar (seção 5). Só no hero: na versão
+              compacta, dentro do editor com carrossel aberto, o recibo da
+              geração que já aconteceu é o que importa. */}
+          <PriceSheet
+            kind={format === "apresentacao" ? "apresentacao" : "carrossel"}
+            model={GENERATION_MODEL}
+            titulo="O que gerar vai custar"
+            comBusca={includeNews ?? false}
+          />
         </div>
       ) : null}
     </div>

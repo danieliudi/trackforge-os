@@ -84,4 +84,16 @@ export const kbdClass =
   "rounded border border-line bg-canvas px-1 font-mono text-[10px] leading-4 text-mut";
 
 /** Rótulo curto e discreto ao lado de um dado — origem, plataforma, contagem. */
-export const metaClass = "font-mono text-[10px] uppercase tracking-wide text-faint";
+/**
+ * Meta: a contagem ou o estado ao lado de um rótulo.
+ *
+ * 11px, não 10px, e isso é conformidade e não gosto: a seção 4 fixa o piso de
+ * 11px para rótulo e meta em tela de trabalho desde a Fase 2, e o mockup
+ * aprovado da Fase 3 desenha estes rótulos a 11px. O token tinha ficado em
+ * 10px — a regra existia e o código não a seguia.
+ *
+ * A sonda de contraste foi quem trouxe o caso à tona ao listar "0 DE 6
+ * MARCADAS" a 3,56:1: como RÓTULO ele passa no piso de 3:1, mas medir fez
+ * alguém olhar para o tamanho.
+ */
+export const metaClass = "font-mono text-[11px] uppercase tracking-wide text-faint";

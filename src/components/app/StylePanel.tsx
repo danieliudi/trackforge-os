@@ -74,10 +74,11 @@ export function StylePanel({
       </div>
 
       <div className="flex flex-col gap-2 border-t border-line pt-6">
-        <span className={labelClass}>Marca</span>
+        <span className={labelClass}>Frente desta peça</span>
         <BrandPills value={brandId} onChange={onBrandChange} />
         <p className="text-[11px] leading-relaxed text-mut">
-          Selecionar uma marca aplica o tema e a política de logo do manual dela.
+          Aplica o tema e a política de logo do manual dela. É a frente DESTA peça:
+          pode ser outra que a da esteira, e o rascunho manda.
         </p>
       </div>
 

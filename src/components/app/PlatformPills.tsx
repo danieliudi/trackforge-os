@@ -12,20 +12,23 @@ type PlatformPillsProps = {
   disabled?: boolean;
 };
 
-const pill = (isActive: boolean, disabled: boolean) =>
+// Marcado é INVERTIDO, não preenchido de laranja. Cor escolhida uma vez com
+// ternário: somar `bg-` a um token que já carrega fundo deixa duas utilidades
+// da mesma propriedade na lista, e vence a ordem do CSS gerado (seção 1).
+const cela = (isActive: boolean, disabled: boolean) =>
   clsx(
-    "rounded-full border px-3 py-1.5 text-xs font-medium transition",
+    "px-3.5 py-2 text-[12.5px] transition",
     focusRing,
     disabled
-      ? "cursor-not-allowed border-line bg-surface text-faint"
+      ? "cursor-not-allowed bg-cell text-faint"
       : isActive
-        ? "border-acc bg-acc text-acc-ink"
-        : "border-line bg-surface text-ink2 hover:border-line3",
+        ? "bg-ink font-medium text-paper"
+        : "bg-cell text-ink2 hover:text-ink",
   );
 
 export function PlatformPills({ value, onChange, disabled = false }: PlatformPillsProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex w-fit flex-wrap gap-px border border-rule bg-rule">
       {platformOptions.map(({ id, label }) => (
         <button
           key={id}
@@ -33,7 +36,7 @@ export function PlatformPills({ value, onChange, disabled = false }: PlatformPil
           disabled={disabled}
           onClick={() => onChange(id)}
           aria-pressed={value === id}
-          className={pill(value === id, disabled)}
+          className={cela(value === id, disabled)}
         >
           {label}
         </button>

@@ -7,7 +7,6 @@ import {
   useEffect,
   useRef,
   useState,
-  useSyncExternalStore,
   type ReactNode,
 } from "react";
 
@@ -33,14 +32,11 @@ import { resolveCanvasSize } from "@/constants/themes";
 import type { ForbiddenHit } from "@/knowledge/check";
 import type { Verification } from "@/lib/verify";
 import { useHistory } from "@/hooks/useHistory";
-import { useFront } from "@/components/app/EsteiraShell";
+import { EsteiraShell, useFront } from "@/components/app/EsteiraShell";
 import { useSettings } from "@/hooks/useSettings";
 import {
   entryFromCost,
-  getCostLogServerSnapshot,
-  getCostLogSnapshot,
   pushCostEntry,
-  subscribeCostLog,
   type CostEntry,
 } from "@/lib/costLog";
 import { exportToPDF, exportToPPTX, exportToZip, getPDFFile } from "@/lib/export";
@@ -206,14 +202,9 @@ export default function Home() {
   const [regeneratingIndex, setRegeneratingIndex] = useState<number | null>(null);
   const [brandContext, setBrandContext] = useState<BrandContext>(() => loadBrandContext());
 
-  // Store externo em vez de useState: o log vive no localStorage e o chip some
-  // quando está vazio, então ler no inicializador causaria mismatch de
-  // hidratação (ver comentário em lib/costLog.ts).
-  const costEntries = useSyncExternalStore(
-    subscribeCostLog,
-    getCostLogSnapshot,
-    getCostLogServerSnapshot,
-  );
+  // O chip de custo saiu daqui na Fase 3: a casca já mostra o total do mês na
+  // dateline, e a tela de Custos mostra o extrato. Duas leituras do mesmo log em
+  // duas barras empilhadas era a duplicação que a casca própria do editor criava.
   // Recibo da última geração de documento. Regerar um slide não substitui: o
   // recibo responde "quanto custou este post", e o slide avulso entra na soma
   // do rascunho, não numa tela nova a cada clique.
@@ -647,7 +638,23 @@ export default function Home() {
   }, [carousel, undo, redo]);
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-surface2 font-sans">
+    <EsteiraShell
+      // Superfície de TRABALHO: a casca atravessa a folha, como na bancada.
+      medida="folha"
+      // O contexto do rascunho vai para a dateline. A prancheta abaixo continua
+      // sendo o entregável do CLIENTE — o tema visual dela sai das brand
+      // guidelines da marca, e a Fase 3 não a toca.
+      aside={
+        carousel ? (
+          <span className="text-[11.5px] text-mut">
+            {formatOptions.find((f) => f.id === format)?.label ?? format} ·{" "}
+            {platformOptions.find((p) => p.id === platform)?.label ?? platform} ·{" "}
+            {carousel.slides.length} {carousel.slides.length === 1 ? "slide" : "slides"}
+          </span>
+        ) : null
+      }
+    >
+      <div className="flex h-full flex-col overflow-hidden font-sans">
       <AppHeader
         title={carousel?.title}
         hasCarousel={carousel !== null}
@@ -667,7 +674,6 @@ export default function Home() {
         canShare={canShare}
         sharing={sharing}
         onShare={shareCarousel}
-        costEntries={costEntries}
       />
 
       {/* O erro ficava colado embaixo do input da sidebar, então falha de
@@ -866,6 +872,7 @@ export default function Home() {
           ))}
         </div>
       ) : null}
-    </div>
+      </div>
+    </EsteiraShell>
   );
 }

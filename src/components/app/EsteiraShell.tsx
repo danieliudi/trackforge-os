@@ -58,6 +58,11 @@ const SECTIONS = [
   { href: "/esteira/fatos", label: "Fatos" },
   { href: "/esteira/custos", label: "Custos" },
   { href: "/esteira/instalacao", label: "Instalação" },
+  // O editor entra na Fase 3. Ele tem porta de entrada própria — o composer,
+  // que gera um carrossel do zero — então não é só destino contextual de uma
+  // peça pronta, e sem item de navegação era uma tela que só existia para quem
+  // já estava dentro dela.
+  { href: "/editor", label: "Editor" },
 ];
 
 const MESES = [

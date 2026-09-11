@@ -1,36 +1,20 @@
 "use client";
 
 import {
-  ArrowLeft,
   CloudOff,
   FileDown,
   FilePlus2,
   Images,
-  Monitor,
-  Moon,
   Redo2,
   Share2,
-  Sun,
   Undo2,
 } from "lucide-react";
-import Link from "next/link";
-import { useSyncExternalStore } from "react";
 
 import { Button, IconButton } from "@/components/ui/Button";
-import { focusRing } from "@/lib/ui";
-import { CostMenu } from "@/components/app/CostMenu";
+import { labelClass } from "@/lib/ui";
 import { DraftsMenu } from "@/components/app/DraftsMenu";
 import type { Format } from "@/constants/format";
-import type { CostEntry } from "@/lib/costLog";
 import type { Draft } from "@/lib/storage";
-import {
-  getThemeServerSnapshot,
-  getThemeSnapshot,
-  nextTheme,
-  setTheme,
-  subscribeTheme,
-  themeLabel,
-} from "@/lib/theme";
 
 type AppHeaderProps = {
   title?: string;
@@ -54,7 +38,6 @@ type AppHeaderProps = {
   sharing: boolean;
   onShare: () => void;
   /** Histórico de custo da API — o chip some enquanto estiver vazio. */
-  costEntries: CostEntry[];
 };
 
 export function AppHeader({
@@ -76,37 +59,19 @@ export function AppHeader({
   canShare,
   sharing,
   onShare,
-  costEntries,
 }: AppHeaderProps) {
   const isExporting = exporting !== null;
-  const tema = useSyncExternalStore(subscribeTheme, getThemeSnapshot, getThemeServerSnapshot);
-  const themeIcon = tema === "claro" ? Sun : tema === "escuro" ? Moon : Monitor;
 
   return (
-    <header className="flex shrink-0 items-center justify-between gap-4 border-b border-line bg-surface px-4 py-2.5 sm:px-6">
+    <header className="flex shrink-0 items-center justify-between gap-4 border-b border-rule bg-paper px-10 py-2.5">
       <div className="flex min-w-0 items-center gap-3">
-        <Link
-          href="/"
-          className={`flex shrink-0 items-center gap-1.5 rounded-md px-1.5 py-1 text-sm font-semibold tracking-tight text-ink transition hover:text-acc-tx ${focusRing}`}
-          title="Voltar para a esteira"
-        >
-          <ArrowLeft size={14} />
-          Trackforge OS
-        </Link>
-        <span aria-hidden className="shrink-0 text-faint">
-          /
-        </span>
-        <span className="shrink-0 text-sm text-mut">Editor</span>
         {title ? (
-          <>
-            <span aria-hidden className="shrink-0 text-faint">
-              /
-            </span>
-            <span className="truncate text-sm text-mut" title={title}>
-              {title}
-            </span>
-          </>
-        ) : null}
+          <span className="truncate text-[13.5px] text-ink2" title={title}>
+            {title}
+          </span>
+        ) : (
+          <span className={labelClass}>Editor</span>
+        )}
         {persistFailed ? (
           <span
             className="flex shrink-0 items-center gap-1 rounded bg-warn-bg px-2 py-0.5 text-[11px] font-medium text-warn"
@@ -119,16 +84,6 @@ export function AppHeader({
       </div>
 
       <div className="flex shrink-0 items-center gap-1 sm:gap-2">
-        {/* O tema é do app inteiro, não de uma tela: faltar aqui obrigava a
-            voltar para a esteira só para trocar. */}
-        <IconButton
-          icon={themeIcon}
-          size="sm"
-          label={`Tema: ${themeLabel[tema]} — clique para ${themeLabel[nextTheme[tema]]}`}
-          onClick={() => setTheme(nextTheme[tema])}
-        />
-        <CostMenu entries={costEntries} />
-
         {hasCarousel ? (
           <>
             <span aria-hidden className="mx-1 h-5 w-px bg-line" />

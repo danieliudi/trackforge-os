@@ -38,7 +38,13 @@ const ROTAS = [
   { rota: "/esteira/fatos", marca: "O que a ferramenta pode afirmar" },
   { rota: "/esteira/instalacao", marca: "O que está ligado aqui" },
   { rota: "/artigo", marca: BANCADA },
-  { rota: "/editor", marca: "Editor" },
+  // Era "Editor", que vinha da migalha "Trackforge OS / Editor" do cabeçalho
+  // próprio do editor. A Fase 3 trocou esse cabeçalho pela casca, e o que
+  // sobrou com esse texto é um rótulo em CAIXA ALTA por CSS — `innerText`
+  // devolve o texto TRANSFORMADO, então a marca deixou de casar. A manchete do
+  // composer é texto real, é a porta de entrada do editor, e não existe em
+  // nenhuma outra tela.
+  { rota: "/editor", marca: "Um carrossel, slide a slide" },
   { rota: "/biblioteca", marca: "Imagens da frente" },
   { rota: "/slides-preview", marca: "01 / 05" },
 ];

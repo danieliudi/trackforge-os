@@ -43,14 +43,22 @@ const texto = (f) => readFileSync(join(RAIZ, f), "utf8");
 /* ── 1. todo caminho citado existe ──────────────────────────────────────── */
 
 /**
- * Caminhos que os documentos declaram, no próprio texto, como ainda
- * inexistentes. A lista é curta de propósito: cada entrada é dívida registrada.
+ * Caminhos que os documentos citam SABENDO que não estão no repo. São dois
+ * motivos, e os dois precisam da mesma exceção: o arquivo ainda não existe
+ * (dívida registrada), ou ele saiu e o texto diz para onde foi.
  *
- * Se um deles passar a existir, o check FALHA pedindo para tirá-lo daqui — a
+ * Se um deles voltar a existir, o check FALHA pedindo para tirá-lo daqui — a
  * lista não pode virar o próximo lugar onde a verdade envelhece em silêncio.
+ *
+ * Ficou vazia em 08/09/2026, quando o mapa funcional foi escrito, e ganhou a
+ * primeira baixa em 11/09: o `ui-diretrizes` descrevia o Clockwork como direção
+ * das superfícies de trabalho, a Fase 3 redesenhou as duas, e o próprio arquivo
+ * previa a aposentadoria. A seção 4 do CLAUDE.md conta o que aconteceu com ele —
+ * tirar a menção esconderia a história de quem abrir um commit antigo.
  */
-/** Vazio desde 08/09/2026: o mapa funcional foi escrito. */
-const AINDA_NAO_EXISTEM = [];
+const AUSENTES_DE_PROPOSITO = [
+  { caminho: "docs/ui-diretrizes.md", porque: "aposentado em 11/09/2026 com o fim do Clockwork como layout" },
+];
 
 const CITACAO = /`([A-Za-z0-9_@./-]+\/[A-Za-z0-9_@./-]+\.(?:ts|tsx|mjs|css|json|md|mdc))`/g;
 
@@ -59,7 +67,7 @@ for (const doc of documentos) {
   for (const [, caminho] of texto(doc).matchAll(CITACAO)) {
     if (vistos.has(caminho)) continue;
     vistos.add(caminho);
-    if (AINDA_NAO_EXISTEM.includes(caminho)) continue;
+    if (AUSENTES_DE_PROPOSITO.some((a) => a.caminho === caminho)) continue;
     // `node_modules/...` é citado como orientação de leitura, não como arquivo
     // versionado; pode não estar instalado na máquina que roda o check.
     if (caminho.startsWith("node_modules/")) continue;
@@ -69,12 +77,12 @@ for (const doc of documentos) {
   }
 }
 
-for (const caminho of AINDA_NAO_EXISTEM) {
+for (const { caminho, porque } of AUSENTES_DE_PROPOSITO) {
   if (existsSync(join(RAIZ, caminho))) {
     erro(
       "scripts/check-docs.mjs",
-      `\`${caminho}\` passou a existir`,
-      "tire de AINDA_NAO_EXISTEM e ajuste o texto que o declara ausente",
+      `\`${caminho}\` voltou a existir (estava na lista como: ${porque})`,
+      "tire de AUSENTES_DE_PROPOSITO e ajuste o texto que o declara ausente",
     );
   }
 }

@@ -10,24 +10,23 @@ type BrandPillsProps = {
   onChange: (id: BrandId | null) => void;
 };
 
-const pill = (isActive: boolean) =>
+// Mesma célula da PlatformPills: marcado é invertido.
+const cela = (isActive: boolean) =>
   clsx(
-    "rounded-full border px-3 py-1.5 text-xs font-medium transition",
+    "px-3.5 py-2 text-[12.5px] transition",
     focusRing,
-    isActive
-      ? "border-acc bg-acc text-acc-ink"
-      : "border-line bg-surface text-ink2 hover:border-line3",
+    isActive ? "bg-ink font-medium text-paper" : "bg-cell text-ink2 hover:text-ink",
   );
 
 /** Escolher a marca também troca o tema, então o controle vale já na entrada. */
 export function BrandPills({ value, onChange }: BrandPillsProps) {
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className="flex w-fit flex-wrap gap-px border border-rule bg-rule">
       <button
         type="button"
         onClick={() => onChange(null)}
         aria-pressed={value === null}
-        className={pill(value === null)}
+        className={cela(value === null)}
       >
         Nenhuma
       </button>
@@ -37,7 +36,7 @@ export function BrandPills({ value, onChange }: BrandPillsProps) {
           type="button"
           onClick={() => onChange(id)}
           aria-pressed={value === id}
-          className={pill(value === id)}
+          className={cela(value === id)}
         >
           {label}
         </button>

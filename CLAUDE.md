@@ -111,11 +111,12 @@ parecido**.
 | Tema claro/escuro (`sistema` / `claro` / `escuro`) | `src/lib/theme.ts` + o script inline em `src/app/layout.tsx` | o atributo `data-tema` no `<html>` é a fonte da verdade. O script roda ANTES da primeira pintura: sem ele a tela nasce clara e pisca para escura em toda navegação |
 | Tokens de classe da UI (`focusRing`, `labelClass`, `fieldClass`, `panelClass`, `metaClass`) | `src/lib/ui.ts` | 29 arquivos — nunca monte painel ou campo na mão |
 | Botão e botão-de-ícone (variantes, tamanhos, `loading`) | `src/components/ui/Button.tsx` | 13 arquivos — `IconButton` exige `label` (nome acessível) |
-| Casca do app: barra, frente ativa, seções | `src/components/app/EsteiraShell.tsx` | 5 telas — toda tela nova dentro da esteira nasce aqui, não com layout próprio |
-| KPI / gráfico / lista do padrão Situação | `src/components/dashboard/*` | painel e telas que reusam a densidade aprovada |
+| Casca do app: barra, frente ativa, seções | `src/components/app/EsteiraShell.tsx` | 6 telas — toda tela nova dentro da esteira nasce aqui, não com layout próprio. `medida="folha"` é a variante de superfície de trabalho (seção 4) |
+| Peças do interior de leitura: `PageHead`, grade de células | `src/components/app/Interior.tsx` | 4 telas — cabeçalho de tela é rótulo → manchete serif → frase, não `h1` solto |
+| Medida: página, folha e coluna de leitura (`medidaClass`, `folhaClass`, `leituraClass`) | `src/lib/ui.ts` | a medida é da COLUNA, não da página — por isso o interior trava em 1280px e a bancada não |
 | Direção da casca e da home | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` | híbrido Wire + Specimen, travado 07/09/2026 |
 | Direção dos interiores de leitura | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` | mesma direção, aprovada 08/09/2026 — medida, escala e papel de fonte |
-| Diretrizes visuais das superfícies de TRABALHO | `docs/ui-diretrizes.md` | bancada e editor, até a fase delas |
+| Direção das superfícies de trabalho | `scratchpad/intent-fase3/DESIGN-fase3-locked.md` | mesma direção, aprovada 11/09/2026 — bancada, editor e o painel de preço |
 | Frente ativa como store global | `src/lib/front.ts` | via `useFront()` do shell. É global de propósito: estar no painel da Resibag lendo fato da Sanwey é a classe de bug que isto previne |
 | Renderização de peça por formato + `toPlainText` | `src/components/app/OutputPieces.tsx` | 2 telas — Reels mostra tempo, Stories mostra telas; não renderize formato novo como parágrafo genérico |
 | Recibo de custo | `src/components/app/CostReceipt.tsx` | 3 telas |
@@ -219,9 +220,19 @@ Isto não é preferência de estilo. É o requisito do produto.
 
 ## 4. Mockup antes de código — e a identidade visual é uma só
 
-**A identidade visual está em transição desde 07/09/2026, e são DUAS enquanto
-durar a transição — cada uma no seu escopo.** Confundir as duas, ou seguir a
-errada, é como a plataforma ganha um terceiro visual sem ninguém ter decidido.
+**A transição acabou em 11/09/2026: a identidade é UMA.** De 07 a 11/09 foram
+duas ao mesmo tempo — híbrido na casca e nos interiores, Clockwork nas
+superfícies de trabalho —, e esta tabela existia para dizer qual valia onde.
+Hoje as três linhas são a MESMA direção; o que muda é só a fonte que descreve
+cada escopo em detalhe, porque cada fase mediu coisas diferentes.
+
+**Clockwork continua sendo o nome da PALETA** em `globals.css` — cinza quente
+com acento laranja, e isso nunca esteve em questão. O que morreu em 11/09 foi o
+Clockwork como LAYOUT: cartão arredondado flutuando, pílula de marca, KPI
+preenchido de laranja. Com ele saiu do repo o `docs/ui-diretrizes.md`, que o
+descrevia e que previa a própria aposentadoria — *"quando a bancada e o editor
+forem redesenhados, este documento some"*. O que nele valia para todo escopo
+(token, classe de UI, botão, casca única, portão de mockup) já estava aqui.
 
 | Escopo | Direção | Fonte | Estado |
 |---|---|---|---|
@@ -515,7 +526,7 @@ suíte.
 | Comando | O que prova |
 |---|---|
 | `npm run qa:rotas` | as 11 telas renderizam **a tela certa**, no monitor e no celular — e nenhum elemento declara duas cores para a mesma propriedade |
-| `npm run qa:contraste` | 436 medições em 7 telas passam o piso nos **dois** temas |
+| `npm run qa:contraste` | 552 medições em 7 telas passam o piso nos **dois** temas |
 | `npm run qa:interacao` | frente, tema, prioridade e herança de chave respondem |
 | `npm run qa:avisos` | o achado de **coocorrência** aparece no painel com os dois trechos e o bloco nomeado |
 | `npm run qa` | os quatro em sequência |

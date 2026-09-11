@@ -6,32 +6,38 @@ alwaysApply: false
 
 # Telas — identidade Situação, cor, tema e mockup
 
-## Identidade visual única (aprovada 04/09/2026)
+## Identidade visual única — híbrido Wire + Specimen
 
-A plataforma inteira segue o visual do painel de Situação.
+A plataforma inteira segue a MESMA direção desde 11/09/2026. Foram três fases, e
+cada uma mediu coisas diferentes — por isso três fontes, um visual só:
 
-- **Diretrizes (interiores):** `docs/ui-diretrizes.md` — leia antes de qualquer tela nova ou
-  redesign.
-- **Mockup canônico (interiores):** `scratchpad/painel-mockup.html`
-- **Casca e home:** híbrido Wire + Specimen —
-  `scratchpad/intent-fase1/DESIGN-hibrido-locked.md`, mock
-  `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html`
-- **Código de referência:** `src/app/page.tsx` + `src/components/dashboard/`
+| Escopo | Fonte | Mock | Aprovado |
+|---|---|---|---|
+| Casca e home | `scratchpad/intent-fase1/DESIGN-hibrido-locked.md` | `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html` | 07/09/2026 |
+| Interiores de leitura | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` | `scratchpad/intent-fase2/mockup-interiores.html` | 08/09/2026 |
+| Superfícies de trabalho | `scratchpad/intent-fase3/DESIGN-fase3-locked.md` | `scratchpad/intent-fase3/mockup-trabalho.html` | 11/09/2026 |
+
+**Código de referência:** `src/components/app/EsteiraShell.tsx` (casca),
+`src/components/app/Interior.tsx` (interiores), `src/app/esteira/page.tsx`
+(bancada).
+
+Clockwork é o nome da PALETA (cinza quente, acento laranja) e continua valendo;
+o que acabou em 11/09 foi o Clockwork como LAYOUT — cartão arredondado
+flutuando, pílula de marca, KPI preenchido de laranja. O `docs/ui-diretrizes.md`
+que o descrevia saiu do repo junto.
 
 Não invente segundo visual. Hex de referência externa (Sanwey OS, Worktail)
-mapeia para token Clockwork — não entra no TSX. Cabeçalho de página =
-`labelClass` → `h1` → subtítulo `text-mut`. Superfície = `panelClass`. Vazio =
-borda tracejada. KPI urgente = `bg-acc` + letra `acc-ink` (nunca branco no
-laranja). Percentual sempre com `n` ao lado. Gráfico = Recharts +
-`var(--color-*)` + tooltip com hover.
+mapeia para token — não entra no TSX. Cabeçalho de tela = `PageHead` (rótulo →
+manchete serif → frase). Agrupamento = célula separada por 1px de `rule`, não
+cartão flutuante. Vazio = borda tracejada. Urgência = inversão e glifo, não
+preenchimento laranja. Percentual sempre com `n` ao lado.
 
 ## Mockup aprovado antes de implementar
 
 Mudou **como a plataforma se parece ou se organiza** — cor, tema, ícone, layout,
 componente, ordem de tela, agrupamento de dado? Precisa de mockup aprovado pelo
-Daniel **antes** do código. O mockup se confere contra a fonte do ESCOPO:
-híbrido (`scratchpad/intent-fase1/DESIGN-hibrido-locked.md`) para casca e home,
-`docs/ui-diretrizes.md` para os interiores.
+Daniel **antes** do código. O mockup se confere contra a fonte do ESCOPO — a
+tabela acima diz qual é a de cada um.
 
 - **Bug fix puro não precisa** — algo que já deveria funcionar e não funciona, ou
   asset quebrado voltando ao original.
@@ -78,6 +84,10 @@ a razão não for 1, atravessa a proporção, nunca o valor em pixel.
 **Duas travas fixas:**
 - **Medida de página** — leitura mora numa coluna (1280px), com a casca alinhada
   à mesma borda. Texto até a borda do papel não existe em jornal nenhum.
+- **Mas a medida é da COLUNA, não da página**, e a Fase 3 obrigou a separar as
+  duas: num interior a página *é* a coluna, numa superfície de trabalho a folha
+  é inteira (`folhaClass`) e quem carrega medida é a prosa (`leituraClass`,
+  680px = 72 caracteres por linha, medido).
 - **Piso de 11px** para rótulo e meta; corpo em 15px. Abaixo disso é decisão
   explícita, não descuido de tradução.
 

@@ -57,8 +57,15 @@ const casca = ({ secaoAtiva = true } = {}) => [
   { nome: "masthead · frente ativa", piso: CORPO, onde: (p) => p.locator('header button[aria-pressed="true"]') },
   { nome: "masthead · frente inativa", piso: CORPO, quantos: 2, onde: (p) => p.locator('header button[aria-pressed="false"]') },
   { nome: "dateline · praça e mês", piso: MIUDO, onde: (p) => p.getByText("São Paulo ·") },
-  { nome: "dateline · custo do mês", piso: MIUDO, onde: (p) => p.locator("header + div span.font-mono") },
-  { nome: "dateline · botão de tema", piso: MIUDO, onde: (p) => p.locator("header + div button").last() },
+  /**
+   * A dateline é a irmã imediata do MASTHEAD, e é preciso dizer QUAL masthead.
+   * `header + div` sozinho valia enquanto toda tela tinha um `<header>` só; na
+   * Fase 3 a barra do editor virou o segundo, o seletor passou a casar com dois,
+   * e o "custo do mês" media o "Sonnet 5" do painel de preço. Quem pegou foi a
+   * contagem declarada — que é exatamente para isso que ela existe.
+   */
+  { nome: "dateline · custo do mês", piso: MIUDO, onde: (p) => p.locator('header:has-text("trackforge") + div span.font-mono') },
+  { nome: "dateline · botão de tema", piso: MIUDO, onde: (p) => p.locator('header:has-text("trackforge") + div button').last() },
   // O sinal é filho DIRETO da faixa; a seção "Situação" mora dentro de um span.
   // Sem o `>` os dois casam e a medição vira loteria — foi um dos três erros.
   { nome: "faixa · ponto do sinal", piso: MIUDO, onde: (p) => p.locator('nav > div > a[href="/"] > span[aria-hidden="true"]') },
@@ -72,10 +79,10 @@ const casca = ({ secaoAtiva = true } = {}) => [
   ...(secaoAtiva
     ? [
         { nome: "faixa · seção ativa", piso: CORPO, onde: (p) => p.locator('nav a[aria-current="page"]') },
-        { nome: "faixa · seção inativa", piso: CORPO, quantos: 4, onde: (p) => p.locator("nav span > a:not([aria-current]):not([aria-label])") },
+        { nome: "faixa · seção inativa", piso: CORPO, quantos: 5, onde: (p) => p.locator("nav span > a:not([aria-current]):not([aria-label])") },
       ]
     : [
-        { nome: "faixa · seção inativa (tela fora do menu)", piso: CORPO, quantos: 5, onde: (p) => p.locator("nav span > a:not([aria-current]):not([aria-label])") },
+        { nome: "faixa · seção inativa (tela fora do menu)", piso: CORPO, quantos: 6, onde: (p) => p.locator("nav span > a:not([aria-current]):not([aria-label])") },
       ]),
   { nome: "faixa · botão produzir (+)", piso: MIUDO, onde: (p) => p.locator("nav a[aria-label]") },
 ];
@@ -222,27 +229,33 @@ const TELAS = [
       // `/artigo` não está no menu: nenhuma seção fica marcada.
       ...casca({ secaoAtiva: false }),
       { nome: "bancada · rótulo de seção", piso: MIUDO, onde: (p) => p.locator("main span.uppercase.text-mut").first() },
-      { nome: "bancada · origem escolhida", piso: CORPO, onde: (p) => p.locator("main button.flex-1.rounded-md").first() },
-      { nome: "bancada · origem não escolhida", piso: CORPO, onde: (p) => p.locator("main button.flex-1.rounded-md").last() },
+      { nome: "bancada · origem escolhida", piso: CORPO, onde: (p) => p.locator('[aria-label="Origem do material"] button[aria-pressed="true"]') },
+      { nome: "bancada · origem não escolhida", piso: CORPO, quantos: 3, onde: (p) => p.locator('[aria-label="Origem do material"] button[aria-pressed="false"]') },
       { nome: "bancada · nota de CRM ausente", piso: CORPO, onde: (p) => p.locator("main p.border-dashed").first() },
       { nome: "bancada · nome do formato", piso: CORPO, onde: (p) => p.locator("main span.leading-tight").first() },
       { nome: "bancada · contador de marcados", piso: MIUDO, onde: (p) => p.locator("main span.text-faint").first() },
-      { nome: "bancada · botão de gerar", piso: CORPO, onde: (p) => p.getByRole("button", { name: /Gerar \d+ peças?/ }) },
+      { nome: "bancada · instrução sem formato", piso: CORPO, onde: (p) => p.getByText("Marque ao menos um formato.") },
+      // Achado pela sonda em 11/09/2026 e classificado como RÓTULO: é a
+      // contagem ao lado de "Peças", não texto de leitura.
+      { nome: "bancada · contagem de formatos", piso: MIUDO, onde: (p) => p.getByText(/\d+ de \d+ marcad/) },
     ],
   },
 
   {
-    // O editor NÃO nasce do `EsteiraShell` — tem casca própria, sem masthead
-    // nem faixa. Por isso não recebe `casca()`: alvo que não existe é reprovação,
-    // e reprovar por ausência esperada seria ruído.
+    // Desde a Fase 3 (11/09/2026) o editor NASCE do `EsteiraShell`, com masthead,
+    // dateline e faixa, e "Editor" é item de navegação. Até aqui esta tela não
+    // recebia `casca()` porque tinha casca própria — o comentário anterior dizia
+    // isso e virou mentira no dia em que a tela mudou. Sem esta linha, a casca do
+    // editor era a única do app sem medição nenhuma.
     rota: "/editor",
     nome: "Editor",
     alvos: [
-      { nome: "editor · marca no caminho", piso: CORPO, onde: (p) => p.getByRole("link", { name: "Trackforge OS" }) },
-      { nome: "editor · separador do caminho", piso: MIUDO, onde: (p) => p.locator("span.text-faint").first() },
-      { nome: "editor · seção atual", piso: CORPO, onde: (p) => p.getByText("Editor", { exact: true }).first() },
-      { nome: "editor · título", piso: CORPO, onde: (p) => p.getByRole("heading", { name: "Gere um carrossel B2B" }) },
-      { nome: "editor · rótulo de bloco", piso: MIUDO, onde: (p) => p.locator("span.uppercase.text-mut").first() },
+      ...casca({ secaoAtiva: true }),
+      // No `main`, para não empatar com o "EDITOR" da faixa — que a `casca()`
+      // acima já mede como seção ativa.
+      { nome: "editor · rótulo da barra", piso: MIUDO, onde: (p) => p.locator("main span.uppercase.text-mut").first() },
+      { nome: "editor · manchete", piso: CORPO, onde: (p) => p.getByRole("heading", { name: "Um carrossel, slide a slide" }) },
+      { nome: "editor · rótulo de bloco", piso: MIUDO, onde: (p) => p.getByText("Comece por um exemplo") },
       { nome: "editor · tecla de atalho", piso: MIUDO, onde: (p) => p.locator("kbd").first() },
       { nome: "editor · opção de notícias", piso: CORPO, onde: (p) => p.getByText("Incluir notícias recentes do setor") },
       { nome: "editor · exemplo de URL", piso: CORPO, onde: (p) => p.locator("span.truncate").first() },
