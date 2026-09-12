@@ -272,7 +272,16 @@ export function EsteiraShell({
               ? `${espera.total} ${espera.total === 1 ? "espera" : "esperam"} · ${espera.rotulo}`
               : fila.estado === "fora-do-ar"
                 ? "fila indisponível"
-                : "em dia"}
+                : /* "EM DIA" só depois de OLHAR. Sem CRM configurado a fila não
+                     foi consultada, e dizer "em dia" é afirmar que está limpa
+                     uma coisa que ninguém viu — com o corpo da página dizendo
+                     "a fila não aparece nesta instalação" quarenta pixels
+                     abaixo. Os três estados existiam desde o começo e este
+                     caía no `else` do "fora do ar". Achado pelo Daniel na
+                     tela, 12/09/2026. */
+                  fila.estado === "sem-crm"
+                  ? "fila não configurada"
+                  : "em dia"}
           </span>
         </Link>
 

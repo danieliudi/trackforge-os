@@ -608,6 +608,16 @@ e um que escondeu uma reprovação real de 1,17:1. Em `contraste.mjs` cada alvo
 traz a contagem esperada e o relatório imprime o texto que mediu; seletor que
 deixa de casar é reprovação, não silêncio.
 
+**Declarar DOIS de três estados é pior que declarar nenhum**, porque dá a
+sensação de cobertura. O sinal da faixa tem três — fila com itens, fila vazia,
+fila desconhecida —, e a suíte declarava "fila vazia diz em dia" e "fila fora do
+ar NÃO diz". Faltava o terceiro: **CRM não configurado**, que caía no `else` e
+dizia "EM DIA". Foi o Daniel que viu na tela, em 12/09/2026, com o corpo da
+página dizendo "a fila não aparece nesta instalação" quarenta pixels abaixo. O
+comentário no código já dizia que "não sei" não pode virar "em dia"; o `else`
+não tinha lido o comentário. Ao declarar o caso, a suíte passou de 20 para 21
+verificações — e, plantado de volta, o defeito reprova.
+
 **Nem a sonda vê tudo: pseudo-elemento não está no DOM.** O `placeholder` do
 composer e o do campo de ângulo ficaram em **3,56:1 no tema claro** — reprovando
 — e passando a 5,27:1 no escuro, sem nada olhar, porque a sonda percorre nós e

@@ -191,6 +191,23 @@ const navegador = await abrirNavegador();
     true,
   );
   await p2.close();
+
+  // TERCEIRO estado, e o que faltava: CRM NÃO CONFIGURADO. A suíte declarava
+  // "fora do ar" e não este — e era exatamente onde o Daniel estava parado
+  // quando viu a faixa dizer "EM DIA" com a página dizendo "a fila não aparece
+  // nesta instalação" logo abaixo (12/09/2026). Gate que só vigia dois de três
+  // estados deixa o terceiro mentir em silêncio.
+  const { pagina: p3 } = await novaPagina(navegador, {
+    publish: { configured: false, pending: [] },
+  });
+  await p3.goto(`${BASE}/`, { waitUntil: "networkidle" });
+  await p3.waitForTimeout(600);
+  confere(
+    "fila não configurada não vira 'em dia'",
+    await p3.locator('nav > div > a[href="/"]').innerText(),
+    "• FILA NÃO CONFIGURADA",
+  );
+  await p3.close();
 }
 
 // ══ 5 ══ herança da chave antiga do localStorage

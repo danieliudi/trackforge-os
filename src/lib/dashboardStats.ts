@@ -206,8 +206,13 @@ export function esperandoDecisao(input: {
   const naoEnviados = mine.filter((item) => !item.sent).length;
   const semFonte = mine.filter((item) => flaggedClaimTotal(item) > 0).length;
 
-  const fila = input.pendingCount ?? 0;
-  if (fila > 0) return { id: "fila", total: fila, rotulo: "na fila do CRM" };
+  // `null` é fila DESCONHECIDA e não fila vazia, e a diferença não se resolve
+  // aqui: sem número, esta função não tem o que contar, e quem sabe que a fila
+  // não foi consultada é a casca — que mostra "fila não configurada" em vez de
+  // "em dia". Antes isto era `?? 0`, que apagava a distinção na linha seguinte
+  // ao comentário que a declara.
+  const fila = input.pendingCount;
+  if (fila !== null && fila > 0) return { id: "fila", total: fila, rotulo: "na fila do CRM" };
   if (naoEnviados > 0) return { id: "nao-enviados", total: naoEnviados, rotulo: "não enviados" };
   if (semFonte > 0) return { id: "sem-fonte", total: semFonte, rotulo: "sem fonte" };
   return null;
