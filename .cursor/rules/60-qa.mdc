@@ -74,7 +74,10 @@ pasta com esse nome ninguém trata como suíte):
   configurado) caía no `else` dizendo "EM DIA". Achado na tela, 12/09/2026.
 - `npm run qa:avisos` — o achado de **coocorrência** aparece no painel com os
   dois trechos e o bloco nomeado (a regra em si é `knowledge:coerencia`);
-- `npm run qa` — os quatro;
+- `npm run qa:contador` — o contador conta **o que o botão copia** (lido da área
+  de transferência, não recalculado dentro do teste), diz "sem lastro" enquanto
+  a régua for `nao-verificado`, e SAI de cena no roteiro de Reels;
+- `npm run qa` — os cinco;
 - `npm run qa:sonda` — **não é gate**: lista o que está abaixo do piso, para
   você classificar e declarar.
 

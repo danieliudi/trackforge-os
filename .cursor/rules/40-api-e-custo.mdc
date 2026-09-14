@@ -1,6 +1,6 @@
 ---
-description: Rotas de API — leitura do corpo, formato de erro, recibo de custo, pacote que vai ao CRM e a revisão de segurança
-globs: src/app/api/**/*.ts,src/constants/pricing.ts,src/lib/costLog.ts,src/lib/crm.ts,src/proxy.ts
+description: Rotas de API — leitura do corpo, formato de erro, recibo de custo, número de plataforma com procedência, pacote que vai ao CRM e a revisão de segurança
+globs: src/app/api/**/*.ts,src/constants/pricing.ts,src/constants/plataformas.ts,src/lib/costLog.ts,src/lib/crm.ts,src/lib/prompts.ts,src/proxy.ts,src/components/app/ContadorPlataforma.tsx
 alwaysApply: false
 ---
 
@@ -98,3 +98,37 @@ Checklist mínimo:
 - Mudança no pacote que vai ao CRM declara **o que a agência passa a ver**.
 - A chave de agente identifica quem assina a sugestão. Trocar a chave é trocar a
   autoria no CRM — não é detalhe de configuração.
+
+## Número de plataforma também tem procedência
+
+Espelha a seção 16 do `CLAUDE.md`. Mora aqui e não no núcleo pelo mesmo motivo
+da revisão de segurança: dispara em arquivos nomeáveis — `plataformas.ts`,
+`prompts.ts`, o contador — e glob carrega a regra na hora certa.
+
+`HOOK_TARGET` carregava 220/150/160/180 **sem fonte, sem data e sem `checkedAt`**,
+e `prompts.ts` os interpolava direto na instrução do modelo. Ao lado,
+`MODEL_PRICING` cita URL e data e cada fato normativo carrega `tier`. Número de
+plataforma era a única categoria de número sem disciplina de procedência — e é a
+que apodrece mais rápido: certificado vence numa data escrita nele, limite de
+plataforma muda sem avisar.
+
+Hoje tudo mora em `src/constants/plataformas.ts`, com `tier`, `source`,
+`checkedAt` e `revalidateBy` — **obrigatório** aqui, opcional em `FactRecord`,
+por esse motivo.
+
+- **Contar ≠ comparar.** Contar o nosso texto não precisa de fonte e não pode
+  estar errado. O limite é fato de fora, tem tier, e **some sem lastro** — no
+  lugar dele a palavra "sem lastro", nunca um número cinza de cara apurada.
+- **O portão não é `isPublishable`.** `temLastro` aceita `primaria` **ou**
+  `interna`: limite de plataforma não vai para peça nenhuma, é instrumento de
+  medida na tela. Para o "ver mais", `interna` (medido na conta) é a melhor
+  evidência que existe — ninguém documenta onde ele cai.
+- **O corte é faixa, nunca tique.** Dois orçamentos ao mesmo tempo (caracteres
+  E ~3 linhas, vale o que acabar primeiro), quebra de linha conta, e varia por
+  aparelho e versão.
+- **`.length` é UTF-16, que é o que a plataforma conta.** Emoji custa de 2 a 8.
+  Não "conserte" para `[...s].length` nem `Intl.Segmenter`.
+- **Conferir limite exige abrir a página da plataforma.** Em 13/09/2026 a
+  política de saída do contêiner negava `www.linkedin.com`,
+  `developers.facebook.com` e `help.instagram.com` (403 no CONNECT), e busca
+  devolve resumo de página não aberta — `secundaria`, não "conferido".

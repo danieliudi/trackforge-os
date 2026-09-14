@@ -17,6 +17,7 @@ cada uma mediu coisas diferentes — por isso três fontes, um visual só:
 | Interiores de leitura | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` | `scratchpad/intent-fase2/mockup-interiores.html` | 08/09/2026 |
 | Superfícies de trabalho | `scratchpad/intent-fase3/DESIGN-fase3-locked.md` | `scratchpad/intent-fase3/mockup-trabalho.html` | 11/09/2026 |
 | Eixos editoriais (trabalho, voz, arco) | `scratchpad/intent-fase4/DESIGN-fase4-locked.md` | `scratchpad/intent-fase4/mockup-vozes.html` | 11/09/2026 |
+| Contador de plataforma no cartão da peça | `scratchpad/intent-fase5/DESIGN-fase5-locked.md` | `scratchpad/intent-fase5/mockup-contador.html` | 14/09/2026 |
 
 **Código de referência:** `src/components/app/EsteiraShell.tsx` (casca),
 `src/components/app/Interior.tsx` (interiores), `src/app/esteira/page.tsx`

@@ -5,6 +5,7 @@ import { AlertCircle, AlertTriangle, Check, Copy, PenLine, RefreshCw } from "luc
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { ContadorPlataforma } from "@/components/app/ContadorPlataforma";
 import { VerificationPanel } from "@/components/app/VerificationPanel";
 import { Button } from "@/components/ui/Button";
 import { brands, type BrandId } from "@/constants/brands";
@@ -369,6 +370,12 @@ export function OutputPieces({
             </div>
 
             <PieceBody kind={piece.kind} data={piece.data} />
+
+            {/* Conta o MESMO string que o botão "Copiar texto" copia. */}
+            <ContadorPlataforma
+              kind={piece.kind}
+              texto={toPlainText(piece.kind, piece.data)}
+            />
 
             {piece.warnings.length > 0 ? (
               <div className="flex flex-col gap-0.5 rounded-md border border-warn-line bg-warn-bg px-2.5 py-2 text-[11.5px] text-warn">

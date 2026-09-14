@@ -1,7 +1,7 @@
 # Fase 5 — a régua de plataforma
 
-**Estado: PROPOSTA. Nada implementado, nada escrito em código.**
-Escrito em 13/09/2026, depois da análise do moda.app.
+**Estado: APROVADO 14/09/2026 e IMPLEMENTADO.** Direção aprovada em 13/09,
+mockup aprovado em 14/09. Escrito depois da análise do moda.app.
 
 ---
 
@@ -298,3 +298,73 @@ diria "está errado", e não está — ninguém conferiu, que é diferente.
 
 Contador no composer (mede a entrada, não a saída) · encurtar ou cortar texto
 automaticamente · qualquer previsão de alcance, engajamento ou "melhor horário".
+
+---
+
+# Parte 3 — o que foi implementado (14/09/2026)
+
+| Arquivo | O que é |
+|---|---|
+| `src/constants/plataformas.ts` | a tabela declarada: `LIMITES`, `CORTES`, `temLastro`, `contar`, `KINDS_COM_REGUA` — e `HOOK_TARGET`, que veio de `outputs.ts` |
+| `src/components/app/ContadorPlataforma.tsx` | o contador, com os três comportamentos: conta, diz "sem lastro", ou sai de cena |
+| `src/components/app/OutputPieces.tsx` | uma linha: o contador entre o corpo da peça e os avisos |
+| `scripts/qa/contador.mjs` | `npm run qa:contador` — 4 verificações |
+
+## O estado em que a ferramenta entrou no ar
+
+As duas linhas de `LIMITES` estão `nao-verificado`, e `CORTES` está **vazio**.
+Na tela isso é o selo SEM LASTRO e a frase "nenhum limite com fonte conferida
+para este formato". **Nenhum número de plataforma aparece.** É o combinado.
+
+## O portão é diferente do de fato normativo, de propósito
+
+`isPublishable` exige `primaria` porque fato vira afirmação pública numa peça.
+`temLastro` aceita `primaria` **ou** `interna`, porque limite de plataforma não
+vai para peça nenhuma — é instrumento de medida na tela do Daniel. E para o
+CORTE, `interna` (ele medindo na conta dele) é literalmente a melhor evidência
+que existe: ninguém documenta onde o "ver mais" cai.
+
+## Conferido na tela, não no typecheck
+
+`npm run qa:contador`, com o app de pé e as rotas interceptadas:
+
+```
+post de texto: selo 'sem lastro' presente ✓
+nenhum limite vazou para a tela sem fonte ✓
+conta confere com o que o botão copia: 181 caracteres ✓
+reels: diz 'sem régua' e não conta ✓
+```
+
+A terceira é a que importa mais: o roteiro **clica no botão "Copiar texto", lê a
+área de transferência e compara com o número da tela**. Recalcular a conta dentro
+do teste provaria que duas contas minhas batem, não que a tela conta certo.
+
+**Plantado de volta, reprova** — as duas vezes:
+
+- portão do lastro desligado → 3 reprovações, entre elas *"apareceu um LIMITE na
+  tela com a régua ainda `nao-verificado`"* e *"a tela diz 3000 caracteres e o
+  botão copiou 181"*;
+- `reels` acrescentado a `KINDS_COM_REGUA` → 2 reprovações.
+
+## Três defeitos do próprio roteiro, que valem como regra
+
+Os três davam reprovação com o produto funcionando — é a classe de erro que faz
+perder tarde consertando o que não está quebrado.
+
+1. **Fixture inventado.** O artigo forjado tinha `blocks`; o tipo tem
+   `sections`. A tela estourou em `article.sections is not iterable`. Depois,
+   sem `suggestedOutputs`, em `.find of undefined` — campos com `.default([])`
+   no schema, que uma resposta real nunca deixa faltar e uma forjada deixa.
+2. **Locator por ancestral de DOM.** `filter({hasText}).last()` casou com um
+   contêiner que continha OS DOIS cartões. Fatiar o texto da página pelos
+   títulos é menos esperto e não mente.
+3. **`indexOf` onde precisava de `lastIndexOf`.** Cada título aparece duas vezes
+   — na grade de formatos e no cartão da peça. Buscar do começo fatiava a grade.
+
+## O que continua faltando, e só o Daniel pode dar
+
+1. **Medir o corte** num post longo dele: copiar o pedaço visível antes do "ver
+   mais", no celular e no computador. Vira `CORTES` com `tier: "interna"`.
+2. **Os tetos duros**, abertos na máquina dele: número + URL → `tier: "primaria"`.
+
+Até lá o selo SEM LASTRO fica na tela, que é o comportamento certo.

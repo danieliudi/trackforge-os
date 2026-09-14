@@ -57,7 +57,8 @@ export function buildCarrosselSystem(platform: Platform, brandId: BrandId | null
   );
 }
 
-import { HOOK_TARGET, OUTPUT_META, type TextKind } from "@/types/outputs";
+import { HOOK_TARGET } from "@/constants/plataformas";
+import { OUTPUT_META, type TextKind } from "@/types/outputs";
 
 /**
  * Como cada formato quer ser escrito.

@@ -36,6 +36,8 @@ aquilo. Quanto maior, mais caro é divergir.
 | Auditoria de afirmações | `src/lib/verify.ts` | 8 arquivos |
 | Varredura de termo proibido | `src/knowledge/check.ts` | 9 arquivos |
 | Preço por modelo e `priceUsage` | `src/constants/pricing.ts` | 17 arquivos |
+| Régua de plataforma: `LIMITES`, `CORTES`, `temLastro`, `contar`, `KINDS_COM_REGUA`, `HOOK_TARGET` | `src/constants/plataformas.ts` | o contador e `prompts.ts` — todo número de plataforma mora aqui, com `tier` e `checkedAt`. `contar` é `.length` de propósito (UTF-16 é o que a plataforma conta): não "conserte" para `[...s].length` |
+| Contador de caracteres da peça | `src/components/app/ContadorPlataforma.tsx` | o cartão da bancada — conta o que `toPlainText` copia, e SOME nos formatos sem régua |
 | Marcas, tagline canônica, política de logo | `src/constants/brands.ts` | 29 arquivos |
 | Formatos de saída (`OUTPUT_META`, `OUTPUT_SCHEMAS`, `outputBlocks`, `isCarousel`) | `src/types/outputs.ts` | 9 arquivos |
 | Log de custo (`entryFromCost`, `pushCostEntry`, `formatCost`) | `src/lib/costLog.ts` | 9 — assinatura `entryFromCost(cost, kind, title, failed?)` |

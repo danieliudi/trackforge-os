@@ -61,6 +61,16 @@ faixa que as gerações anteriores do mesmo tipo custaram de verdade. Nada ali �
 estimativa — é preço de tabela e histórico medido, e quando não há histórico a
 tela diz que não há.
 
+**Conta o tamanho da peça** (`ContadorPlataforma`, Fase 5, 14/09/2026): no cartão
+de cada peça, quantos caracteres tem **exatamente o que o botão "Copiar texto"
+copia** — o retorno de `toPlainText`, nem uma letra a mais. Vale para **post de
+texto e legenda**, e só: Reels e Stories são roteiro (o texto copiado traz
+"GANCHO:" e "[8s]", que não vão para campo nenhum) e carrossel é slide. O limite
+da plataforma só aparece quando tem fonte conferida (`src/constants/plataformas.ts`,
+`temLastro`); enquanto não tiver, a tela escreve **"sem lastro"** em vez de um
+número. Hoje as duas linhas da tabela estão `nao-verificado`, então nenhum limite
+aparece — e isso está certo.
+
 **Precisa estar funcionando:** `ANTHROPIC_API_KEY` para gerar. Sinais exigem
 `SUPABASE_URL` + `SUPABASE_SERVICE_ROLE_KEY`; sem elas a seção de sinais não
 aparece e as outras três origens seguem.

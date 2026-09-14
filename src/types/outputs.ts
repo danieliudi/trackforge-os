@@ -91,22 +91,19 @@ export const OUTPUT_META: Record<
 };
 
 /**
- * Tamanho de gancho por plataforma — alvo do prompt, não portão do schema.
+ * O gancho tem TAMANHO ALVO, e ele mora em `src/constants/plataformas.ts`.
  *
- * Pela mesma razão do artigo e do carrossel: a Anthropic não aplica
- * `maxLength`, então exigi-lo na volta só transformava um gancho doze
- * caracteres mais longo na perda da peça inteira. E aqui o custo é maior que no
- * artigo, porque as peças saem em lote: uma reprovada derrubava as seis.
+ * Continua valendo a razão de ele ser alvo do prompt e não portão do schema: a
+ * Anthropic não aplica `maxLength`, então exigi-lo na volta transformava um
+ * gancho doze caracteres mais longo na perda da peça inteira — e as peças saem
+ * em lote, então a reprovada derrubava as seis. Passar do número não quebra
+ * nada; é texto para o Daniel colar e ajustar, não medida de layout.
  *
- * Passar do número não quebra nada — o Instagram corta no "ver mais" e o resto
- * continua lá. É texto para o Daniel colar e ajustar, não medida de layout.
+ * O QUE MUDOU NA FASE 5: os quatro números estavam aqui sem fonte e sem data, e
+ * iam direto para a instrução do modelo. Mudaram de arquivo para ficar ao lado
+ * da régua de plataforma, que carrega tier e `checkedAt` como todo número de
+ * fora nesta ferramenta. `HOOK_TARGET` segue exportado de lá.
  */
-export const HOOK_TARGET = {
-  "post-texto": 220,
-  legenda: 150,
-  reels: 160,
-  stories: 180,
-} as const;
 
 /** Post de texto do LinkedIn — o gancho é a única linha garantida antes do corte. */
 export const postTextoSchema = z.object({

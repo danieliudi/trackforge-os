@@ -39,13 +39,15 @@ genuinamente novo.
 >
 > O mapa: `00-nucleo` (fato, segredo, mockup, pronto, entrega, mais 0, 14 e 15)
 > ↔ seções 0, 2, 3, 4, 8, 10, 14 e 15 · `10-reuso` ↔ 1 e 7 · `20-telas` ↔ 4
-> mais a linha de cor/tema da 1 · `30-react` ↔ 6 · `40-api-e-custo` ↔ 3, 5 e 13
-> · `50-conhecimento` ↔ 9 · `60-qa` ↔ 11 e 12.
+> mais a linha de cor/tema da 1 · `30-react` ↔ 6 · `40-api-e-custo` ↔ 3, 5, 13
+> e 16 · `50-conhecimento` ↔ 9 · `60-qa` ↔ 11 e 12.
 >
 > A seção 13 (segurança) foi para `40-api-e-custo` e não para o núcleo, embora
 > a sugestão original fosse o núcleo: ela dispara em arquivos nomeáveis — rota
 > que gasta, `src/lib/crm.ts`, `proxy.ts` — e no Cursor isso é glob, que carrega a
-> regra na hora certa sem pesar em todo pedido.
+> regra na hora certa sem pesar em todo pedido. A seção 16 (número de plataforma)
+> foi para lá pelo mesmo motivo, e não para o núcleo apesar de ser procedência
+> como a 2: ela dispara em `plataformas.ts`, `prompts.ts` e o contador.
 >
 > `70-quando-passar-pro-claude` **não espelha seção nenhuma daqui, de propósito**:
 > ela diz ao Cursor quando parar e passar a tarefa para o Claude Code, e só faz
@@ -129,6 +131,8 @@ parecido**.
 | Auditoria de afirmações | `src/lib/verify.ts` | 8 arquivos |
 | Varredura de termo proibido | `src/knowledge/check.ts` | 9 arquivos |
 | Preço por modelo e `priceUsage` | `src/constants/pricing.ts` | 17 arquivos |
+| Régua de plataforma: `LIMITES`, `CORTES`, `temLastro`, `contar`, `KINDS_COM_REGUA`, `HOOK_TARGET` | `src/constants/plataformas.ts` | o contador e `prompts.ts` — todo número de plataforma mora aqui, com `tier` e `checkedAt`. `contar` é `.length` de propósito (UTF-16 é o que a plataforma conta): não "conserte" para `[...s].length` |
+| Contador de caracteres da peça | `src/components/app/ContadorPlataforma.tsx` | o cartão da bancada — conta o que `toPlainText` copia, e SOME nos formatos sem régua |
 | Marcas, tagline canônica, política de logo | `src/constants/brands.ts` | 29 arquivos |
 | Formatos de saída: `OUTPUT_META`, `OUTPUT_SCHEMAS`, `outputBlocks`, `isCarousel` | `src/types/outputs.ts` | 9 arquivos |
 | Log de custo (`entryFromCost`, `pushCostEntry`, `formatCost`) | `src/lib/costLog.ts` | 9 arquivos — assinatura é `entryFromCost(cost, kind, title, failed?)` |
@@ -273,6 +277,7 @@ forem redesenhados, este documento some"*. O que nele valia para todo escopo
 | Interiores de leitura: Peças, Fatos, Custos, Instalação | **Híbrido, mesma direção** | `scratchpad/intent-fase2/DESIGN-fase2-locked.md` · mock `scratchpad/intent-fase2/mockup-interiores.html` | aprovado 08/09/2026 (Fase 2) |
 | Superfícies de trabalho: bancada (`/esteira`) e editor | **Híbrido, mesma direção** | `scratchpad/intent-fase3/DESIGN-fase3-locked.md` · mock `scratchpad/intent-fase3/mockup-trabalho.html` | aprovado 11/09/2026 (Fase 3) |
 | Eixos editoriais: trabalho, voz e o arco de evento | **Híbrido, mesma direção** | `scratchpad/intent-fase4/DESIGN-fase4-locked.md` · mock `scratchpad/intent-fase4/mockup-vozes.html` | aprovado 11/09/2026 (Fase 4) |
+| Contador de plataforma no cartão da peça | **Híbrido, mesma direção** | `scratchpad/intent-fase5/DESIGN-fase5-locked.md` · mock `scratchpad/intent-fase5/mockup-contador.html` | aprovado 14/09/2026 (Fase 5) |
 
 Do híbrido vêm o masthead serif, `EDIÇÃO · frente`, a dateline, a faixa preta com
 a navegação, o glifo da prioridade e a grade de células. Tokens `paper`, `band`,
@@ -584,7 +589,8 @@ suíte.
 | `npm run qa:contraste` | 590 medições em 7 telas passam o piso nos **dois** temas |
 | `npm run qa:interacao` | frente, tema, prioridade e herança de chave respondem |
 | `npm run qa:avisos` | o achado de **coocorrência** aparece no painel com os dois trechos e o bloco nomeado |
-| `npm run qa` | os quatro em sequência |
+| `npm run qa:contador` | o contador conta **o que o botão copia** (lido da área de transferência, não recalculado), diz "sem lastro" enquanto a régua for `nao-verificado`, e SAI de cena no roteiro de Reels |
+| `npm run qa` | os cinco em sequência |
 | `npm run qa:sonda` | **não é gate** — percorre o DOM e lista o que está abaixo do piso, para você declarar |
 
 Playwright continua fora das dependências do projeto, instalado sob demanda, e
@@ -705,3 +711,49 @@ não para nem espera confirmação. Duas opções, em ordem:
 
 Só interromper de verdade quando a mensagem for correção de rumo do que está em
 andamento, ou pedido explícito de parar.
+
+## 16. Número de plataforma também tem procedência
+
+Regra derivada da Fase 5, e o achado que a motivou é de uma sessão minha.
+
+Ao desenhar o contador descobriu-se que `HOOK_TARGET` carregava **220/150/160/180
+sem fonte, sem data e sem `checkedAt`** — e `prompts.ts` os interpolava direto na
+instrução do modelo, três linhas abaixo de um comentário que afirmava onde cada
+plataforma corta. Ao lado, `MODEL_PRICING` cita URL e data (§5) e cada fato
+normativo carrega `tier` e `checkedAt` (§2). **Número de plataforma era a única
+categoria de número desta ferramenta sem disciplina de procedência**, e ela é
+justamente a que apodrece mais rápido: certificado vence numa data escrita nele,
+limite de plataforma muda sem avisar ninguém.
+
+Hoje eles moram em `src/constants/plataformas.ts`, com `tier`, `source`,
+`checkedAt` e `revalidateBy` — este último **obrigatório** aqui, e opcional em
+`FactRecord`, por esse motivo.
+
+**Contar o nosso texto é diferente de comparar com um limite**, e separar as duas
+coisas é o que faz a fase funcionar. Contar não precisa de fonte e não pode estar
+errado. O limite é fato de fora, tem tier, e **some quando não tem lastro** —
+aparecendo em lugar dele a palavra "sem lastro", nunca um número cinza que
+pareceria apurado.
+
+**O portão aqui não é o `isPublishable`, de propósito.** Fato normativo exige
+`primaria` porque vira afirmação pública numa peça. `temLastro` aceita `primaria`
+**ou** `interna`, porque limite de plataforma não vai para peça nenhuma — é
+instrumento de medida na tela. E para o corte (`ver mais`), `interna` é a melhor
+evidência que existe: as plataformas não documentam onde ele cai.
+
+**O que não vira número nunca:** o "ver mais" não é um ponto. São dois orçamentos
+ao mesmo tempo — caracteres **e** ~3 linhas, vale o que acabar primeiro —, quebra
+de linha conta, e o resultado varia por aparelho e versão. Por isso a UI desenha
+**faixa, nunca tique**, entre a medição do celular e a do computador.
+
+**`.length` em JS é unidade UTF-16, que é exatamente o que as plataformas
+contam.** Um emoji custa de 2 a 8. Não "conserte" para `[...s].length` nem
+`Intl.Segmenter`: os dois contam caractere visível, e o número ficaria menor que
+o da plataforma justo nas peças com emoji.
+
+**Conferir limite exige abrir a página da plataforma.** Esta sessão não pôde: a
+política de saída do contêiner nega `www.linkedin.com`,
+`developers.facebook.com` e `help.instagram.com` com 403 no CONNECT (13/09/2026),
+e busca devolve resumo de página não aberta — `secundaria` na melhor hipótese.
+Foi por isso que a tabela entrou no ar inteira `nao-verificado`, e isso está
+certo: o selo na tela é a informação honesta.

@@ -19,7 +19,8 @@
     "qa:contraste": "node scripts/qa/contraste.mjs",
     "qa:interacao": "node scripts/qa/interacao.mjs",
     "qa:avisos": "node --experimental-strip-types --no-warnings scripts/qa/avisos.mjs",
-    "qa": "npm run qa:rotas && npm run qa:contraste && npm run qa:interacao && npm run qa:avisos",
+    "qa:contador": "node scripts/qa/contador.mjs",
+    "qa": "npm run qa:rotas && npm run qa:contraste && npm run qa:interacao && npm run qa:avisos && npm run qa:contador",
     "qa:sonda": "node scripts/qa/sonda.mjs"
   },
   "dependencies": {
