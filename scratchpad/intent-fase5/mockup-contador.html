@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="claro" data-estado="a">
+<head>
+<meta charset="utf-8">
+<title>Fase 5 — o contador de plataforma</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:wght@400&display=swap" rel="stylesheet">
+<style>
+/* ══════════════════════════════════════════════════════════════════════════
+   TOKENS — cópia literal de src/app/globals.css, via o mockup da Fase 4.
+   Zero hex novo. Se a cor não está no globals.css, não entra aqui.
+   ══════════════════════════════════════════════════════════════════════════ */
+:root{
+  --canvas:#f3efe6; --surface:#ffffff; --surface2:#f1f1ef;
+  --line:#cdcdcb; --line2:#e4e4e2; --line3:#919599;
+  --ink:#1c1c1b; --ink2:#3f4143; --mut:#5f6367; --faint:#7a7e82;
+  --acc:#e56515; --acc-hi:#c2540f; --acc-soft:#fba45c; --acc-tint:#fdf0e4;
+  --acc-tx:#b8490b; --acc-ink:#1c1c1b;
+  --paper:#f3efe6; --band:#16140f; --band-ink:#f3efe6; --rule:#d8d1c3;
+  --cell:#f7f4ec; --urgent:#d63a22; --urgent-bg:#f6e4df; --urgent-line:#e2b4a8;
+  --note-bg:#efe6d6;
+  --ok:#15803d; --ok-bg:#eff8f2; --ok-line:#a7d8b9;
+  --warn:#8a4a10; --warn-bg:#fdf0e4; --warn-line:#fba45c;
+  --danger:#b91c1c; --danger-bg:#fef2f2; --danger-line:#f0b4b4;
+
+  --sans:"Geist",system-ui,sans-serif;
+  --mono:"Geist Mono",ui-monospace,monospace;
+  --serif:"Instrument Serif",Georgia,serif;
+
+  --medida-leitura:680px;
+  --gutter:40px;
+}
+html[data-tema="escuro"]{
+  --canvas:#12110f; --paper:#12110f; --band:#000000; --band-ink:#f2efe6;
+  --rule:#2c2a26; --cell:#1a1916; --urgent:#ff6b52; --urgent-bg:#2a1814;
+  --urgent-line:#5a3030; --note-bg:#1f1c18;
+  --surface:#201f1d; --surface2:#2a2926; --line:#3a3835; --line2:#2a2926;
+  --line3:#55524e;
+  --ink:#f8f8f8; --ink2:#dcdbd8; --mut:#a9a7a2; --faint:#8a8782;
+  --acc-hi:#fba45c; --acc-tint:#2e1f0f; --acc-tx:#fba45c;
+  --ok:#34d399; --ok-bg:#0e2a20; --ok-line:#1e5a44;
+  --warn:#fba45c; --warn-bg:#2e1f0f; --warn-line:#6b4a1e;
+  --danger:#f87171; --danger-bg:#2e1616; --danger-line:#7a2c2c;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);
+     font-size:15px;-webkit-font-smoothing:antialiased}
+
+/* ══ CASCA — full-bleed, como a Fase 3 implementou ═══════════════════════ */
+.tela{min-height:1040px;display:flex;flex-direction:column;background:var(--paper)}
+.mast{display:flex;align-items:flex-end;justify-content:space-between;
+      padding:14px var(--gutter) 10px;border-bottom:2px solid var(--ink)}
+.marca{font-family:var(--serif);font-weight:400;font-size:32px;line-height:1;
+       letter-spacing:-.01em;color:var(--ink)}
+.edicao{font-family:var(--sans);font-size:11.5px;letter-spacing:.09em;
+        text-transform:uppercase;color:var(--mut);display:flex;gap:14px;align-items:baseline}
+.edicao b{color:var(--ink);font-weight:600;border-bottom:2px solid var(--acc);padding-bottom:1px}
+.date{display:flex;justify-content:space-between;padding:7px var(--gutter);
+      font-size:11.5px;color:var(--mut);border-bottom:1px solid var(--rule)}
+.date .mono{font-family:var(--mono)}
+.band{display:flex;align-items:center;gap:26px;background:var(--band);
+      color:var(--band-ink);padding:9px var(--gutter);font-size:11.5px;
+      letter-spacing:.1em;text-transform:uppercase;font-weight:500}
+.band .sig{color:var(--band-ink)}
+.band a{color:var(--band-ink);text-decoration:none;opacity:.72}
+.band a.on{opacity:1;border-bottom:2px solid var(--acc);padding-bottom:2px}
+.band .dir{margin-left:auto;opacity:.72;letter-spacing:.06em}
+
+/* ══ A BANCADA — só a coluna de saída importa nesta fase ═════════════════ */
+.obra{flex:1;display:grid;padding:0 var(--gutter);grid-template-columns:340px 1fr 560px}
+.pan{display:flex;flex-direction:column;gap:16px;padding:20px 0}
+.pan.orig{border-right:1px solid var(--rule);padding-right:24px}
+.pan.meio{padding-left:32px;padding-right:32px}
+.pan.said{border-left:1px solid var(--rule);padding-left:24px}
+.rot{font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--mut);font-weight:500}
+.fantasma{border:1px solid var(--line2);background:var(--surface);padding:11px 13px;
+  font-size:12.5px;color:var(--mut);line-height:1.5}
+.fantasma b{color:var(--ink);font-weight:600;display:block;margin-bottom:3px;font-size:13px}
+
+/* ══ O CARTÃO DE PEÇA — estrutura real de OutputPieces.tsx ═══════════════ */
+.peca{border:1px solid var(--line2);background:var(--surface);padding:16px;
+  display:flex;flex-direction:column;gap:12px}
+.peca .cab{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.peca .cab .t{font-size:14px;font-weight:600;letter-spacing:-.01em;color:var(--ink)}
+.peca .cab .m{font-family:var(--mono);font-size:10px;text-transform:uppercase;
+  letter-spacing:.06em;color:var(--faint)}
+.corpo{display:flex;flex-direction:column;gap:7px;font-size:13.5px;line-height:1.5;
+  color:var(--ink2)}
+.corpo .gancho{font-weight:600;color:var(--ink);font-size:14.5px;line-height:1.35}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   O CONTADOR — a peça nova da fase.
+
+   Duas metades com papéis diferentes, e a distinção é o desenho inteiro:
+   o NÚMERO conta o nosso texto e é sempre verdade; a RÉGUA é fato de fora e
+   tem procedência. Por isso a régua mora numa linha própria, embaixo, com a
+   fonte ao lado — e some quando não há fonte. O número nunca some.
+   ══════════════════════════════════════════════════════════════════════════ */
+.conta{border-top:1px solid var(--line2);padding-top:11px;
+  display:flex;flex-direction:column;gap:7px}
+.conta .linha{display:flex;align-items:baseline;gap:8px}
+.conta .n{font-family:var(--mono);font-size:15px;font-weight:600;color:var(--ink);
+  letter-spacing:-.01em}
+.conta .de{font-family:var(--mono);font-size:15px;color:var(--mut)}
+.conta .un{font-size:11.5px;color:var(--mut)}
+
+/* Selo SEM LASTRO — a palavra, não um número cinza. Borda tracejada porque o
+   que falta é a FONTE; usar `urgent` diria "está errado", e não está. */
+.selo{margin-left:auto;font-family:var(--mono);font-size:10px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.09em;color:var(--warn);
+  border:1px dashed var(--warn-line);background:var(--warn-bg);padding:2px 7px}
+
+/* A barra. Sem borda arredondada — é regra, como todo o resto do híbrido. */
+.barra{position:relative;height:9px;background:var(--cell);border:1px solid var(--rule)}
+.barra .cheio{position:absolute;inset:0 auto 0 0;background:var(--ink)}
+/* O CORTE É FAIXA, NÃO PONTO. As plataformas não documentam onde ele cai, e
+   são dois orçamentos ao mesmo tempo — caracteres E ~3 linhas. Desenhar um
+   tique único seria um número inventado com cara de medido. */
+.barra .faixa{position:absolute;top:-1px;bottom:-1px;
+  background:repeating-linear-gradient(135deg,transparent 0 3px,var(--acc-soft) 3px 6px);
+  border-left:1px solid var(--acc);border-right:1px solid var(--acc)}
+.fonte{font-size:11px;color:var(--mut);display:flex;gap:6px;align-items:baseline}
+.fonte .mono{font-family:var(--mono);font-size:10.5px;color:var(--faint);
+  text-transform:uppercase;letter-spacing:.06em}
+.fonte b{color:var(--ink2);font-weight:600}
+.corte{font-size:11px;color:var(--acc-tx);display:flex;gap:5px;align-items:baseline}
+.corte b{font-weight:600}
+
+/* Rodapé do cartão — os botões que já existem hoje */
+.acoes{display:flex;align-items:center;gap:8px;border-top:1px solid var(--line2);
+  padding-top:11px}
+.bt{font-family:var(--sans);font-size:12px;font-weight:500;padding:5px 11px;
+  border:1px solid var(--line);background:var(--canvas);color:var(--ink);cursor:pointer}
+.ok{font-size:11px;color:var(--ok);display:flex;gap:4px;align-items:center}
+
+/* ══ NOTA DE RODAPÉ DO MOCKUP ════════════════════════════════════════════ */
+.nota{margin:0 var(--gutter) 26px;border-left:2px solid var(--acc);
+  background:var(--note-bg);padding:13px 16px;font-size:13px;line-height:1.55;
+  color:var(--ink2);max-width:var(--medida-leitura)}
+.nota b{color:var(--ink);font-weight:600}
+.nota code{font-family:var(--mono);font-size:12px;color:var(--ink)}
+
+/* ══ TROCA DE ESTADO ═════════════════════════════════════════════════════ */
+.est{display:none}
+html[data-estado="a"] #a,html[data-estado="b"] #b,
+html[data-estado="c"] #c,html[data-estado="d"] #d{display:block}
+.leme{position:fixed;right:16px;bottom:16px;z-index:9;display:flex;gap:1px;
+  background:var(--rule);border:1px solid var(--rule)}
+.leme button{font-family:var(--sans);font-size:11.5px;padding:7px 12px;border:0;
+  background:var(--cell);color:var(--ink);cursor:pointer}
+.leme button.on{background:var(--ink);color:var(--paper);font-weight:600}
+.leme .tema{background:var(--surface2)}
+</style>
+</head>
+<body>
+<div class="est" id="a">
+ <div class="tela">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>EDIÇÃO ·</span> <b>RESIBAG</b> <span>SANWEY</span> <span>PESSOAL</span></div>
+  </div>
+  <div class="date"><span>segunda-feira, 14 de setembro de 2026</span><span class="mono">BANCADA · SEM LASTRO</span></div>
+  <div class="band">
+    <span class="sig">fila não configurada</span>
+    <a href="#" class="on">bancada</a><a href="#">peças</a><a href="#">fatos</a>
+    <a href="#">custos</a><a href="#">biblioteca</a>
+    <span class="dir">tema · claro</span>
+  </div>
+  <div class="obra">
+    <div class="pan orig">
+      <div class="rot">origem</div>
+      <div class="fantasma"><b>Artigo publicado</b>“Como o gerador responde pelo resíduo depois que o caminhão sai” — 1.240 palavras, 9 afirmações rastreadas.</div>
+      <div class="rot">eixos</div>
+      <div class="fantasma"><b>Voz · Página da empresa</b>Trabalho: explicar a norma. Carrega a assinatura institucional.</div>
+    </div>
+    <div class="pan meio">
+      <div class="rot">formatos gerados</div>
+      <div class="fantasma"><b>6 de 6 concluídos</b>Carrossel LinkedIn · Carrossel Instagram · Post de texto · Legenda · Reels · Stories</div>
+      <div class="fantasma"><b>Custo desta rodada</b>US$ 0,214 — 6 gerações e 2 buscas na web.</div>
+    </div>
+    <div class="pan said">
+      <div class="rot">saída</div>
+      <div class="peca">
+        <div class="cab"><span class="t">Post de texto</span><span class="m">LINKEDIN · DO ARTIGO</span></div>
+
+        <div class="corpo">
+          <div class="gancho">O caminhão sai, o resíduo continua seu. A responsabilidade do gerador não termina no portão.</div>
+          <p>A NBR 10.004:2024 classifica o resíduo quanto à periculosidade — Classe I perigoso, Classe II não perigoso. É norma de classificação.</p>
+          <p>O que muitos confundem: classificar não é transferir. O gerador responde pela destinação até o fim da cadeia.</p>
+          <p>Na prática, isso significa exigir do transportador o mesmo padrão de documentação que você exigiria de si.</p>
+        </div>
+
+        <div class="conta">
+          <div class="linha">
+            <span class="n">1.847</span><span class="un">caracteres — o que o botão copia</span>
+            <span class="selo">sem lastro</span>
+          </div>
+          <div class="fonte"><span class="mono">régua</span><span>nenhum limite com fonte conferida para LinkedIn · post de texto.</span></div>
+        </div>
+        <div class="acoes">
+          <button class="bt">Copiar texto</button>
+          <span class="ok">✓ tudo rastreado até a origem</span>
+        </div>
+      </div>
+    </div>
+  </div>
+ </div>
+ <div class="nota">Este é o estado em que a ferramenta <b>entra no ar</b>, e é o mais importante do mockup. O número aparece porque contar o nosso próprio texto não precisa de fonte nenhuma — é o mesmo string que o botão “Copiar texto” põe na área de transferência, nem uma letra a mais. A régua não aparece porque ninguém conferiu o limite ainda, e o selo diz isso com a palavra, não com um número cinza. Mesma regra da §2: <code>nao-verificado</code> dá contexto e nunca vira o número que decide.</div>
+</div>
+<div class="est" id="b">
+ <div class="tela">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>EDIÇÃO ·</span> <b>RESIBAG</b> <span>SANWEY</span> <span>PESSOAL</span></div>
+  </div>
+  <div class="date"><span>segunda-feira, 14 de setembro de 2026</span><span class="mono">BANCADA · COM LASTRO</span></div>
+  <div class="band">
+    <span class="sig">fila não configurada</span>
+    <a href="#" class="on">bancada</a><a href="#">peças</a><a href="#">fatos</a>
+    <a href="#">custos</a><a href="#">biblioteca</a>
+    <span class="dir">tema · claro</span>
+  </div>
+  <div class="obra">
+    <div class="pan orig">
+      <div class="rot">origem</div>
+      <div class="fantasma"><b>Artigo publicado</b>“Como o gerador responde pelo resíduo depois que o caminhão sai” — 1.240 palavras, 9 afirmações rastreadas.</div>
+      <div class="rot">eixos</div>
+      <div class="fantasma"><b>Voz · Página da empresa</b>Trabalho: explicar a norma. Carrega a assinatura institucional.</div>
+    </div>
+    <div class="pan meio">
+      <div class="rot">formatos gerados</div>
+      <div class="fantasma"><b>6 de 6 concluídos</b>Carrossel LinkedIn · Carrossel Instagram · Post de texto · Legenda · Reels · Stories</div>
+      <div class="fantasma"><b>Custo desta rodada</b>US$ 0,214 — 6 gerações e 2 buscas na web.</div>
+    </div>
+    <div class="pan said">
+      <div class="rot">saída</div>
+      <div class="peca">
+        <div class="cab"><span class="t">Post de texto</span><span class="m">LINKEDIN · DO ARTIGO</span></div>
+
+        <div class="corpo">
+          <div class="gancho">O caminhão sai, o resíduo continua seu. A responsabilidade do gerador não termina no portão.</div>
+          <p>A NBR 10.004:2024 classifica o resíduo quanto à periculosidade — Classe I perigoso, Classe II não perigoso. É norma de classificação.</p>
+          <p>O que muitos confundem: classificar não é transferir. O gerador responde pela destinação até o fim da cadeia.</p>
+          <p>Na prática, isso significa exigir do transportador o mesmo padrão de documentação que você exigiria de si.</p>
+        </div>
+
+        <div class="conta">
+          <div class="linha">
+            <span class="n">1.847</span><span class="de">/ 3.000</span><span class="un">caracteres</span>
+          </div>
+          <div class="barra"><div class="cheio" style="width:61.6%"></div></div>
+          <div class="fonte"><span class="mono">régua</span><span>limite do post no LinkedIn · <b>⟨fonte e data que você conferir⟩</b></span></div>
+        </div>
+        <div class="acoes">
+          <button class="bt">Copiar texto</button>
+          <span class="ok">✓ tudo rastreado até a origem</span>
+        </div>
+      </div>
+    </div>
+  </div>
+ </div>
+ <div class="nota">Depois que você colar o limite e o link, a régua acende sozinha. A barra é regra de 1px, não pílula arredondada — a linguagem do híbrido. A linha de fonte fica <b>sempre visível</b>, com data: é o mesmo hábito do recibo de custo e do <code>checkedAt</code> de cada fato. Um limite cuja fonte vencer volta ao estado A por conta própria.</div>
+</div>
+<div class="est" id="c">
+ <div class="tela">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>EDIÇÃO ·</span> <b>RESIBAG</b> <span>SANWEY</span> <span>PESSOAL</span></div>
+  </div>
+  <div class="date"><span>segunda-feira, 14 de setembro de 2026</span><span class="mono">BANCADA · CORTE MEDIDO</span></div>
+  <div class="band">
+    <span class="sig">fila não configurada</span>
+    <a href="#" class="on">bancada</a><a href="#">peças</a><a href="#">fatos</a>
+    <a href="#">custos</a><a href="#">biblioteca</a>
+    <span class="dir">tema · claro</span>
+  </div>
+  <div class="obra">
+    <div class="pan orig">
+      <div class="rot">origem</div>
+      <div class="fantasma"><b>Artigo publicado</b>“Como o gerador responde pelo resíduo depois que o caminhão sai” — 1.240 palavras, 9 afirmações rastreadas.</div>
+      <div class="rot">eixos</div>
+      <div class="fantasma"><b>Voz · Página da empresa</b>Trabalho: explicar a norma. Carrega a assinatura institucional.</div>
+    </div>
+    <div class="pan meio">
+      <div class="rot">formatos gerados</div>
+      <div class="fantasma"><b>6 de 6 concluídos</b>Carrossel LinkedIn · Carrossel Instagram · Post de texto · Legenda · Reels · Stories</div>
+      <div class="fantasma"><b>Custo desta rodada</b>US$ 0,214 — 6 gerações e 2 buscas na web.</div>
+    </div>
+    <div class="pan said">
+      <div class="rot">saída</div>
+      <div class="peca">
+        <div class="cab"><span class="t">Post de texto</span><span class="m">LINKEDIN · DO ARTIGO</span></div>
+
+        <div class="corpo">
+          <div class="gancho">O caminhão sai, o resíduo continua seu. A responsabilidade do gerador não termina no portão.</div>
+          <p>A NBR 10.004:2024 classifica o resíduo quanto à periculosidade — Classe I perigoso, Classe II não perigoso. É norma de classificação.</p>
+          <p>O que muitos confundem: classificar não é transferir. O gerador responde pela destinação até o fim da cadeia.</p>
+          <p>Na prática, isso significa exigir do transportador o mesmo padrão de documentação que você exigiria de si.</p>
+        </div>
+
+        <div class="conta">
+          <div class="linha">
+            <span class="n">1.847</span><span class="de">/ 3.000</span><span class="un">caracteres</span>
+          </div>
+          <div class="barra">
+            <div class="cheio" style="width:61.6%"></div>
+            <div class="faixa" style="left:6.8%;width:3.6%"></div>
+          </div>
+          <div class="corte"><b>O “ver mais” cai na faixa.</b> <span>204 no seu celular, 312 no seu computador — medido em 14/09/2026. Vale também o teto de 3 linhas, o que vier antes.</span></div>
+          <div class="fonte"><span class="mono">régua</span><span>limite do post no LinkedIn · <b>⟨fonte e data que você conferir⟩</b></span></div>
+        </div>
+        <div class="acoes">
+          <button class="bt">Copiar texto</button>
+          <span class="ok">✓ tudo rastreado até a origem</span>
+        </div>
+      </div>
+    </div>
+  </div>
+ </div>
+ <div class="nota">O corte é <b>faixa, não tique</b>, e essa é a decisão de desenho da fase. As duas plataformas não documentam onde o “ver mais” cai, e são dois orçamentos ao mesmo tempo — caracteres <b>e</b> ~3 linhas, vale o que acabar primeiro. Um tique único seria um número inventado com cara de medido. A faixa nasce das <b>suas duas medições</b>: celular e computador. É por isso que preciso das duas.</div>
+</div>
+<div class="est" id="d">
+ <div class="tela">
+  <div class="mast">
+    <div class="marca">trackforge</div>
+    <div class="edicao"><span>EDIÇÃO ·</span> <b>RESIBAG</b> <span>SANWEY</span> <span>PESSOAL</span></div>
+  </div>
+  <div class="date"><span>segunda-feira, 14 de setembro de 2026</span><span class="mono">BANCADA · SEM RÉGUA</span></div>
+  <div class="band">
+    <span class="sig">fila não configurada</span>
+    <a href="#" class="on">bancada</a><a href="#">peças</a><a href="#">fatos</a>
+    <a href="#">custos</a><a href="#">biblioteca</a>
+    <span class="dir">tema · claro</span>
+  </div>
+  <div class="obra">
+    <div class="pan orig">
+      <div class="rot">origem</div>
+      <div class="fantasma"><b>Artigo publicado</b>“Como o gerador responde pelo resíduo depois que o caminhão sai” — 1.240 palavras, 9 afirmações rastreadas.</div>
+      <div class="rot">eixos</div>
+      <div class="fantasma"><b>Voz · Página da empresa</b>Trabalho: explicar a norma. Carrega a assinatura institucional.</div>
+    </div>
+    <div class="pan meio">
+      <div class="rot">formatos gerados</div>
+      <div class="fantasma"><b>6 de 6 concluídos</b>Carrossel LinkedIn · Carrossel Instagram · Post de texto · Legenda · Reels · Stories</div>
+      <div class="fantasma"><b>Custo desta rodada</b>US$ 0,214 — 6 gerações e 2 buscas na web.</div>
+    </div>
+    <div class="pan said">
+      <div class="rot">saída</div>
+      <div class="peca">
+        <div class="cab"><span class="t">Roteiro de Reels</span><span class="m">INSTAGRAM · DO ARTIGO</span></div>
+
+        <div class="corpo">
+          <div class="gancho">GANCHO · “Seu resíduo saiu do portão. Ele ainda é seu.”</div>
+          <p><b>[4s]</b> fala: O caminhão leva o resíduo, mas não leva a responsabilidade.<br><span style="color:var(--faint)">na tela: A RESPONSABILIDADE NÃO EMBARCA</span></p>
+          <p><b>[7s]</b> fala: A norma classifica. Quem responde pela destinação é o gerador.<br><span style="color:var(--faint)">na tela: NBR 10.004:2024</span></p>
+          <p><b>[6s]</b> fala: Exija do transportador a documentação que você exigiria de si.</p>
+        </div>
+
+        <div class="conta">
+          <div class="fonte"><span class="mono">sem régua</span><span>Reels é roteiro de vídeo, não legenda. O que tem limite aqui é o <b>tempo</b> — 23s somados —, e isso o schema já garante.</span></div>
+        </div>
+        <div class="acoes">
+          <button class="bt">Copiar texto</button>
+          <span class="ok">✓ tudo rastreado até a origem</span>
+        </div>
+      </div>
+    </div>
+  </div>
+ </div>
+ <div class="nota">Reels e Stories são <b>roteiro</b>, não legenda — o texto que o botão copia tem “GANCHO:” e “[4s]” dentro, que nunca vão para lugar nenhum. Contar isso contra um limite de legenda seria medir a coisa errada e parecer certo. Os dois carrosséis também ficam de fora: slide não é caractere de post. <b>Sobram dois formatos com régua de verdade: post de texto e legenda.</b></div>
+</div>
+<div class="leme">
+  <button data-e="a" class="on">A · sem lastro</button>
+  <button data-e="b">B · com lastro</button>
+  <button data-e="c">C · corte medido</button>
+  <button data-e="d">D · sem régua</button>
+  <button class="tema" id="tema">tema</button>
+</div>
+<script>
+for (const b of document.querySelectorAll('.leme button[data-e]')) {
+  b.onclick = () => {
+    document.documentElement.dataset.estado = b.dataset.e;
+    for (const o of document.querySelectorAll('.leme button[data-e]')) o.classList.toggle('on', o === b);
+  };
+}
+document.getElementById('tema').onclick = () => {
+  const r = document.documentElement;
+  r.dataset.tema = r.dataset.tema === 'claro' ? 'escuro' : 'claro';
+  for (const d of document.querySelectorAll('.band .dir')) d.textContent = 'tema · ' + r.dataset.tema;
+};
+</script>
+</body>
+</html>

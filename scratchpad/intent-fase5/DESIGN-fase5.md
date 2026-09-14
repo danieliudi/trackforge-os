@@ -217,3 +217,84 @@ nada. O que muda é que param de parecer apurados.
 - **Prometer previsão de alcance, de engajamento ou de "melhor horário".**
   Nada disso tem fonte primária, e esta ferramenta existe para não publicar
   número que ninguém sustenta.
+
+---
+
+# Parte 2 — o mockup (14/09/2026)
+
+Daniel aprovou a direção e pediu o mockup. `mockup-contador.html`, quatro
+estados clicáveis, os dois temas. **340 medições de contraste, todas acima do
+piso, nos dois temas** (`contraste.mjs`). Capturas a 1900px em `capturas/`.
+
+## Onde o contador mora — e não é onde eu tinha imaginado
+
+No **cartão de peça da bancada** (`OutputPieces.tsx`), entre o corpo do texto e
+os botões. Não no composer: lá o texto é o material de entrada, não o post.
+
+E ele tem uma âncora que dispensa qualquer interpretação: **conta exatamente o
+que o botão “Copiar texto” põe na área de transferência** — o retorno de
+`toPlainText(kind, data)`, o mesmo string, nem uma letra a mais. Não é uma
+estimativa da peça; é a peça.
+
+## O que descobri conferindo: o contador só serve para DOIS dos seis formatos
+
+`toPlainText` monta o Reels assim:
+
+```
+GANCHO: Seu resíduo saiu do portão…
+[4s] O caminhão leva o resíduo…
+   na tela: A RESPONSABILIDADE NÃO EMBARCA
+```
+
+Esse `GANCHO:` e esse `[4s]` nunca vão para lugar nenhum — é roteiro de vídeo,
+para uma pessoa ler e gravar. Contar isso contra um limite de legenda seria
+medir a coisa errada e o número pareceria certo. Stories, a mesma coisa. Os
+dois carrosséis também ficam de fora: slide não é caractere de post.
+
+**Sobram post de texto e legenda.** Isso reduz a fase e é bom: menos superfície,
+e a que sobra é a que de fato tem régua.
+
+## E os formatos NÃO são editáveis aqui
+
+Conferido: `OutputPieces.tsx` não tem `contentEditable`, `<textarea>` nem
+`onChange` — as cinco peças não-carrossel são leitura pura e vão para o CRM como
+saíram. O contador, então, **informa mas não conserta**: ele diz que o post
+passou do corte, e o ajuste acontece depois, no LinkedIn.
+
+Isso não invalida a fase — saber antes de colar já é o ganho —, mas é honesto
+dizer que a próxima pergunta natural ("e se eu quiser encurtar aqui?") é outra
+fase, com editor de texto e regeneração. Não entra nesta.
+
+## A decisão de desenho: o corte é FAIXA, não tique
+
+`.barra .faixa` é hachurada e tem duas bordas, porque o "ver mais" não é um
+ponto. Dois orçamentos ao mesmo tempo — caracteres **e** ~3 linhas, vale o que
+acabar primeiro —, e nenhuma das duas plataformas documenta onde ele cai. Um
+tique único seria número inventado com cara de medido.
+
+**A faixa nasce das duas medições do Daniel**: celular numa borda, computador na
+outra. É literalmente por isso que preciso das duas, e não de uma.
+
+## O que a captura mostrou e eu não tinha previsto
+
+Na barra, a faixa do corte fica **nos primeiros 7%**. Um post cabe em 3.000
+caracteres e só uns 200 aparecem antes do "ver mais".
+
+Ou seja: **o limite quase nunca é o número interessante.** Ninguém esbarra em
+3.000. O que decide se o post funciona são os primeiros ~200 caracteres, e é
+essa a informação que o contador existe para dar. O teto entra junto porque é
+barato, não porque importa.
+
+Isso reordena a prioridade do que pedir ao Daniel: **a medição do corte vale
+mais que os tetos duros.** Os tetos são conforto; o corte é o produto.
+
+## Selo `SEM LASTRO`
+
+Borda tracejada, `warn` sobre `warn-bg` — 6,12:1 no claro, 8,01:1 no escuro.
+Tracejada de propósito: o que falta é a **fonte**, não a correção. Usar `urgent`
+diria "está errado", e não está — ninguém conferiu, que é diferente.
+
+## Fora do escopo, registrado
+
+Contador no composer (mede a entrada, não a saída) · encurtar ou cortar texto
+automaticamente · qualquer previsão de alcance, engajamento ou "melhor horário".
