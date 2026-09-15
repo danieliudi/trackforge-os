@@ -62,8 +62,12 @@ Este arquivo é **como construir**. Ele não descreve nenhuma funcionalidade, de
 propósito. **O que existe mora em `docs/mapa-funcional.md`** — escrito em
 08/09/2026, e antes dele o buraco era real: numa análise externa em 03/09 foi
 preciso varrer o código inteiro para responder o que cada tela faz, porque
-nenhuma das 11 páginas tinha comentário de propósito e o `README` descreve o
-produto, não a superfície.
+nenhuma das 11 páginas tinha comentário de propósito e o `README` era o
+boilerplate do `create-next-app` — não descrevia nem o produto nem a superfície.
+(Este arquivo dizia até 15/09/2026 que o README "descreve o produto"; não
+descrevia. Reescrito naquela data, e hoje ele cobre como rodar e aponta para o
+mapa. `doc:check` não pega esse tipo de erro: ele confere caminho citado e
+contagem, não se a frase sobre um arquivo é verdadeira.)
 
 O mapa cobre, com tudo conferido no código e não lembrado:
 
