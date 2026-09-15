@@ -40,6 +40,12 @@ A production bench with a fact-provenance gate: derived pieces cannot invent bey
 - Product name in chrome: trackforge (operator tool name).
 - Brand fronts by id/label: Sanwey, Resibag, Meu.
 - Session brief (2026-09): prior visual identity (tokens, fonts, shell look) is NOT binding for this redesign test. Modern 2026 web craft is in scope. Industrial-sector aesthetic conventions are not required.
+- **Locked visual direction (2026-09-07): Hybrid Wire Service + Type Specimen Desk.**
+  Casca = Wire (masthead serif `trackforge`, EDIÇÃO · frente, dateline, faixa LIVE + nav).
+  Corpo Situação = Specimen (glifo = prioridade ativa, célula invertida, grade/lista tipográfica).
+  Paleta: paper `#f3efe6` / ink `#16140f` / urgent `#d63a22`; tema escuro = ink invertido.
+  Referência aprovada: `scratchpad/intent-fase1/impeccable-hibrido-wire-specimen.html`.
+  Directions descartadas nesta rodada: Night Desk, Catalog Sleeve, Nixie Bench, Wire puro, Specimen puro.
 - Binding operational ethics remain: no fabricated facts; anti dark-pattern.
 
 ## Evidence on Hand
