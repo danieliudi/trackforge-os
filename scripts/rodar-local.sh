@@ -61,20 +61,37 @@ if [ "$menor" != "$NODE_MINIMO" ]; then
 fi
 ok "git $(git --version | awk '{print $3}') · node v$node_atual · npm $(npm -v)"
 
-# ── 2. Baixar ou atualizar ──────────────────────────────────────────────────
-if [ -d "$PASTA/.git" ]; then
-  passo "Atualizando o que já está aqui"
-  cd "$PASTA"
+# ── 2. Onde estou? ──────────────────────────────────────────────────────────
+#
+# Três situações reais, e o script não pode adivinhar errado nenhuma:
+#   · rodando DE DENTRO de uma cópia que já existe  → trabalha aqui
+#   · rodando AO LADO dela (a pasta-mãe)            → entra nela
+#   · rodando numa pasta qualquer                   → clona
+#
+# A primeira é a que quebrava: sem este teste, rodar de dentro de
+# C:\dev\trackforge-os criava C:\dev\trackforge-os\trackforge-os.
+eh_este_repo() {
+  git -C "$1" rev-parse --git-dir >/dev/null 2>&1 || return 1
+  local url; url="$(git -C "$1" remote get-url origin 2>/dev/null || echo "")"
+  # Aceita com e sem `.git` no fim, e ignora caixa: no Windows o mesmo
+  # repositório aparece escrito das duas formas conforme quem clonou.
+  case "$(printf '%s' "${url%.git}" | tr 'A-Z' 'a-z')" in
+    *danieliudi/carousel-builder|*danieliudi/trackforge-os) return 0 ;;
+    *) return 1 ;;
+  esac
+}
 
-  # Alteração local não commitada é sua; o script não decide por você.
-  if [ -n "$(git status --porcelain)" ]; then
-    aviso "Você tem alterações não salvas nesta pasta. Não vou puxar nada por cima."
-    git status --short
-    echo "  (rode 'git stash' para guardá-las, ou 'git checkout .' para descartar)"
-  else
-    git pull --ff-only origin main
-    ok "atualizado até $(git log --oneline -1)"
-  fi
+if eh_este_repo "."; then
+  passo "Você já está dentro da cópia local"
+  ok "$(pwd)"
+elif [ -d "$PASTA" ] && eh_este_repo "$PASTA"; then
+  passo "Achei a cópia local aqui do lado"
+  cd "$PASTA"
+  ok "$(pwd)"
+elif [ -d "$PASTA" ] && [ -n "$(ls -A "$PASTA" 2>/dev/null)" ]; then
+  erro "Existe uma pasta '$PASTA' aqui que NÃO é uma cópia deste projeto."
+  echo "  Não vou mexer nela. Renomeie, apague, ou rode este script de outro lugar."
+  exit 1
 else
   passo "Baixando o projeto"
   echo "  O repositório é privado — o git vai pedir seu login do GitHub."
@@ -92,6 +109,19 @@ AJUDA
   fi
   cd "$PASTA"
   ok "baixado em $(pwd)"
+fi
+
+# ── 2b. Atualizar ───────────────────────────────────────────────────────────
+passo "Buscando novidades"
+# Alteração local não commitada é sua; o script não decide por você.
+if [ -n "$(git status --porcelain)" ]; then
+  aviso "Você tem alterações não salvas nesta pasta. Não vou puxar nada por cima."
+  git status --short
+  echo "  (rode 'git stash' para guardá-las, ou 'git checkout .' para descartar)"
+elif ! git pull --ff-only origin main 2>/dev/null; then
+  aviso "Não consegui atualizar — seguindo com o que já está aqui."
+else
+  ok "atualizado até $(git log --oneline -1)"
 fi
 
 # ── 3. Dependências ─────────────────────────────────────────────────────────

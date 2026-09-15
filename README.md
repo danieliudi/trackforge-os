@@ -16,19 +16,33 @@ antes de a peça chegar em você.
 
 ## Rodar na sua máquina
 
+**Windows** (PowerShell):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\rodar-local.ps1
+```
+
+O `-ExecutionPolicy Bypass` é necessário porque o Windows bloqueia script não
+assinado por padrão, e vale **só para esta execução** — não muda a configuração
+da máquina.
+
+**macOS, Linux, WSL ou Git Bash:**
+
 ```bash
 bash scripts/rodar-local.sh
 ```
 
-O script baixa (ou atualiza), instala, cria o `.env.local` e sobe o app em
-http://localhost:3000. Pode rodar quantas vezes quiser — ele nunca sobrescreve o
-seu `.env.local` nem descarta alteração sua sem avisar.
+Os dois fazem o mesmo: baixam (ou atualizam), instalam, criam o `.env.local` e
+sobem o app em http://localhost:3000, abrindo o navegador. Pode rodar quantas
+vezes quiser — nunca sobrescrevem o seu `.env.local` nem descartam alteração sua
+sem avisar.
 
-**Na primeira vez você nem tem o repositório ainda.** Salve só o script numa
-pasta qualquer (a Área de Trabalho serve) e rode de lá: ele clona sozinho.
+**Rodam de qualquer um dos dois lugares:** de dentro da pasta do projeto, ou da
+pasta-mãe (aí eles entram nela). E se você ainda não tem o repositório, salve só
+o script numa pasta qualquer e rode de lá — ele clona sozinho.
 
 Precisa de **git** e **Node 20.9 ou mais** ([nodejs.org](https://nodejs.org), a
-versão LTS). O script confere os dois antes de começar e diz o que falta.
+versão LTS). Os dois conferem antes de começar e dizem o que falta.
 
 ### À mão, se preferir
 
