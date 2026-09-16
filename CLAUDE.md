@@ -38,7 +38,7 @@ genuinamente novo.
 > Não é gate — avisa e sai com 1, mas fica fora do `prebuild` (seção 0).
 >
 > O mapa: `00-nucleo` (fato, segredo, mockup, pronto, entrega, mais 0, 14 e 15)
-> ↔ seções 0, 2, 3, 4, 8, 10, 14 e 15 · `10-reuso` ↔ 1 e 7 · `20-telas` ↔ 4
+> ↔ seções 0, 2, 3, 4, 8, 10, 14 e 15 · `10-reuso` ↔ 1 e 7 · `20-telas` ↔ 4 e 17,
 > mais a linha de cor/tema da 1 · `30-react` ↔ 6 · `40-api-e-custo` ↔ 3, 5, 13
 > e 16 · `50-conhecimento` ↔ 9 · `60-qa` ↔ 11 e 12.
 >
@@ -47,7 +47,9 @@ genuinamente novo.
 > que gasta, `src/lib/crm.ts`, `proxy.ts` — e no Cursor isso é glob, que carrega a
 > regra na hora certa sem pesar em todo pedido. A seção 16 (número de plataforma)
 > foi para lá pelo mesmo motivo, e não para o núcleo apesar de ser procedência
-> como a 2: ela dispara em `plataformas.ts`, `prompts.ts` e o contador.
+> como a 2: ela dispara em `plataformas.ts`, `prompts.ts` e o contador. A seção 17
+> (cor de marca) foi para `20-telas` e não para o núcleo porque dispara em
+> `themes.ts` — e mexer em tema de marca cai no mesmo portão de mockup da 4.
 >
 > `70-quando-passar-pro-claude` **não espelha seção nenhuma daqui, de propósito**:
 > ela diz ao Cursor quando parar e passar a tarefa para o Claude Code, e só faz
@@ -135,6 +137,7 @@ parecido**.
 | Auditoria de afirmações | `src/lib/verify.ts` | 8 arquivos |
 | Varredura de termo proibido | `src/knowledge/check.ts` | 9 arquivos |
 | Preço por modelo e `priceUsage` | `src/constants/pricing.ts` | 17 arquivos |
+| Paleta curada da marca (autorizadas + **cores mortas**) | `src/knowledge/paleta-resibag.json` | o gate `npm run paleta:check` — cor de tema de marca se confere contra a lista de eliminadas do manual, nunca de memória |
 | Régua de plataforma: `LIMITES`, `CORTES`, `temLastro`, `contar`, `KINDS_COM_REGUA`, `HOOK_TARGET` | `src/constants/plataformas.ts` | o contador e `prompts.ts` — todo número de plataforma mora aqui, com `tier` e `checkedAt`. `contar` é `.length` de propósito (UTF-16 é o que a plataforma conta): não "conserte" para `[...s].length` |
 | Contador de caracteres da peça | `src/components/app/ContadorPlataforma.tsx` | o cartão da bancada — conta o que `toPlainText` copia, e SOME nos formatos sem régua |
 | Marcas, tagline canônica, política de logo | `src/constants/brands.ts` | 29 arquivos |
@@ -550,8 +553,9 @@ classe, e não cobre `rules-of-hooks`, condição que nunca faz o que parece, ne
 duplicação silenciosa.
 
 **O que foi feito.** `prebuild` agora é
-`node scripts/check-knowledge.mjs && eslint` — o aviso de drift continua saindo
-com 0, e o lint bloqueia. **Zero regra de estilo, de propósito**: gate que apita
+`node scripts/check-knowledge.mjs && node scripts/check-paleta.mjs && eslint` —
+o aviso de drift continua saindo com 0, e os outros dois bloqueiam. O
+`check-paleta` entrou em 16/09/2026 e é a seção 17. **Zero regra de estilo, de propósito**: gate que apita
 por formatação vira gate ignorado. O ruído que não quebra nada (variável não
 usada, dependência incompleta) continua como AVISO e sai em `npm run lint:ruido`,
 que não trava o build. O racional de cada bloco, e das regras que ficaram de
@@ -761,3 +765,55 @@ política de saída do contêiner nega `www.linkedin.com`,
 e busca devolve resumo de página não aberta — `secundaria` na melhor hipótese.
 Foi por isso que a tabela entrou no ar inteira `nao-verificado`, e isso está
 certo: o selo na tela é a informação honesta.
+
+## 17. Cor de marca tem versão, e a ferramenta estava cinco atrás
+
+Regra derivada de 16/09/2026, e o achado é do mesmo tipo da seção 16: número —
+aqui, cor — que entrou certo e envelheceu sem nada olhando.
+
+**O que se descobriu.** A ferramenta renderiza slide com cor de marca
+(`theme.accent` em `src/constants/themes.ts`), e os **quatro temas Resibag
+estavam na paleta v9**. Não v10.x, que já tinha sido substituído inteiro: v9.
+Sete dos nove hexes apareciam na `resibag-brand-guidelines` v11 numa linha
+rotulada *"Versões v9 — já eliminadas antes desta versão"*, e o `resibag-selo`
+usava `#B8973A`, o Certification Gold, como acento — **a ferramenta gerava selo
+de certificação na cor que o manual aposentou por ser a cor de certificação.**
+
+Ninguém errou. A paleta foi escrita quando estava certa, o manual andou cinco
+versões, e nada olhava para os dois ao mesmo tempo. É o Padrão de Falha 1 que a
+própria skill descreve no topo — ela ficou 4 gerações à frente da conta *"por
+meses sem ninguém notar"*.
+
+**A decisão que envelheceu, e por quê.** O `sources.json` dizia que design
+system NÃO entra na curadoria — decisão certa quando a ferramenta só produzia
+texto. Hoje ela renderiza peça. **Entrou só a COR**; tipografia, layout,
+template e protocolo de versionamento continuam fora, porque nenhum deles sai
+impresso num slide sem alguém olhar.
+
+**A lista é curada no repo, não lida da skill instalada.** Gate que só roda na
+máquina onde as skills estão sincronizadas não é gate — a mesma lição que o
+medidor de contraste aprendeu apontando para `/opt/pw-browsers`. Quem avisa que
+a fonte mudou é o `check-knowledge`, que agora vigia `resibag-brand-guidelines`
+também.
+
+**Dívida se declara, não se ignora.** Os quatro temas reprovam hoje, e o gate
+passa porque cada um está em `DIVIDA_DECLARADA` com motivo e data — mesmo padrão
+do `AUSENTES_DE_PROPOSITO` do `check-docs`. Gate que nasce vermelho por dívida
+já conhecida é gate que alguém desliga na sexta. E a exceção tem a morte
+embutida: **se o tema for consertado e a declaração ficar, o gate reprova
+dizendo que a exceção sobreviveu ao motivo.**
+
+**O que ele deliberadamente não olha:** `src/app/globals.css`. Aquela é a paleta
+da FERRAMENTA (o híbrido), que não responde a manual de marca nenhum. Peça que
+sai para o cliente usa `themes.ts`; a tela onde o Daniel trabalha usa o globals.
+
+**Conferido plantando os quatro defeitos que ele deve pegar:** cor morta em tema
+não declarado, declaração apagada sem o conserto, tema consertado com a
+declaração esquecida, e o formato do `themes.ts` mudando a ponto de o fatiador
+casar com zero temas — este último porque um gate que deixa de enxergar é pior
+que gate nenhum, e sai verde do mesmo jeito. Com a cor morta plantada,
+`npm run build` sai com **código 1 e não chega a compilar o Next**.
+
+**O que falta, e depende de mockup:** os quatro temas ainda precisam ser
+redesenhados contra a v11 — é mudança de aparência, seção 4. E a Sanwey não tem
+paleta curada: o gate só olha `resibag*` hoje, e diz isso no código.

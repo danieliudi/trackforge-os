@@ -1,6 +1,6 @@
 ---
-description: Cor, tema, identidade Situação, contraste e portão de mockup
-globs: src/**/*.tsx,src/app/globals.css
+description: Cor, tema, identidade Situação, contraste, paleta de marca e portão de mockup
+globs: src/**/*.tsx,src/app/globals.css,src/constants/themes.ts,src/knowledge/paleta-resibag.json
 alwaysApply: false
 ---
 
@@ -138,3 +138,27 @@ para `band-ink` (16,04:1).
   invisível para leitor de tela.
 - Estado de carregamento usa `role="status"` com `aria-live="polite"`.
 - Foco visível vem de `focusRing` (`src/lib/ui.ts`), não de `outline-none`.
+
+## Cor de marca tem versão
+
+Espelha a seção 17 do `CLAUDE.md`. Mora aqui porque dispara em `themes.ts` — e
+mexer em tema de marca é mudança de aparência, então o portão de mockup acima
+vale igual.
+
+Em 16/09/2026 os quatro temas Resibag da ferramenta estavam na paleta **v9**.
+Não v10.x, que já tinha sido substituído inteiro: v9. Sete dos nove hexes
+apareciam na `resibag-brand-guidelines` v11 como "Versões v9 — já eliminadas
+antes desta versão", e o `resibag-selo` usava `#B8973A` (Certification Gold)
+como acento: selo de certificação na cor que o manual aposentou por ser a cor
+de certificação.
+
+- **A paleta autorizada e a lista de MORTAS moram em
+  `src/knowledge/paleta-resibag.json`**, curadas no repo — não lidas da skill
+  instalada. Gate que só roda onde as skills estão sincronizadas não é gate.
+- **`npm run paleta:check` bloqueia o build** (entrou no `prebuild`). Cor morta
+  em tema de marca reprova, com o substituto que o manual manda usar.
+- **Dívida se declara em `DIVIDA_DECLARADA`**, com motivo e data. Os quatro temas
+  Resibag estão lá hoje. E a exceção morre sozinha: tema consertado com a
+  declaração esquecida também reprova.
+- **Não olha `globals.css`** — aquela é a paleta da ferramenta, não da marca.
+- **Sanwey não tem paleta curada.** O gate só olha `resibag*`.

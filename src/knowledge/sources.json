@@ -1,5 +1,5 @@
 {
-  "comment": "Skills de origem de src/knowledge/*.ts, com o hash do arquivo no momento da curadoria. `npm run knowledge:check` compara com o que está em ~/.claude/skills e avisa quando a fonte mudou. O script NÃO reescreve a curadoria: o que entra e o que fica de fora foi decisão editorial (fato verificável entra; design system, protocolo de versionamento e dado interno não). Depois de atualizar o arquivo curado à mão, rode `npm run knowledge:sync` para gravar o hash novo — e nunca antes, porque o sync grava TODAS as fontes de uma vez e apagaria o aviso de uma que você não revisou.",
+  "comment": "Skills de origem de src/knowledge/, com o hash do arquivo no momento da curadoria. `npm run knowledge:check` compara com o que está em ~/.claude/skills e avisa quando a fonte mudou. O script NÃO reescreve a curadoria: o que entra e o que fica de fora foi decisão editorial. Fato verificável entra. Do design system entra SÓ A COR, e só desde 16/09/2026 — a decisão anterior de deixar o design system inteiro de fora foi tomada quando a ferramenta só produzia texto, e envelheceu: hoje ela renderiza slide com cor de marca, e os quatro temas Resibag estavam na paleta v9 enquanto o manual ia na v11. Tipografia, layout, template e protocolo de versionamento continuam fora. Depois de atualizar um arquivo curado à mão, rode `npm run knowledge:sync` para gravar o hash novo — e nunca antes, porque o sync grava TODAS as fontes de uma vez e apagaria o aviso de uma que você não revisou.",
   "sources": [
     {
       "skill": "resibag-canonical-facts",
@@ -12,6 +12,12 @@
       "version": "v1.6",
       "sha256": "57aaadeaa6155df18c4c88c4103d290488e69ff48cbac6481d2567a133381be6",
       "curatedInto": "src/knowledge/sanwey.ts"
+    },
+    {
+      "skill": "resibag-brand-guidelines",
+      "version": "v11.0",
+      "sha256": "7de849e30f91c65357be9976477db25313b4fdf192dc82b4164a3748ce6e0efb",
+      "curatedInto": "src/knowledge/paleta-resibag.json"
     }
   ]
 }

@@ -272,6 +272,16 @@ outra frente seria o vazamento que a regra de isolamento proíbe.
 
 ---
 
+**E, desde 16/09/2026, uma paleta.** `src/knowledge/paleta-resibag.json` carrega
+as cores autorizadas da Resibag e — o que importa para o gate — a lista das
+**mortas**, curada da §02 da `resibag-brand-guidelines`. `npm run paleta:check`
+cruza essa lista com `src/constants/themes.ts` e **bloqueia o build** se um tema
+de marca usar cor aposentada. Entrou porque os quatro temas Resibag estavam na
+paleta v9 enquanto o manual ia na v11 — cinco versões de deriva, com o
+`resibag-selo` gerando selo de certificação no Certification Gold que a v11
+eliminou. Só a COR entrou na curadoria; tipografia, layout e template do design
+system continuam fora, como sempre estiveram.
+
 ## 4. A fronteira com o CRM (`src/lib/crm.ts`)
 
 O envio usa `agent_actions`, a fila que o CRM já tem para sugestão de agente

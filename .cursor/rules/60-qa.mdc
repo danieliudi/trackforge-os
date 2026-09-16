@@ -25,7 +25,7 @@ conta apareceu como quatro telas mortas em três semanas, uma delas quinze dias
 no ar — todas erro de escopo puro, e quem pegou a de quinze dias foi o ESLint,
 não o build.
 
-**O que está ligado.** `prebuild` é `node scripts/check-knowledge.mjs && eslint`:
+**O que está ligado.** `prebuild` é `node scripts/check-knowledge.mjs && node scripts/check-paleta.mjs && eslint`:
 o aviso de drift continua saindo com 0, e o lint bloqueia. **Zero regra de
 estilo, de propósito** — gate que apita por formatação vira gate ignorado. O
 ruído que não quebra nada (variável não usada, dependência incompleta) continua
