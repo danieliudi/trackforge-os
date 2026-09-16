@@ -16,6 +16,32 @@ antes de a peça chegar em você.
 
 ## Rodar na sua máquina
 
+### Já tem a pasta? Uma linha
+
+```bash
+npm run rodar
+```
+
+Puxa a `main`, acerta as dependências e sobe em http://localhost:3000. É o
+comando do dia a dia — rode de dentro da pasta do projeto.
+
+Se quiser só atualizar sem subir: `npm run atualizar`.
+
+Ele não atropela nada. Alteração sua não commitada faz ele avisar em vez de
+puxar por cima, e **não conseguir atualizar não impede de rodar**: sem rede ou
+com a branch divergida ele segue com o que já está na pasta. Só dependência
+quebrada interrompe, porque app com `node_modules` pela metade quebra numa tela
+qualquer, longe da causa.
+
+`npm ci` só roda quando o `package-lock.json` muda de verdade — o hash do lock
+instalado fica carimbado dentro do `node_modules`. Nas outras vezes é instantâneo.
+
+### Primeira vez, ou não tem a pasta ainda
+
+Estes clonam, conferem a versão do Node e explicam o login do GitHub se o clone
+falhar — coisas que um script npm não pode fazer, porque para rodar `npm` você
+já precisa estar dentro do projeto.
+
 **Windows** (PowerShell):
 
 ```powershell
@@ -35,7 +61,8 @@ bash scripts/rodar-local.sh
 Os dois fazem o mesmo: baixam (ou atualizam), instalam, criam o `.env.local` e
 sobem o app em http://localhost:3000, abrindo o navegador. Pode rodar quantas
 vezes quiser — nunca sobrescrevem o seu `.env.local` nem descartam alteração sua
-sem avisar.
+sem avisar. Depois da primeira vez, `npm run rodar` acima faz o mesmo em menos
+digitação.
 
 **Rodam de qualquer um dos dois lugares:** de dentro da pasta do projeto, ou da
 pasta-mãe (aí eles entram nela). E se você ainda não tem o repositório, salve só
@@ -47,7 +74,7 @@ versão LTS). Os dois conferem antes de começar e dizem o que falta.
 ### À mão, se preferir
 
 ```bash
-git clone https://github.com/danieliudi/carousel-builder.git trackforge-os
+git clone https://github.com/danieliudi/trackforge-os.git trackforge-os
 cd trackforge-os
 npm ci                      # `ci`, não `install`: instala o que está no lock
 cp .env.example .env.local  # e preencha ANTHROPIC_API_KEY
