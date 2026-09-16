@@ -118,6 +118,11 @@ export async function novaPagina(navegador, opcoes = {}) {
      */
     instalacao = {
       integrations: [
+        // A obrigatória vem primeiro, como na rota — e no estado de PLACEHOLDER,
+        // que é o terceiro estado e o mais provável numa instalação nova. Sem
+        // ela declarada aqui, a varredura nunca renderizava a linha que existe
+        // para avisar que a ferramenta não gera nada.
+        { id: "anthropic", label: "Geração de conteúdo — o valor ainda é o sk-ant-… do exemplo", env: ["ANTHROPIC_API_KEY"], configured: false },
         { id: "signals", label: "Sinais de mercado", env: ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"], configured: true },
         { id: "crm_publish", label: "Fila de aprovação (CRM)", env: ["SUPABASE_URL", "CRM_AGENT_KEY"], configured: true },
         { id: "imagens", label: "Busca de imagem", env: ["UNSPLASH_ACCESS_KEY"], configured: true },

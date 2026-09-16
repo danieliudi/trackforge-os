@@ -218,7 +218,16 @@ const TELAS = [
       ...BLOCO,
       { nome: "variável · nome", piso: CORPO, onde: (p) => p.locator("main span.font-mono.text-\\[14\\.5px\\]").first() },
       { nome: "variável · o que é", piso: CORPO, onde: (p) => p.locator("main span.text-\\[13\\.5px\\]").first() },
-      { nome: "variável · estado", piso: MIUDO, onde: (p) => p.locator('main span[data-status]').first() },
+      // OS DOIS ESTADOS, e com contagem — não `.first()`.
+      //
+      // Enquanto isto era um `.first()` sem contagem, quem ele media dependia
+      // da ORDEM da lista: até 16/09/2026 caía numa linha ligada e media o
+      // verde; a linha da chave da Anthropic entrou na frente, virou vermelho,
+      // e o alvo trocou de cor sem uma palavra no relatório. Passou nos dois
+      // casos — que é justamente o problema. Declarados separados, os dois são
+      // medidos sempre, e mudança no fixture reprova por contagem.
+      { nome: "variável · definida", piso: MIUDO, quantos: 3, onde: (p) => p.locator('main span[data-status="on"]') },
+      { nome: "variável · faltando", piso: MIUDO, quantos: 2, onde: (p) => p.locator('main span[data-status="off"]') },
     ],
   },
 
@@ -311,7 +320,15 @@ for (const tela of TELAS) {
           reprovou++;
           console.log(
             `  \x1b[31mALVO\x1b[0m    ${alvo.nome}: casou com ${achados}, esperava ${esperados}` +
-              (achados === 0 ? " — sumiu da tela ou mudou de nome" : " — seletor pegando demais"),
+              // Três direções, não duas. "Pegando demais" para o caso de casar
+              // MENOS manda investigar o seletor quando o que mudou foi a tela
+              // — e mensagem de gate que aponta para o lado errado custa o
+              // tempo de quem foi conferir.
+              (achados === 0
+                ? " — sumiu da tela ou mudou de nome"
+                : achados < esperados
+                  ? " — a tela tem menos do que o alvo declara"
+                  : " — seletor pegando demais"),
           );
           continue;
         }

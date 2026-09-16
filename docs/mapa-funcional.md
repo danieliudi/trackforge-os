@@ -112,9 +112,23 @@ sai daqui.
 **Para que serve:** o que está ligado nesta máquina. Nome da variável e se está
 definida.
 
+**A primeira linha é a única OBRIGATÓRIA**, e ela entrou em 16/09/2026: a
+`ANTHROPIC_API_KEY`. As outras cinco são opcionais — sem cada uma, a seção
+correspondente só não aparece. Sem esta, toda rota que gera devolve 401 no
+clique, e até essa data ela era justamente a que não estava na lista: a tela
+listava as cinco opcionais e omitia a obrigatória.
+
+Ela tem **três estados, não dois**. `sk-ant-...` é o texto literal do
+`.env.example`, e o bootstrap copia o exemplo quando não há `.env.local` — então
+placeholder esquecido é o estado mais provável de todos. Para a API ele é
+indistinguível de chave errada (os dois voltam 401), então contar como
+"definida" seria a tela mentindo no lugar exato em que ela existe para não
+mentir.
+
 **Deliberadamente não faz:** **nunca imprime o valor de um segredo**, nem para
 depurar. A service role ignora RLS e a chave de agente define quem assina no
-CRM — nenhuma das duas pode chegar à tela.
+CRM — nenhuma das duas pode chegar à tela. Nem o começo da chave, nem o tamanho
+dela.
 
 ### `/editor` — Editor de slides
 
