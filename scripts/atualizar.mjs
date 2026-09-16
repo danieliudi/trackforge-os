@@ -112,4 +112,51 @@ if (!existsSync(LOCK)) {
   }
 }
 
+// ── 3. A chave que faz o app servir para alguma coisa ───────────────────────
+//
+// POR QUE ISTO ESTÁ AQUI, E É CORREÇÃO DE UM BURACO MEU. O bootstrap
+// (`rodar-local.ps1`) confere a chave da Anthropic e se RECUSA a subir sem ela
+// — certo, porque na primeira vez não há nada para olhar sem gerar. Quando o
+// `npm run rodar` nasceu, ele herdou o `git pull` e o `npm ci` do bootstrap e
+// NÃO herdou esta conferência. O resultado é o pior tipo de silêncio: o app
+// sobe inteiro, a tela pinta certo, e a descoberta só acontece no clique que
+// deveria custar dinheiro — com a mensagem crua da API, "API key is invalid",
+// que não diz onde fica o arquivo nem o que fazer.
+//
+// AVISA, NÃO BLOQUEIA — e a diferença para o bootstrap é deliberada. Ali é a
+// primeira vez e não existe nada para ver. Aqui o app já funciona: Custos,
+// Fatos, Instalação e o editor abrem e são úteis sem gerar nada. Travar tudo
+// porque a chave venceu seria a mesma troca que este arquivo já recusa uma vez
+// acima — um incômodo virando bloqueio.
+//
+// O VALOR NUNCA É IMPRESSO (CLAUDE.md seção 3). Só o nome da variável, e se
+// está preenchida.
+const ENV = join(RAIZ, ".env.local");
+passo("Conferindo a chave da Anthropic");
+
+if (!existsSync(ENV)) {
+  console.log(`  ${amarelo("!")} não existe .env.local — o app sobe, mas não gera nada.`);
+  console.log("    Crie a partir do exemplo:  cp .env.example .env.local");
+} else {
+  const linha = readFileSync(ENV, "utf8")
+    .split(/\r?\n/)
+    .find((l) => l.startsWith("ANTHROPIC_API_KEY="));
+  // `sk-ant-...` é o texto literal do `.env.example`, e o bootstrap copia o
+  // exemplo quando o `.env.local` não existe. Placeholder esquecido é
+  // indistinguível de chave errada para a API: os dois voltam 401.
+  const valor = (linha ?? "").split("=").slice(1).join("=").trim().replace(/^["']|["']$/g, "");
+
+  if (!valor || valor === "sk-ant-...") {
+    console.log(`  ${amarelo("!")} ANTHROPIC_API_KEY ${valor ? "ainda é o exemplo" : "está vazia"} — nada vai gerar.`);
+    console.log("    1. Pegue a chave em https://console.anthropic.com/settings/keys");
+    console.log(`    2. Abra ${ENV}`);
+    console.log("    3. Troque o valor e rode de novo");
+  } else {
+    console.log(`  ${verde("OK")}  ANTHROPIC_API_KEY está preenchida`);
+    // Não vale a pena chamar a API para validar: gastaria dinheiro a cada
+    // `npm run rodar` para responder uma pergunta que o primeiro clique
+    // responde de graça. Preenchida != válida, e a tela diz o resto.
+  }
+}
+
 console.log(`\n${verde("✓")} pasta local em dia\n`);
