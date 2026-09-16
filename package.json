@@ -4,6 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "atualizar": "node scripts/atualizar.mjs",
+    "rodar": "npm run atualizar && npm run dev",
     "predev": "node scripts/check-knowledge.mjs",
     "build": "next build",
     "prebuild": "node scripts/check-knowledge.mjs && node scripts/check-paleta.mjs && eslint",
