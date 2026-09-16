@@ -15,7 +15,12 @@
 
 set -euo pipefail
 
-REPO="https://github.com/danieliudi/carousel-builder.git"
+# O repositório foi RENOMEADO para `trackforge-os` em 16/09/2026. O GitHub
+# redireciona o nome antigo, então clone com a URL velha ainda funciona — até
+# alguém criar um repo novo com aquele nome, e aí para de funcionar sem aviso.
+# Por isso a URL aqui é a nova. Quem já tem clone antigo não precisa fazer nada:
+# o `origin` dele continua sendo redirecionado.
+REPO="https://github.com/danieliudi/trackforge-os.git"
 PASTA="trackforge-os"
 NODE_MINIMO="20.9.0"   # exigência do Next 16 (node_modules/next/package.json)
 
