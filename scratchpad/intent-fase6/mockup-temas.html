@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="pt-BR" data-e="r"><head><meta charset="utf-8">
+<title>Fase 6 — temas de marca contra o manual</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:wght@400&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:#12110f;color:#f8f8f8;font-family:"Geist",system-ui,sans-serif;font-size:15px;
+     -webkit-font-smoothing:antialiased;padding-bottom:90px}
+.top{padding:22px 40px 16px;border-bottom:2px solid #2c2a26;display:flex;align-items:flex-end;
+     justify-content:space-between;gap:24px;flex-wrap:wrap}
+.top h1{font-family:"Instrument Serif",Georgia,serif;font-weight:400;font-size:30px;line-height:1;
+        letter-spacing:-.01em}
+.top .sub{font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:#a9a7a2}
+.nota{margin:18px 40px;border-left:2px solid #e56515;background:#1f1c18;padding:13px 16px;
+      font-size:13.5px;line-height:1.6;color:#dcdbd8;max-width:900px}
+.nota b{color:#f8f8f8}
+.nota code{font-family:"Geist Mono",ui-monospace,monospace;font-size:12.5px}
+
+/* ── A LÂMINA. Canvas real 1080×1350, reduzido por transform: a PROPORÇÃO
+      atravessa, nenhum valor em pixel é copiado à mão (seção 4). ── */
+.par{display:grid;grid-template-columns:auto auto;gap:44px;align-items:start;justify-content:start}
+/* a lista de cor fica AO LADO da lâmina, não embaixo: com ela embaixo sobravam
+   ~550px mortos por coluna numa tela de 1900px — o mesmo defeito da Fase 1. */
+.lado{display:grid;grid-template-columns:auto 210px;grid-template-rows:auto auto;
+      gap:9px 20px;align-items:start}
+.lado .tag{grid-column:1/-1}
+.lado .linhas{padding-top:2px}
+.tag{font-size:10.5px;letter-spacing:.11em;text-transform:uppercase;font-weight:600}
+.tag.a{color:#ff6b52}.tag.d{color:#34d399}
+.palco{width:352px;height:440px;overflow:hidden;border:1px solid #2c2a26}
+.slide{width:1080px;height:1350px;transform:scale(.3259);transform-origin:top left;
+       padding:88px;display:flex;flex-direction:column;position:relative}
+.slide .kick{font-size:26px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.slide h2{font-size:82px;line-height:1.06;font-weight:700;letter-spacing:-.02em;margin-top:26px}
+.slide .corpo{font-size:34px;line-height:1.5;margin-top:34px;max-width:82%}
+.slide .meta{font-size:25px;margin-top:auto;display:flex;justify-content:space-between;
+             align-items:center;border-top:2px solid;padding-top:24px}
+.slide .cta{display:inline-block;padding:20px 34px;font-size:29px;font-weight:600;
+            align-self:flex-start;margin-top:40px}
+.slide .selo{position:absolute;right:88px;top:88px;padding:14px 22px;font-size:22px;
+             font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+.linhas{display:flex;flex-direction:column;gap:5px;font-size:11.5px;line-height:1.5;color:#a9a7a2}
+.linhas .k{font-family:"Geist Mono",ui-monospace,monospace;font-size:10.5px;color:#8a8782}
+.porque{font-size:12.5px;line-height:1.6;color:#dcdbd8;border-top:1px solid #2c2a26;padding-top:10px}
+.porque b{color:#f8f8f8}
+.bloco{margin:0 40px 34px;border:1px solid #2c2a26;background:#1a1916;padding:20px 22px}
+.bloco > h3{font-size:15px;font-weight:600;margin-bottom:4px}
+.bloco > .fonte{font-family:"Geist Mono",ui-monospace,monospace;font-size:10.5px;color:#8a8782;
+                text-transform:uppercase;letter-spacing:.07em;margin-bottom:16px}
+.est{display:none}
+html[data-e="r"] #r,html[data-e="s"] #s{display:block}
+.leme{position:fixed;left:0;right:0;bottom:0;display:flex;gap:1px;background:#2c2a26;
+      border-top:1px solid #2c2a26;z-index:9}
+.leme button{flex:1;font-family:inherit;font-size:12.5px;padding:13px;border:0;background:#1a1916;
+             color:#f8f8f8;cursor:pointer}
+.leme button.on{background:#f8f8f8;color:#12110f;font-weight:600}
+</style></head><body>
+<div class="top">
+ <div><h1>Temas de marca × manual</h1>
+ <div class="sub" style="margin-top:6px">Fase 6 · 16 set 2026 · lâmina 1080×1350 reduzida por proporção</div></div>
+ <div class="sub">Resibag v11 · Sanwey v7.0b</div>
+</div>
+<div class="est" id="r"><div class="nota"><b>Os quatro temas Resibag estavam na paleta v9</b> — duas gerações antes do v10.x, que já tinha sido substituído inteiro. Cada lâmina da direita usa só cor da <code>v11</code>, e cada par de texto foi medido: nenhum abaixo de 4,5:1 no corpo. A <code>Legenda</code> usa o valor da <b>v11.1</b> (<code>#646A63</code>), porque o da v11.0 reprova nas camadas 2 e 3 — é a correção que ainda não propagou.</div><div class="bloco">
+ <h3>resibag</h3><div class="fonte">Brand Guidelines v11 · §02</div>
+ <div class="par">
+  <div class="lado"><div class="tag a">Antes · o que está no ar</div><div class="palco"><div class="slide" style="background:#FAF8F6;color:#1E2A22">
+  
+  <div class="kick" style="color:#1B5E3A">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#1E2A22">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#1B5E3A;color:#FAF8F6">Fale com um especialista</div>
+  <div class="meta" style="color:#5A6B60;border-color:#EDF2EE"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #FAF8F6</div><div><span class="k">texto</span> #1E2A22</div><div><span class="k">kicker</span> #1B5E3A</div><div><span class="k">meta</span> #5A6B60</div><div><span class="k">acento</span> #1B5E3A</div><div><span class="k">sobre o acento</span> #FAF8F6</div><div><span class="k">regra</span> #EDF2EE</div></div></div>
+  <div class="lado"><div class="tag d">Depois · contra o manual</div><div class="palco"><div class="slide" style="background:#F6FBEF;color:#000000">
+  
+  <div class="kick" style="color:#006E1E">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#000000">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#006E1E;color:#FFFFFF">Fale com um especialista</div>
+  <div class="meta" style="color:#646A63;border-color:#EAF0E3"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #F6FBEF</div><div><span class="k">texto</span> #000000</div><div><span class="k">kicker</span> #006E1E</div><div><span class="k">meta</span> #646A63</div><div><span class="k">acento</span> #006E1E</div><div><span class="k">sobre o acento</span> #FFFFFF</div><div><span class="k">regra</span> #EAF0E3</div></div></div>
+ </div>
+ <div class="porque" style="margin-top:14px">Off-White v11 no lugar do papel v9. Tinta para título, Legenda v11.1 para meta, Verde Sólido no acento.</div>
+</div><div class="bloco">
+ <h3>resibag-escuro</h3><div class="fonte">Brand Guidelines v11 · §02 (fundo escuro)</div>
+ <div class="par">
+  <div class="lado"><div class="tag a">Antes · o que está no ar</div><div class="palco"><div class="slide" style="background:#0D3D20;color:#FAF8F6">
+  
+  <div class="kick" style="color:#72FD9C">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#FAF8F6">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#72FD9C;color:#0D3D20">Fale com um especialista</div>
+  <div class="meta" style="color:#EDF2EE;border-color:rgba(250,248,246,.22)"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #0D3D20</div><div><span class="k">texto</span> #FAF8F6</div><div><span class="k">kicker</span> #72FD9C</div><div><span class="k">meta</span> #EDF2EE</div><div><span class="k">acento</span> #72FD9C</div><div><span class="k">sobre o acento</span> #0D3D20</div><div><span class="k">regra</span> rgba(250,248,246,.22)</div></div></div>
+  <div class="lado"><div class="tag d">Depois · contra o manual</div><div class="palco"><div class="slide" style="background:#006E1E;color:#FFFFFF">
+  
+  <div class="kick" style="color:#CFE8D9">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#FFFFFF">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#4DBE55;color:#000000">Fale com um especialista</div>
+  <div class="meta" style="color:#CFE8D9;border-color:rgba(255,255,255,.22)"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #006E1E</div><div><span class="k">texto</span> #FFFFFF</div><div><span class="k">kicker</span> #CFE8D9</div><div><span class="k">meta</span> #CFE8D9</div><div><span class="k">acento</span> #4DBE55</div><div><span class="k">sobre o acento</span> #000000</div><div><span class="k">regra</span> rgba(255,255,255,.22)</div></div></div>
+ </div>
+ <div class="porque" style="margin-top:14px">A hierarquia de fundo escuro da v11 é literal: branco no título, #CFE8D9 no corpo. Verde Vivo vira BLOCO com texto em Tinta — a v11 proíbe branco em cima dele. O kicker NÃO é Verde Vivo: como texto ele dá 2,71 sobre o Verde Sólido. Vai em #CFE8D9, o mesmo token do corpo.</div>
+</div><div class="bloco">
+ <h3>resibag-ativo</h3><div class="fonte">Brand Guidelines v11 · §02</div>
+ <div class="par">
+  <div class="lado"><div class="tag a">Antes · o que está no ar</div><div class="palco"><div class="slide" style="background:#FAF8F6;color:#1E2A22">
+  
+  <div class="kick" style="color:#3AAF65">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#1E2A22">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#3AAF65;color:#FAF8F6">Fale com um especialista</div>
+  <div class="meta" style="color:#5A6B60;border-color:#EDF2EE"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #FAF8F6</div><div><span class="k">texto</span> #1E2A22</div><div><span class="k">kicker</span> #3AAF65</div><div><span class="k">meta</span> #5A6B60</div><div><span class="k">acento</span> #3AAF65</div><div><span class="k">sobre o acento</span> #FAF8F6</div><div><span class="k">regra</span> #EDF2EE</div></div></div>
+  <div class="lado"><div class="tag d">Depois · contra o manual</div><div class="palco"><div class="slide" style="background:#F6FBEF;color:#000000">
+  
+  <div class="kick" style="color:#006E1E">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#000000">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#4DBE55;color:#000000">Fale com um especialista</div>
+  <div class="meta" style="color:#646A63;border-color:#EAF0E3"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #F6FBEF</div><div><span class="k">texto</span> #000000</div><div><span class="k">kicker</span> #006E1E</div><div><span class="k">meta</span> #646A63</div><div><span class="k">acento</span> #4DBE55</div><div><span class="k">sobre o acento</span> #000000</div><div><span class="k">regra</span> #EAF0E3</div></div></div>
+ </div>
+ <div class="porque" style="margin-top:14px">O CTA persistente da v11 é Verde Vivo preenchido, sempre com Tinta em cima. O #3AAF65 v9 saía com texto claro, que a v11 proíbe. Mesmo motivo do escuro: Verde Vivo como TEXTO dá 2,27. O kicker vai em Verde Sólido; o Verde Vivo fica só no bloco do CTA.</div>
+</div><div class="bloco">
+ <h3>resibag-selo</h3><div class="fonte">Brand Guidelines v11 · §04</div>
+ <div class="par">
+  <div class="lado"><div class="tag a">Antes · o que está no ar</div><div class="palco"><div class="slide" style="background:#FAF8F6;color:#1E2A22">
+  <div class="selo" style="background:#B8973A;color:#1E2A22">INMETRO</div>
+  <div class="kick" style="color:#1E2A22">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#1E2A22">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  
+  <div class="meta" style="color:#5A6B60;border-color:#EDF2EE"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #FAF8F6</div><div><span class="k">texto</span> #1E2A22</div><div><span class="k">kicker</span> #1E2A22</div><div><span class="k">meta</span> #5A6B60</div><div><span class="k">acento</span> #B8973A</div><div><span class="k">sobre o acento</span> #1E2A22</div><div><span class="k">regra</span> #EDF2EE</div></div></div>
+  <div class="lado"><div class="tag d">Depois · contra o manual</div><div class="palco"><div class="slide" style="background:#F6FBEF;color:#000000">
+  <div class="selo" style="background:#1B5E8A;color:#FFFFFF">INMETRO</div>
+  <div class="kick" style="color:#1B5E8A">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#000000">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  
+  <div class="meta" style="color:#646A63;border-color:#D8EEF4"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #F6FBEF</div><div><span class="k">texto</span> #000000</div><div><span class="k">kicker</span> #1B5E8A</div><div><span class="k">meta</span> #646A63</div><div><span class="k">acento</span> #1B5E8A</div><div><span class="k">sobre o acento</span> #FFFFFF</div><div><span class="k">regra</span> #D8EEF4</div></div></div>
+ </div>
+ <div class="porque" style="margin-top:14px">O ouro era o Certification Gold, que a v11 matou. A instrução dela é textual: badge de certificação vira OCEAN sólido. Borda em Ice, o fundo de badge azul.</div>
+</div></div><div class="est" id="s"><div class="nota">A Sanwey está <b>muito melhor</b> que a Resibag: os 13 pares de contraste do manual dela conferem todos na segunda casa decimal, recalculados aqui. <b>Mas há um defeito real no ar:</b> o <code>sanwey-impacto</code> usa <code>#8B1419</code> sobre o vermelho — <b>1,66:1</b>, invisível, e cor que o manual não tem. E três temas usam cinza QUENTE onde o manual crava rampa de K puro.</div><div class="bloco">
+ <h3>sanwey</h3><div class="fonte">Identidade Visual v7.0b · cores.md</div>
+ <div class="par">
+  <div class="lado"><div class="tag a">Antes · o que está no ar</div><div class="palco"><div class="slide" style="background:#F9F9F9;color:#1A1A1A">
+  
+  <div class="kick" style="color:#C7212B">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#1A1A1A">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#C7212B;color:#FFFFFF">Fale com um especialista</div>
+  <div class="meta" style="color:#8A8680;border-color:#E5E0DA"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #F9F9F9</div><div><span class="k">texto</span> #1A1A1A</div><div><span class="k">kicker</span> #C7212B</div><div><span class="k">meta</span> #8A8680</div><div><span class="k">acento</span> #C7212B</div><div><span class="k">sobre o acento</span> #FFFFFF</div><div><span class="k">regra</span> #E5E0DA</div></div></div>
+  <div class="lado"><div class="tag d">Depois · contra o manual</div><div class="palco"><div class="slide" style="background:#F9F9F9;color:#1A1A1A">
+  
+  <div class="kick" style="color:#C7212B">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#1A1A1A">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#C7212B;color:#FFFFFF">Fale com um especialista</div>
+  <div class="meta" style="color:#707070;border-color:#CFCFCF"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #F9F9F9</div><div><span class="k">texto</span> #1A1A1A</div><div><span class="k">kicker</span> #C7212B</div><div><span class="k">meta</span> #707070</div><div><span class="k">acento</span> #C7212B</div><div><span class="k">sobre o acento</span> #FFFFFF</div><div><span class="k">regra</span> #CFCFCF</div></div></div>
+ </div>
+ <div class="porque" style="margin-top:14px">O manual crava rampa de cinza PURO K (R=G=B). #8A8680 e #E5E0DA são quentes, e o #8A8680 dava 3,44 — abaixo de AA. Trocados por gray-600 e gray-300.</div>
+</div><div class="bloco">
+ <h3>sanwey-industrial</h3><div class="fonte">Identidade Visual v7.0b · cores.md</div>
+ <div class="par">
+  <div class="lado"><div class="tag a">Antes · o que está no ar</div><div class="palco"><div class="slide" style="background:#545454;color:#F9F9F9">
+  
+  <div class="kick" style="color:#C7212B">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#F9F9F9">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#C7212B;color:#FFFFFF">Fale com um especialista</div>
+  <div class="meta" style="color:#E2E2E2;border-color:rgba(249,249,249,.18)"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #545454</div><div><span class="k">texto</span> #F9F9F9</div><div><span class="k">kicker</span> #C7212B</div><div><span class="k">meta</span> #E2E2E2</div><div><span class="k">acento</span> #C7212B</div><div><span class="k">sobre o acento</span> #FFFFFF</div><div><span class="k">regra</span> rgba(249,249,249,.18)</div></div></div>
+  <div class="lado"><div class="tag d">Depois · contra o manual</div><div class="palco"><div class="slide" style="background:#F2F2F2;color:#1A1A1A">
+  
+  <div class="kick" style="color:#C7212B">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#1A1A1A">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#C7212B;color:#FFFFFF">Fale com um especialista</div>
+  <div class="meta" style="color:#545454;border-color:#CFCFCF"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #F2F2F2</div><div><span class="k">texto</span> #1A1A1A</div><div><span class="k">kicker</span> #C7212B</div><div><span class="k">meta</span> #545454</div><div><span class="k">acento</span> #C7212B</div><div><span class="k">sobre o acento</span> #FFFFFF</div><div><span class="k">regra</span> #CFCFCF</div></div></div>
+ </div>
+ <div class="porque" style="margin-top:14px">É a MUDANÇA MAIS FORTE e precisa da sua palavra. Cinza-700 é 'texto secundário' na rampa, não superfície — e nenhum acento lê em cima dele: o bloco vermelho dá 1,33:1. Gray-100 é 'superfície elevada' no manual, e mantém a distinção contra o institucional. O meta usa gray-700 e não gray-600: sobre a superfície elevada o 600 cai para 4,42, abaixo de AA — o manual validou o 600 sobre gray-50, não sobre gray-100.</div>
+</div><div class="bloco">
+ <h3>sanwey-impacto</h3><div class="fonte">Identidade Visual v7.0b · cores.md</div>
+ <div class="par">
+  <div class="lado"><div class="tag a">Antes · o que está no ar</div><div class="palco"><div class="slide" style="background:#C7212B;color:#FFFFFF">
+  
+  <div class="kick" style="color:#8B1419">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#FFFFFF">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#8B1419;color:#FFFFFF">Fale com um especialista</div>
+  <div class="meta" style="color:#FBE9EB;border-color:rgba(255,255,255,.24)"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #C7212B</div><div><span class="k">texto</span> #FFFFFF</div><div><span class="k">kicker</span> #8B1419</div><div><span class="k">meta</span> #FBE9EB</div><div><span class="k">acento</span> #8B1419</div><div><span class="k">sobre o acento</span> #FFFFFF</div><div><span class="k">regra</span> rgba(255,255,255,.24)</div></div></div>
+  <div class="lado"><div class="tag d">Depois · contra o manual</div><div class="palco"><div class="slide" style="background:#C7212B;color:#FFFFFF">
+  
+  <div class="kick" style="color:#0A0A0A">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#FFFFFF">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#0A0A0A;color:#FFFFFF">Fale com um especialista</div>
+  <div class="meta" style="color:#FBE9EB;border-color:rgba(255,255,255,.24)"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #C7212B</div><div><span class="k">texto</span> #FFFFFF</div><div><span class="k">kicker</span> #0A0A0A</div><div><span class="k">meta</span> #FBE9EB</div><div><span class="k">acento</span> #0A0A0A</div><div><span class="k">sobre o acento</span> #FFFFFF</div><div><span class="k">regra</span> rgba(255,255,255,.24)</div></div></div>
+ </div>
+ <div class="porque" style="margin-top:14px">DEFEITO REAL hoje: o acento #8B1419 sobre o vermelho dá 1,66:1 — invisível, e é cor que o manual não tem. Preto Premium no lugar: 3,47 como bloco, e branco em cima a 19,80.</div>
+</div><div class="bloco">
+ <h3>sanwey-preto</h3><div class="fonte">Identidade Visual v7.0b · cores.md</div>
+ <div class="par">
+  <div class="lado"><div class="tag a">Antes · o que está no ar</div><div class="palco"><div class="slide" style="background:#0A0A0A;color:#FFFFFF">
+  
+  <div class="kick" style="color:#C7212B">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#FFFFFF">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#C7212B;color:#FFFFFF">Fale com um especialista</div>
+  <div class="meta" style="color:#8A8680;border-color:rgba(255,255,255,.16)"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #0A0A0A</div><div><span class="k">texto</span> #FFFFFF</div><div><span class="k">kicker</span> #C7212B</div><div><span class="k">meta</span> #8A8680</div><div><span class="k">acento</span> #C7212B</div><div><span class="k">sobre o acento</span> #FFFFFF</div><div><span class="k">regra</span> rgba(255,255,255,.16)</div></div></div>
+  <div class="lado"><div class="tag d">Depois · contra o manual</div><div class="palco"><div class="slide" style="background:#0A0A0A;color:#F9F9F9">
+  
+  <div class="kick" style="color:#DD4039">Resíduo Classe I</div>
+  <h2>O caminhão sai.<br>O resíduo continua seu.</h2>
+  <div class="corpo" style="color:#F9F9F9">A norma classifica. Quem responde pela destinação até o fim da cadeia é o gerador.</div>
+  <div class="cta" style="background:#DD4039;color:#0A0A0A">Fale com um especialista</div>
+  <div class="meta" style="color:#B0B0B0;border-color:rgba(255,255,255,.16)"><span>resibag.com.br</span><span>01 / 07</span></div>
+</div></div><div class="linhas"><div><span class="k">fundo</span> #0A0A0A</div><div><span class="k">texto</span> #F9F9F9</div><div><span class="k">kicker</span> #DD4039</div><div><span class="k">meta</span> #B0B0B0</div><div><span class="k">acento</span> #DD4039</div><div><span class="k">sobre o acento</span> #0A0A0A</div><div><span class="k">regra</span> rgba(255,255,255,.16)</div></div></div>
+ </div>
+ <div class="porque" style="margin-top:14px">O manual recomenda Vermelho SINAL em fundo escuro: o base dá 3,47 e reprova corpo; o Sinal dá 4,59. E o muted quente vira gray-400, que é o caption sobre preto do próprio manual.</div>
+</div></div><div class="leme">
+ <button data-e="r" class="on">Resibag — 4 temas</button>
+ <button data-e="s">Sanwey — 4 temas</button>
+</div>
+<script>
+for (const b of document.querySelectorAll('.leme button')) {
+  b.onclick = () => {
+    document.documentElement.dataset.e = b.dataset.e;
+    for (const o of document.querySelectorAll('.leme button')) o.classList.toggle('on', o===b);
+    window.scrollTo(0,0);
+  };
+}
+</script></body></html>

@@ -1,0 +1,202 @@
+{
+ "resibag": {
+  "marca": "Resibag",
+  "manual": "Brand Guidelines v11 · §02",
+  "antes": {
+   "label": "Resibag (ESG)",
+   "bg": "#FAF8F6",
+   "fg": "#1E2A22",
+   "mut": "#5A6B60",
+   "acc": "#1B5E3A",
+   "accTx": "#FAF8F6",
+   "bd": "#EDF2EE",
+   "kick": "#1B5E3A"
+  },
+  "depois": {
+   "label": "Resibag Institucional",
+   "bg": "#F6FBEF",
+   "fg": "#000000",
+   "mut": "#646A63",
+   "acc": "#006E1E",
+   "accTx": "#FFFFFF",
+   "bd": "#EAF0E3",
+   "kick": "#006E1E"
+  },
+  "porque": "Off-White v11 no lugar do papel v9. Tinta para título, Legenda v11.1 para meta, Verde Sólido no acento."
+ },
+ "resibag-escuro": {
+  "marca": "Resibag",
+  "manual": "Brand Guidelines v11 · §02 (fundo escuro)",
+  "antes": {
+   "label": "Resibag Escuro",
+   "bg": "#0D3D20",
+   "fg": "#FAF8F6",
+   "mut": "#EDF2EE",
+   "acc": "#72FD9C",
+   "accTx": "#0D3D20",
+   "bd": "rgba(250,248,246,.22)",
+   "kick": "#72FD9C"
+  },
+  "depois": {
+   "label": "Resibag Escuro",
+   "bg": "#006E1E",
+   "fg": "#FFFFFF",
+   "mut": "#CFE8D9",
+   "acc": "#4DBE55",
+   "accTx": "#000000",
+   "bd": "rgba(255,255,255,.22)",
+   "kick": "#CFE8D9"
+  },
+  "porque": "A hierarquia de fundo escuro da v11 é literal: branco no título, #CFE8D9 no corpo. Verde Vivo vira BLOCO com texto em Tinta — a v11 proíbe branco em cima dele. O kicker NÃO é Verde Vivo: como texto ele dá 2,71 sobre o Verde Sólido. Vai em #CFE8D9, o mesmo token do corpo."
+ },
+ "resibag-ativo": {
+  "marca": "Resibag",
+  "manual": "Brand Guidelines v11 · §02",
+  "antes": {
+   "label": "Resibag Ativo",
+   "bg": "#FAF8F6",
+   "fg": "#1E2A22",
+   "mut": "#5A6B60",
+   "acc": "#3AAF65",
+   "accTx": "#FAF8F6",
+   "bd": "#EDF2EE",
+   "kick": "#3AAF65"
+  },
+  "depois": {
+   "label": "Resibag Ativo",
+   "bg": "#F6FBEF",
+   "fg": "#000000",
+   "mut": "#646A63",
+   "acc": "#4DBE55",
+   "accTx": "#000000",
+   "bd": "#EAF0E3",
+   "kick": "#006E1E"
+  },
+  "porque": "O CTA persistente da v11 é Verde Vivo preenchido, sempre com Tinta em cima. O #3AAF65 v9 saía com texto claro, que a v11 proíbe. Mesmo motivo do escuro: Verde Vivo como TEXTO dá 2,27. O kicker vai em Verde Sólido; o Verde Vivo fica só no bloco do CTA."
+ },
+ "resibag-selo": {
+  "marca": "Resibag",
+  "manual": "Brand Guidelines v11 · §04",
+  "antes": {
+   "label": "Resibag Selo",
+   "bg": "#FAF8F6",
+   "fg": "#1E2A22",
+   "mut": "#5A6B60",
+   "acc": "#B8973A",
+   "accTx": "#1E2A22",
+   "bd": "#EDF2EE",
+   "kick": "#1E2A22"
+  },
+  "depois": {
+   "label": "Resibag Selo",
+   "bg": "#F6FBEF",
+   "fg": "#000000",
+   "mut": "#646A63",
+   "acc": "#1B5E8A",
+   "accTx": "#FFFFFF",
+   "bd": "#D8EEF4",
+   "kick": "#1B5E8A"
+  },
+  "porque": "O ouro era o Certification Gold, que a v11 matou. A instrução dela é textual: badge de certificação vira OCEAN sólido. Borda em Ice, o fundo de badge azul."
+ },
+ "sanwey": {
+  "marca": "Sanwey",
+  "manual": "Identidade Visual v7.0b · cores.md",
+  "antes": {
+   "label": "Sanwey (institucional)",
+   "bg": "#F9F9F9",
+   "fg": "#1A1A1A",
+   "mut": "#8A8680",
+   "acc": "#C7212B",
+   "accTx": "#FFFFFF",
+   "bd": "#E5E0DA",
+   "kick": "#C7212B"
+  },
+  "depois": {
+   "label": "Sanwey Institucional",
+   "bg": "#F9F9F9",
+   "fg": "#1A1A1A",
+   "mut": "#707070",
+   "acc": "#C7212B",
+   "accTx": "#FFFFFF",
+   "bd": "#CFCFCF",
+   "kick": "#C7212B"
+  },
+  "porque": "O manual crava rampa de cinza PURO K (R=G=B). #8A8680 e #E5E0DA são quentes, e o #8A8680 dava 3,44 — abaixo de AA. Trocados por gray-600 e gray-300."
+ },
+ "sanwey-industrial": {
+  "marca": "Sanwey",
+  "manual": "Identidade Visual v7.0b · cores.md",
+  "antes": {
+   "label": "Sanwey Industrial",
+   "bg": "#545454",
+   "fg": "#F9F9F9",
+   "mut": "#E2E2E2",
+   "acc": "#C7212B",
+   "accTx": "#FFFFFF",
+   "bd": "rgba(249,249,249,.18)",
+   "kick": "#C7212B"
+  },
+  "depois": {
+   "label": "Sanwey Industrial",
+   "bg": "#F2F2F2",
+   "fg": "#1A1A1A",
+   "mut": "#545454",
+   "acc": "#C7212B",
+   "accTx": "#FFFFFF",
+   "bd": "#CFCFCF",
+   "kick": "#C7212B"
+  },
+  "porque": "É a MUDANÇA MAIS FORTE e precisa da sua palavra. Cinza-700 é 'texto secundário' na rampa, não superfície — e nenhum acento lê em cima dele: o bloco vermelho dá 1,33:1. Gray-100 é 'superfície elevada' no manual, e mantém a distinção contra o institucional. O meta usa gray-700 e não gray-600: sobre a superfície elevada o 600 cai para 4,42, abaixo de AA — o manual validou o 600 sobre gray-50, não sobre gray-100."
+ },
+ "sanwey-impacto": {
+  "marca": "Sanwey",
+  "manual": "Identidade Visual v7.0b · cores.md",
+  "antes": {
+   "label": "Sanwey Impacto",
+   "bg": "#C7212B",
+   "fg": "#FFFFFF",
+   "mut": "#FBE9EB",
+   "acc": "#8B1419",
+   "accTx": "#FFFFFF",
+   "bd": "rgba(255,255,255,.24)",
+   "kick": "#8B1419"
+  },
+  "depois": {
+   "label": "Sanwey Impacto",
+   "bg": "#C7212B",
+   "fg": "#FFFFFF",
+   "mut": "#FBE9EB",
+   "acc": "#0A0A0A",
+   "accTx": "#FFFFFF",
+   "bd": "rgba(255,255,255,.24)",
+   "kick": "#0A0A0A"
+  },
+  "porque": "DEFEITO REAL hoje: o acento #8B1419 sobre o vermelho dá 1,66:1 — invisível, e é cor que o manual não tem. Preto Premium no lugar: 3,47 como bloco, e branco em cima a 19,80."
+ },
+ "sanwey-preto": {
+  "marca": "Sanwey",
+  "manual": "Identidade Visual v7.0b · cores.md",
+  "antes": {
+   "label": "Sanwey Preto",
+   "bg": "#0A0A0A",
+   "fg": "#FFFFFF",
+   "mut": "#8A8680",
+   "acc": "#C7212B",
+   "accTx": "#FFFFFF",
+   "bd": "rgba(255,255,255,.16)",
+   "kick": "#C7212B"
+  },
+  "depois": {
+   "label": "Sanwey Preto",
+   "bg": "#0A0A0A",
+   "fg": "#F9F9F9",
+   "mut": "#B0B0B0",
+   "acc": "#DD4039",
+   "accTx": "#0A0A0A",
+   "bd": "rgba(255,255,255,.16)",
+   "kick": "#DD4039"
+  },
+  "porque": "O manual recomenda Vermelho SINAL em fundo escuro: o base dá 3,47 e reprova corpo; o Sinal dá 4,59. E o muted quente vira gray-400, que é o caption sobre preto do próprio manual."
+ }
+}
