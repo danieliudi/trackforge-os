@@ -228,6 +228,69 @@ if (existsSync(FATOS_DIR) && existsSync(join(RAIZ, MAPA))) {
   }
 }
 
+/* ── 5. toda variável do .env.example aparece no diagnóstico ────────────── */
+
+/**
+ * O `.env.example` é a lista do que existe; `/api/instalacao` é a tela que
+ * responde "o que falta nesta máquina?". Enquanto nada comparava as duas, a
+ * segunda podia omitir a primeira em silêncio — e omitiu.
+ *
+ * O CASO, 16/09/2026. O `.env.local` do Daniel não tinha `UNSPLASH_ACCESS_KEY`
+ * nem `APP_PASSWORD`: fora criado antes de 08/09, quando o `.env.example` ganhou
+ * as duas, e o bootstrap só copia o exemplo quando o `.env.local` NÃO EXISTE —
+ * variável nova nunca alcança um arquivo já criado. A tela que responderia isso
+ * também não as listava. Duas ausências alinhadas, nenhuma delas visível.
+ *
+ * `APP_PASSWORD` é a que dói: sem ela o `src/proxy.ts` não pede nada, o que é
+ * certo em localhost e inaceitável numa URL pública (CLAUDE.md §3).
+ *
+ * VARRE O CÓDIGO DA ROTA, e não a resposta dela: rodar a rota exigiria o app de
+ * pé, e este check roda sem nada ligado. O que importa é se o NOME da variável
+ * está declarado ali — o valor nunca sai da rota, e não sai daqui também.
+ */
+const ENV_EXEMPLO = ".env.example";
+const ROTA_INSTALACAO = "src/app/api/instalacao/route.ts";
+
+/**
+ * Variável que existe e NÃO deve aparecer no diagnóstico, com o motivo.
+ *
+ * Mesmo contrato do `AUSENTES_DE_PROPOSITO` lá em cima: se ela passar a ser
+ * listada, o check FALHA pedindo para tirá-la daqui. Exceção que sobrevive ao
+ * motivo é o próximo lugar onde a verdade envelhece calada.
+ *
+ * Vazia desde que nasceu, e isso é o estado certo: toda variável que a
+ * ferramenta lê é coisa que alguém precisa saber se está ligada.
+ */
+const FORA_DO_DIAGNOSTICO = [];
+
+if (existsSync(join(RAIZ, ENV_EXEMPLO)) && existsSync(join(RAIZ, ROTA_INSTALACAO))) {
+  const rota = texto(ROTA_INSTALACAO);
+  // Linha de variável no exemplo, comentada ou não: `# APP_PASSWORD=` conta,
+  // porque estar comentada é o padrão sugerido, não ausência.
+  const doExemplo = [
+    ...texto(ENV_EXEMPLO).matchAll(/^#?\s*([A-Z][A-Z0-9_]+)=/gm),
+  ].map((m) => m[1]);
+
+  for (const nome of new Set(doExemplo)) {
+    const excecao = FORA_DO_DIAGNOSTICO.find((e) => e.nome === nome);
+    const listada = rota.includes(`"${nome}"`);
+
+    if (excecao && listada) {
+      erro(
+        "scripts/check-docs.mjs",
+        `\`${nome}\` está em FORA_DO_DIAGNOSTICO (${excecao.porque}) e a rota passou a listá-la`,
+        "tire da lista de exceções",
+      );
+    } else if (!excecao && !listada) {
+      erro(
+        ROTA_INSTALACAO,
+        `\`${nome}\` está no ${ENV_EXEMPLO} e não aparece no diagnóstico`,
+        "acrescente a integração, ou declare o motivo em FORA_DO_DIAGNOSTICO",
+      );
+    }
+  }
+}
+
 /* ── relatório ──────────────────────────────────────────────────────────── */
 
 const totalFatos = existsSync(FATOS_DIR)

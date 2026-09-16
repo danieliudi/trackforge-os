@@ -226,7 +226,7 @@ const TELAS = [
       // e o alvo trocou de cor sem uma palavra no relatório. Passou nos dois
       // casos — que é justamente o problema. Declarados separados, os dois são
       // medidos sempre, e mudança no fixture reprova por contagem.
-      { nome: "variável · definida", piso: MIUDO, quantos: 3, onde: (p) => p.locator('main span[data-status="on"]') },
+      { nome: "variável · definida", piso: MIUDO, quantos: 6, onde: (p) => p.locator('main span[data-status="on"]') },
       { nome: "variável · faltando", piso: MIUDO, quantos: 2, onde: (p) => p.locator('main span[data-status="off"]') },
     ],
   },

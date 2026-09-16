@@ -67,7 +67,7 @@ pasta com esse nome ninguém trata como suíte):
 
 - `npm run qa:rotas` — as 11 telas, no monitor e no celular, mais o detector de
   colisão de cor (dois `bg-`/`text-`/`border-` no mesmo elemento);
-- `npm run qa:contraste` — 590 medições em 7 telas, nos dois temas;
+- `npm run qa:contraste` — 604 medições em 7 telas, nos dois temas;
 - `npm run qa:interacao` — frente, tema, prioridade e herança de chave;
 - **Declarar dois de três estados é pior que nenhum** — o sinal da faixa tinha
   "fila vazia" e "fila fora do ar" declarados, e o terceiro (CRM não

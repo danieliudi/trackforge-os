@@ -116,17 +116,32 @@ export async function novaPagina(navegador, opcoes = {}) {
      * dela não têm o que medir — cobertura que evapora em silêncio. O padrão
      * traz uma faltando de propósito: é o estado que a tela existe para avisar.
      */
+    /**
+     * ESTE FIXTURE É A ROTA, NÃO UMA LISTA PARECIDA COM ELA.
+     *
+     * Até 16/09/2026 ele inventava `imagens` e `senha` — que a rota não
+     * devolvia — e omitia `campaigns`, `shortener` e `usd_brl`, que ela
+     * devolvia. A varredura renderizava uma tela que o app nunca produziu, e
+     * nada comparava os dois. Ironia registrada: as duas que ele inventava
+     * eram exatamente as que faltavam na rota, e foi o `.env.local` do Daniel
+     * que denunciou.
+     *
+     * Hoje as duas listas batem, e quem confere que continuam batendo é o
+     * `npm run doc:check`, cruzando o `.env.example` com a rota.
+     *
+     * Uma faltando de propósito: a tela existe para avisar o que falta, e com
+     * tudo ligado os alvos daquele estado não têm o que medir.
+     */
     instalacao = {
       integrations: [
-        // A obrigatória vem primeiro, como na rota — e no estado de PLACEHOLDER,
-        // que é o terceiro estado e o mais provável numa instalação nova. Sem
-        // ela declarada aqui, a varredura nunca renderizava a linha que existe
-        // para avisar que a ferramenta não gera nada.
         { id: "anthropic", label: "Geração de conteúdo — o valor ainda é o sk-ant-… do exemplo", env: ["ANTHROPIC_API_KEY"], configured: false },
         { id: "signals", label: "Sinais de mercado", env: ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"], configured: true },
+        { id: "campaigns", label: "Campanhas de conteúdo", env: ["SUPABASE_URL", "SUPABASE_SERVICE_ROLE_KEY"], configured: true },
         { id: "crm_publish", label: "Fila de aprovação (CRM)", env: ["SUPABASE_URL", "CRM_AGENT_KEY"], configured: true },
-        { id: "imagens", label: "Busca de imagem", env: ["UNSPLASH_ACCESS_KEY"], configured: true },
-        { id: "senha", label: "Senha na frente do app", env: ["APP_PASSWORD"], configured: false },
+        { id: "imagens", label: "Busca de imagem (Unsplash)", env: ["UNSPLASH_ACCESS_KEY"], configured: true },
+        { id: "senha", label: "Senha na frente do app — obrigatória ao publicar", env: ["APP_PASSWORD"], configured: false },
+        { id: "shortener", label: "Encurtador (QR curto)", env: ["NEXT_PUBLIC_SHORTENER_BASE"], configured: true },
+        { id: "usd_brl", label: "Cotação USD → BRL", env: ["NEXT_PUBLIC_USD_BRL"], configured: true },
       ],
     },
     localStorage: extra = {},

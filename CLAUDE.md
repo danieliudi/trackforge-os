@@ -601,7 +601,7 @@ suíte.
 | Comando | O que prova |
 |---|---|
 | `npm run qa:rotas` | as 11 telas renderizam **a tela certa**, no monitor e no celular — e nenhum elemento declara duas cores para a mesma propriedade |
-| `npm run qa:contraste` | 590 medições em 7 telas passam o piso nos **dois** temas |
+| `npm run qa:contraste` | 604 medições em 7 telas passam o piso nos **dois** temas |
 | `npm run qa:interacao` | frente, tema, prioridade e herança de chave respondem |
 | `npm run qa:avisos` | o achado de **coocorrência** aparece no painel com os dois trechos e o bloco nomeado |
 | `npm run qa:contador` | o contador conta **o que o botão copia** (lido da área de transferência, não recalculado), diz "sem lastro" enquanto a régua for `nao-verificado`, e SAI de cena no roteiro de Reels |

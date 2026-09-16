@@ -65,6 +65,29 @@ export async function GET() {
         configured: crmPublishConfigured(),
       },
       {
+        id: "imagens",
+        label: "Busca de imagem (Unsplash)",
+        env: ["UNSPLASH_ACCESS_KEY"],
+        configured: Boolean((process.env.UNSPLASH_ACCESS_KEY || "").trim()),
+      },
+      {
+        /**
+         * OBRIGATÓRIA AO PUBLICAR, e por isso ela está aqui e não só no
+         * `.env.example`. Sem `APP_PASSWORD` o `src/proxy.ts` não pede nada —
+         * o que é certo em localhost e inaceitável numa URL pública, onde as
+         * rotas que gastam a chave da Anthropic, leem o CRM e apagam arquivo da
+         * biblioteca ficam abertas a quem souber o endereço (CLAUDE.md §3).
+         *
+         * Entrou em 16/09/2026, junto com a `ANTHROPIC_API_KEY`, e pelo mesmo
+         * motivo: a tela listava só o que é opcional. O `.env.example`
+         * documenta as duas desde 08/09; o diagnóstico não sabia que existiam.
+         */
+        id: "senha",
+        label: "Senha na frente do app — obrigatória ao publicar",
+        env: ["APP_PASSWORD"],
+        configured: Boolean((process.env.APP_PASSWORD || "").trim()),
+      },
+      {
         id: "shortener",
         label: "Encurtador (QR curto)",
         env: ["NEXT_PUBLIC_SHORTENER_BASE"],

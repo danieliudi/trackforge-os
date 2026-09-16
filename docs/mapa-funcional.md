@@ -112,11 +112,17 @@ sai daqui.
 **Para que serve:** o que está ligado nesta máquina. Nome da variável e se está
 definida.
 
-**A primeira linha é a única OBRIGATÓRIA**, e ela entrou em 16/09/2026: a
-`ANTHROPIC_API_KEY`. As outras cinco são opcionais — sem cada uma, a seção
-correspondente só não aparece. Sem esta, toda rota que gera devolve 401 no
-clique, e até essa data ela era justamente a que não estava na lista: a tela
-listava as cinco opcionais e omitia a obrigatória.
+**São oito linhas, e as duas obrigatórias entraram em 16/09/2026.** A
+`ANTHROPIC_API_KEY`, sem a qual toda rota que gera devolve 401 no clique, e a
+`APP_PASSWORD`, obrigatória ao publicar — sem ela o `src/proxy.ts` não pede
+nada, o que é certo em localhost e inaceitável numa URL pública. Até essa data
+a tela listava só o que é opcional: cinco integrações que, faltando, apenas
+fazem a seção correspondente não aparecer.
+
+Junto entrou a `UNSPLASH_ACCESS_KEY`, que o `.env.example` documenta desde
+08/09 e o diagnóstico ignorava. Hoje **`npm run doc:check` cruza as duas
+listas** e reprova quando o exemplo ganha variável que a rota não mostra —
+conferido plantando os três casos, inclusive o defeito original.
 
 Ela tem **três estados, não dois**. `sk-ant-...` é o texto literal do
 `.env.example`, e o bootstrap copia o exemplo quando não há `.env.local` — então
