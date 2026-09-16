@@ -1,6 +1,6 @@
 ---
 description: Cor, tema, identidade Situação, contraste, paleta de marca e portão de mockup
-globs: src/**/*.tsx,src/app/globals.css,src/constants/themes.ts,src/knowledge/paleta-resibag.json
+globs: src/**/*.tsx,src/app/globals.css,src/constants/themes.ts,src/knowledge/paleta-*.json
 alwaysApply: false
 ---
 
@@ -157,8 +157,33 @@ de certificação.
   instalada. Gate que só roda onde as skills estão sincronizadas não é gate.
 - **`npm run paleta:check` bloqueia o build** (entrou no `prebuild`). Cor morta
   em tema de marca reprova, com o substituto que o manual manda usar.
-- **Dívida se declara em `DIVIDA_DECLARADA`**, com motivo e data. Os quatro temas
-  Resibag estão lá hoje. E a exceção morre sozinha: tema consertado com a
-  declaração esquecida também reprova.
+- **Dívida se declara em `DIVIDA_DECLARADA`**, com motivo e data. Está vazio
+  desde 16/09/2026, quando a Fase 6 redesenhou os oito temas. E a exceção morre
+  sozinha: tema consertado com a declaração esquecida também reprova.
 - **Não olha `globals.css`** — aquela é a paleta da ferramenta, não da marca.
-- **Sanwey não tem paleta curada.** O gate só olha `resibag*`.
+- **A Sanwey tem paleta curada** desde 16/09/2026 (`paleta-sanwey.json`): 4
+  mortas, 17 autorizadas e a regra do **puro K** — o manual dela crava que a
+  rampa neutra é `R=G=B`, então cinza composto reprova mesmo sem estar na lista.
+- **Comentário não é varrido.** Hex dentro de comentário não pinta nada, e
+  documentar o conserto ao lado dele é o que se quer. Mesma decisão do `notes`
+  na regra de conhecimento.
+
+## Cor de marca tem PAPEL
+
+Espelha a seção 18 do `CLAUDE.md`. Mora aqui pelo mesmo motivo da 17.
+
+**O manual autoriza por papel, não por hex.** O Verde Vivo `#4DBE55` da v11 é cor
+de PREENCHIMENTO. Como letra ele dá 2,27:1 sobre o Off-White e 2,71:1 sobre o
+Verde Sólido — abaixo até do piso de ornamento.
+
+- **`accent` é a cor do BLOCO CHEIO.** Quando a mesma ideia vira letra ou fio,
+  sai de **`accentInk`** — campo próprio do tema, nunca derivado do acento.
+- Vale para o número do `data_metric`, a atribuição da citação e a etiqueta
+  vazada. Com `accent`, o `resibag-ativo` punha o **"38%"** a 2,27:1.
+- O campo é obrigatório no tipo, então tema ou formato novo não esquece dele.
+- **Tradução de mockup para código confere os campos NOVOS um a um.** Os antigos
+  o compilador acha sozinho; o `kick` do mockup da Fase 6 ficou para trás
+  justamente por ser novo, e ele era a correção.
+- Sobre foto de fundo a medição não vale (o gradiente é irmão, não ancestral):
+  ali o token de texto tem de ser CLARO por construção, e quem confere é a
+  captura de tela.

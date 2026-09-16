@@ -2,67 +2,203 @@
   "comment": "Paleta curada da Resibag, para o GATE de cor morta (scripts/check-paleta.mjs). Curada no repo, e não lida da skill instalada, pelo mesmo motivo do medidor de contraste: gate que só roda numa máquina não é gate. O `check-knowledge` avisa quando a skill de origem mudar. O que entra aqui é só COR — o resto do design system (tipografia, layout, template) continua fora da curadoria, como o sources.json sempre disse.",
   "fonte": {
     "skill": "resibag-brand-guidelines",
-    "versao": "v11.0",
+    "versao": "v11.0 + correção de Legenda da v11.1",
     "secao": "§02 — Cores Eliminadas",
     "checkedAt": "2026-09-16",
     "checkedBy": "sessão Claude Code — lida do SKILL.md instalado na conta",
-    "nota": "A v11.1 foi montada e conferida, mas NÃO propagou até esta data. Quando propagar, `#6E756D` sai de `autorizadas` e entra em `mortas`, substituída por `#646A63` — ver o campo `pendenteV11_1` abaixo."
+    "nota": "A v11.1 foi montada, conferida e entregue, mas NÃO propagou até 16/09/2026. O único valor dela adotado aqui é a Legenda #646A63, por decisão do Daniel — o resto segue a v11.0 instalada. Quando a v11.1 propagar, atualizar `versao` e apagar este parágrafo."
   },
-
   "mortas": [
-    { "hex": "#0F3D24", "nome": "Deep (v10.x)", "usar": "Verde Sólido #006E1E" },
-    { "hex": "#1A6640", "nome": "Forest (v10.x)", "usar": "Verde Ênfase #005500" },
-    { "hex": "#2EA05A", "nome": "Active (v10.x)", "usar": "Verde Vivo #4DBE55" },
-    { "hex": "#72D4A0", "nome": "Mint (v10.x)", "usar": "#CFE8D9 — não é mais token à parte" },
-    { "hex": "#F3F9F6", "nome": "Off-White (v10.x)", "usar": "Off-White #F6FBEF" },
-    { "hex": "#1E2A22", "nome": "Graphite (v10.x)", "usar": "Tinta #000000 (título) ou Corpo #3D413A (parágrafo)" },
-    { "hex": "#4A6355", "nome": "Slate (v10.x)", "usar": "Legenda #6E756D" },
-    { "hex": "#E8F2EC", "nome": "Light Gray (v10.x)", "usar": "Light Gray #EAF0E3" },
-    { "hex": "#9FE0B4", "nome": "Tag Claro pré-ajuste", "usar": "Tag Claro #B0E8C2" },
-    { "hex": "#B8973A", "nome": "Certification Gold", "usar": "Badge Ocean sólido #1B5E8A" },
-    { "hex": "#D4730E", "nome": "Alert Amber", "usar": "Alerta #CD5B5B (uso restrito)" },
-
-    { "hex": "#1B5E3A", "nome": "v9", "usar": "ver a tabela v10.x — eliminada antes da v11" },
-    { "hex": "#0D3D20", "nome": "v9", "usar": "ver a tabela v10.x — eliminada antes da v11" },
-    { "hex": "#3AAF65", "nome": "v9", "usar": "ver a tabela v10.x — eliminada antes da v11" },
-    { "hex": "#72FD9C", "nome": "v9", "usar": "ver a tabela v10.x — eliminada antes da v11" },
-    { "hex": "#FAF8F6", "nome": "v9", "usar": "ver a tabela v10.x — eliminada antes da v11" },
-    { "hex": "#5A6B60", "nome": "v9", "usar": "ver a tabela v10.x — eliminada antes da v11" },
-    { "hex": "#EDF2EE", "nome": "v9", "usar": "ver a tabela v10.x — eliminada antes da v11" },
-
-    { "hex": "#1A6E35", "nome": "anterior à v9", "usar": "—" },
-    { "hex": "#0F4A23", "nome": "anterior à v9", "usar": "—" },
-    { "hex": "#2D9B52", "nome": "anterior à v9", "usar": "—" },
-    { "hex": "#C49B2A", "nome": "anterior à v9", "usar": "—" },
-    { "hex": "#CC2936", "nome": "anterior à v9", "usar": "—" }
+    {
+      "hex": "#0F3D24",
+      "nome": "Deep (v10.x)",
+      "usar": "Verde Sólido #006E1E"
+    },
+    {
+      "hex": "#1A6640",
+      "nome": "Forest (v10.x)",
+      "usar": "Verde Ênfase #005500"
+    },
+    {
+      "hex": "#2EA05A",
+      "nome": "Active (v10.x)",
+      "usar": "Verde Vivo #4DBE55"
+    },
+    {
+      "hex": "#72D4A0",
+      "nome": "Mint (v10.x)",
+      "usar": "#CFE8D9 — não é mais token à parte"
+    },
+    {
+      "hex": "#F3F9F6",
+      "nome": "Off-White (v10.x)",
+      "usar": "Off-White #F6FBEF"
+    },
+    {
+      "hex": "#1E2A22",
+      "nome": "Graphite (v10.x)",
+      "usar": "Tinta #000000 (título) ou Corpo #3D413A (parágrafo)"
+    },
+    {
+      "hex": "#4A6355",
+      "nome": "Slate (v10.x)",
+      "usar": "Legenda #6E756D"
+    },
+    {
+      "hex": "#E8F2EC",
+      "nome": "Light Gray (v10.x)",
+      "usar": "Light Gray #EAF0E3"
+    },
+    {
+      "hex": "#9FE0B4",
+      "nome": "Tag Claro pré-ajuste",
+      "usar": "Tag Claro #B0E8C2"
+    },
+    {
+      "hex": "#B8973A",
+      "nome": "Certification Gold",
+      "usar": "Badge Ocean sólido #1B5E8A"
+    },
+    {
+      "hex": "#D4730E",
+      "nome": "Alert Amber",
+      "usar": "Alerta #CD5B5B (uso restrito)"
+    },
+    {
+      "hex": "#1B5E3A",
+      "nome": "v9",
+      "usar": "ver a tabela v10.x — eliminada antes da v11"
+    },
+    {
+      "hex": "#0D3D20",
+      "nome": "v9",
+      "usar": "ver a tabela v10.x — eliminada antes da v11"
+    },
+    {
+      "hex": "#3AAF65",
+      "nome": "v9",
+      "usar": "ver a tabela v10.x — eliminada antes da v11"
+    },
+    {
+      "hex": "#72FD9C",
+      "nome": "v9",
+      "usar": "ver a tabela v10.x — eliminada antes da v11"
+    },
+    {
+      "hex": "#FAF8F6",
+      "nome": "v9",
+      "usar": "ver a tabela v10.x — eliminada antes da v11"
+    },
+    {
+      "hex": "#5A6B60",
+      "nome": "v9",
+      "usar": "ver a tabela v10.x — eliminada antes da v11"
+    },
+    {
+      "hex": "#EDF2EE",
+      "nome": "v9",
+      "usar": "ver a tabela v10.x — eliminada antes da v11"
+    },
+    {
+      "hex": "#1A6E35",
+      "nome": "anterior à v9",
+      "usar": "—"
+    },
+    {
+      "hex": "#0F4A23",
+      "nome": "anterior à v9",
+      "usar": "—"
+    },
+    {
+      "hex": "#2D9B52",
+      "nome": "anterior à v9",
+      "usar": "—"
+    },
+    {
+      "hex": "#C49B2A",
+      "nome": "anterior à v9",
+      "usar": "—"
+    },
+    {
+      "hex": "#CC2936",
+      "nome": "anterior à v9",
+      "usar": "—"
+    },
+    {
+      "hex": "#6E756D",
+      "nome": "Legenda (v11.0)",
+      "usar": "Legenda #646A63 — a v11.0 dava 4,30 e 4,08 nas Camadas 2 e 3, abaixo de AA"
+    }
   ],
-
   "autorizadas": [
-    { "hex": "#006E1E", "nome": "Verde Sólido" },
-    { "hex": "#005500", "nome": "Verde Ênfase" },
-    { "hex": "#4DBE55", "nome": "Verde Vivo", "nota": "SÓ como fundo — texto em Tinta, nunca branco" },
-    { "hex": "#1B5E8A", "nome": "Ocean", "nota": "o único azul que pode ser texto" },
-    { "hex": "#3D9BD4", "nome": "Sky", "nota": "SÓ preenchimento — reprova como texto em qualquer camada (v11.1)" },
-    { "hex": "#D8EEF4", "nome": "Ice" },
-    { "hex": "#F6FBEF", "nome": "Off-White (Camada 1)" },
-    { "hex": "#F0F6E9", "nome": "Off-White Alternada (Camada 2)" },
-    { "hex": "#EAF0E3", "nome": "Light Gray (Camada 3)" },
-    { "hex": "#FFFFFF", "nome": "Branco" },
-    { "hex": "#000000", "nome": "Tinta" },
-    { "hex": "#3D413A", "nome": "Corpo" },
-    { "hex": "#6E756D", "nome": "Legenda", "nota": "vira morta quando a v11.1 propagar — ver pendenteV11_1" },
-    { "hex": "#CD5B5B", "nome": "Alerta", "nota": "só texto grande" },
-    { "hex": "#B0E8C2", "nome": "Tag Claro" },
-    { "hex": "#CFE8D9", "nome": "texto de apoio em fundo escuro" }
-  ],
-
-  "pendenteV11_1": {
-    "porque": "A v11.1 corrige dois defeitos da v11.0 e ainda não propagou (conferido em 16/09/2026). Quando propagar, aplicar estas duas linhas e atualizar `fonte.versao`.",
-    "mover_para_mortas": [
-      { "hex": "#6E756D", "nome": "Legenda (v11.0)", "usar": "Legenda #646A63 — a v11.0 reprovava AA nas Camadas 2 e 3" }
-    ],
-    "acrescentar_em_autorizadas": [
-      { "hex": "#646A63", "nome": "Legenda (v11.1)" }
-    ]
-  }
+    {
+      "hex": "#006E1E",
+      "nome": "Verde Sólido"
+    },
+    {
+      "hex": "#005500",
+      "nome": "Verde Ênfase"
+    },
+    {
+      "hex": "#4DBE55",
+      "nome": "Verde Vivo",
+      "nota": "SÓ como fundo — texto em Tinta, nunca branco"
+    },
+    {
+      "hex": "#1B5E8A",
+      "nome": "Ocean",
+      "nota": "o único azul que pode ser texto"
+    },
+    {
+      "hex": "#3D9BD4",
+      "nome": "Sky",
+      "nota": "SÓ preenchimento — reprova como texto em qualquer camada (v11.1)"
+    },
+    {
+      "hex": "#D8EEF4",
+      "nome": "Ice"
+    },
+    {
+      "hex": "#F6FBEF",
+      "nome": "Off-White (Camada 1)"
+    },
+    {
+      "hex": "#F0F6E9",
+      "nome": "Off-White Alternada (Camada 2)"
+    },
+    {
+      "hex": "#EAF0E3",
+      "nome": "Light Gray (Camada 3)"
+    },
+    {
+      "hex": "#FFFFFF",
+      "nome": "Branco"
+    },
+    {
+      "hex": "#000000",
+      "nome": "Tinta"
+    },
+    {
+      "hex": "#3D413A",
+      "nome": "Corpo"
+    },
+    {
+      "hex": "#CD5B5B",
+      "nome": "Alerta",
+      "nota": "só texto grande"
+    },
+    {
+      "hex": "#B0E8C2",
+      "nome": "Tag Claro"
+    },
+    {
+      "hex": "#CFE8D9",
+      "nome": "texto de apoio em fundo escuro"
+    },
+    {
+      "hex": "#646A63",
+      "nome": "Legenda (v11.1)",
+      "nota": "Aprovado pelo Daniel em 16/09/2026 para os temas, ANTES de a v11.1 propagar: o valor da v11.0 (#6E756D) reprova AA nas Camadas 2 e 3, e desenhar contra um valor sabidamente errado embutiria o defeito."
+    }
+  ]
 }

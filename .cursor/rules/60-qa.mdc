@@ -77,7 +77,12 @@ pasta com esse nome ninguém trata como suíte):
 - `npm run qa:contador` — o contador conta **o que o botão copia** (lido da área
   de transferência, não recalculado dentro do teste), diz "sem lastro" enquanto
   a régua for `nao-verificado`, e SAI de cena no roteiro de Reels;
-- `npm run qa` — os cinco;
+- `npm run qa:temas` — os **8 temas de marca** renderizam no piso no slide de
+  verdade, por papel DECLARADO (`data-papel`: manchete, métrica, corpo,
+  etiqueta) e com a contagem esperada de cada um — 136 medições. Slide com foto
+  de fundo fica fora, declarado: ali o gradiente é IRMÃO do texto e o medidor
+  sobe por ancestrais, então mediria contra uma cor que ninguém vê;
+- `npm run qa` — os seis;
 - `npm run qa:sonda` — **não é gate**: lista o que está abaixo do piso, para
   você classificar e declarar.
 

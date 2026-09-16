@@ -272,15 +272,24 @@ outra frente seria o vazamento que a regra de isolamento proíbe.
 
 ---
 
-**E, desde 16/09/2026, uma paleta.** `src/knowledge/paleta-resibag.json` carrega
-as cores autorizadas da Resibag e — o que importa para o gate — a lista das
-**mortas**, curada da §02 da `resibag-brand-guidelines`. `npm run paleta:check`
-cruza essa lista com `src/constants/themes.ts` e **bloqueia o build** se um tema
-de marca usar cor aposentada. Entrou porque os quatro temas Resibag estavam na
-paleta v9 enquanto o manual ia na v11 — cinco versões de deriva, com o
-`resibag-selo` gerando selo de certificação no Certification Gold que a v11
-eliminou. Só a COR entrou na curadoria; tipografia, layout e template do design
-system continuam fora, como sempre estiveram.
+**E, desde 16/09/2026, DUAS paletas.** `src/knowledge/paleta-resibag.json` e
+`src/knowledge/paleta-sanwey.json` carregam as cores autorizadas de cada marca
+e — o que importa para o gate — a lista das **mortas**, curadas da §02 da
+`resibag-brand-guidelines` e do `cores.md` da `sanwey-brand-guidelines`.
+`npm run paleta:check` cruza as duas com `src/constants/themes.ts` e **bloqueia
+o build** se um tema de marca usar cor aposentada.
+
+Entrou porque os quatro temas Resibag estavam na paleta v9 enquanto o manual ia
+na v11 — cinco versões de deriva, com o `resibag-selo` gerando selo de
+certificação no Certification Gold que a v11 eliminou. Só a COR entrou na
+curadoria; tipografia, layout e template do design system continuam fora, como
+sempre estiveram.
+
+A da Sanwey traz uma regra a mais: a rampa neutra dela é **puro K** (`R=G=B`),
+então cinza composto reprova mesmo sem estar na lista de mortas — era assim que
+`#8A8680` e `#E5E0DA`, cinzas quentes, tinham entrado. O gate também não varre
+comentário: hex dentro de comentário não pinta nada, e documentar o conserto ao
+lado dele é o que se quer (mesma decisão do `notes`, acima).
 
 ## 4. A fronteira com o CRM (`src/lib/crm.ts`)
 

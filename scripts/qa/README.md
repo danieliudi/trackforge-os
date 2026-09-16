@@ -7,11 +7,12 @@ que a seção 12 do `CLAUDE.md` mandou trazê-los para cá.
 | Roteiro | O que prova | Comando |
 |---|---|---|
 | `rotas.mjs` | as 11 telas renderizam **a tela certa**, no monitor e no celular — e nenhum elemento declara duas cores para a mesma propriedade | `npm run qa:rotas` |
-| `contraste.mjs` | 552 medições em 7 telas passam o piso nos **dois** temas | `npm run qa:contraste` |
+| `contraste.mjs` | 590 medições em 7 telas passam o piso nos **dois** temas | `npm run qa:contraste` |
 | `interacao.mjs` | frente, tema, prioridade e herança de chave **respondem** | `npm run qa:interacao` |
 | `avisos.mjs` | o achado de **coocorrência** aparece no painel com os dois trechos e o bloco nomeado | `npm run qa:avisos` |
 | `contador.mjs` | o contador conta **o que o botão copia** — lido da área de transferência, não recalculado —, diz "sem lastro" enquanto a régua for `nao-verificado`, e SAI de cena no roteiro de Reels | `npm run qa:contador` |
-| todos | os cinco em sequência, parando no primeiro que reprovar | `npm run qa` |
+| `temas.mjs` | os **8 temas de marca** renderizam no piso no slide de verdade (`/slides-preview`), por papel declarado e com a contagem esperada de cada um — 136 medições. Slide com foto de fundo fica fora, e o roteiro diz por quê | `npm run qa:temas` |
+| todos | os seis em sequência, parando no primeiro que reprovar | `npm run qa` |
 | `sonda.mjs` | **não é gate** — acha o que ainda não foi declarado | `npm run qa:sonda` |
 
 O app precisa estar de pé (`npm run dev`). Nenhum roteiro gasta a chave da

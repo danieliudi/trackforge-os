@@ -20,6 +20,10 @@
  * medidor de contraste, que apontava para `/opt/pw-browsers` e só funcionava num
  * sandbox. Quem avisa que a fonte mudou é o `check-knowledge`.
  *
+ * DESDE 16/09/2026 OLHA AS DUAS MARCAS. A Sanwey entrou junto com a Fase 6, e
+ * trouxe uma regra que a Resibag não tem: a rampa neutra dela é PURO K, e cinza
+ * composto reprova por si — `#8A8680` e `#E5E0DA` estavam em três temas.
+ *
  * O QUE ELE NÃO OLHA: `src/app/globals.css`. Aquela é a paleta da FERRAMENTA
  * (o híbrido), não da marca. Peça que sai para o cliente usa `themes.ts`;
  * a tela onde o Daniel trabalha usa o globals. São coisas diferentes.
@@ -51,34 +55,40 @@ const verde = (s) => `\x1b[32m${s}\x1b[0m`;
  * aperta sozinho.
  */
 const DIVIDA_DECLARADA = [
-  {
-    tema: "resibag",
-    porque: "paleta v9 — aguarda mockup dos quatro temas contra a v11",
-    desde: "2026-09-16",
-  },
-  {
-    tema: "resibag-escuro",
-    porque: "paleta v9 — aguarda mockup dos quatro temas contra a v11",
-    desde: "2026-09-16",
-  },
-  {
-    tema: "resibag-ativo",
-    porque: "paleta v9 — aguarda mockup dos quatro temas contra a v11",
-    desde: "2026-09-16",
-  },
-  {
-    tema: "resibag-selo",
-    porque:
-      "paleta v9, e o acento é o Certification Gold que a v11 aposentou — aguarda mockup",
-    desde: "2026-09-16",
-  },
+  // Vazio desde 16/09/2026, quando os quatro temas Resibag foram redesenhados
+  // contra a v11 (Fase 6). Estava com quatro linhas, todas "paleta v9 — aguarda
+  // mockup". Declaração aqui é exceção COM data de morte: some junto com o
+  // motivo, e o gate acusa se ficar para trás.
 ];
 
-const paleta = JSON.parse(readFileSync(join(RAIZ, "src/knowledge/paleta-resibag.json"), "utf8"));
+const PALETAS = {
+  resibag: JSON.parse(readFileSync(join(RAIZ, "src/knowledge/paleta-resibag.json"), "utf8")),
+  sanwey: JSON.parse(readFileSync(join(RAIZ, "src/knowledge/paleta-sanwey.json"), "utf8")),
+};
 const fonte = readFileSync(join(RAIZ, ALVO), "utf8");
 
-const MORTAS = new Map(paleta.mortas.map((c) => [c.hex.toUpperCase(), c]));
-const AUTORIZADAS = new Set(paleta.autorizadas.map((c) => c.hex.toUpperCase()));
+const curada = (marca) => ({
+  mortas: new Map(PALETAS[marca].mortas.map((c) => [c.hex.toUpperCase(), c])),
+  autorizadas: new Set(PALETAS[marca].autorizadas.map((c) => c.hex.toUpperCase())),
+  regraPuroK: PALETAS[marca].regraPuroK?.vale === true,
+});
+
+/**
+ * Cinza composto — R, G e B diferentes entre si.
+ *
+ * O manual da Sanwey proíbe explicitamente: "Nunca introduzir cinza azulado
+ * (slate). A rampa é puro K e reproduz idêntico em qualquer gráfica." Cinza
+ * composto muda entre telas e entre gráficas, e três temas da ferramenta usavam
+ * `#8A8680` e `#E5E0DA` até 16/09/2026. A regra é mecânica, então o gate a faz
+ * valer; o manual da Resibag não tem equivalente, e por isso o campo é opcional.
+ */
+function cinzaComposto(hex) {
+  const [r, g, b] = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16));
+  if (r === g && g === b) return false;
+  // Só acusa o que é PERCEBIDO como cinza: canais próximos entre si. Vermelho e
+  // ouro têm R≠G≠B de propósito e não são cinza nenhum.
+  return Math.max(r, g, b) - Math.min(r, g, b) <= 40;
+}
 
 /**
  * Fatia `themes.ts` por tema.
@@ -86,6 +96,22 @@ const AUTORIZADAS = new Set(paleta.autorizadas.map((c) => c.hex.toUpperCase()));
  * Um hex sem o tema ao lado é um achado que ninguém consegue agir: `#B8973A`
  * sozinho não diz onde mexer. O gate só é útil se aponta o lugar.
  */
+/**
+ * Comentário fora antes de varrer — e isto é a mesma decisão do `notes` na
+ * checagem de coerência da base (CLAUDE.md seção 9).
+ *
+ * O gate existe para achar cor morta que o navegador PINTA. Hex dentro de
+ * comentário não pinta nada: é o registro de por que aquela cor saiu, que é
+ * justamente o que se quer escrito ao lado do conserto. Sem isto, documentar
+ * "o acento era #8B1419 e dava 1,66:1" reprova o gate — e um gate que apita
+ * por prosa é um gate que alguém desliga.
+ *
+ * Varre o que CHEGA à tela, não o arquivo inteiro. Conferido plantando nos dois
+ * lugares: no valor de um token reprova, na explicação ao lado passa.
+ */
+const semComentario = (texto) =>
+  texto.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/[^\n]*/g, "");
+
 function fatiarTemas(texto) {
   const temas = [];
   const re = /\n {2}"?([a-z0-9-]+)"?:\s*\{/g;
@@ -113,12 +139,18 @@ for (const { id, corpo } of temas) {
   // Só tema de MARCA. Os genéricos (dark-modern, editorial…) não respondem a
   // manual nenhum, e reprovar cor deles seria inventar regra que não existe.
   const marca = id.startsWith("resibag") ? "resibag" : id.startsWith("sanwey") ? "sanwey" : null;
-  if (marca !== "resibag") continue;
+  if (!marca) continue;
+  const { mortas, autorizadas, regraPuroK } = curada(marca);
 
-  for (const hex of new Set(corpo.match(/#[0-9A-Fa-f]{6}/g) ?? [])) {
+  for (const hex of new Set(semComentario(corpo).match(/#[0-9A-Fa-f]{6}/g) ?? [])) {
     const H = hex.toUpperCase();
-    if (MORTAS.has(H)) achados.push({ tema: id, hex: H, ...MORTAS.get(H) });
-    else if (!AUTORIZADAS.has(H)) foraDaPaleta.push({ tema: id, hex: H });
+    if (mortas.has(H)) achados.push({ tema: id, hex: H, marca, ...mortas.get(H) });
+    else if (regraPuroK && cinzaComposto(H) && !autorizadas.has(H)) {
+      achados.push({
+        tema: id, hex: H, marca, nome: "cinza composto",
+        usar: "um token da rampa neutra — o manual da Sanwey exige puro K (R=G=B)",
+      });
+    } else if (!autorizadas.has(H)) foraDaPaleta.push({ tema: id, hex: H });
   }
 }
 
@@ -126,10 +158,25 @@ const declarados = new Set(DIVIDA_DECLARADA.map((d) => d.tema));
 const novos = achados.filter((a) => !declarados.has(a.tema));
 const conhecidos = achados.filter((a) => declarados.has(a.tema));
 
-console.log(bold("\nCor morta em tema de marca") + dim(`  — ${ALVO} × ${paleta.fonte.skill} ${paleta.fonte.versao}`));
+console.log(
+  bold("\nCor morta em tema de marca") +
+    dim(
+      `  — ${ALVO} × ${PALETAS.resibag.fonte.skill} ${PALETAS.resibag.fonte.versao}` +
+        ` · ${PALETAS.sanwey.fonte.skill} ${PALETAS.sanwey.fonte.versao}`,
+    ),
+);
 
 if (conhecidos.length > 0) {
   console.log(amarelo(`\n  ${conhecidos.length} ocorrência(s) em dívida DECLARADA:`));
+}
+
+// FORA do `if` acima, de propósito, e isto foi um defeito real: enquanto a
+// checagem morava lá dentro, uma dívida declarada que deixou de existir só era
+// acusada se AINDA HOUVESSE outra dívida viva. Consertando todos os temas de
+// uma vez — que é o caso normal —, as declarações mortas passariam batido, e a
+// exceção sobreviveria ao motivo em silêncio. Achado em 16/09/2026 ao aplicar a
+// Fase 6, quando os quatro temas foram corrigidos juntos.
+{
   for (const d of DIVIDA_DECLARADA) {
     const desse = conhecidos.filter((c) => c.tema === d.tema);
     if (desse.length === 0) {
@@ -166,9 +213,12 @@ if (process.exitCode === 1) {
   process.exit(1);
 }
 
-const total = temas.filter((t) => t.id.startsWith("resibag")).length;
+const total = temas.filter((t) => t.id.startsWith("resibag") || t.id.startsWith("sanwey")).length;
 console.log(
-  `\n${verde("✓")} nenhuma cor morta nova em ${total} tema(s) Resibag ` +
-    dim(`(${conhecidos.length} em dívida declarada, ${paleta.mortas.length} cores na lista)`) +
+  `\n${verde("✓")} nenhuma cor morta nova em ${total} tema(s) de marca ` +
+    dim(
+      `(${conhecidos.length} em dívida declarada, ` +
+        `${PALETAS.resibag.mortas.length + PALETAS.sanwey.mortas.length} cores nas duas listas)`,
+    ) +
     "\n",
 );

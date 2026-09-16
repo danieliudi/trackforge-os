@@ -1,0 +1,44 @@
+{
+  "comment": "Paleta curada da Sanwey, para o gate de cor (scripts/check-paleta.mjs). Mesmo molde da Resibag. O manual da Sanwey é mais rígido que o da Resibag em dois pontos que o gate faz valer: a rampa neutra é PURO K (R=G=B) e 'combinação ausente da tabela de contraste não foi aprovada'. A primeira é mecânica e está no gate; a segunda é de par, não de cor, e fica com quem desenha.",
+  "fonte": {
+    "skill": "sanwey-brand-guidelines",
+    "versao": "v7.0b",
+    "secao": "references/cores.md",
+    "checkedAt": "2026-09-16",
+    "checkedBy": "sessão Claude Code — lida do SKILL.md e do cores.md instalados na conta",
+    "nota": "Os 13 pares de contraste do manual foram recalculados um a um pela fórmula WCAG nesta data: TODOS conferem na segunda casa decimal. Nenhuma correção foi necessária no manual — diferente da v11 da Resibag, que tinha um valor errado."
+  },
+
+  "regraPuroK": {
+    "vale": true,
+    "porque": "O manual crava: 'Nunca introduzir cinza azulado (slate). A rampa é puro K e reproduz idêntico em qualquer gráfica.' Cinza com R≠G≠B é cinza composto — muda entre telas e entre gráficas. Três temas da ferramenta usavam #8A8680 e #E5E0DA, que são quentes, até 16/09/2026.",
+    "excecao": "Só a rampa NEUTRA. Vermelho, Cert Gold e os tints são cor, não cinza."
+  },
+
+  "mortas": [
+    { "hex": "#A20018", "nome": "Vermelho Sanwey (v6)", "usar": "Vermelho Sanwey #C7212B — a troca de token está no estado de migração v6 → v7.0b" },
+    { "hex": "#8A8680", "nome": "cinza quente que a ferramenta usava", "usar": "gray-600 #707070 (caption) ou gray-400 #B0B0B0 (sobre preto) — e dava 3,44:1 sobre a superfície, abaixo de AA" },
+    { "hex": "#E5E0DA", "nome": "cinza quente que a ferramenta usava", "usar": "gray-300 #CFCFCF (borda de card)" },
+    { "hex": "#8B1419", "nome": "vermelho escuro que a ferramenta inventou", "usar": "Preto Premium #0A0A0A — o #8B1419 dava 1,66:1 sobre o vermelho, invisível, e não existe no manual" }
+  ],
+
+  "autorizadas": [
+    { "hex": "#C7212B", "nome": "Vermelho Sanwey" },
+    { "hex": "#DD4039", "nome": "Vermelho Sinal", "nota": "EXCLUSIVO fundo escuro — proibido em fundo claro (4,10:1)" },
+    { "hex": "#FBE9EB", "nome": "Vermelho Tint", "nota": "fundo de chip/badge; texto sobre ele é #7A0012" },
+    { "hex": "#7A0012", "nome": "texto sobre o Vermelho Tint" },
+    { "hex": "#8A6C19", "nome": "Cert Gold", "nota": "selo de certificação apenas — nunca decorativo, nunca dominante" },
+    { "hex": "#0A0A0A", "nome": "Preto Premium (gray-950)" },
+    { "hex": "#FFFFFF", "nome": "gray-000" },
+    { "hex": "#F9F9F9", "nome": "gray-50 — superfície base digital" },
+    { "hex": "#F2F2F2", "nome": "gray-100 — superfície elevada" },
+    { "hex": "#E2E2E2", "nome": "gray-200 — divisória decorativa" },
+    { "hex": "#CFCFCF", "nome": "gray-300 — borda de card" },
+    { "hex": "#B0B0B0", "nome": "gray-400 — ícone desabilitado, caption sobre preto" },
+    { "hex": "#8E8E8E", "nome": "gray-500 — borda funcional, piso 3:1, não clarear" },
+    { "hex": "#707070", "nome": "gray-600 — caption, piso 4,5:1" },
+    { "hex": "#545454", "nome": "gray-700 — texto secundário" },
+    { "hex": "#333333", "nome": "gray-800 — ênfase média" },
+    { "hex": "#1A1A1A", "nome": "gray-900 — Ink, corpo de texto" }
+  ]
+}

@@ -53,6 +53,7 @@ function CoverLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         style={{ background: theme.accent }}
       />
       <h1
+        data-papel="manchete"
         className="line-clamp-4 break-words"
         style={{
           ...display(theme, fitSize(slide.headline, scale), density),
@@ -62,6 +63,7 @@ function CoverLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         {slide.headline}
       </h1>
       <p
+        data-papel="corpo"
         className="mt-[36px] line-clamp-2 max-w-[820px] break-words leading-[1.45]"
         style={{ color: theme.muted, fontSize: Math.round(34 * density) }}
       >
@@ -82,6 +84,7 @@ function ContentLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden">
       <h2
+        data-papel="manchete"
         className="line-clamp-4 break-words"
         style={{
           ...display(theme, fitSize(slide.headline, scale), density),
@@ -96,6 +99,7 @@ function ContentLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         style={{ background: theme.border }}
       />
       <p
+        data-papel="corpo"
         className="mt-[40px] line-clamp-3 max-w-[860px] break-words leading-[1.5]"
         style={{ color: theme.muted, fontSize: Math.round(34 * density) }}
       >
@@ -120,6 +124,9 @@ function QuoteLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         style={{
           fontFamily: theme.displayFont,
           fontSize: Math.round(280 * density),
+          // Aqui `accent` está certo e fica: a 16% de opacidade isto é marca
+          // d'água atrás do texto, não letra nem fio. É o único uso de `accent`
+          // fora de bloco preenchido, e é de propósito.
           color: theme.accent,
           opacity: 0.16,
         }}
@@ -127,6 +134,7 @@ function QuoteLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         &ldquo;
       </span>
       <blockquote
+        data-papel="manchete"
         className="relative line-clamp-5 break-words"
         style={{
           ...display(theme, fitSize(slide.headline, scale), density),
@@ -136,8 +144,9 @@ function QuoteLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         {slide.headline}
       </blockquote>
       <p
+        data-papel="etiqueta"
         className="relative mt-[44px] line-clamp-2 break-words font-semibold uppercase leading-[1.4] tracking-[0.14em]"
-        style={{ color: theme.accent, fontSize: Math.round(28 * density) }}
+        style={{ color: theme.accentInk, fontSize: Math.round(28 * density) }}
       >
         &mdash; {slide.bodyText ?? ""}
       </p>
@@ -156,12 +165,15 @@ function DataMetricLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden">
       <p
+        data-papel="metrica"
         className="line-clamp-2 break-words tabular-nums"
         style={{
           ...display(theme, fitSize(slide.headline, scale), density),
           fontFamily: theme.metricFont,
           lineHeight: 1,
-          color: theme.accent,
+          // `accentInk`, NUNCA `accent`: este número é a razão de o slide
+          // existir, e com o acento do `resibag-ativo` ele saía a 2,27:1.
+          color: theme.accentInk,
         }}
       >
         {slide.headline}
@@ -172,6 +184,7 @@ function DataMetricLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         style={{ background: theme.border }}
       />
       <p
+        data-papel="corpo"
         className="mt-[40px] line-clamp-3 max-w-[860px] break-words leading-[1.5]"
         style={{ color: theme.muted, fontSize: Math.round(34 * density) }}
       >
@@ -192,6 +205,7 @@ function CtaLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden">
       <h2
+        data-papel="manchete"
         className="line-clamp-3 break-words"
         style={{
           ...display(theme, fitSize(slide.headline, scale), density),
@@ -203,6 +217,7 @@ function CtaLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
 
       <div className="mt-[56px] flex items-end justify-between gap-[48px]">
         <span
+          data-papel="corpo"
           className="min-w-0 truncate font-semibold"
           style={{
             background: theme.accent,
@@ -256,6 +271,7 @@ function BulletsLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
   return (
     <div className="flex min-h-0 flex-1 flex-col justify-center overflow-hidden">
       <h2
+        data-papel="manchete"
         className="line-clamp-2 break-words"
         style={{
           ...display(theme, fitSize(slide.headline, scale), density),
@@ -278,6 +294,7 @@ function BulletsLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
               style={{ background: theme.accent }}
             />
             <p
+              data-papel="corpo"
               className="break-words leading-[1.4]"
               style={{ fontSize: Math.round(32 * density) }}
             >
@@ -311,6 +328,7 @@ function SectionLayout({ slide, theme, density = 1 }: SlideLayoutProps) {
         style={{ background: theme.accent }}
       />
       <h1
+        data-papel="manchete"
         className="line-clamp-3 break-words"
         style={{
           ...display(theme, fitSize(slide.headline, scale), density),

@@ -54,6 +54,25 @@ type SlideThemeTokens = {
   accent: string;
   /** Cor de texto sobre blocos preenchidos com `accent`. */
   accentContrast: string;
+  /**
+   * O acento QUANDO ELE É LETRA — o número do `data_metric` e a atribuição da
+   * citação. Nunca derive de `accent`.
+   *
+   * POR QUE É CAMPO SEPARADO. Manual de marca autoriza cor por PAPEL, e as
+   * cores de destaque costumam ser autorizadas só como preenchimento: a v11 da
+   * Resibag diz isso do Verde Vivo com todas as letras. Enquanto o layout lia
+   * `theme.accent` para pintar texto, o `resibag-ativo` renderizava o "38%" —
+   * o número que é a razão de o slide existir — a 2,27:1, e a atribuição da
+   * citação a 2,71:1. Abaixo até do piso de ornamento.
+   *
+   * Foi um erro DESTA sessão e ele tem duas datas. Em 16/09/2026 o mockup da
+   * Fase 6 nasceu com o kicker na cor do acento, a medição reprovou, e a regra
+   * derivada entrou no `DESIGN-fase6.md`: kicker tem cor PRÓPRIA, nunca "a
+   * mesma do acento". Horas depois, ao trazer o mockup para cá, vieram só os
+   * campos que já existiam no tipo — e o `kick` do `spec.json`, que era
+   * justamente a correção, ficou para trás. Quem pegou foi o `qa:temas`.
+   */
+  accentInk: string;
   border: string;
   displayFont: string;
   bodyFont: string;
@@ -91,6 +110,7 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     muted: "#94a3b8",
     accent: "#38bdf8",
     accentContrast: "#0f172a",
+    accentInk: "#38bdf8",
     border: "rgba(148, 163, 184, 0.22)",
     displayFont: GEIST,
     bodyFont: GEIST,
@@ -114,6 +134,7 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     muted: "#475569",
     accent: "#2563eb",
     accentContrast: "#ffffff",
+    accentInk: "#2563eb",
     border: "#dbe2ea",
     displayFont: GEIST,
     bodyFont: GEIST,
@@ -132,6 +153,7 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
       foreground: "#f8fafc",
       muted: "#cbd5e1",
       accent: "#60a5fa",
+      accentInk: "#60a5fa",
       border: "rgba(248, 250, 252, 0.24)",
       surface: "dark",
     },
@@ -144,6 +166,7 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     muted: "#6b6355",
     accent: "#a8321d",
     accentContrast: "#faf8f3",
+    accentInk: "#a8321d",
     border: "rgba(20, 17, 13, 0.18)",
     displayFont: "var(--font-instrument-serif)",
     bodyFont: GEIST,
@@ -157,6 +180,7 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
       foreground: "#f4f1ea",
       muted: "#d6cfc2",
       accent: "#e2725b",
+      accentInk: "#e2725b",
       border: "rgba(244, 241, 234, 0.24)",
       surface: "dark",
     },
@@ -174,10 +198,11 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     label: "Sanwey (institucional)",
     background: "#F9F9F9",
     foreground: "#1A1A1A",
-    muted: "#8A8680",
+    muted: "#707070",
     accent: "#C7212B",
     accentContrast: "#FFFFFF",
-    border: "#E5E0DA",
+    accentInk: "#C7212B",
+    border: "#CFCFCF",
     displayFont: "var(--font-barlow-condensed)",
     bodyFont: INTER,
     metricFont: "var(--font-jetbrains-mono)",
@@ -188,10 +213,13 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     surface: "light",
     coverUsesDarkSurface: true,
     darkSurface: {
-      background: "#1A1A1A",
+      background: "#0A0A0A",
+      accentContrast: "#0A0A0A",
+      accentInk: "#DD4039",
+      accent: "#DD4039",
       foreground: "#F9F9F9",
-      muted: "#E2E2E2",
-      border: "rgba(249, 249, 249, 0.24)",
+      muted: "#B0B0B0",
+      border: "rgba(249, 249, 249, 0.22)",
       surface: "dark",
     },
   },
@@ -204,28 +232,30 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
   resibag: {
     id: "resibag",
     label: "Resibag (ESG)",
-    background: "#FAF8F6",
-    foreground: "#1E2A22",
-    muted: "#5A6B60",
-    accent: "#1B5E3A",
-    accentContrast: "#FAF8F6",
-    border: "#EDF2EE",
+    background: "#F6FBEF",
+    foreground: "#000000",
+    muted: "#646A63",
+    accent: "#006E1E",
+    accentContrast: "#FFFFFF",
+    accentInk: "#006E1E",
+    border: "#EAF0E3",
     displayFont: "var(--font-outfit)",
     bodyFont: INTER,
     metricFont: "var(--font-outfit)",
     displayWeight: 700,
     displayTracking: "-0.01em",
     badgeRadius: 6,
-    overlayColor: "#0D3D20",
+    overlayColor: "#006E1E",
     surface: "light",
     coverUsesDarkSurface: true,
     darkSurface: {
-      background: "#0D3D20",
-      foreground: "#FAF8F6",
-      muted: "#EDF2EE",
-      accent: "#72FD9C",
-      accentContrast: "#0D3D20",
-      border: "rgba(250, 248, 246, 0.22)",
+      background: "#006E1E",
+      foreground: "#FFFFFF",
+      muted: "#CFE8D9",
+      accent: "#4DBE55",
+      accentContrast: "#000000",
+      accentInk: "#CFE8D9",
+      border: "rgba(255, 255, 255, 0.22)",
       surface: "dark",
     },
   },
@@ -236,21 +266,47 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
   "sanwey-industrial": {
     id: "sanwey-industrial",
     label: "Sanwey Industrial",
-    background: "#545454",
-    foreground: "#F9F9F9",
-    muted: "#E2E2E2",
+    background: "#F2F2F2",
+    foreground: "#1A1A1A",
+    muted: "#545454",
     accent: "#C7212B",
     accentContrast: "#FFFFFF",
-    border: "rgba(249, 249, 249, 0.18)",
+    accentInk: "#C7212B",
+    border: "#CFCFCF",
     displayFont: "var(--font-barlow-condensed)",
     bodyFont: INTER,
     metricFont: "var(--font-jetbrains-mono)",
     displayWeight: 900,
     displayTracking: "-0.02em",
     badgeRadius: 4,
-    overlayColor: "#545454",
-    surface: "dark",
-    darkSurface: {},
+    overlayColor: "#0A0A0A",
+    /**
+     * `light`, e não `dark`: a Fase 6 trocou o fundo de cinza-700 para a
+     * superfície elevada, e estas duas linhas ficaram para trás na mesma
+     * edição. `surface` escolhe a VERSÃO DO LOGO — com `dark` aqui, o logo
+     * invertido saía sobre #F2F2F2.
+     */
+    surface: "light",
+    /**
+     * E `{}` deixou de servir pelo mesmo motivo. Sobre foto de fundo o tema
+     * inteiro escurece, mas com o objeto vazio o título continuava #1A1A1A e o
+     * meta #545454 — quase-preto sobre a foto já coberta de preto. Aparece na
+     * captura de 16/09: o slide de citação do industrial é ilegível.
+     *
+     * São os tokens escuros do `sanwey`, e isso é de propósito: o manual da
+     * Sanwey tem UMA paleta de fundo escuro, e nela o vermelho de texto é o
+     * SINAL (4,59 sobre o Preto Premium), não o base (3,47).
+     */
+    darkSurface: {
+      background: "#0A0A0A",
+      foreground: "#F9F9F9",
+      muted: "#B0B0B0",
+      accent: "#DD4039",
+      accentContrast: "#0A0A0A",
+      accentInk: "#DD4039",
+      border: "rgba(249, 249, 249, 0.22)",
+      surface: "dark",
+    },
   },
   /** Vermelho+Branco — combinação monocromática aprovada pelo manual pra
    * material de alto impacto. */
@@ -260,8 +316,9 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     background: "#C7212B",
     foreground: "#FFFFFF",
     muted: "#FBE9EB",
-    accent: "#8B1419",
+    accent: "#0A0A0A",
     accentContrast: "#FFFFFF",
+    accentInk: "#0A0A0A",
     border: "rgba(255, 255, 255, 0.24)",
     displayFont: "var(--font-barlow-condensed)",
     bodyFont: INTER,
@@ -269,9 +326,24 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     displayWeight: 900,
     displayTracking: "-0.02em",
     badgeRadius: 4,
-    overlayColor: "#8B1419",
+    overlayColor: "#0A0A0A",
     surface: "dark",
-    darkSurface: {},
+    /**
+     * O vermelho sólido é o tema — e sobre foto de fundo ele desaparece debaixo
+     * do gradiente preto, levando junto o Preto Premium que serve de acento.
+     * Com `{}` a atribuição da citação saía preta sobre preto: está na captura
+     * de 16/09. Não é regressão da Fase 6 — antes dela o acento era #8B1419 e
+     * sumia igual.
+     *
+     * Sobre a foto quem identifica a marca é o vermelho, então ele volta como
+     * PREENCHIMENTO (com branco em cima, 5,71), e a letra de acento vira branco.
+     */
+    darkSurface: {
+      accent: "#C7212B",
+      accentContrast: "#FFFFFF",
+      accentInk: "#FFFFFF",
+      surface: "dark",
+    },
   },
   /** Preto+Branco — a outra combinação monocromática aprovada; mais
    * contraste que o Carvão suave do tema institucional. */
@@ -279,11 +351,12 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
     id: "sanwey-preto",
     label: "Sanwey Preto",
     background: "#0A0A0A",
-    foreground: "#FFFFFF",
-    muted: "#8A8680",
-    accent: "#C7212B",
-    accentContrast: "#FFFFFF",
-    border: "rgba(255, 255, 255, 0.16)",
+    foreground: "#F9F9F9",
+    muted: "#B0B0B0",
+    accent: "#DD4039",
+    accentContrast: "#0A0A0A",
+    accentInk: "#DD4039",
+    border: "rgba(249, 249, 249, 0.16)",
     displayFont: "var(--font-barlow-condensed)",
     bodyFont: INTER,
     metricFont: "var(--font-jetbrains-mono)",
@@ -301,19 +374,20 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
   "resibag-escuro": {
     id: "resibag-escuro",
     label: "Resibag Escuro",
-    background: "#0D3D20",
-    foreground: "#FAF8F6",
-    muted: "#EDF2EE",
-    accent: "#72FD9C",
-    accentContrast: "#0D3D20",
-    border: "rgba(250, 248, 246, 0.22)",
+    background: "#006E1E",
+    foreground: "#FFFFFF",
+    muted: "#CFE8D9",
+    accent: "#4DBE55",
+    accentContrast: "#000000",
+    accentInk: "#CFE8D9",
+    border: "rgba(255, 255, 255, 0.22)",
     displayFont: "var(--font-outfit)",
     bodyFont: INTER,
     metricFont: "var(--font-outfit)",
     displayWeight: 700,
     displayTracking: "-0.01em",
     badgeRadius: 6,
-    overlayColor: "#0D3D20",
+    overlayColor: "#006E1E",
     surface: "dark",
     darkSurface: {},
   },
@@ -323,28 +397,30 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
   "resibag-ativo": {
     id: "resibag-ativo",
     label: "Resibag Ativo",
-    background: "#FAF8F6",
-    foreground: "#1E2A22",
-    muted: "#5A6B60",
-    accent: "#3AAF65",
-    accentContrast: "#FAF8F6",
-    border: "#EDF2EE",
+    background: "#F6FBEF",
+    foreground: "#000000",
+    muted: "#646A63",
+    accent: "#4DBE55",
+    accentContrast: "#000000",
+    accentInk: "#006E1E",
+    border: "#EAF0E3",
     displayFont: "var(--font-outfit)",
     bodyFont: INTER,
     metricFont: "var(--font-outfit)",
     displayWeight: 700,
     displayTracking: "-0.01em",
     badgeRadius: 6,
-    overlayColor: "#0D3D20",
+    overlayColor: "#006E1E",
     surface: "light",
     coverUsesDarkSurface: true,
     darkSurface: {
-      background: "#0D3D20",
-      foreground: "#FAF8F6",
-      muted: "#EDF2EE",
-      accent: "#72FD9C",
-      accentContrast: "#0D3D20",
-      border: "rgba(250, 248, 246, 0.22)",
+      background: "#006E1E",
+      foreground: "#FFFFFF",
+      muted: "#CFE8D9",
+      accent: "#4DBE55",
+      accentContrast: "#000000",
+      accentInk: "#CFE8D9",
+      border: "rgba(255, 255, 255, 0.22)",
       surface: "dark",
     },
   },
@@ -353,28 +429,30 @@ export const slideThemes: Record<SlideThemeId, SlideTheme> = {
   "resibag-selo": {
     id: "resibag-selo",
     label: "Resibag Selo",
-    background: "#FAF8F6",
-    foreground: "#1E2A22",
-    muted: "#5A6B60",
-    accent: "#B8973A",
-    accentContrast: "#1E2A22",
-    border: "#EDF2EE",
+    background: "#F6FBEF",
+    foreground: "#000000",
+    muted: "#646A63",
+    accent: "#1B5E8A",
+    accentContrast: "#FFFFFF",
+    accentInk: "#1B5E8A",
+    border: "#D8EEF4",
     displayFont: "var(--font-outfit)",
     bodyFont: INTER,
     metricFont: "var(--font-outfit)",
     displayWeight: 700,
     displayTracking: "-0.01em",
     badgeRadius: 6,
-    overlayColor: "#0D3D20",
+    overlayColor: "#006E1E",
     surface: "light",
     coverUsesDarkSurface: true,
     darkSurface: {
-      background: "#0D3D20",
-      foreground: "#FAF8F6",
-      muted: "#EDF2EE",
-      accent: "#B8973A",
-      accentContrast: "#1E2A22",
-      border: "rgba(250, 248, 246, 0.22)",
+      background: "#006E1E",
+      foreground: "#FFFFFF",
+      muted: "#CFE8D9",
+      accent: "#D8EEF4",
+      accentContrast: "#1B5E8A",
+      accentInk: "#D8EEF4",
+      border: "rgba(255, 255, 255, 0.22)",
       surface: "dark",
     },
   },

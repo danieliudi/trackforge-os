@@ -81,6 +81,10 @@ export function SlideFrame({
     >
       <div
         data-slide-theme={theme.id}
+        // Declarado para o `qa:temas`: sobre foto o fundo real é a imagem mais
+        // um gradiente IRMÃO, e o medidor sobe por ancestrais — mediria contra
+        // uma cor que ninguém vê. Ver a exclusão em `scripts/qa/temas.mjs`.
+        data-foto={image?.layout === "background" ? "fundo" : undefined}
         className="relative flex flex-col overflow-hidden"
         style={{
           width,
@@ -131,11 +135,16 @@ export function SlideFrame({
             ) : null}
             {highlightTag ? (
               <span
+                data-papel="etiqueta"
                 className="inline-block max-w-[620px] truncate border text-[24px] font-semibold uppercase leading-none tracking-[0.14em]"
                 style={{
-                  borderColor: theme.accent,
+                  // Etiqueta VAZADA: a cor é letra e é fio, nunca
+                  // preenchimento — então sai de `accentInk`. Com `accent`,
+                  // "Resultado" no `resibag-ativo` saía a 2,27:1, e o fio
+                  // junto. `accent` continua sendo a cor do bloco cheio.
+                  borderColor: theme.accentInk,
                   borderRadius: theme.badgeRadius,
-                  color: theme.accent,
+                  color: theme.accentInk,
                   padding: "16px 28px",
                 }}
               >
@@ -144,6 +153,7 @@ export function SlideFrame({
             ) : null}
           </div>
           <span
+            data-papel="etiqueta"
             className="shrink-0 text-[26px] font-medium tabular-nums tracking-[0.18em]"
             style={{ color: theme.muted }}
           >
@@ -213,6 +223,7 @@ export function SlideFrame({
                     style={{ background: theme.accent }}
                   />
                   <p
+                    data-papel="etiqueta"
                     className="min-w-0 flex-1 text-[24px] uppercase leading-snug tracking-[0.16em]"
                     style={{ color: theme.muted }}
                   >
