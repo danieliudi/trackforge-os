@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="pt-BR" data-tema="claro" data-estado="sem-teto">
+<head>
+<meta charset="utf-8">
+<title>Fase 7 · Teto de gasto</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&family=Geist+Mono:wght@400;500&family=Geist:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ── tokens: cópia literal do globals.css, para o mock medir o que o app mede ── */
+:root{
+  --canvas:#f3efe6; --surface:#ffffff; --surface2:#f1f1ef;
+  --line:#cdcdcb; --line2:#e4e4e2;
+  --ink:#1c1c1b; --ink2:#3f4143; --mut:#5f6367; --faint:#7a7e82;
+  --acc:#e56515; --acc-tx:#b8490b; --acc-ink:#1c1c1b; --acc-tint:#fdf0e4;
+  --band:#16140f; --band-ink:#f3efe6; --rule:#d8d1c3; --cell:#f7f4ec;
+  --urgent:#d63a22; --urgent-bg:#f6e4df; --urgent-line:#e2b4a8;
+  --ok:#15803d; --ok-bg:#eff8f2; --ok-line:#a7d8b9;
+  --warn:#8a4a10; --warn-bg:#fdf0e4; --warn-line:#fba45c;
+  --sans:"Geist",system-ui,sans-serif; --mono:"Geist Mono",ui-monospace,monospace;
+  --serif:"Instrument Serif",serif;
+}
+:root[data-tema="escuro"]{
+  --canvas:#12110f; --surface:#201f1d; --surface2:#2a2926;
+  --line:#3a3835; --line2:#2a2926;
+  --ink:#f8f8f8; --ink2:#dcdbd8; --mut:#a9a7a2; --faint:#8a8782;
+  --acc-tx:#fba45c; --acc-tint:#2e1f0f;
+  --band:#000000; --rule:#2c2a26; --cell:#1a1916;
+  --urgent:#ff6b52; --urgent-bg:#2a1814; --urgent-line:#5a3030;
+  --ok:#34d399; --ok-bg:#0e2a20; --ok-line:#1e5a44;
+  --warn:#fba45c; --warn-bg:#2e1f0f; --warn-line:#6b4a1e;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--canvas);color:var(--ink);font-family:var(--sans);font-size:15px}
+
+/* ── comando do mock, fora do desenho ── */
+.cmd{position:fixed;top:0;left:0;right:0;z-index:99;display:flex;gap:28px;align-items:center;
+  padding:10px 24px;background:#111;color:#eee;font-family:var(--mono);font-size:11.5px}
+.cmd b{font-weight:500;color:#888;letter-spacing:.08em;text-transform:uppercase}
+.cmd button{background:none;border:1px solid #444;color:#ccc;font:inherit;padding:5px 11px;cursor:pointer}
+.cmd button[aria-pressed="true"]{background:#eee;color:#111;border-color:#eee}
+.folha{padding-top:44px}
+
+/* ── casca (híbrido) ── */
+.mast{display:flex;justify-content:space-between;align-items:baseline;padding:14px 40px 12px;
+  border-bottom:1px solid var(--ink)}
+.marca{font-family:var(--serif);font-size:34px;font-weight:400;letter-spacing:-.005em;line-height:1}
+.fronts{font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
+.fronts .on{color:var(--ink);border-bottom:1.5px solid var(--acc);padding-bottom:2px}
+.date{display:flex;justify-content:space-between;padding:7px 40px;
+  font-family:var(--mono);font-size:11.5px;color:var(--mut);border-bottom:1px solid var(--line2)}
+.band{display:flex;gap:26px;align-items:center;padding:9px 40px;background:var(--band);color:var(--band-ink);
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.09em;text-transform:uppercase}
+.band .on{border-bottom:1.5px solid var(--band-ink);padding-bottom:2px}
+.band .sig{opacity:.82}
+.col{max-width:1280px;margin:0 auto;padding:30px 40px 70px}
+
+/* ── cabeçalho de interior ── */
+.kicker{font-family:var(--mono);font-size:11.5px;letter-spacing:.11em;text-transform:uppercase;color:var(--mut)}
+h1{font-family:var(--serif);font-size:44px;font-weight:400;line-height:1.06;margin:9px 0 10px;letter-spacing:.004em}
+.lede{font-size:15px;line-height:1.55;color:var(--mut);max-width:60ch}
+
+/* ── grade de células ── */
+.cells{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--line);margin-top:26px}
+.cell{padding:17px 20px 15px;border-right:1px solid var(--line)}
+.cell:last-child{border-right:0}
+.cell.hi{background:var(--surface)}
+.cell .n{font-family:var(--mono);font-size:11px;color:var(--faint)}
+.cell b{display:block;font-size:31px;font-weight:600;letter-spacing:-.018em;margin:5px 0 4px;line-height:1.05}
+.cell .rot{font-family:var(--mono);font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.cell .sem{display:block;font-size:19px;font-weight:500;margin:9px 0 6px;color:var(--mut);letter-spacing:-.005em}
+
+/* ── A RÉGUA: faixa, não tique. Mesmo vocabulário do contador de plataforma. ── */
+.regua{margin-top:22px;border:1px solid var(--line);background:var(--surface)}
+.regua-top{display:flex;justify-content:space-between;align-items:baseline;padding:13px 20px 10px}
+.regua-tit{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;color:var(--mut)}
+.regua-val{font-family:var(--mono);font-size:13px;color:var(--ink)}
+.trilho{height:9px;background:var(--cell);border-top:1px solid var(--line2);border-bottom:1px solid var(--line2);position:relative}
+.cheio{height:100%;background:var(--acc)}
+[data-estado="perto"] .cheio{background:var(--warn-line)}
+[data-estado="estouraria"] .cheio{background:var(--warn-line)}
+[data-estado="no-teto"] .cheio{background:var(--urgent)}
+/* a MORDIDA: o que esta rodada consumiria, hachurado por cima do que resta */
+.mordida{position:absolute;top:0;bottom:0;background:repeating-linear-gradient(115deg,
+  var(--warn-line) 0 5px,transparent 5px 10px);border-left:1.5px solid var(--warn)}
+.regua-pe{display:flex;justify-content:space-between;padding:9px 20px 12px;
+  font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut)}
+
+/* ── avisos ── */
+.nota{margin-top:18px;border:1px solid;padding:13px 18px;display:flex;gap:13px;align-items:flex-start}
+.nota .gl{font-family:var(--mono);font-size:13px;line-height:1.35;flex:none}
+.nota p{font-size:14.5px;line-height:1.5}
+.nota .t{font-weight:600;display:block;margin-bottom:2px}
+.n-info{background:var(--surface);border-color:var(--line);color:var(--ink2)}
+.n-warn{background:var(--warn-bg);border-color:var(--warn-line);color:var(--ink)}
+.n-urg{background:var(--urgent-bg);border-color:var(--urgent-line);color:var(--ink)}
+
+/* ── painel de preço da bancada ── */
+.bancada{display:grid;grid-template-columns:1fr 1fr;gap:30px;margin-top:38px;align-items:start}
+.bloco-tit{font-family:var(--mono);font-size:11px;letter-spacing:.09em;text-transform:uppercase;
+  color:var(--mut);padding-bottom:9px;border-bottom:1px solid var(--ink);margin-bottom:0}
+.preco{border:1px solid var(--line);border-top:0;background:var(--surface)}
+.preco-h{display:flex;justify-content:space-between;padding:12px 18px;border-bottom:1px solid var(--line2);
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--mut)}
+.linha{display:flex;justify-content:space-between;padding:9px 18px;font-size:14px;color:var(--ink2);
+  border-bottom:1px dotted var(--rule)}
+.linha .v{font-family:var(--mono);font-size:13px;color:var(--ink)}
+.linha.forte{background:var(--cell)}
+.linha.forte .v{font-weight:500}
+.preco-pe{padding:11px 18px;font-size:13px;color:var(--mut);line-height:1.45}
+.botao{display:block;width:100%;margin-top:16px;padding:14px;border:0;background:var(--acc);
+  color:var(--acc-ink);font-family:var(--sans);font-size:15px;font-weight:600;cursor:pointer;text-align:center}
+/* `mut`, NÃO `faint`: o botão desabilitado carrega o motivo de a geração estar
+   parada — é o texto mais importante da tela naquele estado. `faint` mediu
+   3,62:1 no claro e 4,07:1 no escuro, reprovando nos dois. */
+.botao[disabled]{background:var(--surface2);color:var(--mut);cursor:not-allowed}
+.botao-nota{margin-top:7px;font-family:var(--mono);font-size:10.5px;letter-spacing:.05em;
+  text-transform:uppercase;color:var(--mut);text-align:center}
+
+/* ── config do teto ── */
+.campo{display:flex;gap:11px;align-items:center;margin-top:13px}
+.campo input{font-family:var(--mono);font-size:15px;padding:9px 12px;width:150px;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.campo label{font-family:var(--mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+
+/* VISIBILIDADE POR ESTADO — e esta parte já estava errada.
+   A primeira versão tinha DUAS regras de `display:none`, uma para tudo e outra
+   só para `.nota` e `.regua`. As duas tinham a mesma especificidade, então a
+   segunda vencia e os blocos de aviso ficavam invisíveis em TODOS os estados —
+   inclusive o aviso de estouro, que é o elemento mais importante da tela.
+   Nada disso aparece lendo o HTML: só a captura mostrou. É o `.stage{display:flex}`
+   vencendo o `hidden` da §8 do CLAUDE.md, de novo, no meu próprio mock.
+   `revert` em vez de `block` porque os alvos são `span` (inline) e `div`
+   (bloco): forçar `block` num span quebraria a linha da dateline. */
+.so{display:none}
+[data-estado="sem-teto"] .so-sem-teto,[data-estado="dentro"] .so-dentro,
+[data-estado="perto"] .so-perto,[data-estado="estouraria"] .so-estouraria,
+[data-estado="no-teto"] .so-no-teto{display:revert}
+</style>
+</head>
+<body>
+
+<div class="cmd">
+  <b>estado</b>
+  <span>
+    <button data-e="sem-teto" aria-pressed="true">sem teto</button>
+    <button data-e="dentro" aria-pressed="false">dentro</button>
+    <button data-e="perto" aria-pressed="false">perto (84%)</button>
+    <button data-e="estouraria" aria-pressed="false">estouraria</button>
+    <button data-e="no-teto" aria-pressed="false">no teto</button>
+  </span>
+  <b>tema</b>
+  <span>
+    <button data-t="claro" aria-pressed="true">claro</button>
+    <button data-t="escuro" aria-pressed="false">escuro</button>
+  </span>
+</div>
+
+<div class="folha">
+  <div class="mast">
+    <span class="marca">trackforge</span>
+    <span class="fronts">Edição · Sanwey <span class="on">Resibag</span> Meu</span>
+  </div>
+  <div class="date">
+    <span>São Paulo · set 2026</span>
+    <span class="so so-sem-teto">mês · R$ 0,69 · sem teto</span>
+    <span class="so so-dentro">mês · R$ 5,90 de R$ 50,00</span>
+    <span class="so so-perto">mês · R$ 42,10 de R$ 50,00</span>
+    <span class="so so-estouraria">mês · R$ 42,10 de R$ 50,00</span>
+    <span class="so so-no-teto">mês · R$ 50,00 de R$ 50,00</span>
+  </div>
+  <div class="band">
+    <span class="sig so so-sem-teto">· sem teto de gasto</span>
+    <span class="sig so so-dentro">· R$ 44,10 no mês</span>
+    <span class="sig so so-perto">· resta R$ 7,90 no mês</span>
+    <span class="sig so so-estouraria">· resta R$ 7,90 no mês</span>
+    <span class="sig so so-no-teto">· teto do mês atingido</span>
+    <span>Situação</span><span>Peças</span><span>Fatos</span>
+    <span class="on">Custos</span><span>Instalação</span><span>Editor</span>
+  </div>
+
+  <div class="col">
+    <div class="kicker">Custos · este navegador</div>
+    <h1>O que a API cobrou</h1>
+    <p class="lede">Histórico local deste navegador. Não sai daqui, e não existe cobrança
+      que não esteja nesta lista.</p>
+
+    <div class="cells">
+      <div class="cell hi">
+        <span class="n">01</span>
+        <span class="so so-sem-teto"><b>R$ 0,69</b></span>
+        <span class="so so-dentro"><b>R$ 5,90</b></span>
+        <span class="so so-perto"><b>R$ 42,10</b></span>
+        <span class="so so-estouraria"><b>R$ 42,10</b></span>
+        <span class="so so-no-teto"><b>R$ 50,00</b></span>
+        <span class="rot">neste mês</span>
+      </div>
+      <div class="cell">
+        <span class="n">02</span>
+        <span class="so so-sem-teto"><span class="sem">nenhum</span></span>
+        <span class="so so-dentro"><b>R$ 50,00</b></span>
+        <span class="so so-perto"><b>R$ 50,00</b></span>
+        <span class="so so-estouraria"><b>R$ 50,00</b></span>
+        <span class="so so-no-teto"><b>R$ 50,00</b></span>
+        <span class="rot">teto do mês</span>
+      </div>
+      <div class="cell">
+        <span class="n">03</span>
+        <span class="so so-sem-teto"><span class="sem">—</span></span>
+        <span class="so so-dentro"><b>R$ 44,10</b></span>
+        <span class="so so-perto"><b>R$ 7,90</b></span>
+        <span class="so so-estouraria"><b>R$ 7,90</b></span>
+        <span class="so so-no-teto"><b>R$ 0,00</b></span>
+        <span class="rot">resta</span>
+      </div>
+      <div class="cell">
+        <span class="n">04</span><b>R$ 0,23</b>
+        <span class="rot">média/post · n=8</span>
+      </div>
+    </div>
+
+    <!-- ESTADO SEM TETO: a ausência CONTA, e a tela diz o que falta -->
+    <div class="nota n-info so so-sem-teto">
+      <span class="gl">○</span>
+      <p><span class="t">Nenhum teto configurado — nada trava.</span>
+        Você vê o gasto depois que ele aconteceu. Um teto avisa em 80% e para de gerar
+        no limite, neste navegador.</p>
+    </div>
+    <div class="so so-sem-teto">
+      <div class="campo">
+        <label for="t">Teto mensal · R$</label>
+        <input id="t" value="50,00">
+      </div>
+    </div>
+
+    <!-- A RÉGUA, nos quatro estados com teto -->
+    <div class="regua so so-dentro">
+      <div class="regua-top"><span class="regua-tit">Consumo do mês</span>
+        <span class="regua-val">R$ 5,90 / R$ 50,00 · 12n</span></div>
+      <div class="trilho"><div class="cheio" style="width:12%"></div></div>
+      <div class="regua-pe"><span>aviso em R$ 40,00</span><span>resta R$ 44,10</span></div>
+    </div>
+
+    <div class="regua so so-perto">
+      <div class="regua-top"><span class="regua-tit">Consumo do mês</span>
+        <span class="regua-val">R$ 42,10 / R$ 50,00 · 84n</span></div>
+      <div class="trilho"><div class="cheio" style="width:84%"></div></div>
+      <div class="regua-pe"><span>passou do aviso de R$ 40,00</span><span>resta R$ 7,90</span></div>
+    </div>
+
+    <div class="regua so so-estouraria">
+      <div class="regua-top"><span class="regua-tit">Consumo do mês · com a rodada marcada</span>
+        <span class="regua-val">R$ 42,10 + R$ 11,40 estimado</span></div>
+      <div class="trilho"><div class="cheio" style="width:84%"></div>
+        <div class="mordida" style="left:84%;right:0"></div></div>
+      <div class="regua-pe"><span>a hachura é o que esta rodada consumiria</span>
+        <span>estoura em R$ 3,50</span></div>
+    </div>
+
+    <div class="regua so so-no-teto">
+      <div class="regua-top"><span class="regua-tit">Consumo do mês</span>
+        <span class="regua-val">R$ 50,00 / R$ 50,00 · 100n</span></div>
+      <div class="trilho"><div class="cheio" style="width:100%"></div></div>
+      <div class="regua-pe"><span>teto atingido em 19/09</span><span>zera em 01/10</span></div>
+    </div>
+
+    <div class="nota n-warn so so-perto">
+      <span class="gl">▲</span>
+      <p><span class="t">Passou de 80% do teto.</span>
+        Restam R$ 7,90 — cerca de 34 posts pela sua média, ou 1 artigo com busca na web.</p>
+    </div>
+    <div class="nota n-warn so so-estouraria">
+      <span class="gl">▲</span>
+      <p><span class="t">Esta rodada estoura o teto em R$ 3,50.</span>
+        Seis formatos, estimado em R$ 11,40 e ~2min40s pela mediana das suas últimas
+        rodadas. Desmarque um formato, ou confirme e o teto sobe para R$ 55,00.</p>
+    </div>
+    <div class="nota n-urg so so-no-teto">
+      <span class="gl">■</span>
+      <p><span class="t">Teto do mês atingido. A geração está parada.</span>
+        Zera sozinho em 01/10. Para continuar agora, aumente o teto abaixo — e o novo
+        valor vale para este navegador.</p>
+    </div>
+
+    <!-- ── a bancada, lado a lado, porque é lá que o botão para ── -->
+    <div class="bancada">
+      <div>
+        <div class="bloco-tit">Bancada · painel de preço</div>
+        <div class="preco">
+          <div class="preco-h"><span>O que escrever vai custar</span><span>Sonnet 5</span></div>
+          <div class="linha"><span>Entrada</span><span class="v">US$ 2,00 / milhão</span></div>
+          <div class="linha"><span>Saída</span><span class="v">US$ 10,00 / milhão</span></div>
+          <div class="linha"><span>Busca na web, se usada</span><span class="v">US$ 0,01 / busca</span></div>
+          <div class="linha forte so so-dentro"><span>Estimado · 6 formatos</span>
+            <span class="v">R$ 11,40 · ~2min40s</span></div>
+          <div class="linha forte so so-perto"><span>Estimado · 6 formatos</span>
+            <span class="v">R$ 11,40 · ~2min40s</span></div>
+          <div class="linha forte so so-estouraria"><span>Estimado · 6 formatos</span>
+            <span class="v">R$ 11,40 · ~2min40s</span></div>
+          <div class="linha forte so so-no-teto"><span>Estimado · 6 formatos</span>
+            <span class="v">R$ 11,40 · ~2min40s</span></div>
+          <div class="linha forte so so-sem-teto"><span>Estimado · 6 formatos</span>
+            <span class="v">R$ 11,40 · ~2min40s</span></div>
+          <div class="preco-pe so so-sem-teto">Mediana das suas 8 rodadas anteriores. Sem teto
+            configurado, nada interrompe.</div>
+          <div class="preco-pe so so-dentro">Mediana das suas 8 rodadas anteriores. Resta
+            R$ 44,10 no mês.</div>
+          <div class="preco-pe so so-perto">Mediana das suas 8 rodadas anteriores. Resta
+            R$ 7,90 no mês.</div>
+          <div class="preco-pe so so-estouraria">Mediana das suas 8 rodadas anteriores.
+            Resta R$ 7,90 — faltam R$ 3,50.</div>
+          <div class="preco-pe so so-no-teto">Mediana das suas 8 rodadas anteriores.
+            O teto do mês já foi atingido.</div>
+        </div>
+      </div>
+      <div>
+        <div class="bloco-tit">O botão, em cada estado</div>
+        <div style="padding-top:16px">
+          <span class="so so-sem-teto"><button class="botao">Escrever o artigo</button>
+            <div class="botao-nota">nada trava — R$ 11,40 estimado</div></span>
+          <span class="so so-dentro"><button class="botao">Escrever o artigo</button>
+            <div class="botao-nota">R$ 11,40 · resta R$ 44,10</div></span>
+          <span class="so so-perto"><button class="botao">Escrever o artigo</button>
+            <div class="botao-nota">R$ 11,40 · resta R$ 7,90 depois desta</div></span>
+          <span class="so so-estouraria"><button class="botao">Confirmar e subir o teto</button>
+            <div class="botao-nota">estoura em R$ 3,50 — exige confirmação</div></span>
+          <span class="so so-no-teto"><button class="botao" disabled>Teto do mês atingido</button>
+            <div class="botao-nota">aumente o teto ou espere 01/10</div></span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+for (const b of document.querySelectorAll(".cmd button")) {
+  b.addEventListener("click", () => {
+    const grupo = b.dataset.e ? "e" : "t";
+    for (const o of document.querySelectorAll(`.cmd button[data-${grupo}]`)) {
+      o.setAttribute("aria-pressed", String(o === b));
+    }
+    if (grupo === "e") document.documentElement.dataset.estado = b.dataset.e;
+    else document.documentElement.dataset.tema = b.dataset.t;
+  });
+}
+</script>
+</body>
+</html>
