@@ -208,13 +208,18 @@ const CASOS = {
       ["tagline antiga", ["Gestao inteligente de residuos industriais."]],
       ["slogan suspenso", ["Nem todo big bag passa na auditoria. O nosso passa."]],
       ["capacidade fora do certificado", ["Homologado em 500 kg, 1500 kg e 2000 kg."]],
-      ["Decreto 12.688 em Classe I", ["O Decreto 12.688/2025 obriga logistica reversa do seu Classe I."]],
+      ["Decreto 12.688 em Classe 1", ["O Decreto 12.688/2025 obriga logistica reversa do seu Classe 1."]],
       ["exclusividade", ["Unico no Brasil com essa cobertura."]],
       ["ANTT 6.078", ["A ANTT 6.078/2026 atualizou a 5.998."]],
       ["NORMAM", ["Homologacao NORMAM da Marinha."]],
       ["4 tambores", ["1 big bag substitui 4 tambores."]],
       ["prazo inventado para a NBR", ["O prazo de transicao da NBR 10.004:2024 termina em 31/12/2026."]],
       ["edicao antiga da NBR", ["Classificacao conforme NBR 10.004:2004."]],
+      // v3.2 (16/09/2026): o prazo EXISTE, mas e estadual. O que ficou proibido
+      // e apresenta-lo como nacional — e este caso guarda a diferenca.
+      ["data da NBR como prazo nacional", ["O prazo nacional da NBR 10.004 vai ate 01/01/2027."]],
+      ["Classe I atrelada a edicao :2024", ["A NBR 10.004:2024 classifica residuo em Classe I e Classe II."]],
+      ["Classe II-A, que nao existe na :2024", ["Residuo Classe II-A nao inerte."]],
       ["OCP como codigo do produto", ["Codigo INMETRO OCP-0041."]],
       ["organismo da ISO em peca Resibag", ["ISO 9001:2015 certificada pela SGS."]],
       ["premissa falsa em outra roupagem", ["Ninguem compra big bag. Compra a prova de que o big bag passa na auditoria."]],
@@ -227,19 +232,27 @@ const CASOS = {
       ], PAR_NIVEIS],
       ["par 01+03, blocos distantes", [
         "Gestao inteligente de residuos.",
-        "Homologacao INMETRO para residuo perigoso Classe I.",
+        "Homologacao INMETRO para residuo perigoso Classe 1.",
         "5 tambores parecem mais baratos. Juntos, pesam e custam mais que 1 Resibag.",
       ], PAR_NIVEIS],
     ],
     passa: [
-      ["contagem certa", ["A Resibag tem homologacao INMETRO para residuo perigoso Classe I."]],
+      ["contagem certa", ["A Resibag tem homologacao INMETRO para residuo perigoso Classe 1."]],
       ["ANTT como obrigacao do cliente", ["A ANTT 5998/2022 exige embalagem certificada para o transporte."]],
       ["ISO como sistema de gestao", ["Fabricado sob sistema de gestao da qualidade certificado ISO 9001:2015 do Grupo Sanwey."]],
       ["tagline nova", ["Gestao inteligente de residuos."]],
       ["capacidades certas", ["Disponivel em 700 kg e 1000 kg."]],
-      // A formulacao CORRETA sobre a NBR nao pode disparar a regra do prazo.
-      ["NBR sem prazo, dito certo", ["A NBR 10.004 e norma de classificacao e nao tem prazo de adequacao."]],
+      // A formulacao CORRETA sobre a NBR nao pode disparar a regra do prazo — e
+      // qual e a correta MUDOU. Ate a v3.1 era a negacao pura ("nao tem prazo");
+      // a v3.2 mostrou que ela era meia verdade, porque a CETESB fixou adocao
+      // exclusiva da :2024 em SP. A frase que passa agora e a que traz a DD e o
+      // recorte estadual. Este caso existia com a frase antiga: se um dia ela
+      // voltar a ser a declarada, este comentario diz por que nao deve.
+      ["prazo estadual, com a DD e o recorte", ["Em Sao Paulo, a CETESB adota a NBR 10.004:2024 de forma exclusiva a partir de 01/01/2027, conforme a Decisao de Diretoria no 078/2025/I/C."]],
+      ["a norma ABNT nao obriga sozinha", ["A NBR 10.004 e norma de classificacao: ela ganha forca quando um orgao ambiental a adota."]],
       ["NBR na edicao certa", ["Classificacao conforme NBR 10.004:2024."]],
+      ["Classe 1 e Classe 2, nomenclatura da :2024", ["A NBR 10.004:2024 classifica residuo em Classe 1 (perigoso) e Classe 2 (nao perigoso)."]],
+      ["a antiga Classe I entre parenteses", ["Homologacao INMETRO para residuo perigoso Classe 1 (antiga Classe I)."]],
       ["OCP citado como acreditador", ["Organismo certificador ABRACE, OCP-0041, acreditado ABNT NBR ISO/IEC 17065."]],
       ["ISO sem nomear organismo", ["Fabricado sob sistema de gestao da qualidade certificado ISO 9001:2015."]],
       ["e-mail canonico", ["Fale com vendas@resibag.com.br."]],

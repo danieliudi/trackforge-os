@@ -38,12 +38,13 @@
   "facts": [
     {
       "id": "nbr-10004-classificacao",
-      "claim": "A NBR 10.004:2024 (ABNT) classifica resíduo sólido quanto à periculosidade: Classe I é perigoso e Classe II não perigoso. É norma de CLASSIFICAÇÃO, sem prazo de adequação, e não é obrigação sobre o transportador. Citar sempre a edição :2024 — a :2004 aparece em material antigo.",
-      "tier": "nao-verificado",
-      "source": "resibag-canonical-facts v3.1 §05",
-      "checkedAt": "2026-09-11",
+      "claim": "A NBR 10.004:2024 (ABNT) classifica resíduo sólido quanto à periculosidade: Classe 1 é perigoso e Classe 2 não perigoso — nomenclatura que substituiu as Classes I, II-A e II-B da edição :2004. A norma ABNT não obriga por si só: ganha força quando um órgão ambiental a adota. Em São Paulo, a CETESB adota a :2024 de forma exclusiva a partir de 01/01/2027, conforme a Decisão de Diretoria nº 078/2025/I/C (DOE-SP, 17/11/2025); até 31/12/2026 a :2004 segue aceita nos processos do órgão. Fora de SP não há data confirmada. Citar sempre a edição :2024, e a data sempre com a DD e o recorte estadual.",
+      "tier": "secundaria",
+      "source": "resibag-canonical-facts v3.2 §05",
+      "checkedAt": "2026-09-19",
       "checkedBy": "sessão Claude Code — conferido contra resibag-canonical-facts v3.1",
-      "notes": "RE-ANCORADO em 11/09/2026: a fonte era a resibag-compliance-kb v3.3, descontinuada pelo titular em 10/09 e não reconsultável. O que a canônica sustenta entrou na claim, inclusive a frase que mais protege — norma de classificação NÃO TEM prazo de adequação (ver a proibição correspondente em forbidden). A subdivisão Classe II A não inerte / II B inerte vinha da KB morta e ficou de fora da claim: é provavelmente correta, mas não está na canônica e ninguém abriu o texto da ABNT. Conferir em: texto da ABNT NBR 10.004:2024."
+      "notes": "REVISADO em 19/09/2026 contra a v3.2, e a revisão DERRUBOU o que esta base tratava como fechado. Até a v3.1 o registro afirmava 'sem prazo de adequação', e havia proibição correspondente em forbidden mandando tratar qualquer data como erro. A v3.2 chama aquilo de meia verdade: a norma ABNT de fato não obriga sozinha, mas a CETESB publicou a DD 078/2025/I/C e o prazo existe — estadual, e numa data diferente da que circulava. O regex da proibição listava 01/01/2027 entre as datas erradas, então a ferramenta reprovava a única formulação autorizada; medido antes de mexer. A proibição foi reescrita para mirar o prazo NACIONAL, que continua sem lastro. TIER secundaria E NÃO primaria, pela regra de fonte que a própria v3.2 registrou (ato de órgão público confirma; quem cita o ato aponta onde procurar): a pendência 7 da canônica diz que o texto integral da DD NÃO foi lido — existência e ementa conferidas no portal da CETESB, mas as datas vieram de fontes técnicas que citam o ato, e a página do DOE-SP não renderiza fora do navegador. Com secundaria a peça pode citar atribuindo à DD, nunca como fato próprio. Sobe a primaria quando alguém abrir o DOE-SP. revalidateBy 31/12/2026: no dia seguinte a frase sobre a :2004 'seguir aceita' vira passado. Pendência 8 da canônica segue aberta — fora de SP as fontes divergem sobre a transição da própria ABNT (01/01/2026 × 31/12/2026) e não há ato estadual mapeado para MG, RJ ou BA. Conferir em: DOE-SP de 17/11/2025.",
+      "revalidateBy": "2026-12-31"
     },
     {
       "id": "antt-5998-exigencias",

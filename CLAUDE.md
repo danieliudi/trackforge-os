@@ -224,14 +224,37 @@ Isto não é preferência de estilo. É o requisito do produto.
   11/09: toda peça Resibag saía carimbada com o termo que a varredura acusava
   três linhas depois — a ferramenta produzindo o próprio aviso. Hoje
   `npm run knowledge:coerencia` faz essa terceira pergunta, e reprova.
-- **Rebaixar o tier não é o mesmo que remover, e a diferença já protegeu a
-  ferramenta.** "O prazo da NBR 10.004 termina em 31/12/2026" estava na base como
-  `secundaria` — nível que a regra de procedência deixa virar alegação, desde que
-  a peça atribua a quem afirmou. Mas a canônica não diz que o prazo é incerto:
-  diz que **não existe prazo**, porque a NBR 10.004 é norma de classificação.
-  Afirmação que a fonte da marca declara ERRADA não tem tier — sai da lista, e a
-  proibição correspondente fica em `forbidden`. Tier serve para medir confiança,
-  não para estacionar o que já se sabe falso.
+- **Rebaixar o tier não é o mesmo que remover.** Afirmação que a fonte da marca
+  declara ERRADA não tem tier — sai da lista, e a proibição correspondente fica
+  em `forbidden`. Tier serve para medir confiança, não para estacionar o que já
+  se sabe falso.
+- **CORREÇÃO DATADA, 19/09/2026 — o exemplo que ilustrava a regra acima estava
+  errado, e o erro custou nove dias de gate apontando para o lado contrário.**
+  Este arquivo afirmava, desde 10/09: *"a canônica não diz que o prazo da NBR
+  10.004 é incerto: diz que não existe prazo, porque é norma de classificação"*.
+  A `resibag-canonical-facts` v3.2 (16/09) chama aquilo de **meia verdade**. A
+  norma ABNT de fato não obriga sozinha — mas a CETESB publicou a **Decisão de
+  Diretoria nº 078/2025/I/C** (DOE-SP, 17/11/2025) e adota a :2024 de forma
+  exclusiva em SP **a partir de 01/01/2027**; até 31/12/2026 a :2004 segue aceita
+  nos processos do órgão. O prazo existe. É estadual, e numa data diferente da
+  que circulava.
+  **O dano concreto:** a proibição escrita com a versão antiga listava
+  `01/01/2027` ao lado de `31/12/2026` como datas erradas. Quando a primeira
+  virou a certa, a ferramenta passou a reprovar como violação de compliance a
+  **única formulação autorizada**, e a nomenclatura errada passava limpa. Medido
+  antes de mexer, com a frase da v3.2 de um lado e a da v3.1 do outro.
+  **A regra derivada:** ao remover um fato por "a marca diz que é falso",
+  registre em que ESCOPO a marca disse. Norma federal que não obriga sozinha
+  ainda pode ser adotada por um estado, e o fato volta com outro recorte e outra
+  data. É a mesma forma do erro de "existência de norma ≠ aplicabilidade", que a
+  canônica já tinha registrado — desta vez no sentido inverso. Hoje o fato mora
+  como `secundaria`, e a proibição mira o prazo **nacional**, que segue sem
+  lastro.
+- **E a nomenclatura mudou junto.** A :2024 usa **Classe 1** (perigoso) e
+  **Classe 2** (não perigoso); Classe I, II-A e II-B são da :2004. A curadoria
+  escrevia ":2024" e "Classe I" na mesma frase — dentro da fonte autorizada,
+  que é o pior lugar possível. Atrelar a nomenclatura velha à edição nova virou
+  proibição própria, conferida plantando os dois sentidos.
 - **Erro conhecido, não reintroduzir:** a Resolução ANTT nº 6.078/2026 não se
   confirma em fonte oficial, mesmo após revalidação completa de compliance
   (08–09/09/2026) — e também não substituiu a nº 5.998/2022, que trata de outro

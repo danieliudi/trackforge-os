@@ -34,6 +34,17 @@ import type { BrandKnowledge } from "./types";
  *   · A NBR 10.004 é norma de CLASSIFICAÇÃO e NÃO TEM prazo de adequação. O
  *     "prazo até 31/12/2026" que circulava é erro — apareceu num deck de
  *     prospecção, e a origem da data virou [FALTA DADO]. Citar sempre :2024.
+ *     >>> DERRUBADO PELA v3.2 (16/09/2026), revisado aqui em 19/09. Era MEIA
+ *     VERDADE: a norma ABNT não obriga sozinha, mas a CETESB publicou a DD
+ *     078/2025/I/C e adota a :2024 de forma exclusiva em SP a partir de
+ *     01/01/2027. O prazo existe — é estadual, e numa data diferente da que
+ *     circulava. O que continua proibido é apresentá-lo como NACIONAL. A linha
+ *     acima fica porque ela é a decisão que o gate carregou por nove dias, e
+ *     apagá-la esconderia de quem abrir um commit antigo por que o regex
+ *     listava 01/01/2027 entre as datas erradas.
+ *   · A :2024 usa Classe 1 e Classe 2. As Classes I, II-A e II-B são da :2004,
+ *     e atrelá-las à edição nova virou proibição na v3.2 — defeito que esta
+ *     própria curadoria carregava, dentro da fonte autorizada.
  *   · OCP-0041 é o registro do ORGANISMO CERTIFICADOR (ABRACE), nunca o código
  *     INMETRO do produto. Cita-se separado, como OCP acreditador.
  *   · O nome do organismo certificador da ISO 9001 saiu da fonte: está em
@@ -69,7 +80,7 @@ Quatro produtos em dois registros. Atribuir certificação entre registros é er
 Registro 1 — homologados no INMETRO. Standard e Estruturado compartilham AS MESMAS
 duas certificações, uma por capacidade; o Estruturado só acrescenta chapa de papelão
 ondulado interna, que não muda o certificado.
-- **Standard** — 700 kg ou 1000 kg, para resíduo perigoso Classe I (NBR 10.004).
+- **Standard** — 700 kg ou 1000 kg, para resíduo perigoso Classe 1 (NBR 10.004:2024).
 - **Estruturado** — mesmas capacidades, com reforço interno opcional.
 
 700 kg e 1000 kg são as ÚNICAS capacidades homologadas. Qualquer outra dimensão é
@@ -79,7 +90,7 @@ Registro 2 — SEM certificação de produto:
 - **Filtrante** — substitui filtro-prensa em tintas, vernizes e resinas; desaguamento de lodo; limpeza de ETE/fossa.
 - **Resíduo Verde** — alternativa reutilizável ao saco plástico, paisagismo e resíduo verde.
 
-Filtrante e Resíduo Verde nunca podem ser oferecidos para resíduo perigoso Classe I
+Filtrante e Resíduo Verde nunca podem ser oferecidos para resíduo perigoso Classe 1
 transportado externamente.
 
 ## Certificações — a Resibag tem UMA homologação de produto
@@ -101,12 +112,23 @@ de Containers, e cobre a fabricação de todas as linhas. Nunca soma nem substit
 homologação. Escreva "fabricado sob sistema de gestão da qualidade certificado
 ISO 9001:2015 do Grupo Sanwey" — nunca "Filtrante é certificado".
 
-Classe (NBR 10.004, I/II) e Grupo de embalagem (ANTT/ONU, I/II/III) são eixos
+Classe (NBR 10.004:2024, 1/2) e Grupo de embalagem (ANTT/ONU, I/II/III) são eixos
 diferentes: Classe classifica o resíduo, Grupo classifica o risco da embalagem no
-transporte. Não misturar os dois em material técnico ou jurídico.
+transporte. Não misturar os dois em material técnico ou jurídico — e reparar que
+os dois sistemas hoje usam grafias diferentes de propósito: a Classe virou
+arábica na :2024, o Grupo segue romano.
 
-**A NBR 10.004 é norma de classificação e não tem prazo de adequação.** Citar
-sempre a edição :2024. Data de prazo atribuída a ela é erro de fato.
+**A :2024 renomeou as classes: Classe 1 é perigoso, Classe 2 é não perigoso.** As
+Classes I, II-A e II-B são da edição :2004. Em material de cliente usar Classe 1;
+"(antiga Classe I)" entre parênteses é aceito quando o interlocutor ainda trabalha
+com laudo antigo. Citar sempre a edição :2024.
+
+**A NBR 10.004 é norma de classificação e não obriga por si só** — ela ganha força
+quando um órgão ambiental a adota. Em São Paulo a CETESB adota a :2024 de forma
+exclusiva a partir de 01/01/2027, pela Decisão de Diretoria nº 078/2025/I/C
+(DOE-SP, 17/11/2025); até 31/12/2026 a :2004 segue aceita nos processos do órgão.
+Fora de SP não há data confirmada. A data só sai numa peça com a DD e o recorte
+estadual junto — apresentada como prazo nacional, é erro de fato.
 
 **OCP-0041 é o registro do organismo certificador**, a ABRACE, acreditada pela
 ABNT NBR ISO/IEC 17065. Cita-se separado, como OCP acreditador — os códigos do
@@ -118,8 +140,9 @@ conflito aberto entre as frentes e aguarda certificado físico conferido.
 
 ## Argumentos fixos (verbatim)
 - "1 Resibag substitui 5 tambores" — cinco, nunca outro número.
+- Peso da embalagem vazia: 3,2 kg por Resibag. Nunca "3 kg", e nunca tara de tambor sem fonte ("75 kg"). [FALTA DADO: confirmar se vale para 700 e 1000 kg]
 - "Envio em até 2 dias ou retirada em fábrica" — só a linha Standard, nunca prometer entrega na porta.
-- Certificação: homologação INMETRO para resíduo perigoso Classe I. Uma, nunca mais de uma.
+- Certificação: homologação INMETRO para resíduo perigoso Classe 1. Uma, nunca mais de uma.
 - Obrigação do cliente: a ANTT 5998/2022 exige embalagem certificada. Uma única autuação cobre anos de diferença de preço contra embalagem não certificada. Sem valores de multa sem fonte oficial.
 - Diferenciação real: Grupo Sanwey (40+ anos) · consistência lote a lote · atendimento · confiabilidade da documentação de homologação · despacho em 2 dias para o Standard · projetos customizados.
 
@@ -131,7 +154,7 @@ desse piso: consistência lote a lote, se a documentação chega junto com o pro
 rastreabilidade do certificado, atendimento e o respaldo do grupo fabricante.
 
 ## Para quem se escreve
-- **Gerente Ambiental / EHS** — especificador e PORTA DE ENTRADA da conta. Ganchos: homologação INMETRO para Classe I, rastreabilidade, RAPP, NBR 10.004:2024. Tom técnico e regulatório.
+- **Gerente Ambiental / EHS** — especificador e PORTA DE ENTRADA da conta. Ganchos: homologação INMETRO para Classe 1, rastreabilidade, RAPP, NBR 10.004:2024. Tom técnico e regulatório.
 - **Gerente de Compras** — conduz o processo e negocia TCO. Ganchos: 1 Resibag = 5 tambores, envio em 2 dias, previsibilidade. Tom operacional e financeiro.
 - **C-Level / Diretor de ESG** — aprova, por exceção em contas grandes. Ganchos: passivo ambiental como risco financeiro, ESG auditável, IFRS S1/S2, Escopo 3. Tom de comitê, sem jargão. A linguagem ESG é espaço pouco ocupado pelos concorrentes — não exclusivo.
 
@@ -197,18 +220,53 @@ certificação de produto — estão na seção PROIBIÇÕES, que é onde elas v
         "essas linhas NÃO têm certificação de produto nenhuma. A ISO 9001:2015 é do sistema de gestão da Sanwey e cobre a fabricação — escreva \"fabricado sob SGQ certificado\", nunca \"linha certificada\". Atribuir homologação a elas é erro de compliance.",
     },
     {
-      term: "prazo de adequação atribuído à NBR 10.004",
+      term: "prazo NACIONAL atribuído à NBR 10.004",
       reason:
-        "a NBR 10.004 é norma de CLASSIFICAÇÃO de resíduo e não tem prazo de adequação. O \"prazo até 31/12/2026\" circulou num deck de prospecção e a origem da data ficou como [FALTA DADO] (10/09/2026). Citar sempre a edição :2024.",
-      // A primeira versão desta regra casava com QUALQUER menção da norma perto
-      // da palavra "prazo" — inclusive com a frase que NEGA o prazo, que é a
-      // formulação correta. Falso alarme em peça certa é tão caro quanto silêncio
-      // em peça errada: os padrões abaixo exigem a AFIRMAÇÃO do prazo (a data
-      // errada, ou "prazo … da NBR"), nunca a menção solta.
+        "o prazo existe, mas é ESTADUAL: a CETESB adota a :2024 de forma exclusiva em SP a partir de 01/01/2027 (Decisão de Diretoria nº 078/2025/I/C, DOE-SP, 17/11/2025), e até 31/12/2026 a :2004 segue aceita nos processos do órgão. A norma ABNT não obriga por si só — ganha força quando um órgão ambiental a adota. Fora de SP não há data confirmada. Citar sempre com a DD e o recorte estadual, e sempre a edição :2024.",
+      /**
+       * ESTA REGRA JÁ ERROU NOS DOIS SENTIDOS, e o histórico fica porque ele é
+       * a razão de os padrões serem estes.
+       *
+       * 1. A PRIMEIRA versão casava com qualquer menção da norma perto da
+       *    palavra "prazo" — inclusive com a frase que NEGAVA o prazo, que era
+       *    a formulação correta na época. Falso alarme em peça certa é tão caro
+       *    quanto silêncio em peça errada.
+       * 2. A SEGUNDA listava `01/01/2027` como data errada, ao lado de
+       *    `31/12/2026`. A v3.2 da canônica (16/09/2026) reverteu o fato: a
+       *    primeira dessas datas virou a CERTA, e o gate passou a reprovar a
+       *    única formulação autorizada. Medido antes de mexer — a frase com a
+       *    CETESB e a DD reprovava, e a nomenclatura errada passava.
+       *
+       * O que sobrou de proibido não é a data: é apresentá-la como NACIONAL.
+       * A data sem recorte não vira regex aqui de propósito — quem cobra isso é
+       * o tier `secundaria` do fato, que obriga a peça a atribuir à DD. Regra
+       * de ausência ("cita a data e NÃO cita SP") em regex fica ilegível e
+       * quebra na primeira frase que inverte a ordem das orações.
+       */
       match: [
-        /nbr 10\.?004[^.]{0,80}(31\/12\/2026|01\/01\/2027)/,
+        /nbr 10\.?004[^.]{0,80}(prazo nacional|em todo o brasil|prazo no brasil|prazo federal)/,
+        /(prazo nacional|em todo o brasil|prazo federal)[^.]{0,80}nbr 10\.?004/,
+        // A norma ABNT obrigando sozinha — o erro que a v3.0 nomeou e que
+        // continua erro; o que mudou é que existe um ato ESTADUAL que obriga.
         /prazo (de )?(transicao|adequacao) da nbr/,
+        // A edição velha citada como vigente. Casa também com "a NBR 10.004:2004
+        // ainda é aceita em SP", que hoje é verdade — falso alarme aceito de
+        // propósito: numa peça, a edição a citar é sempre a :2024.
         /nbr 10\.?004:?\s*2004\b/,
+      ],
+    },
+    {
+      term: "Classe I / II-A / II-B atreladas à NBR 10.004:2024",
+      reason:
+        "a :2024 renomeou para Classe 1 (perigoso) e Classe 2 (não perigoso); I, II-A e II-B são da edição :2004. Citar a edição nova com os nomes da antiga é o erro que a canônica corrigiu na v3.2. Em material de cliente usar Classe 1; \"(antiga Classe I)\" entre parênteses é aceito quando o interlocutor ainda trabalha com laudo antigo.",
+      // Entrou em 19/09/2026 porque a própria claim curada carregava o defeito:
+      // ela escrevia ":2024" e "Classe I" na mesma frase, e ia para o prompt
+      // como fonte AUTORIZADA. Medido: antes desta regra a frase passava limpa.
+      match: [
+        /nbr 10\.?004:?\s*2024[^.]{0,80}classe (i\b|ii\b|i\s|ii\s)/,
+        /classe (i\b|ii\b)[^.]{0,80}nbr 10\.?004:?\s*2024/,
+        // II-A e II-B não existem na :2024 em contexto nenhum.
+        /classe ii\s?-\s?[ab]\b/,
       ],
     },
     {

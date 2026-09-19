@@ -216,7 +216,7 @@ Revisada em 11/09/2026 contra as fontes canônicas, e contada a partir do códig
 
 | Arquivo | Fatos | Por nível | Fonte órfã |
 |---|---|---|---|
-| `facts/resibag-normas.json` | 9 | 1 primária · 8 não verificado | 0 |
+| `facts/resibag-normas.json` | 9 | 1 primária · 1 secundária · 7 não verificado | 0 |
 | `facts/sanwey-normas.json` | 7 | 1 interna · 6 não verificado | 0 |
 | `facts/meu-normas.json` | 0 | frente pessoal — número e norma só do material colado | — |
 

@@ -54,11 +54,18 @@ dois discordarem, o `CLAUDE.md` vence e este é o que está errado.
   09/09/2026 e o `brands.ts` ficou para trás: até 11/09 toda peça saía com o
   termo que a varredura acusava três linhas depois. `knowledge:coerencia` agora
   faz essa terceira pergunta.
-- **Rebaixar o tier não é remover.** "Prazo da NBR 10.004 até 31/12/2026" estava
-  como `secundaria`, nível que a regra deixa virar alegação com atribuição — mas
-  a canônica diz que a norma **não tem prazo**, não que o prazo é incerto.
-  Afirmação que a fonte da marca declara errada sai da lista e vira proibição.
-  Tier mede confiança, não estaciona o que já se sabe falso.
+- **Rebaixar o tier não é remover.** Afirmação que a fonte da marca declara
+  errada sai da lista e vira proibição. Tier mede confiança, não estaciona o que
+  já se sabe falso.
+- **Mas registre o ESCOPO em que a marca disse que é falso (19/09/2026).** Esta
+  regra era ilustrada pela NBR 10.004, "norma de classificação, não tem prazo".
+  A v3.2 da canônica mostrou que era meia verdade: a ABNT não obriga sozinha, e
+  a CETESB adota a :2024 em SP a partir de **01/01/2027** (DD 078/2025/I/C). O
+  prazo existe, é estadual. A proibição antiga listava essa data como errada —
+  por nove dias o gate reprovou a única formulação autorizada. Norma federal que
+  não obriga sozinha ainda pode ser adotada por um estado. Ver CLAUDE.md §2.
+- **Classe 1 / Classe 2 é a nomenclatura da :2024.** I, II-A e II-B são da
+  :2004, e atrelá-las à edição nova é proibição própria desde 19/09/2026.
 - **Erro conhecido, não reintroduzir:** a Resolução ANTT nº 6.078/2026 não se
   confirma em fonte oficial (revalidação de 08–09/09/2026) e também não
   substituiu a nº 5.998/2022. Não citar até existir publicação que a sustente.
